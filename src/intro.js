@@ -200,4 +200,7 @@
  * the License.
  * 
  */
-var MITHGrid=MITHGrid||{},jQuery=jQuery||{},fluid=fluid||{};(function(a,b){b.Application.namespaces("Canvas"),b.Application.Canvas=function(a,c){b.Application.initApp("MITHGrid.Application.Canvas",a,{})}})(jQuery,MITHGrid);
+
+var MITHGrid = MITHGrid || {};
+var jQuery = jQuery || {};
+var fluid = fluid || {};

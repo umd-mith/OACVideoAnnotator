@@ -1,6 +1,6 @@
 var JSLINT = require("./lib/jslint").check, //.JSLINT,
 	print = require("sys").print,
-	src = require("fs").readFileSync("dist/mithgrid.js", "utf8");
+	src = require("fs").readFileSync("dist/videoanno.js", "utf8");
 
 JSLINT(src, { 
 	forin: true, 

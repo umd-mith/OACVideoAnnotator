@@ -49,3 +49,7 @@ The built version of MITHGrid will be in the `dist/` subdirectory.
 
 To remove all built files, run `make clean`.
 
+Testing the OAC Video Annotator
+-------------------------------
+
+
