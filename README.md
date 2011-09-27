@@ -46,3 +46,8 @@ The built version of MITHGrid will be in the `dist/` subdirectory.
 
 To remove all built files, run `make clean`.
 
+Testing the OAC Video Annotator
+-------------------------------
+
+Direct your browser to `/your installation directory/tests/` and it will display the QUnit tests that have been set up with this release. For more information on QUnit and how you can set up your own tests, visit [the QUnit documentation](http://docs.jquery.com/Qunit) 
+

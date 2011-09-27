@@ -36,16 +36,17 @@ videoanno: ${MG}
 #sed 's/.function....MITHGrid..{//' | \
 #sed 's/}..jQuery..MITHGrid.;//' > ${MG}.tmp;
 
-${MG}: ${MODULES} | ${DIST_DIR}
+${MG}: ${DIST_DIR}
 		@@echo "Building" ${MG}
-
-		@@cat ${BASE_FILES} > ${MG}.tmp;
-
+		
+		@@cat ${BASE_FILES} > ${MG}.tmp
+		
 		@@cat ${SRC_DIR}/intro.js ${MG}.tmp ${SRC_DIR}/outro.js | \
 			sed 's/@DATE/'"${DATE}"'/' | \
 			${VER} > ${MG};
+		
 		@@rm -f ${MG}.tmp;
-
+		
 lint: videoanno
 		@@if test ! -z ${JS_ENGINE}; then \
 				echo "Checking videoanno code against JSLint..."; \
