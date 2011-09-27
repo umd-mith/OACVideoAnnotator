@@ -24,13 +24,13 @@ DATE=$(shell git log --pretty=format:%ad | head -1)
 
 all: core
 
-core: mithgrid min lint
-		@@echo "mithgrid build complete"
+core: videoanno min lint
+		@@echo "videoanno build complete"
 
 ${DIST_DIR}:
 		@@mkdir -p ${DIST_DIR}
 
-mithgrid: ${MG}
+videoanno: ${MG}
 
 #| \
 #sed 's/.function....MITHGrid..{//' | \
@@ -46,19 +46,19 @@ ${MG}: ${MODULES} | ${DIST_DIR}
 			${VER} > ${MG};
 		@@rm -f ${MG}.tmp;
 
-lint: mithgrid
+lint: videoanno
 		@@if test ! -z ${JS_ENGINE}; then \
-				echo "Checking mithgrid against JSLint..."; \
+				echo "Checking videoanno code against JSLint..."; \
 				${JS_ENGINE} build/jslint-check.js; \
 		else \
-				echo "You must have NodeJS installed in order to test mithgrid against JSLint."; \
+				echo "You must have NodeJS installed in order to test videoanno against JSLint."; \
 		fi
 
-min: mithgrid ${MG_MIN}
+min: videoanno ${MG_MIN}
 
 ${MG_MIN}: ${MG}
 		@@if test ! -z ${JS_ENGINE}; then \
-				echo "Minifying mithgrid" ${MG_MIN}; \
+				echo "Minifying videoanno" ${MG_MIN}; \
 				${COMPILER} ${MG} > ${MG_MIN}.tmp; \
 				${POST_COMPILER} ${MG_MIN}.tmp > ${MG_MIN}; \
 				rm -f ${MG_MIN}.tmp; \
@@ -72,4 +72,4 @@ clean:
 
 distclean: clean
 
-.PHONY: all mithgrid lint min clean distclean core
+.PHONY: all videoanno lint min clean distclean core
