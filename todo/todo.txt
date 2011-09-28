@@ -1,9 +1,7 @@
 (B) 2011-09-27 document test environment in test/README.md +document @quick
 (B) 2011-09-27 document documentation standard/pattern for OAC +document @quick
-(A) 2011-09-27 create +Raphaël presentation @medium
 (A) 2011-09-27 create +test of +Raphaël presentation @medium
 (A) 2011-09-27 create generic +SVGLens for use in a +Raphaël presentation @easy
-(A) 2011-09-27 create a +test HTML page for testing +SVGLens and +Raphaël presentation together @quick +visualBehaviorTestEnvironment
 (A) 2011-09-27 create a simple/test javascript application to tie everything together for testing in the HTML +test page +Raphaël +visualBehaviorTestEnvironment @quick
 (A) 2011-09-27 hook +SVGLens into +Raphaël presentation +visualBehaviorTestEnvironment @quick
 (A) 2011-09-27 push data into data store to create item displayed by +SVGLens +Raphaël +visualBehaviorTestEnvironment @easy

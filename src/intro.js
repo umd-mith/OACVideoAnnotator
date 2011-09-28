@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: @Date
+ *  Date: @DATE
  *  
  * Educational Community License, Version 2.0
  * 
@@ -24,3 +24,4 @@
 var MITHGrid = MITHGrid || {};
 var jQuery = jQuery || {};
 var fluid = fluid || {};
+var Raphael = Raphael || {};
