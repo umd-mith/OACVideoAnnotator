@@ -36,7 +36,7 @@ videoanno: ${MG}
 #sed 's/.function....MITHGrid..{//' | \
 #sed 's/}..jQuery..MITHGrid.;//' > ${MG}.tmp;
 
-${MG}: ${DIST_DIR}
+${MG}: ${DIST_DIR} ${SRC_DIR}/intro.js ${BASE_FILES} ${SRC_DIR}/outro.js
 		@@echo "Building" ${MG}
 		
 		@@cat ${BASE_FILES} > ${MG}.tmp
