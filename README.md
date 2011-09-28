@@ -42,7 +42,7 @@ First, use the *git* command *git clone* to copy the remote repository to your d
 
 Then, to get a complete, minified, jslinted version of the OACVideoAnnotator, `cd` to the directory containing the files for OACVideoAnnotator and type `make`.  If you don't have Node installed and/or want to make a basic, uncompressed, unlinted version of OACVideoAnnotator, use `make videoanno` instead of `make`.
 
-The built version of MITHGrid will be in the `dist/` subdirectory.
+The built version of OACVideoAnnotator will be in the `dist/` subdirectory.
 
 To remove all built files, run `make clean`.
 
