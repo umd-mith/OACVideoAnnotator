@@ -1,0 +1,4 @@
+x 2011-09-26 2011-09-26 setup github repository in umd_mith account +setup @quick
+x 2011-09-28 2011-09-27 setup build environment based on MIHGRid pattern +setup @medium
+x 2011-09-28 2011-09-27 setup test environment based on MITHGrid pattern +setup @easy
+x 2011-09-28 2011-09-27 document build environment in README.md +document @quick
