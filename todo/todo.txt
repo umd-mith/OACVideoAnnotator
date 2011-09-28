@@ -1,7 +1,4 @@
-(A) 2011-09-27 setup build environment based on MIHGRid pattern +setup @medium
-(A) 2011-09-27 setup test environment based on MITHGrid pattern +setup @easy
-(A) 2011-09-27 document build environment in README.md +document @quick
-(A) 2011-09-27 document test environment in test/README.md +document @quick
+(B) 2011-09-27 document test environment in test/README.md +document @quick
 (B) 2011-09-27 document documentation standard/pattern for OAC +document @quick
 (A) 2011-09-27 create +Raphaël presentation @medium
 (A) 2011-09-27 create +test of +Raphaël presentation @medium
