@@ -39,12 +39,10 @@
 							item = model.getItem(itemId);
 							
 							// item determines sizing options for the container/canvas
-							console.log('svg  '+containerid);
 							// create the svg canvas with the container
 							svg = Raphael(containerid, item.sizew, item.sizeh);
 							
 							paper = svg;
-							$("#testdone").text("SVG loaded "+JSON.stringify(paper));
 						}
 					}
 				},
@@ -61,10 +59,8 @@
 							$("#testdone").append("<p>Rect object: "+JSON.stringify(item)+"</p>");
 							
 							// attach the svg element to the paper object
-							switch(item.shapeType[0]) {
-								case 'rect':
-									paper.rect(item.posInfo[0].x, item.posInfo[0].y, item.posInfo[0].w, item.posInfo[0].h);
-									break;
+							if(item.shapeType[0] === 'rect') {
+								paper.rect(item.posInfo[0].x, item.posInfo[0].y, item.posInfo[0].w, item.posInfo[0].h);
 							}
 						}
 					}
