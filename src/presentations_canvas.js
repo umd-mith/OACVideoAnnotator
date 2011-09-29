@@ -10,6 +10,7 @@ Presentations for canvas.js
 	MITHGrid.Presentation.RaphSVG = function(container, options) {
 		var that = MITHGrid.Presentation.initPresentation("RaphSVG", container, options);
 		
+	
 		return that;
 	};
 	

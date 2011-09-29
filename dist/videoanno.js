@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Wed Sep 28 10:18:53 2011 -0400
+ *  Date: Thu Sep 29 11:59:56 2011 -0400
  *  
  * Educational Community License, Version 2.0
  * 
@@ -36,6 +36,7 @@ Presentations for canvas.js
 	MITHGrid.Presentation.RaphSVG = function(container, options) {
 		var that = MITHGrid.Presentation.initPresentation("RaphSVG", container, options);
 		
+	
 		return that;
 	};
 	
@@ -64,7 +65,7 @@ Presentations for canvas.js
 				// is drawn
 				drawspace: {
 					dataStore: 'canvas',
-					types: ["paper"],
+					types: ["paper", "shape"],
 					label: 'drawspace'
 				},
 				shapes: {
@@ -74,7 +75,7 @@ Presentations for canvas.js
 					filters: [".posInfo"]
 				}
 			},
-			viewSetup: '<div id="canvasSVG"></div><div id="testdone"></div><button id="loadrect">Load SVG Shape</button>',
+			viewSetup: '<h3>Canvas Area</h3><div id="canvasSVG"></div><div id="testdone"></div><button id="loadrect">Load SVG Shape</button>',
 			presentations: {
 				raphsvg: {
 					type: MITHGrid.Presentation.RaphSVG,
@@ -87,20 +88,11 @@ Presentations for canvas.js
 							item = model.getItem(itemId);
 							
 							// item determines sizing options for the container/canvas
-							console.log('svg  '+containerid);
 							// create the svg canvas with the container
 							svg = Raphael(containerid, item.sizew, item.sizeh);
 							
 							paper = svg;
-							$("#testdone").text("SVG loaded "+JSON.stringify(paper));
-						}
-					}
-				},
-				svgshape: {
-					type: MITHGrid.Presentation.SVGRect,
-					container: "#canvasSVG",
-					dataView: 'shapes',
-					lenses: {
+						},
 						shape: function(container, view, model, itemId) {
 							var that = {},
 							svg, 
@@ -109,10 +101,8 @@ Presentations for canvas.js
 							$("#testdone").append("<p>Rect object: "+JSON.stringify(item)+"</p>");
 							
 							// attach the svg element to the paper object
-							switch(item.shapeType[0]) {
-								case 'rect':
-									paper.rect(item.posInfo[0].x, item.posInfo[0].y, item.posInfo[0].w, item.posInfo[0].h);
-									break;
+							if(item.shapeType[0] === 'rect') {
+								paper.rect(item.posInfo[0].x, item.posInfo[0].y, item.posInfo[0].w, item.posInfo[0].h);
 							}
 						}
 					}
@@ -128,19 +118,22 @@ Presentations for canvas.js
 				type: "paper",
 				label:"RaphaelJS Canvas",
 				sizew: 500,
-				sizeh: 500
+				sizeh: 200
 			}]);
 			
 			$("#loadrect").click(function(e) {
 				e.preventDefault();
+				
+				// create a shape object
+				
 				
 				that.dataStore.canvas.loadItems([{
 					id: "rect1",
 					type: "shape",
 					shapeType: 'rect',
 					posInfo: {
-						w: 10,
-						h: 10,
+						w: 100,
+						h: 100,
 						x: 110,
 						y: 23
 					}

@@ -1,0 +1,8 @@
+body {
+	background: #ADDEE1;
+}
+#canvasSVG {
+	padding: 10px;
+	background: #FFF;
+	border: 2px solid red;
+}
