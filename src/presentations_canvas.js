@@ -6,19 +6,28 @@ Presentations for canvas.js
 
 
 (function($, MITHGrid) {
+	MITHGrid.Presentation.namespace("RaphSVG");
 	// Presentation for the Canvas area - area that the Raphael canvas is drawn on
-	MITHGrid.Presentation.RaphSVG = function(container, options) {
-		var that = MITHGrid.Presentation.initPresentation("RaphSVG", container, options);
+	MITHGrid.Presentation.RaphSVG.initPresentation = function(container, options) {
+		var that = MITHGrid.Presentation.initPresentation("RaphSVG", container, options),
+		//create canvas object to be used outside of the Presentation - objects
+		//access this to generate shapes
+		id = $(container).attr('id'), h, w;
 		
-	
+		if(options.cWidth && options.cHeight) {
+			w = options.cWidth;
+			h = options.cHeight;
+		} else {
+			// measure the div space and make the canvas
+			// to fit
+			w = $(container).width();
+			h = $(container).height();
+		}
+		// init RaphaelJS canvas
+		that.canvas = new Raphael(id, w, h);
+		
+		
+		
 		return that;
 	};
-	
-	// Shape presentation for rectangles
-	MITHGrid.Presentation.SVGRect = function(container, options) {
-		var that = MITHGrid.Presentation.initPresentation("SVGRect", container, options);
-		
-		return that;
-	};
-	
-})(jQuery, MITHGrid);
+}(jQuery, MITHGrid));

@@ -1,4 +1,3 @@
-(B) 2011-09-27 document test environment in test/README.md +document @quick
 (B) 2011-09-27 document documentation standard/pattern for OAC +document @quick
 (A) 2011-09-27 create +test of +Raphaël presentation @medium
 (A) 2011-09-27 create generic +SVGLens for use in a +Raphaël presentation @easy

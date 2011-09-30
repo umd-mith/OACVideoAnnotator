@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Thu Sep 29 11:59:56 2011 -0400
+ *  Date: Thu Sep 29 16:46:37 2011 -0400
  *  
  * Educational Community License, Version 2.0
  * 
@@ -32,22 +32,31 @@ Presentations for canvas.js
 
 
 (function($, MITHGrid) {
+	MITHGrid.Presentation.namespace("RaphSVG");
 	// Presentation for the Canvas area - area that the Raphael canvas is drawn on
-	MITHGrid.Presentation.RaphSVG = function(container, options) {
-		var that = MITHGrid.Presentation.initPresentation("RaphSVG", container, options);
+	MITHGrid.Presentation.RaphSVG.initPresentation = function(container, options) {
+		var that = MITHGrid.Presentation.initPresentation("RaphSVG", container, options),
+		//create canvas object to be used outside of the Presentation - objects
+		//access this to generate shapes
+		id = $(container).attr('id'), h, w;
 		
-	
+		if(options.cWidth && options.cHeight) {
+			w = options.cWidth;
+			h = options.cHeight;
+		} else {
+			// measure the div space and make the canvas
+			// to fit
+			w = $(container).width();
+			h = $(container).height();
+		}
+		// init RaphaelJS canvas
+		that.canvas = new Raphael(id, w, h);
+		
+		
+		
 		return that;
 	};
-	
-	// Shape presentation for rectangles
-	MITHGrid.Presentation.SVGRect = function(container, options) {
-		var that = MITHGrid.Presentation.initPresentation("SVGRect", container, options);
-		
-		return that;
-	};
-	
-})(jQuery, MITHGrid);(function($, MITHGrid) {
+}(jQuery, MITHGrid));(function($, MITHGrid) {
 	/**
 	* MITHGrid Canvas
 	* Creates a canvas using the Raphael JS library
@@ -57,8 +66,7 @@ Presentations for canvas.js
 	// Set the namespace for the Canvas application
 	MITHGrid.Application.namespace("Canvas");
 	MITHGrid.Application.Canvas.initApp = function(container, options) {
-		var paper = {};
-		
+	
 		var that = MITHGrid.Application.initApp("MITHGrid.Application.Canvas", container, $.extend(true, {}, options, {
 			dataViews: {
 				// view for the space in which data from shapes
@@ -82,30 +90,20 @@ Presentations for canvas.js
 					container: "#canvasSVG",
 					dataView: 'drawspace',
 					lenses: {
-						paper: function(container, view, model, itemId) {
-							var that = {},
-							svg, el, containerid = $(container).attr('id'),
-							item = model.getItem(itemId);
-							
-							// item determines sizing options for the container/canvas
-							// create the svg canvas with the container
-							svg = Raphael(containerid, item.sizew, item.sizeh);
-							
-							paper = svg;
-						},
 						shape: function(container, view, model, itemId) {
 							var that = {},
-							svg, 
 							item = model.getItem(itemId);
 							
 							$("#testdone").append("<p>Rect object: "+JSON.stringify(item)+"</p>");
 							
 							// attach the svg element to the paper object
 							if(item.shapeType[0] === 'rect') {
-								paper.rect(item.posInfo[0].x, item.posInfo[0].y, item.posInfo[0].w, item.posInfo[0].h);
+								view.canvas.rect(item.posInfo[0].x, item.posInfo[0].y, item.posInfo[0].w, item.posInfo[0].h);
 							}
 						}
-					}
+					},
+					cWidth: options.width,
+					cHeight: options.height
 				}
 			}
 			
@@ -113,13 +111,7 @@ Presentations for canvas.js
 		);
 		
 		that.ready(function() {
-			that.dataStore.canvas.loadItems([{
-				id:"raphcanvas",
-				type: "paper",
-				label:"RaphaelJS Canvas",
-				sizew: 500,
-				sizeh: 200
-			}]);
+		
 			
 			$("#loadrect").click(function(e) {
 				e.preventDefault();
@@ -172,6 +164,6 @@ Presentations for canvas.js
 		}
 	});
 	 
-})(jQuery, MITHGrid);// End of OAC Video Annotator
+}(jQuery, MITHGrid));// End of OAC Video Annotator
 
 // @author Grant Dickie
