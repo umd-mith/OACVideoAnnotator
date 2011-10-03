@@ -24,9 +24,11 @@ Presentations for canvas.js
 			h = $(container).height();
 		}
 		// init RaphaelJS canvas
+		// Parameters for Raphael: 
+		// @id: element ID for container div
+		// @w: Integer value for width of the SVG canvas
+		// @h: Integer value for height of the SVG canvas
 		that.canvas = new Raphael(id, w, h);
-		
-		
 		
 		return that;
 	};

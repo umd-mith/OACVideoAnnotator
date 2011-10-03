@@ -10,7 +10,7 @@ Create Your Own Tests
 ----------------------
 
 This uses the QUnit software - [documentation here](http://docs.jquery.com/Qunit). The documentation provides instructions on developing your own test modules. A typical test module is pretty simple and looks like this:
-`
+
 module("Testing Video Annotator Canvas");
 
 test("Checking that Object exists", function() {
@@ -19,4 +19,3 @@ test("Checking that Object exists", function() {
 	ok(MITHGrid.Application.Canvas, "VideoAnnotator Canvas exists");
 	
 });
-`
