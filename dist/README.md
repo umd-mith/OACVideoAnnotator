@@ -30,11 +30,16 @@ Lenses are functions that take arrays of data from Views defined in the Applicat
 
 The main Lens for Canvas is called *shape* and it renders each SVG shape passed to it within the SVG canvas created in the Presentation object to which it is attached. Each lens function receives four parameters: *container*, *view*, *model*, and *itemId*
 
-The **view** parameter is how you access the SVG canvas created within the Presentation object. This is done like so:
+**container** is the ID of the div element that serves as the container for the SVG canvas. 
+
+The **view** parameter refers to the Presentation that created the SVG canvas. This is how you access the SVG canvas created within the Presentation object. This is done like so:
 	
 	// Generating rectangle
 	view.canvas.rect(x, y, w, h);
 	
+The **model** is the data store connected to the view.
+
+**itemId** is the ID of the shape or other type of item passed to this view. For Canvas, only shape objects are allowed to be rendered.
 
 --------------------------
 
