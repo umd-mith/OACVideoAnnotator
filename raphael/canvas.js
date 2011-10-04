@@ -4,7 +4,6 @@
 	* Creates a canvas using the Raphael JS library
 	*/
 	
-	
 	// Set the namespace for the Canvas application
 	MITHGrid.Application.namespace("Canvas");
 	MITHGrid.Application.Canvas.initApp = function(container, options) {
@@ -19,7 +18,9 @@
 					label: 'drawspace'
 				}
 			},
-			viewSetup: '<h3>Canvas Area</h3><div id="canvasSVG"></div><div id="testdone"></div><button id="loadrect">Load SVG Shape</button><button id="updaterect">Update Shape (Move it)</button>',
+			viewSetup: '<h3>Canvas Area</h3><div id="canvasSVG"></div><div id="testdone"></div>'+
+			'<button id="loadrect">Load SVG Shape</button><button id="updaterect">Update Shape (Move it)</button>'+
+			'<button id="deleterect">Delete the Shape</button>',
 			presentations: {
 				raphsvg: {
 					type: MITHGrid.Presentation.RaphSVG,
@@ -59,24 +60,34 @@
 							if(item.shapeType[0] === 'rect') {
 								// only creating rectangles for right now
 								// Accessing the view.canvas Object that was created in MITHGrid.Presentation.RaphSVG 
-								c = view.canvas.rect(item.posInfo[0].x, item.posInfo[0].y, item.posInfo[0].w, item.posInfo[0].h);
+								c = view.canvas.rect(item.x, item.y, item.w, item.h);
 								// fill and set opacity
 								c.attr({
 									fill: "#888888",
-									opacity: 0.25
+									opacity: 0.05
 								});
 							}
 						
 							
 							that.update = function(item) {
+								
 								// receiving the Object passed through
 								// model.updateItems in move()
-								c.attr({
-									x: item.posInfo[0].x,
-									y: item.posInfo[0].y
-								});
+								if(item.posInfo !== undefined){
+									c.attr({
+										x: item.x,
+										y: item.y
+									});
+								} else {
+									c.remove();
+								}
 								// Raphael object is updated
 								$("#testdone > p").empty().html("Raphael Object in data store:<br/> "+JSON.stringify(item));
+							};
+							
+							that.remove = function(item) {
+								// getting the removeItems callback
+								c.remove();
 							};
 							
 							// initiate the drag feature (RaphaelJS)
@@ -103,42 +114,47 @@
 					id: "rect1",
 					type: "shape",
 					shapeType: 'rect',
-					posInfo: {
-						w: 100,
-						h: 100,
-						x: initX,
-						y: initY
-					}
+					
+					w: 100,
+					h: 100,
+					x: initX,
+					y: initY
+				
 				}]);
 			});
 			// Updating the shape object by adjusting the
 			// x,y and the width
 			$("#updaterect").click(function(e) {
+				e.preventDefault();
+				
 				that.dataStore.canvas.updateItems([{
 					id: "rect1",
-					posInfo: {
-						x: initX + 100,
-						y: initY + 20,
-						w: 200,
-						h: 50
-					}
+					x: initX + 100,
+					y: initY + 20,
+					w: 200,
+					h: 50
+				
 				}]);
 				
 			});
 			
 			// Deleting the shape object
 			$("#deleterect").click(function(e) {
+				e.preventDefault();
 				
+				that.dataStore.canvas.removeItems([
+					"rect1"
+				]);
 			});
 		});
 		
 		return that;
 	};
-	
+}(jQuery, MITHGrid));	
 
 	
 	// Default library for the Canvas application
-	fluid.defaults("MITHGrid.Application.Canvas", {
+	MITHGrid.defaults("MITHGrid.Application.Canvas", {
 		// Data store for the Application
 		dataStores: {
 			canvas: {
@@ -163,4 +179,3 @@
 		}
 	});
 	 
-}(jQuery, MITHGrid));
