@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Thu Sep 29 11:59:56 2011 -0400
+ *  Date: Mon Oct 3 11:58:52 2011 -0400
  *  
  * Educational Community License, Version 2.0
  * 
@@ -32,146 +32,33 @@ Presentations for canvas.js
 
 
 (function($, MITHGrid) {
+		MITHGrid.Application.namespace("Canvas");
+	MITHGrid.Presentation.namespace("RaphSVG");
 	// Presentation for the Canvas area - area that the Raphael canvas is drawn on
-	MITHGrid.Presentation.RaphSVG = function(container, options) {
-		var that = MITHGrid.Presentation.initPresentation("RaphSVG", container, options);
+	MITHGrid.Presentation.RaphSVG.initPresentation = function(container, options) {
+		var that = MITHGrid.Presentation.initPresentation("RaphSVG", container, options),
+		//create canvas object to be used outside of the Presentation - objects
+		//access this to generate shapes
+		id = $(container).attr('id'), h, w;
 		
-	
-		return that;
-	};
-	
-	// Shape presentation for rectangles
-	MITHGrid.Presentation.SVGRect = function(container, options) {
-		var that = MITHGrid.Presentation.initPresentation("SVGRect", container, options);
-		
-		return that;
-	};
-	
-})(jQuery, MITHGrid);(function($, MITHGrid) {
-	/**
-	* MITHGrid Canvas
-	* Creates a canvas using the Raphael JS library
-	*/
-	
-	
-	// Set the namespace for the Canvas application
-	MITHGrid.Application.namespace("Canvas");
-	MITHGrid.Application.Canvas.initApp = function(container, options) {
-		var paper = {};
-		
-		var that = MITHGrid.Application.initApp("MITHGrid.Application.Canvas", container, $.extend(true, {}, options, {
-			dataViews: {
-				// view for the space in which data from shapes
-				// is drawn
-				drawspace: {
-					dataStore: 'canvas',
-					types: ["paper", "shape"],
-					label: 'drawspace'
-				},
-				shapes: {
-					dataStore: 'canvas',
-					types: ["shape"],
-					label: 'shapes',
-					filters: [".posInfo"]
-				}
-			},
-			viewSetup: '<h3>Canvas Area</h3><div id="canvasSVG"></div><div id="testdone"></div><button id="loadrect">Load SVG Shape</button>',
-			presentations: {
-				raphsvg: {
-					type: MITHGrid.Presentation.RaphSVG,
-					container: "#canvasSVG",
-					dataView: 'drawspace',
-					lenses: {
-						paper: function(container, view, model, itemId) {
-							var that = {},
-							svg, el, containerid = $(container).attr('id'),
-							item = model.getItem(itemId);
-							
-							// item determines sizing options for the container/canvas
-							// create the svg canvas with the container
-							svg = Raphael(containerid, item.sizew, item.sizeh);
-							
-							paper = svg;
-						},
-						shape: function(container, view, model, itemId) {
-							var that = {},
-							svg, 
-							item = model.getItem(itemId);
-							
-							$("#testdone").append("<p>Rect object: "+JSON.stringify(item)+"</p>");
-							
-							// attach the svg element to the paper object
-							if(item.shapeType[0] === 'rect') {
-								paper.rect(item.posInfo[0].x, item.posInfo[0].y, item.posInfo[0].w, item.posInfo[0].h);
-							}
-						}
-					}
-				}
-			}
-			
-		})
-		);
-		
-		that.ready(function() {
-			that.dataStore.canvas.loadItems([{
-				id:"raphcanvas",
-				type: "paper",
-				label:"RaphaelJS Canvas",
-				sizew: 500,
-				sizeh: 200
-			}]);
-			
-			$("#loadrect").click(function(e) {
-				e.preventDefault();
-				
-				// create a shape object
-				
-				
-				that.dataStore.canvas.loadItems([{
-					id: "rect1",
-					type: "shape",
-					shapeType: 'rect',
-					posInfo: {
-						w: 100,
-						h: 100,
-						x: 110,
-						y: 23
-					}
-				}]);
-			});
-		});
-		
-		return that;
-	};
-	
-
-	
-	// Default library for the Canvas application
-	fluid.defaults("MITHGrid.Application.Canvas", {
-		// Data store for the Application
-		dataStores: {
-			canvas: {
-				types:{
-					// the plane that is being drawn on
-					paper: {}, 
-				
-					// types of shapes -- to add a new
-					// shape object, add it here
-					shape: {}
-				},
-				properties: {
-					// posInfo contains the SVG dimensions for 
-					// a shape
-					posInfo: {
-						type: "Item"
-					}
-				}
-				
-			}
-			
+		if(options.cWidth && options.cHeight) {
+			w = options.cWidth;
+			h = options.cHeight;
+		} else {
+			// measure the div space and make the canvas
+			// to fit
+			w = $(container).width();
+			h = $(container).height();
 		}
-	});
-	 
-})(jQuery, MITHGrid);// End of OAC Video Annotator
+		// init RaphaelJS canvas
+		// Parameters for Raphael: 
+		// @id: element ID for container div
+		// @w: Integer value for width of the SVG canvas
+		// @h: Integer value for height of the SVG canvas
+		that.canvas = new Raphael(id, w, h);
+		
+		return that;
+	};
+}(jQuery, MITHGrid));// End of OAC Video Annotator
 
 // @author Grant Dickie

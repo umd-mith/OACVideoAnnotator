@@ -4,3 +4,13 @@ x 2011-09-28 2011-09-27 setup test environment based on MITHGrid pattern +setup 
 x 2011-09-28 2011-09-27 document build environment in README.md +document @quick
 x 2011-09-28 2011-09-27 create +Raphaël presentation @medium
 x 2011-09-28 2011-09-27 create a +test HTML page for testing +SVGLens and +Raphaël presentation together @quick +visualBehaviorTestEnvironment
+x 2011-09-30 2011-09-27 document test environment in test/README.md +document @quick
+x 2011-09-30 2011-09-27 create +test of +Raphaël presentation @medium
+x 2011-10-03 2011-09-27 create a simple/test javascript application to tie everything together for testing in the HTML +test page +Raphaël +visualBehaviorTestEnvironment @quick
+x 2011-10-03 2011-09-27 hook +SVGLens into +Raphaël presentation +visualBehaviorTestEnvironment @quick
+x 2011-10-03 2011-09-27 create a pause button between initial data push and item update +Raphaël +visualBehaviorTestEnvironment @easy
+x 2011-10-03 2011-09-27 create second pause button between item update and item removal +Raphaël +visualBehaviorTestEnvironment @easy
+x 2011-10-03 2011-09-27 delete item from data store +Raphaël +visualBehaviorTestEnvironment @quick
+x 2011-10-03 2011-09-27 push data into data store to create item displayed by +SVGLens +Raphaël +visualBehaviorTestEnvironment @easy
+x 2011-10-03 2011-09-27 create generic +SVGLens for use in a +Raphaël presentation @easy
+x 2011-10-03 2011-09-27 update item in data store +Raphaël +visualBehaviorTestEnvironment @quick
