@@ -1,9 +1,9 @@
 /*
- *  OAC Video Annotation Tool
+ *  OAC Video Annotation Tool v0.1
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Mon Oct 3 11:58:52 2011 -0400
+ *  Date: Thu Oct 6 08:38:40 2011 -0400
  *  
  * Educational Community License, Version 2.0
  * 
@@ -32,7 +32,6 @@ Presentations for canvas.js
 
 
 (function($, MITHGrid) {
-		MITHGrid.Application.namespace("Canvas");
 	MITHGrid.Presentation.namespace("RaphSVG");
 	// Presentation for the Canvas area - area that the Raphael canvas is drawn on
 	MITHGrid.Presentation.RaphSVG.initPresentation = function(container, options) {
