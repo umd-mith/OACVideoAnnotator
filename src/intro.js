@@ -1,5 +1,5 @@
 /*
- *  OAC Video Annotation Tool
+ *  OAC Video Annotation Tool v@VERSION
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
@@ -23,5 +23,4 @@
 
 var MITHGrid = MITHGrid || {};
 var jQuery = jQuery || {};
-var fluid = fluid || {};
 var Raphael = Raphael || {};
