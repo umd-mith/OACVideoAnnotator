@@ -23,5 +23,4 @@
 
 var MITHGrid = MITHGrid || {};
 var jQuery = jQuery || {};
-var fluid = fluid || {};
 var Raphael = Raphael || {};
