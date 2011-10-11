@@ -13,14 +13,17 @@ Presentations for canvas.js
 		//create canvas object to be used outside of the Presentation - objects
 		//access this to generate shapes
 		id = $(container).attr('id'), h, w;
-		
-		if(options.cWidth && options.cHeight) {
+		if(options.cWidth !== undefined) {
 			w = options.cWidth;
+		}
+		else {
+			w = $(container).width();
+		}
+		if(options.cHeight !== undefined) {
 			h = options.cHeight;
 		} else {
 			// measure the div space and make the canvas
 			// to fit
-			w = $(container).width();
 			h = $(container).height();
 		}
 		// init RaphaelJS canvas

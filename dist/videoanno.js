@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Thu Oct 6 08:38:40 2011 -0400
+ *  Date: Tue Oct 11 09:16:51 2011 -0400
  *  
  * Educational Community License, Version 2.0
  * 
@@ -23,7 +23,6 @@
 
 var MITHGrid = MITHGrid || {};
 var jQuery = jQuery || {};
-var fluid = fluid || {};
 var Raphael = Raphael || {};/*
 Presentations for canvas.js
 
@@ -39,14 +38,17 @@ Presentations for canvas.js
 		//create canvas object to be used outside of the Presentation - objects
 		//access this to generate shapes
 		id = $(container).attr('id'), h, w;
-		
-		if(options.cWidth && options.cHeight) {
+		if(options.cWidth !== undefined) {
 			w = options.cWidth;
+		}
+		else {
+			w = $(container).width();
+		}
+		if(options.cHeight !== undefined) {
 			h = options.cHeight;
 		} else {
 			// measure the div space and make the canvas
 			// to fit
-			w = $(container).width();
 			h = $(container).height();
 		}
 		// init RaphaelJS canvas
