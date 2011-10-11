@@ -4,7 +4,7 @@ $(document).ready(function() {
 	
 	test("Check Canvas Presentations", function() {
 		expect(1);
-		ok(MITHGrid.Presentation.RaphSVG !== undefined, "RaphSVG Presentation exists");		
+		ok(MITHGrid.Presentation.RaphaelCanvas !== undefined, "RaphaelCanvas Presentation exists");		
 	});
 	
 	test("Check Canvas availability", function() {
@@ -12,7 +12,7 @@ $(document).ready(function() {
 		expect(3);
 		
 		try {
-			presentation = MITHGrid.Presentation.RaphSVG.initPresentation($('test-158603'), {
+			presentation = MITHGrid.Presentation.RaphaelCanvas.initPresentation($('test-158603'), {
 				dataView: MITHGrid.Data.initView({
 					dataStore: MITHGrid.Data.initStore({})
 				}),

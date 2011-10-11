@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Tue Oct 11 09:16:51 2011 -0400
+ *  Date: Tue Oct 11 15:04:21 2011 -0400
  *  
  * Educational Community License, Version 2.0
  * 
@@ -31,10 +31,10 @@ Presentations for canvas.js
 
 
 (function($, MITHGrid) {
-	MITHGrid.Presentation.namespace("RaphSVG");
+	MITHGrid.Presentation.namespace("RaphaelCanvas");
 	// Presentation for the Canvas area - area that the Raphael canvas is drawn on
-	MITHGrid.Presentation.RaphSVG.initPresentation = function(container, options) {
-		var that = MITHGrid.Presentation.initPresentation("RaphSVG", container, options),
+	MITHGrid.Presentation.RaphaelCanvas.initPresentation = function(container, options) {
+		var that = MITHGrid.Presentation.initPresentation("RaphaelCanvas", container, options),
 		//create canvas object to be used outside of the Presentation - objects
 		//access this to generate shapes
 		id = $(container).attr('id'), h, w;
