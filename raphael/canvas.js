@@ -23,7 +23,7 @@
 			'<button id="deleterect">Delete the Shape</button>',
 			presentations: {
 				raphsvg: {
-					type: MITHGrid.Presentation.RaphSVG,
+					type: MITHGrid.Presentation.RaphaelCanvas,
 					container: "#canvasSVG",
 					dataView: 'drawspace',
 					lenses: {
