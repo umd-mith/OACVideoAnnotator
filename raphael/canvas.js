@@ -34,7 +34,6 @@
 			               start = function() {
 			                    ox = c.attr("x");
 			                    oy = c.attr("y");
-								
 			                },
 			                move = function(dx, dy) {
 			                    var targets = {};
@@ -63,8 +62,8 @@
 								c = view.canvas.rect(item.x, item.y, item.w, item.h);
 								// fill and set opacity
 								c.attr({
-									fill: "#888888",
-									opacity: 0.05
+									fill: "red",
+									opacity: 1
 								});
 							}
 						
@@ -152,30 +151,30 @@
 	};
 }(jQuery, MITHGrid));	
 
-	
-	// Default library for the Canvas application
-	MITHGrid.defaults("MITHGrid.Application.Canvas", {
-		// Data store for the Application
-		dataStores: {
-			canvas: {
-				// put in here the types of data that will
-				// be represented in OACVideoAnnotator
-				types:{
-					annotation: {},
-					// types of shapes -- to add a new
-					// shape object, add it here
-					shape: {}
-				},
-				properties: {
-					// posInfo contains the SVG dimensions for 
-					// a shape
-					posInfo: {
-						type: "Item"
-					}
+
+// Default library for the Canvas application
+MITHGrid.defaults("MITHGrid.Application.Canvas", {
+	// Data store for the Application
+	dataStores: {
+		canvas: {
+			// put in here the types of data that will
+			// be represented in OACVideoAnnotator
+			types:{
+				annotation: {},
+				// types of shapes -- to add a new
+				// shape object, add it here
+				shape: {}
+			},
+			properties: {
+				// posInfo contains the SVG dimensions for 
+				// a shape
+				posInfo: {
+					type: "Item"
 				}
-				
 			}
 			
 		}
-	});
+		
+	}
+});
 	 

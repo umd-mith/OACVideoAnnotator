@@ -14,3 +14,5 @@ x 2011-10-03 2011-09-27 delete item from data store +Raphaël +visualBehaviorTes
 x 2011-10-03 2011-09-27 push data into data store to create item displayed by +SVGLens +Raphaël +visualBehaviorTestEnvironment @easy
 x 2011-10-03 2011-09-27 create generic +SVGLens for use in a +Raphaël presentation @easy
 x 2011-10-03 2011-09-27 update item in data store +Raphaël +visualBehaviorTestEnvironment @quick
+x 2011-10-05 2011-09-27 document documentation standard/pattern for OAC +document @quick
+x 2011-10-05 2011-09-27 document how lenses access the +Raphaël canvas +SVGLens @quick

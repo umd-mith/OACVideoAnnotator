@@ -3,10 +3,9 @@ $(document).ready(function() {
 	module("Canvas presentations");
 	
 	test("Check Canvas Presentations", function() {
-		expect(2);
+		expect(1);
 		ok(MITHGrid.Presentation.RaphSVG !== undefined, "RaphSVG Presentation exists");
-		ok(MITHGrid.Presentation.SVGRect !== undefined, "SVGRect Presentation exists");
-		
+	
 	});
 	
 	module("Canvas");
