@@ -1,9 +1,8 @@
 $(document).ready(function() {
 	test("Check requirements", function() {
-		expect(4);
+		expect(3);
 		ok( jQuery, "jQuery" );
 		ok( $, "$" );
-		ok( fluid, "fluid" );
 		ok( Raphael, "Raphael" );
 	});
 });

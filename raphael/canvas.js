@@ -23,7 +23,7 @@
 			'<button id="deleterect">Delete the Shape</button>',
 			presentations: {
 				raphsvg: {
-					type: MITHGrid.Presentation.RaphSVG,
+					type: MITHGrid.Presentation.RaphaelCanvas,
 					container: "#canvasSVG",
 					dataView: 'drawspace',
 					lenses: {
@@ -32,8 +32,9 @@
 							item = model.getItem(itemId), c, ox, oy,
 							// Set up drag() callback functions
 			               start = function() {
-			                    ox = c.attr("x");
-			                    oy = c.attr("y");
+			                    ox = parseInt(c.attr("x"),10);
+			                    oy = parseInt(c.attr("y"),10);
+								
 			                },
 			                move = function(dx, dy) {
 			                    var targets = {};
@@ -41,12 +42,8 @@
 								// object
 			                    model.updateItems([{
 			                        id: itemId,
-			                        posInfo: {
-										x: dx + ox,
-										y: dy + oy,
-										w: c.attr('width'),
-										h: c.attr('height')
-									}
+									x: dx + ox,
+									y: dy + oy
 			                    }]);
 			                },
 			                up = function() {
@@ -72,13 +69,16 @@
 								
 								// receiving the Object passed through
 								// model.updateItems in move()
-								if(item.posInfo !== undefined){
-									c.attr({
-										x: item.x,
-										y: item.y
-									});
-								} else {
-									c.remove();
+								try {			
+									if(item.x !== undefined && item.y !== undefined) {
+										c.attr({
+											x: item.x[0],
+											y: item.y[0]
+										});
+									}
+								} catch(e) {
+									console.log(e);
+								//	c.remove();
 								}
 								// Raphael object is updated
 								$("#testdone > p").empty().html("Raphael Object in data store:<br/> "+JSON.stringify(item));
