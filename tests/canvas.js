@@ -5,6 +5,7 @@ $(document).ready(function() {
 	test("Check Canvas Presentations", function() {
 		expect(1);
 		ok(MITHGrid.Presentation.RaphaelCanvas !== undefined, "RaphaelCanvas Presentation exists");		
+
 	});
 	
 	test("Check Canvas availability", function() {
