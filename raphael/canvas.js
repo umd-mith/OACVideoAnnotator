@@ -18,9 +18,7 @@
 					label: 'drawspace'
 				}
 			},
-			viewSetup: '<h3>Canvas Area</h3><div id="canvasSVG"></div><div id="testdone"></div>'+
-			'<button id="loadrect">Load SVG Shape</button><button id="updaterect">Update Shape (Move it)</button>'+
-			'<button id="deleterect">Delete the Shape</button>',
+			viewSetup: '<div id="canvasSVG"></div><div id="testdone"></div>',
 			presentations: {
 				raphsvg: {
 					type: MITHGrid.Presentation.RaphaelCanvas,
@@ -104,51 +102,15 @@
 		);
 		
 		that.ready(function() {
-			var initX = 110, initY = 23;
-			$("#loadrect").click(function(e) {
-				e.preventDefault();
-				
-				// create a shape object
-				that.dataStore.canvas.loadItems([{
-					id: "rect1",
-					type: "shape",
-					shapeType: 'rect',
-					
-					w: 100,
-					h: 100,
-					x: initX,
-					y: initY
-				
-				}]);
-			});
-			// Updating the shape object by adjusting the
-			// x,y and the width
-			$("#updaterect").click(function(e) {
-				e.preventDefault();
-				
-				that.dataStore.canvas.updateItems([{
-					id: "rect1",
-					x: initX + 100,
-					y: initY + 20,
-					w: 200,
-					h: 50
-				
-				}]);
-				
-			});
-			
-			// Deleting the shape object
-			$("#deleterect").click(function(e) {
-				e.preventDefault();
-				
-				that.dataStore.canvas.removeItems([
-					"rect1"
-				]);
-			});
+			// This has been extracted into
+			// genApps.js and controls.js
 		});
 		
 		return that;
 	};
+	
+	
+	
 }(jQuery, MITHGrid));	
 
 

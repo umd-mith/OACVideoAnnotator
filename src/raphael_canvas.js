@@ -35,4 +35,19 @@ Presentations for canvas.js
 		
 		return that;
 	};
+	
+	/*
+	* Annotation controls 
+	* Taking out the controls from the Raphael test canvas and implementing
+	* them as their own presentation.
+	*
+	*/
+	
+	MITHGrid.Presentation.namespace('AnnotationControls');
+	MITHGrid.Presentation.AnnotationControls.initPresentation = function(container, options) {
+		var that = MITHGrid.Presentation.initPresentation('AnnotationControls', container, options);
+		
+		return that;
+	};
+	
 }(jQuery, MITHGrid));
