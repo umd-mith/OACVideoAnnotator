@@ -11,7 +11,9 @@
 			viewSetup: '<div id="controls_anno"></div>',
 			dataStores: {
 				controls: {
-					button: {}
+					types: {
+						button: {}
+					}
 				}
 			},
 			dataViews: {
@@ -31,7 +33,7 @@
 							var that = {}, item = model.getItem(itemId), el ='';
 							
 							// render the button 
-							el = '<div id="button_item">'+
+							el = '<div class="button_item">'+
 							'<div class="buttonClick" id="'+item.id[0]+'">'+
 							item.text[0]+
 							'</div>'+

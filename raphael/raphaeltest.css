@@ -20,11 +20,11 @@ body {
 	padding: 5px;
 	cursor: pointer;
 }
-#controls_anno #button_item {
+#controls_anno .button_item {
 	border: solid red 1px;
 	background: #FFF;
 	width: 200px;
 }
-#controls_anno #button_item .buttonClick {
+#controls_anno .button_item .buttonClick {
 	font-size: 20px;
 }

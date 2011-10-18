@@ -12,24 +12,44 @@ var initPlugin = function() {
 	initX = 110, initY = 23,
 	// insert buttons into controls
 	buttons = [{
-		id: "loadrect",
+		id: "rectangle",
 		type: "button",
-		text: "Load Shape",
+		text: "Rectangle ->",
 		callback: function(e) {
 			e.preventDefault();
 
 			// create a shape object
 			raphApp.dataStore.canvas.loadItems([{
 				id: "rect1",
-				type: "shape",
-				shapeType: 'rect',
+				type: 'rect',
+				shape: "rect",
 				w: 100,
 				h: 100,
 				x: initX,
 				y: initY
 			}]);
 		}
-	},{
+	},
+	{
+		id: "oval",
+		type: "button",
+		text: "Oval ->",
+		callback: function(e) {
+			e.preventDefault();
+			
+			// create an oval object
+			raphApp.dataStore.canvas.loadItems([{
+				id: "rect1",
+				type: 'oval',
+				shape: "ellipse",
+				w: 100,
+				h: 100,
+				x: initX,
+				y: initY
+			}]);
+		}
+	},
+	{
 		id: "updaterect",
 		type: "button",
 		text: "Move the Shape (Update in DataStore)",
