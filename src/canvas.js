@@ -8,8 +8,7 @@
 	MITHGrid.Application.namespace("Canvas");
 	MITHGrid.Application.Canvas.initApp = function(container, options) {
 	
-	var that = MITHGrid.Application.initApp("MITHGrid.Application.Canvas", container, $.extend(true, {},
-options, {
+	var that = MITHGrid.Application.initApp("MITHGrid.Application.Canvas", container, $.extend(true, {}, options, {
     dataViews: {
         // view for the space in which data from shapes
         // is drawn

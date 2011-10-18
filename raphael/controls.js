@@ -5,6 +5,14 @@
 */ 
 
 (function($, MITHGrid){
+	MITHGrid.Presentation.namespace('AnnotationControls');
+	MITHGrid.Presentation.AnnotationControls.initPresentation = function(container, options) {
+		var that = MITHGrid.Presentation.initPresentation("AnnotationControls", container, options);
+		
+		return that;
+	};
+	
+	
 	MITHGrid.Application.namespace('Controls');
 	MITHGrid.Application.Controls.initApp = function(container, options) {
 		var that = MITHGrid.Application.initApp("MITHGrid.Application.Controls", container, $.extend(true, {}, options, {
