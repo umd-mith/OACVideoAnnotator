@@ -28,3 +28,12 @@ body {
 #controls_anno .button_item .buttonClick {
 	font-size: 20px;
 }
+.anno_list {
+	padding: 10px;
+	background: #FFF;
+	border: 2px solid red;
+	margin-right: 10%;
+	height: 400px;
+	width: 200px;
+	float: right;
+}

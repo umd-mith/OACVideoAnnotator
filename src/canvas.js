@@ -17,9 +17,16 @@ options, {
             dataStore: 'canvas',
             types: ["rect", "oval"],
             label: 'drawspace'
-        }
+        },
+		annoListItems: {
+			dataStore: 'canvas',
+			types: ["annotation"],
+			label: 'annoListItems'
+		}
     },
-    viewSetup: '<div id="canvasSVG"></div><div id="testdone"></div>',
+    viewSetup: '<div id="canvasSVG"></div>'+
+'<div id="testdone"></div>'+
+'<div class="anno_list"></div>',
     presentations: {
         raphsvg: {
             type: MITHGrid.Presentation.RaphaelCanvas,
@@ -122,7 +129,12 @@ options, {
 
                     // create the shape
                     c = view.canvas.ellipse(item.x, item.y, item.w, item.h);
-
+					// fill shape
+					c.attr({
+						fill: "red"
+					});
+					
+					
                     that.update = function(item) {
                         // receiving the Object passed through
                         // model.updateItems in move()
@@ -140,18 +152,72 @@ options, {
                         // Raphael object is updated
                         $("#testdone > p").empty().html("Raphael Object in data store:<br/> " + JSON.stringify(item));
                     };
+					
+					that.remove = function() {
+						c.remove();
+					};
 
+					// init drag
+					try {
+						c.drag(move, start, up);
+						
+					} catch(e) {
+						console.log(e);
+					}
                     return that;
 
                 }
             }
-        }
+        },
+		annoItem: {
+			type: MITHGrid.Presentation.Annotation,
+			dataView: 'annoListItems',
+			container: '.anno_list',
+			lenses: {
+				annotation: function(container, view, model, itemId) {
+					var that = {}, item = model.getItem(itemId), el = '';
+					
+					el = '<div id="'+item.id[0]+'" class="anno_item">'+
+					'<p>'+item.creator[0]+'</p>'+
+					'<p>'+item.bodyContent[0]+'</p>'+
+					'<span class="delete'+item.id[0]+'">X</span>'+
+					'</div>';
+					
+					$(container).append(el);
+					
+					
+					
+					that.update = function(item) {
+						var el = '<div id="'+item.id[0]+'" class="anno_item">'+
+						'<p>'+item.creator[0]+'</p>'+
+						'<p>'+item.bodyContent[0]+'</p>'+
+						'<div id="delete'+item.id[0]+'">X</div>'+
+						'</div>';
+						$("#"+item.id[0]).remove();
+						$(container).append(el);
+						$("#delete"+item.id[0]).click(function(e){
+							e.preventDefault();
+							model.removeItems([item.id[0]]);
+						});
+					};
+					
+					that.remove = function() {
+						
+						$("#"+item.id).remove();
+					};
+					
+					$("#delete"+item.id[0]).click(function(e){
+						e.preventDefault();
+						model.removeItems([item.id[0]]);
+					});
+					
+					return that;
+				}
+			}
+		}
 	},
-
-        cWidth: options.width,
-        cHeight: options.height
-    
-
+	cWidth: options.width,
+	cHeight: options.height
 })
 );
 		
@@ -162,9 +228,6 @@ options, {
 		
 		return that;
 	};
-	
-	
-	
 }(jQuery, MITHGrid));	
 
 

@@ -87,6 +87,13 @@ var initPlugin = function() {
 	
 	raphApp.run();
 	
+	raphApp.dataStore.canvas.loadItems([{
+		id: "anno1",
+		type: 'annotation',
+		bodyContent: "Annotation number one",
+		creator: "Grant Dickie"
+	}]);
+	
 };
 
 $(initPlugin());

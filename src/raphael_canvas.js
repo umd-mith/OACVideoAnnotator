@@ -50,4 +50,17 @@ Presentations for canvas.js
 		return that;
 	};
 	
+	
+	/*
+	* Annotation
+	* Presentation for all Annotation objects
+	* 
+	*/
+	
+	MITHGrid.Presentation.namespace('Annotation');
+	MITHGrid.Presentation.Annotation.initPresentation = function(container, options) {
+		var that = MITHGrid.Presentation.initPresentation('Annotation', container, options);
+		
+		return that;
+	};
 }(jQuery, MITHGrid));
