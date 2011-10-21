@@ -16,12 +16,7 @@
             dataStore: 'canvas',
             types: ["rect", "oval"],
             label: 'drawspace'
-        },
-		annoListItems: {
-			dataStore: 'canvas',
-			types: ["annotation"],
-			label: 'annoListItems'
-		}
+        }
     },
     viewSetup: '<div id="canvasSVG"></div>'+
 '<div id="testdone"></div>'+
@@ -169,35 +164,17 @@
             }
         },
 		annoItem: {
-			type: MITHGrid.Presentation.Annotation,
-			dataView: 'annoListItems',
+			type: MITHGrid.Presentation.BodyContent,
+			dataView: 'drawspace',
 			container: '.anno_list',
 			lenses: {
-				annotation: function(container, view, model, itemId) {
-					var that = {}, item = model.getItem(itemId), el = '';
+				rect: function(container, view, model, itemId) {
+					var that = {}, item = model.getItem(itemId);
 					
-					el = '<div id="'+item.id[0]+'" class="anno_item">'+
-					'<p>'+item.creator[0]+'</p>'+
-					'<p>'+item.bodyContent[0]+'</p>'+
-					'<span class="delete'+item.id[0]+'">X</span>'+
-					'</div>';
-					
-					$(container).append(el);
-					
-					
+					renderListItem(item, container);
 					
 					that.update = function(item) {
-						var el = '<div id="'+item.id[0]+'" class="anno_item">'+
-						'<p>'+item.creator[0]+'</p>'+
-						'<p>'+item.bodyContent[0]+'</p>'+
-						'<div id="delete'+item.id[0]+'">X</div>'+
-						'</div>';
-						$("#"+item.id[0]).remove();
-						$(container).append(el);
-						$("#delete"+item.id[0]).click(function(e){
-							e.preventDefault();
-							model.removeItems([item.id[0]]);
-						});
+						renderListItem(item);
 					};
 					
 					that.remove = function() {
@@ -205,11 +182,19 @@
 						$("#"+item.id).remove();
 					};
 					
-					$("#delete"+item.id[0]).click(function(e){
-						e.preventDefault();
-						model.removeItems([item.id[0]]);
-					});
-					
+					return that;
+				},
+				oval: function(container, view, model, itemId) {
+					var that = {}, item = model.getItem(itemId);
+
+					renderListItem(item, container);
+
+					that.update = function(item) {
+						renderListItem(item, container);
+					};
+					that.remove = function() {
+						$("#"+item.id).remove();
+					};
 					return that;
 				}
 			}
@@ -218,7 +203,20 @@
 	cWidth: options.width,
 	cHeight: options.height
 })
-);
+),
+renderListItem = function(item, container) {
+	var el = '<div id="'+item.id[0]+'" class="anno_item">'+
+	'<p>'+item.creator[0]+'</p>'+
+	'<p>'+item.bodyContent[0]+'</p>'+
+	'<div id="delete'+item.id[0]+'">X</div>'+
+	'</div>';
+	$("#"+item.id[0]).remove();
+	$(container).append(el);
+	$("#delete"+item.id[0]).click(function(e){
+		e.preventDefault();
+		model.removeItems([item.id[0]]);
+	});
+};
 		
 		that.ready(function() {
 			// This has been extracted into
@@ -238,7 +236,6 @@ MITHGrid.defaults("MITHGrid.Application.Canvas", {
 			// put in here the types of data that will
 			// be represented in OACVideoAnnotator
 			types:{
-				annotation: {},
 				// types of shapes -- to add a new
 				// shape object, add it here
 				rect: {},
@@ -248,7 +245,7 @@ MITHGrid.defaults("MITHGrid.Application.Canvas", {
 				// posInfo contains the SVG dimensions for 
 				// a shape
 				bodyContent: {
-					type: 'Item'
+					type: 'String'
 				},
 				targetURI: {
 					type: 'Item'

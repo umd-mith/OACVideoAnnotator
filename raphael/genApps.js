@@ -17,12 +17,18 @@ var initPlugin = function() {
 		text: "Rectangle ->",
 		callback: function(e) {
 			e.preventDefault();
-
+			
+			var count = raphApp.dataStore.canvas.prepare(['!shape']), items;
+			
+			items = count.evaluate(["rect"]); 
+			
 			// create a shape object
 			raphApp.dataStore.canvas.loadItems([{
-				id: "rect1",
+				id: "rect"+items.length,
 				type: 'rect',
 				shape: "rect",
+				bodyContent: "This is an annotation marked by an rectangular space",
+				creator: 'Grant Dickie',
 				w: 100,
 				h: 100,
 				x: initX,
@@ -36,12 +42,16 @@ var initPlugin = function() {
 		text: "Oval ->",
 		callback: function(e) {
 			e.preventDefault();
+			var count = raphApp.dataStore.canvas.prepare(['!shape']), items;
 			
+			items = count.evaluate(["oval"]);
 			// create an oval object
 			raphApp.dataStore.canvas.loadItems([{
-				id: "rect1",
+				id: "oval"+items.length,
 				type: 'oval',
 				shape: "ellipse",
+				bodyContent: "This is an annotation marked by an oval space",
+				creator: 'Grant Dickie',
 				w: 100,
 				h: 100,
 				x: initX,
@@ -86,13 +96,6 @@ var initPlugin = function() {
 	// creating Raphael canvas application
 	
 	raphApp.run();
-	
-	raphApp.dataStore.canvas.loadItems([{
-		id: "anno1",
-		type: 'annotation',
-		bodyContent: "Annotation number one",
-		creator: "Grant Dickie"
-	}]);
 	
 };
 
