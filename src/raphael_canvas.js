@@ -35,4 +35,12 @@ Presentations for canvas.js
 		
 		return that;
 	};
+	
+	// SimpleText to display Annotation bodyContent
+	MITHGrid.Presentation.namespace('SimpleText');
+	MITHGrid.Presentation.SimpleText.initPresentation = function(container, options) {
+		var that = MITHGrid.Presentation.initPresentation("SimpleText", container, options);
+		
+		return that;
+	};
 }(jQuery, MITHGrid));
