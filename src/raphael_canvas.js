@@ -35,31 +35,4 @@ Presentations for canvas.js
 		
 		return that;
 	};
-	
-	
-	
-	
-	/*
-	* Annotation
-	* Presentation for all Annotation objects
-	* 
-	*/
-	
-	MITHGrid.Presentation.namespace('Annotation');
-	MITHGrid.Presentation.Annotation.initPresentation = function(container, options) {
-		var that = MITHGrid.Presentation.initPresentation('Annotation', container, options);
-		
-		return that;
-	};
-	
-	/*
-	* BodyContent
-	* For rendering the content of the body element of any annotation
-	*/
-	MITHGrid.Presentation.namespace('BodyContent');
-	MITHGrid.Presentation.BodyContent.initPresentation = function(container, options) {
-		var that = MITHGrid.Presentation.initPresentation('BodyContent', container, options);
-		
-		return that;
-	};
 }(jQuery, MITHGrid));
