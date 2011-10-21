@@ -25,8 +25,8 @@ var initPlugin = function() {
 			// create a shape object
 			raphApp.dataStore.canvas.loadItems([{
 				id: "rect"+items.length,
-				type: 'rect',
-				shape: "rect",
+				type: 'Rectangle',
+				shape: "rectangle",
 				bodyContent: "This is an annotation marked by an rectangular space",
 				creator: 'Grant Dickie',
 				w: 100,
@@ -37,9 +37,9 @@ var initPlugin = function() {
 		}
 	},
 	{
-		id: "oval",
+		id: "ellipse",
 		type: "button",
-		text: "Oval ->",
+		text: "Ellipse ->",
 		callback: function(e) {
 			e.preventDefault();
 			var count = raphApp.dataStore.canvas.prepare(['!shape']), items;
@@ -47,45 +47,16 @@ var initPlugin = function() {
 			items = count.evaluate(["oval"]);
 			// create an oval object
 			raphApp.dataStore.canvas.loadItems([{
-				id: "oval"+items.length,
-				type: 'oval',
+				id: "ellipse"+items.length,
+				type: 'Ellipse',
 				shape: "ellipse",
-				bodyContent: "This is an annotation marked by an oval space",
+				bodyContent: "This is an annotation marked by an elliptical space",
 				creator: 'Grant Dickie',
 				w: 100,
 				h: 100,
 				x: initX,
 				y: initY
 			}]);
-		}
-	},
-	{
-		id: "updaterect",
-		type: "button",
-		text: "Move the Shape (Update in DataStore)",
-		callback: function(e) {
-			e.preventDefault();
-
-			raphApp.dataStore.canvas.updateItems([{
-				id: "rect1",
-				x: initX + 100,
-				y: initY + 20,
-				w: 200,
-				h: 50
-
-			}]);
-
-		}
-	},{
-		id: "deleterect",
-		type: "button",
-		text: "Delete the Shape",
-		callback: function(e) {
-			e.preventDefault();
-
-			raphApp.dataStore.canvas.removeItems([
-				"rect1"
-			]);
 		}
 	}];
 	

@@ -19,7 +19,6 @@
 		        }
 		    },
 		    viewSetup: '<div id="canvasSVG"></div>'+
-			'<div id="testdone"></div>'+
 			'<div class="anno_list"></div>',
 		    presentations: {
 		        raphsvg: {
@@ -82,7 +81,6 @@
 		                            //	c.remove();
 		                        }
 		                        // Raphael object is updated
-		                        $("#testdone > p").empty().html("Raphael Object in data store:<br/> " + JSON.stringify(item));
 		                    };
 
 		                    that.remove = function(item) {
@@ -144,7 +142,6 @@
 		                            //	c.remove();
 		                        }
 		                        // Raphael object is updated
-		                        $("#testdone > p").empty().html("Raphael Object in data store:<br/> " + JSON.stringify(item));
 		                    };
 					
 							that.remove = function() {
@@ -164,29 +161,35 @@
 		            }
 		        },
 				annoItem: {
-					type: MITHGrid.Presentation.BodyContent,
+					type: MITHGrid.Presentation.SimpleText,
 					dataView: 'drawspace',
 					container: '.anno_list',
 					lenses: {
 						Rectangle: function(container, view, model, itemId) {
 							var that = {}, item = model.getItem(itemId);
-					
+							$("#delete"+item.id[0]).live('click',function(e){
+								e.preventDefault();
+								model.removeItems([item.id[0]]);
+							});
 							renderListItem(item, container);
 					
 							that.update = function(item) {
-								renderListItem(item);
+								renderListItem(item, container);
 							};
 					
 							that.remove = function() {
 						
 								$("#"+item.id).remove();
 							};
-					
+						
 							return that;
 						},
 						Ellipse: function(container, view, model, itemId) {
 							var that = {}, item = model.getItem(itemId);
-
+							$("#delete"+item.id[0]).live('click',function(e){
+								e.preventDefault();
+								model.removeItems([item.id[0]]);
+							});
 							renderListItem(item, container);
 
 							that.update = function(item) {
@@ -212,10 +215,7 @@
 			'</div>';
 			$("#"+item.id[0]).remove();
 			$(container).append(el);
-			$("#delete"+item.id[0]).click(function(e){
-				e.preventDefault();
-				model.removeItems([item.id[0]]);
-			});
+			
 		};
 		
 		that.ready(function() {
