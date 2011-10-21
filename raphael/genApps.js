@@ -8,7 +8,7 @@
 var initPlugin = function() {
 	// Create Raphael canvas application controls
 	var controlApp = MITHGrid.Application.Controls.initApp("#sidebar", {}), 
-	raphApp = MITHGrid.Application.Canvas.initApp("#main", {width: 500, height: 500}),
+	raphApp = OAC.Client.StreamingVideo.initApp("#main", {width: 500, height: 500}),
 	initX = 110, initY = 23,
 	// insert buttons into controls
 	buttons = [{
