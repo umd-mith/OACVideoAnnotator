@@ -5,4 +5,35 @@ body {
 	padding: 10px;
 	background: #FFF;
 	border: 2px solid red;
+	margin-right: 40%;
+	float: right;
+	
+}
+#sidebar {
+	padding: 10px;
+	background: #FF6600;
+	color: #000066;
+	float: left;
+	height: 400px;
+}
+#controls_anno div {
+	padding: 5px;
+	cursor: pointer;
+}
+#controls_anno .button_item {
+	border: solid red 1px;
+	background: #FFF;
+	width: 200px;
+}
+#controls_anno .button_item .buttonClick {
+	font-size: 20px;
+}
+.anno_list {
+	padding: 10px;
+	background: #FFF;
+	border: 2px solid red;
+	margin-right: 10%;
+	height: 400px;
+	width: 200px;
+	float: right;
 }

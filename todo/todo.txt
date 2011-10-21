@@ -1,2 +1,0 @@
-(A) 2011-09-27 document configuration options for +Raphaël presentation @easy
-(A) 2011-09-27 +test / +debug +Raphaël presentation
