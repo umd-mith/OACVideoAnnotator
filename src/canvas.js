@@ -78,7 +78,6 @@
 		                            }
 		                        } catch(e) {
 		                            console.log(e);
-		                            //	c.remove();
 		                        }
 		                        // Raphael object is updated
 		                    };
@@ -139,7 +138,6 @@
 		                            }
 		                        } catch(e) {
 		                            console.log(e);
-		                            //	c.remove();
 		                        }
 		                        // Raphael object is updated
 		                    };
