@@ -1,163 +1,162 @@
-(function($, MITHGrid) {
+(function($, MITHGrid, OAC) {
 	/**
 	* MITHGrid Canvas
 	* Creates a canvas using the Raphael JS library
 	*/
 	
-	// Set the namespace for the Canvas application
-	MITHGrid.Application.namespace("Canvas");
-	MITHGrid.Application.Canvas.initApp = function(container, options) {
+	// Set the namespace for the StreamingVideo Annotation application
+	MITHGrid.globalNamespace("OAC");
+	OAC.namespace("Client");
+	OAC.Client.namespace("StreamingVideo");
 	
-		var that = MITHGrid.Application.initApp("MITHGrid.Application.Canvas", container, $.extend(true, {}, options, {
-    		dataViews: {
-		        // view for the space in which data from shapes
-		        // is drawn
-		        drawspace: {
-		            dataStore: 'canvas',
-		            types: ["Rectangle", "Ellipse"],
-		            label: 'drawspace'
-		        }
-		    },
-		    viewSetup: '<div id="canvasSVG"></div>'+
+	OAC.Client.StreamingVideo.initApp = function(container, options) {
+		var that, dragController, renderListItem;
+		//dragController = OAC.Client.StreamingVideo.Controller.annotationShapeDragController({});
+		dragController = OAC.Client.StreamingVideo.Controller.annotationShapeResizeController({});
+		
+		that = MITHGrid.Application.initApp("OAC.Client.StreamingVideo", container, $.extend(true, {}, options, {
+			dataViews: {
+				// view for the space in which data from shapes
+				// is drawn
+				drawspace: {
+					dataStore: 'canvas',
+					types: ["Rectangle", "Ellipse"],
+					label: 'drawspace'
+				}
+			},
+			viewSetup: '<div id="canvasSVG"></div>'+
 			'<div class="anno_list"></div>',
-		    presentations: {
-		        raphsvg: {
-		            type: MITHGrid.Presentation.RaphaelCanvas,
-		            container: "#canvasSVG",
-		            dataView: 'drawspace',
-		            lenses: {
-		                Rectangle: function(container, view, model, itemId) {
-		                    // Note: Rectangle measurements x,y start at CENTER
-		                    var that = {},
-		                    item = model.getItem(itemId),
-		                    c,
-		                    ox,
-		                    oy,
-		                    // Set up drag() callback functions
-		                    start = function() {
-		                        ox = parseInt(c.attr("x"), 10);
-		                        oy = parseInt(c.attr("y"), 10);
+		   
+			presentations: {
+				raphsvg: {
+					type: MITHGrid.Presentation.RaphaelCanvas,
+					container: "#canvasSVG",
+					dataView: 'drawspace',
+					lenses: {
+						Rectangle: function(container, view, model, itemId) {
+							// Note: Rectangle measurements x,y start at CENTER
+							var that = {},
+							item = model.getItem(itemId),
+							c, ox, oy;
+							
+							$("#testdone").append("<p>Raphael Object in data store:<br/> " + JSON.stringify(item) + "</p>");
+							ox = (item.x - (item.w[0] / 2));
+							oy = (item.y - (item.h[0] / 2));
 
-		                    },
-		                    move = function(dx, dy) {
-		                        var targets = {};
-		                        // This is where we update the shape
-		                        // object
-		                        model.updateItems([{
-		                            id: itemId,
-		                            x: dx + ox,
-		                            y: dy + oy
-		                        }]);
-		                    },
-		                    up = function() {
 
-		                        };
+							// Accessing the view.canvas Object that was created in MITHGrid.Presentation.RaphSVG
+							c = view.canvas.rect(ox, oy, item.w[0], item.h[0]);
+							// fill and set opacity
+							c.attr({
+								fill: "red",
+								opacity: 1
+							});
+							
+							dragController.bind(c, {
+								model: model,
+								itemId: itemId,
+								calculate: {
+									extents: function() {
+										return {
+											x: c.attr("x") + c.attr("width")/2,
+											y: c.attr("y") + c.attr("height")/2,
+											width: c.attr("width"),
+											height: c.attr("height")
+										};
+									}
+								},
+								x: 'x',
+								y: 'y'
+							});
 
-		                    $("#testdone").append("<p>Raphael Object in data store:<br/> " + JSON.stringify(item) + "</p>");
-		                    ox = (item.x - (item.w / 2));
-		                    oy = (item.y - (item.h / 2));
+							that.update = function(item) {
 
-		                    // Accessing the view.canvas Object that was created in MITHGrid.Presentation.RaphSVG
-		                    c = view.canvas.rect(ox, oy, item.w, item.h);
-		                    // fill and set opacity
-		                    c.attr({
-		                        fill: "red",
-		                        opacity: 1
-		                    });
+								// receiving the Object passed through
+								// model.updateItems in move()
+								try {
+									if (item.x !== undefined && item.y !== undefined && item.w !== undefined && item.y !== undefined) {
+										c.attr({
+											x: item.x[0] - item.w[0]/2,
+											y: item.y[0] - item.h[0]/2,
+											width: item.w[0],
+											height: item.h[0]
+										});
+									}
+								} catch(e) {
+									console.log(e);
+									//	c.remove();
+								}
+								// Raphael object is updated
+							};
 
-		                    that.update = function(item) {
+							that.remove = function(item) {
+								// getting the removeItems callback
+								c.remove();
+							};
 
-		                        // receiving the Object passed through
-		                        // model.updateItems in move()
-		                        try {
-		                            if (item.x !== undefined && item.y !== undefined) {
-		                                c.attr({
-		                                    x: item.x[0],
-		                                    y: item.y[0]
-		                                });
-		                            }
-		                        } catch(e) {
-		                            console.log(e);
-		                        }
-		                        // Raphael object is updated
-		                    };
+							// initiate the drag feature (RaphaelJS)
+							//c.drag(move, start, up);
 
-		                    that.remove = function(item) {
-		                        // getting the removeItems callback
-		                        c.remove();
-		                    };
-
-		                    // initiate the drag feature (RaphaelJS)
-		                    c.drag(move, start, up);
-
-		                    return that;
-		                },
-		                Ellipse: function(container, view, model, itemId) {
-		                    var that = {},
-		                    item = model.getItem(itemId),
-		                    c,
-		                    ox,
-		                    oy,
-		                    // Set up drag() callback functions
-		                    start = function() {
-		                        ox = parseInt(c.attr("cx"), 10);
-		                        oy = parseInt(c.attr("cy"), 10);
-
-		                    },
-		                    move = function(dx, dy) {
-		                        var targets = {};
-		                        // This is where we update the shape
-		                        // object
-		                        model.updateItems([{
-		                            id: itemId,
-		                            x: dx + ox,
-		                            y: dy + oy
-		                        }]);
-		                    },
-		                    up = function() {
-
-		                        };
-
-		                    // create the shape
-		                    c = view.canvas.ellipse(item.x, item.y, item.w, item.h);
+							return that;
+						},
+						Ellipse: function(container, view, model, itemId) {
+							var that = {},
+							item = model.getItem(itemId),
+							c;
+							
+							// create the shape
+							c = view.canvas.ellipse(item.x[0], item.y[0], item.w[0]/2, item.h[0]/2);
 							// fill shape
 							c.attr({
 								fill: "red"
 							});
 							
-					
-		                    that.update = function(item) {
-		                        // receiving the Object passed through
-		                        // model.updateItems in move()
-		                        try {
-		                            if (item.x !== undefined && item.y !== undefined) {
-		                                c.attr({
-		                                    cx: item.x[0],
-		                                    cy: item.y[0]
-		                                });
-		                            }
-		                        } catch(e) {
-		                            console.log(e);
-		                        }
-		                        // Raphael object is updated
-		                    };
+							dragController.bind(c,{
+								model: model,
+								itemId: itemId,
+								calculate: {
+									extents: function() {
+										return {
+											x: c.attr("cx"),
+											y: c.attr("cy"),
+											width: c.attr("rx") * 2,
+											height: c.attr("ry") * 2
+										};
+									}
+								},
+								x: 'cx',
+								y: 'cy'
+							});
+
+							that.update = function(item) {
+								// receiving the Object passed through
+								// model.updateItems in move()
+								try {
+									if (item.x !== undefined && item.y !== undefined) {
+										c.attr({
+											cx: item.x[0],
+											cy: item.y[0],
+											rx: item.w[0] / 2,
+											ry: item.h[0] / 2
+										});
+									}
+								} catch(e) {
+									console.log(e);
+									//	c.remove();
+								}
+								// Raphael object is updated
+							};
 					
 							that.remove = function() {
 								c.remove();
 							};
 
-							// init drag
-							try {
-								c.drag(move, start, up);
-						
-							} catch(e) {
-								console.log(e);
-							}
-		                    return that;
 
-		                }
-		            }
-		        },
+							return that;
+
+						}
+					}
+				},
 				annoItem: {
 					type: MITHGrid.Presentation.SimpleText,
 					dataView: 'drawspace',
@@ -204,7 +203,8 @@
 			cWidth: options.width,
 			cHeight: options.height
 		})
-		),
+		);
+		
 		renderListItem = function(item, container) {
 			var el = '<div id="'+item.id[0]+'" class="anno_item">'+
 			'<p>'+item.creator[0]+'</p>'+
@@ -227,11 +227,11 @@
 		
 		return that;
 	};
-}(jQuery, MITHGrid));	
+}(jQuery, MITHGrid, OAC));	
 
 
 // Default library for the Canvas application
-MITHGrid.defaults("MITHGrid.Application.Canvas", {
+MITHGrid.defaults("OAC.Client.StreamingVideo", {
 	// Data store for the Application
 	dataStores: {
 		canvas: {

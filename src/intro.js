@@ -24,3 +24,4 @@
 var MITHGrid = MITHGrid || {};
 var jQuery = jQuery || {};
 var Raphael = Raphael || {};
+var OAC = OAC || {};
