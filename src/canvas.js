@@ -11,7 +11,9 @@
 	
 	OAC.Client.StreamingVideo.initApp = function(container, options) {
 		var that, dragController, renderListItem;
-		dragController = OAC.Client.StreamingVideo.Controller.annotationShapeDragController({});
+		//dragController = OAC.Client.StreamingVideo.Controller.annotationShapeDragController({});
+		dragController = OAC.Client.StreamingVideo.Controller.annotationShapeResizeController({});
+		
 		that = MITHGrid.Application.initApp("OAC.Client.StreamingVideo", container, $.extend(true, {}, options, {
 			dataViews: {
 				// view for the space in which data from shapes
@@ -37,11 +39,11 @@
 							c, ox, oy;
 							
 							$("#testdone").append("<p>Raphael Object in data store:<br/> " + JSON.stringify(item) + "</p>");
-							ox = (item.x - (item.w / 2));
-							oy = (item.y - (item.h / 2));
+							ox = (item.x - (item.w[0] / 2));
+							oy = (item.y - (item.h[0] / 2));
 
 							// Accessing the view.canvas Object that was created in MITHGrid.Presentation.RaphSVG
-							c = view.canvas.rect(ox, oy, item.w, item.h);
+							c = view.canvas.rect(ox, oy, item.w[0], item.h[0]);
 							// fill and set opacity
 							c.attr({
 								fill: "red",
@@ -51,6 +53,16 @@
 							dragController.bind(c, {
 								model: model,
 								itemId: itemId,
+								calculate: {
+									extents: function() {
+										return {
+											x: c.attr("x") + c.attr("width")/2,
+											y: c.attr("y") + c.attr("height")/2,
+											width: c.attr("width"),
+											height: c.attr("height")
+										};
+									}
+								},
 								x: 'x',
 								y: 'y'
 							});
@@ -60,10 +72,12 @@
 								// receiving the Object passed through
 								// model.updateItems in move()
 								try {
-									if (item.x !== undefined && item.y !== undefined) {
+									if (item.x !== undefined && item.y !== undefined && item.w !== undefined && item.y !== undefined) {
 										c.attr({
-											x: item.x[0],
-											y: item.y[0]
+											x: item.x[0] - item.w[0]/2,
+											y: item.y[0] - item.h[0]/2,
+											width: item.w[0],
+											height: item.h[0]
 										});
 									}
 								} catch(e) {
@@ -89,7 +103,7 @@
 							c;
 							
 							// create the shape
-							c = view.canvas.ellipse(item.x[0], item.y[0], item.w[0], item.h[0]);
+							c = view.canvas.ellipse(item.x[0], item.y[0], item.w[0]/2, item.h[0]/2);
 							// fill shape
 							c.attr({
 								fill: "red"
@@ -98,6 +112,16 @@
 							dragController.bind(c,{
 								model: model,
 								itemId: itemId,
+								calculate: {
+									extents: function() {
+										return {
+											x: c.attr("cx"),
+											y: c.attr("cy"),
+											width: c.attr("rx") * 2,
+											height: c.attr("ry") * 2
+										};
+									}
+								},
 								x: 'cx',
 								y: 'cy'
 							});
@@ -109,7 +133,9 @@
 									if (item.x !== undefined && item.y !== undefined) {
 										c.attr({
 											cx: item.x[0],
-											cy: item.y[0]
+											cy: item.y[0],
+											rx: item.w[0] / 2,
+											ry: item.h[0] / 2
 										});
 									}
 								} catch(e) {
