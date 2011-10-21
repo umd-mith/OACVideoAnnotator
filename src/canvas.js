@@ -101,8 +101,8 @@
 		                    oy,
 		                    // Set up drag() callback functions
 		                    start = function() {
-		                        ox = parseInt(c.attr("x"), 10);
-		                        oy = parseInt(c.attr("y"), 10);
+		                        ox = parseInt(c.attr("cx"), 10);
+		                        oy = parseInt(c.attr("cy"), 10);
 
 		                    },
 		                    move = function(dx, dy) {
@@ -125,7 +125,7 @@
 							c.attr({
 								fill: "red"
 							});
-					
+							
 					
 		                    that.update = function(item) {
 		                        // receiving the Object passed through
@@ -133,8 +133,8 @@
 		                        try {
 		                            if (item.x !== undefined && item.y !== undefined) {
 		                                c.attr({
-		                                    x: item.x[0],
-		                                    y: item.y[0]
+		                                    cx: item.x[0],
+		                                    cy: item.y[0]
 		                                });
 		                            }
 		                        } catch(e) {
@@ -211,6 +211,10 @@
 			var el = '<div id="'+item.id[0]+'" class="anno_item">'+
 			'<p>'+item.creator[0]+'</p>'+
 			'<p>'+item.bodyContent[0]+'</p>'+
+			'<p>'+item.x[0]+'<br/>'+
+			item.y[0]+'<br/>'+
+			item.w[0]+'<br/>'+
+			item.h[0]+'</p>'+
 			'<div id="delete'+item.id[0]+'">X</div>'+
 			'</div>';
 			$("#"+item.id[0]).remove();
