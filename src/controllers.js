@@ -9,11 +9,18 @@
 			
 			svgEl = binding.locate('raphael');
 			svgEl.drag(
-				function(dx, dy) {			
+				function(dx, dy) {	
+					var ddx = (dx - 3), ddy = (dy - 3);
+					
+					svgEl.attr({
+						x: ox + dx,
+						y: ox + dy
+					});
+					// SvgEl stays ahead of the actual shape
 					opts.model.updateItems([{
 						id: opts.itemId,
-						x: ox + dx,
-						y: oy + dy
+						x: ox + ddx,
+						y: oy + ddy
 					}]);
 				},
 				function() {
@@ -41,7 +48,7 @@
 		];
 		
 		that.applyBindings = function(binding, opts) {
-			var ox, oy, svgEl, extents, factors = {}, calcFactors, setCursorType, resetCursorType;
+			var ox, oy, svgEl, bWidth, bHEight, extents, factors = {}, calcFactors, setCursorType, resetCursorType;
 			
 			calcFactors = function() {
 				var px, py;
@@ -79,10 +86,21 @@
 				svgEl.attr('cursor', 'auto');
 			};
 			
+		
+			
 			svgEl = binding.locate('raphael');
 			svgEl.drag(
 				function(dx, dy) {
 					if(factors.x == 0 && factors.y == 0) {
+						
+						
+						svgEl.attr({
+							x: extents.x + dx,
+							y: extents.y + dy
+						});
+						
+						// svgEl is ahead of the actual 
+						// annotation shape
 						opts.model.updateItems([{
 							id: opts.itemId,
 							x: extents.x + dx,
@@ -90,6 +108,14 @@
 						}]);
 					}
 					else {
+						
+						svgEl.attr({
+							x: extents.x - ((bWidth + 2 * dx * factors.x)/2),
+							y: extents.y - ((bHeight + 2 * dy * factors.y)/2),
+							width:  bWidth + 2 * dx * factors.x,
+							height: bHeight + 2 * dy * factors.y
+						});
+						
 						opts.model.updateItems([{
 							id: opts.itemId,
 							w: extents.width + 2 * dx * factors.x,
@@ -100,6 +126,8 @@
 			    function(x, y, e) {
 					ox = e.offsetX;
 					oy = e.offsetY;
+					bWidth = svgEl.attr('width');
+					bHeight = svgEl.attr('height');
 					calcFactors();
 					setCursorType();
 				},

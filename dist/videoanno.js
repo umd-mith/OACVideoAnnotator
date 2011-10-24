@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Fri Oct 21 12:44:35 2011 -0400
+ *  Date: Fri Oct 21 14:35:05 2011 -0400
  *  
  * Educational Community License, Version 2.0
  * 
@@ -59,6 +59,17 @@ Presentations for canvas.js
 		// @h: Integer value for height of the SVG canvas
 		that.canvas = new Raphael(id, w, h);
 		
+		// Function to add to all Raphael shapes - sets 
+		// the shape as on 'top' of the stack and displays
+		// the edit window
+		that.setShapeOnTop = function(e, shape) {
+			if(shape !== 'Raphaël Object') {return;}
+			// bring the passed shape up front
+			
+			shape.toFront();
+		};
+		
+		
 		return that;
 	};
 }(jQuery, MITHGrid));(function($, MITHGrid, OAC) {
@@ -89,6 +100,7 @@ Presentations for canvas.js
 			},
 			viewSetup: '<div id="canvasSVG"></div>'+
 			'<div class="anno_list"></div>',
+		   
 			presentations: {
 				raphsvg: {
 					type: MITHGrid.Presentation.RaphaelCanvas,
@@ -99,11 +111,12 @@ Presentations for canvas.js
 							// Note: Rectangle measurements x,y start at CENTER
 							var that = {},
 							item = model.getItem(itemId),
-							c, ox, oy;
+							c, ox, oy, bbox;
 							
 							$("#testdone").append("<p>Raphael Object in data store:<br/> " + JSON.stringify(item) + "</p>");
 							ox = (item.x - (item.w[0] / 2));
 							oy = (item.y - (item.h[0] / 2));
+
 
 							// Accessing the view.canvas Object that was created in MITHGrid.Presentation.RaphSVG
 							c = view.canvas.rect(ox, oy, item.w[0], item.h[0]);
@@ -113,22 +126,7 @@ Presentations for canvas.js
 								opacity: 1
 							});
 							
-							dragController.bind(c, {
-								model: model,
-								itemId: itemId,
-								calculate: {
-									extents: function() {
-										return {
-											x: c.attr("x") + c.attr("width")/2,
-											y: c.attr("y") + c.attr("height")/2,
-											width: c.attr("width"),
-											height: c.attr("height")
-										};
-									}
-								},
-								x: 'x',
-								y: 'y'
-							});
+							
 
 							that.update = function(item) {
 
@@ -155,9 +153,40 @@ Presentations for canvas.js
 								c.remove();
 							};
 
-							// initiate the drag feature (RaphaelJS)
-							//c.drag(move, start, up);
-
+							// set up bounding box
+							bbox = c.getBBox();
+							that.BBox = $('<div id="bbox'+item.id[0]+'" class="bbox"></div>');
+							$(container).append(that.BBox);
+							that.BBox.attr({
+								x: bbox.x,
+								y: bbox.y,
+								width: bbox.width,
+								height: bbox.height
+							});
+							
+							// attaching the controller to Bounding Box
+							dragController.bind({'box': that.BBox, 'raphael': c}, {
+								model: model,
+								itemId: itemId,
+								calculate: {
+									extents: function() {
+										return {
+											x: c.attr("x") + c.attr("width")/2,
+											y: c.attr("y") + c.attr("height")/2,
+											width: c.attr("width"),
+											height: c.attr("height")
+										};
+									}
+								},
+								x: 'x',
+								y: 'y'
+							});
+							that.BBox.hide();
+							
+							c.mousedown(function(e) {
+								that.BBox.show();
+							});
+							
 							return that;
 						},
 						Ellipse: function(container, view, model, itemId) {
@@ -177,7 +206,6 @@ Presentations for canvas.js
 								itemId: itemId,
 								calculate: {
 									extents: function() {
-										console.log(c);
 										return {
 											x: c.attr("cx"),
 											y: c.attr("cy"),
@@ -189,7 +217,7 @@ Presentations for canvas.js
 								x: 'cx',
 								y: 'cy'
 							});
-					
+
 							that.update = function(item) {
 								// receiving the Object passed through
 								// model.updateItems in move()
