@@ -13,8 +13,10 @@
 		var that, dragController, renderListItem;
 		//dragController = OAC.Client.StreamingVideo.Controller.annotationShapeDragController({});
 		dragController = OAC.Client.StreamingVideo.Controller.annotationShapeResizeController({});
+		editBoxController = OAC.Client.StreamingVideo.Controller.annotationEditSelectionGrid({});
 		
 		that = MITHGrid.Application.initApp("OAC.Client.StreamingVideo", container, $.extend(true, {}, options, {
+			
 			dataViews: {
 				// view for the space in which data from shapes
 				// is drawn
@@ -82,37 +84,56 @@
 							};
 
 							// set up bounding box
-							bbox = c.getBBox();
-							that.BBox = view.canvas.rect(bbox.x, bbox.y, bbox.width, bbox.height);
-							that.BBox.attr({
-								stroke: 'green',
-								fill: 'red',
-								'fill-opacity': 0
-							});
+							// bbox = c.getBBox();
+							// 							that.BBox = view.canvas.rect(bbox.x, bbox.y, bbox.width, bbox.height);
+							// 							that.BBox.attr({
+							// 								stroke: 'green',
+							// 								fill: 'red',
+							// 								'fill-opacity': 0
+							// 							});
+							// 							
+							// 							// attaching the controller to Bounding Box
+							// 							editBoxController.bind(that.BBox, {
+							// 								model: model,
+							// 								itemId: itemId,
+							// 								calculate: {
+							// 									extents: function() {
+							// 										return {
+							// 											x: that.BBox.attr("x") + (that.BBox.attr("width")/2),
+							// 											y: that.BBox.attr("y") + (that.BBox.attr("height")/2),
+							// 											width: that.BBox.attr("width"),
+							// 											height: that.BBox.attr("height")
+							// 										};
+							// 									}
+							// 								},
+							// 								x: 'x',
+							// 								y: 'y'
+							// 							});
 							
-							// attaching the controller to Bounding Box
-							dragController.bind(that.BBox, {
-								model: model,
-								itemId: itemId,
-								calculate: {
-									extents: function() {
-										return {
-											x: that.BBox.attr("x") + (that.BBox.attr("width")/2),
-											y: that.BBox.attr("y") + (that.BBox.attr("height")/2),
-											width: that.BBox.attr("width"),
-											height: that.BBox.attr("height")
-										};
-									}
-								},
-								x: 'x',
-								y: 'y'
-							});
-							that.BBox.hide();
-							
-							c.mousedown(function(e) {
-								that.BBox.show();
+							attachBBox = function(e) {
+								// attaching the controller to Bounding Box
+								editBoxController.bind(c, {
+									eventObj: e,
+									model: model,
+									itemId: itemId,
+									calculate: {
+										extents: function() {
+											return {
+												x: c.attr("x") + (c.attr("width")/2),
+												y: c.attr("y") + (c.attr("height")/2),
+												width: c.attr("width"),
+												height: c.attr("height")
+											};
+										}
+									},
+									x: 'x',
+									y: 'y'
+								});
 								
-							});
+								c.unmousedown(attachBBox);
+							};
+							
+							c.mousedown(attachBBox);
 							
 							return that;
 						},
@@ -218,41 +239,41 @@
 				}
 			},
 			cWidth: options.width,
-			cHeight: options.height,
-			renderListItem: function(item, container) {
-				var el = '<div id="'+item.id[0]+'" class="anno_item">'+
-				'<p>'+item.creator[0]+'</p>'+
-				'<p>'+item.bodyContent[0]+'</p>'+
-				'<p>'+item.x[0]+'<br/>'+
-				item.y[0]+'<br/>'+
-				item.w[0]+'<br/>'+
-				item.h[0]+'</p>'+
-				'<div id="delete'+item.id[0]+'">X</div>'+
-				'</div>';
-				$("#"+item.id[0]).remove();
-				$(container).append(el);
-
-			},
-			renderEditMenu: function(item, container) {
-				var el = '<div id="edit'+item.id[0]+'" class="editAnno">'+
-				'<div id="edit" class="button">^^</div>'+
-				'<div id="del" class="button">X</div>'+
-				'</div>', x, y;
-				
-				$(container).append(el);
-				el = $("#edit"+item.id[0]);
-				x = (item.x[0] - item.w[0]);
-				y = (item.y[0] - el.height());
-				
-				$("#edit"+item.id[0]).attr({
-					x: x,
-					y: y
-				
-				});
-				return el;
-			}
+			cHeight: options.height
 		}));
 	
+		renderListItem = function(item, container) {
+			var el = '<div id="'+item.id[0]+'" class="anno_item">'+
+			'<p>'+item.creator[0]+'</p>'+
+			'<p>'+item.bodyContent[0]+'</p>'+
+			'<p>'+item.x[0]+'<br/>'+
+			item.y[0]+'<br/>'+
+			item.w[0]+'<br/>'+
+			item.h[0]+'</p>'+
+			'<div id="delete'+item.id[0]+'">X</div>'+
+			'</div>';
+			$("#"+item.id[0]).remove();
+			$(container).append(el);
+
+		};
+		renderEditMenu = function(item, container) {
+			var el = '<div id="edit'+item.id[0]+'" class="editAnno">'+
+			'<div id="edit" class="button">^^</div>'+
+			'<div id="del" class="button">X</div>'+
+			'</div>', x, y;
+			
+			$(container).append(el);
+			el = $("#edit"+item.id[0]);
+			x = (item.x[0] - item.w[0]);
+			y = (item.y[0] - el.height());
+			
+			$("#edit"+item.id[0]).attr({
+				x: x,
+				y: y
+			
+			});
+			return el;
+		};
 		
 		that.ready(function() {
 			// This has been extracted into
