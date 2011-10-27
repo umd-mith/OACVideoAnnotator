@@ -220,6 +220,9 @@
 			calcFactors();
 			drawHandles();
 			
+			// fire event
+			$("body:first").trigger("svgElementClicked", [opts.itemId]);
+			
 			// Attaching drag and resize handlers
 			handleSet.drag(
 				function(dx, dy) {
@@ -290,6 +293,8 @@
 			
 		};
 		
+		
+		
 		return that;
 	};
 	
@@ -328,6 +333,34 @@
 		
 		return that;
 	};
+	
+	OAC.Client.StreamingVideo.Controller.annoActiveController = function(options) {
+		var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.annoActiveController", options);
+		options = that.options;
+		
+		that.applyBindings = function(binding, opts) {
+			var annoEl, bodyContent, allAnnos, deleteButton;
+			
+			annoEl = binding.locate('annotation');
+			
+			
+			bodyContent = binding.locate('bodycontent');
+			allAnnos = binding.locate('annotations');
+			deleteButton = binding.locate('deletebutton');
+
+			$("body").bind("svgElementClicked", function(e, id) {
+				
+				if(opts.itemId === id) {
+					// $(allAnnos).removeClass('selected');
+					annoEl.addClass('selected');
+				}
+			});
+			
+		};
+		
+		
+		return that;
+	};	
 	
 	OAC.Client.StreamingVideo.Controller.annotationShapeResizeController = function(options) {
 		var cursors,

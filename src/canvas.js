@@ -14,6 +14,15 @@
 		//dragController = OAC.Client.StreamingVideo.Controller.annotationShapeDragController({});
 		dragController = OAC.Client.StreamingVideo.Controller.annotationShapeResizeController({});
 		editBoxController = OAC.Client.StreamingVideo.Controller.annotationEditSelectionGrid({});
+		annoActiveController = OAC.Client.StreamingVideo.Controller.annoActiveController({
+			// attaching specific selector items here
+			selectors: {
+				annotation: '',
+				annotationlist: ':parent',
+				bodycontent: '.bodyContent',
+				deleteButton: '.button.delete'
+			}
+		});
 		
 		that = MITHGrid.Application.initApp("OAC.Client.StreamingVideo", container, $.extend(true, {}, options, {
 			
@@ -27,7 +36,7 @@
 				}
 			},
 			viewSetup: '<div id="canvasSVG"></div>'+
-			'<div class="anno_list"></div>',
+			'<div id="annoList" class="anno_list"></div>',
 		   
 			presentations: {
 				raphsvg: {
@@ -41,10 +50,8 @@
 							item = model.getItem(itemId),
 							c, ox, oy, bbox;
 							
-							$("#testdone").append("<p>Raphael Object in data store:<br/> " + JSON.stringify(item) + "</p>");
 							ox = (item.x - (item.w[0] / 2));
 							oy = (item.y - (item.h[0] / 2));
-
 
 							// Accessing the view.canvas Object that was created in MITHGrid.Presentation.RaphSVG
 							c = view.canvas.rect(ox, oy, item.w[0], item.h[0]);
@@ -54,8 +61,6 @@
 								opacity: 1
 							});
 							
-							
-
 							that.update = function(item) {
 
 								// receiving the Object passed through
@@ -83,33 +88,6 @@
 								c.remove();
 							};
 
-							// set up bounding box
-							// bbox = c.getBBox();
-							// 							that.BBox = view.canvas.rect(bbox.x, bbox.y, bbox.width, bbox.height);
-							// 							that.BBox.attr({
-							// 								stroke: 'green',
-							// 								fill: 'red',
-							// 								'fill-opacity': 0
-							// 							});
-							// 							
-							// 							// attaching the controller to Bounding Box
-							// 							editBoxController.bind(that.BBox, {
-							// 								model: model,
-							// 								itemId: itemId,
-							// 								calculate: {
-							// 									extents: function() {
-							// 										return {
-							// 											x: that.BBox.attr("x") + (that.BBox.attr("width")/2),
-							// 											y: that.BBox.attr("y") + (that.BBox.attr("height")/2),
-							// 											width: that.BBox.attr("width"),
-							// 											height: that.BBox.attr("height")
-							// 										};
-							// 									}
-							// 								},
-							// 								x: 'x',
-							// 								y: 'y'
-							// 							});
-							
 							attachBBox = function(e) {
 								// attaching the controller to Bounding Box
 								editBoxController.bind(c, {
@@ -201,17 +179,23 @@
 					container: '.anno_list',
 					lenses: {
 						Rectangle: function(container, view, model, itemId) {
-							var that = {}, item = model.getItem(itemId);
+							var that = {}, item = model.getItem(itemId), itemEl;
 							$("#delete"+item.id[0]).live('click',function(e){
 								e.preventDefault();
 								model.removeItems([item.id[0]]);
 							});
-							renderListItem(item, container);
-					
+							itemEl = renderListItem(item, container);
+							
+							// attach the binding controller
+							annoActiveController.bind(itemEl, {
+								model: model,
+								itemId: itemId
+							});
+							
 							that.update = function(item) {
 								renderListItem(item, container);
 							};
-					
+							
 							that.remove = function() {
 						
 								$("#"+item.id).remove();
@@ -250,11 +234,11 @@
 			item.y[0]+'<br/>'+
 			item.w[0]+'<br/>'+
 			item.h[0]+'</p>'+
-			'<div id="delete'+item.id[0]+'">X</div>'+
+			'<div id="delete'+item.id[0]+'" class="button delete">X</div>'+
 			'</div>';
 			$("#"+item.id[0]).remove();
 			$(container).append(el);
-
+			return $("#"+$(container).attr('id')+" > #"+item.id[0]);
 		};
 		renderEditMenu = function(item, container) {
 			var el = '<div id="edit'+item.id[0]+'" class="editAnno">'+

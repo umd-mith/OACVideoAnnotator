@@ -37,3 +37,10 @@ body {
 	width: 200px;
 	float: right;
 }
+.anno_item {
+	
+}
+.anno_item.selected {
+	padding: .5em;
+	border: dashed black 2px;
+}

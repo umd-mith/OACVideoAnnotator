@@ -33,15 +33,7 @@ Presentations for canvas.js
 		// @h: Integer value for height of the SVG canvas
 		that.canvas = new Raphael(id, w, h);
 		
-		// Function to add to all Raphael shapes - sets 
-		// the shape as on 'top' of the stack and displays
-		// the edit window
-		that.setShapeOnTop = function(e, shape) {
-			if(shape !== 'Raphaël Object') {return;}
-			// bring the passed shape up front
-			
-			shape.toFront();
-		};
+		
 		
 		
 		return that;
