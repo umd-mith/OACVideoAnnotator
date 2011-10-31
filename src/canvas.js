@@ -11,7 +11,6 @@
 	
 	OAC.Client.StreamingVideo.initApp = function(container, options) {
 		var that, dragController, renderListItem;
-		//dragController = OAC.Client.StreamingVideo.Controller.annotationShapeDragController({});
 		dragController = OAC.Client.StreamingVideo.Controller.annotationShapeResizeController({});
 		editBoxController = OAC.Client.StreamingVideo.Controller.annotationEditSelectionGrid({});
 		annoActiveController = OAC.Client.StreamingVideo.Controller.annoActiveController({
@@ -127,23 +126,28 @@
 								fill: "red"
 							});
 							
-							dragController.bind(c, {
-								model: model,
-								itemId: itemId,
-								calculate: {
-									extents: function() {
-										return {
-											x: c.attr("cx"),
-											y: c.attr("cy"),
-											width: c.attr("rx") * 2,
-											height: c.attr("ry") * 2
-										};
-									}
-								},
-								x: 'cx',
-								y: 'cy'
-							});
-
+							attachBBox = function(e) {
+								editBoxController.bind(c, {
+									eventObj: e,
+									model: model,
+									itemId: itemId,
+									calculate: {
+										extents: function() {
+											return {
+												x: c.attr("cx"),
+												y: c.attr("cy"),
+												width: c.attr("rx") * 2,
+												height: c.attr("ry") * 2
+											};
+										}
+									},
+									x: 'cx',
+									y: 'cy'
+								});
+								
+								c.unmousedown(attachBBox);
+							};
+							
 							that.update = function(item) {
 								// receiving the Object passed through
 								// model.updateItems in move()
@@ -166,7 +170,8 @@
 							that.remove = function() {
 								c.remove();
 							};
-
+							
+							c.mousedown(attachBBox);
 
 							return that;
 
