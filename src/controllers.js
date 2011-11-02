@@ -10,8 +10,8 @@
 		
 		that.applyBindings = function(binding, opts) {
 			var ox, oy, factors = {}, extents, svgTarget, paper, attrs = {},
-			padding = 5, handles = {}, handleSet, 
-			dirs = (opts.dirs)?opts.dirs:['ul','top','ur','lft','lr','btm','ll','rgt'];
+			padding = 5, handles = {}, handleSet, midDrag,
+			dirs = (opts.dirs)?opts.dirs:['ul','top','ur','lft','lr','btm','ll','rgt','mid'];
 			
 			calcFactors = function() {
 				var px, py;
@@ -57,9 +57,15 @@
 					// draw the corner and mid-point squares
 					handleSet = paper.set();
 					$.each(handles, function(i, o) {
-						h = paper.rect(o.x, o.y, padding, padding);
-						o.id = h.id;
-						handleSet.push(h);
+						if(i === 'mid'){
+							midDrag = paper.rect(o.x, o.y, padding, padding);
+							o.id = midDrag.id;
+							
+						} else {
+							h = paper.rect(o.x, o.y, padding, padding);
+							o.id = h.id;
+							handleSet.push(h);
+						}
 					});
 					
 					// make them all similar looking
@@ -68,8 +74,16 @@
 						stroke: 'black',
 						cursor: 'pointer'
 					});
+					
+					if(midDrag !== undefined) {
+						midDrag.attr({
+							fill: 990000,
+							stroke: 'black',
+							cursor: 'pointer'
+						});
+					}
+					
 					// drawing bounding box
-				
 					that.svgBBox = paper.rect(attrs.x, attrs.y, attrs.width, attrs.height);
 					that.svgBBox.attr({
 						stroke: 'green',
@@ -209,6 +223,20 @@
 								});
 							}
 							break;
+						case 'mid':
+							if(handles.mid === undefined) {
+								handles.mid = {x: (args.x + (args.width/2)), y: (args.y + (args.height/2))};
+							} else {
+								x = (args.x + (args.width/2));
+								y = (args.y + (args.height/2));
+								handles.mid.x = x;
+								handles.mid.y = y;
+								el = paper.getById(handles.mid.id);
+								el.attr({
+									x: x,
+									y: y
+								});
+							}
 					}
 				});
 			};
@@ -222,6 +250,49 @@
 			
 			// fire event
 			$("body:first").trigger("svgElementClicked", [opts.itemId]);
+			
+			if(midDrag !== undefined) {
+				// Attaching listener to drag-only handle (midDrag)
+				midDrag.drag(
+					function(dx, dy) {
+						// drag
+						// nw = extents.width + 2 * dx * factors.x + (padding * 2);
+						// nh = extents.height + 2 * dy * factors.y + (padding * 2);
+						nx = (extents.x) - (extents.width/2) + dx - padding;
+						ny = (extents.y) - (extents.height/2) + dy - padding;
+						x = extents.x + dx;
+						y = extents.y + dy;
+						
+						that.svgBBox.attr({
+							x: nx,
+							y: ny
+						});
+						calcHandles({
+							x: nx,
+							y: ny,
+							width: extents.width + (padding * 2),
+							height: extents.height + (padding * 2)
+						});
+						opts.model.updateItems([{
+							id: opts.itemId,
+							x: x,
+							y: y,
+							w: extents.width,
+							h: extents.height
+						}]);
+					},
+					function(x, y, e) {
+						// start
+						ox = e.offsetX;
+						oy = e.offsetY;
+						calcFactors();
+					},
+					function() {
+						// end
+					}
+				);
+			
+			} 
 			
 			// Attaching drag and resize handlers
 			handleSet.drag(
@@ -283,11 +354,9 @@
 				
 					calcFactors();
 				
-					// setCursorType();
 				},
 				function() {
 					
-					// resetCursorType();
 				}
 			);
 			
@@ -343,7 +412,6 @@
 			
 			annoEl = binding.locate('annotation');
 			
-			
 			bodyContent = binding.locate('bodycontent');
 			allAnnos = binding.locate('annotations');
 			deleteButton = binding.locate('deletebutton');
@@ -351,8 +419,13 @@
 			$("body").bind("svgElementClicked", function(e, id) {
 				
 				if(opts.itemId === id) {
+					// update the item
+					opts.model.updateItems([{
+						id: opts.itemId,
+						active: true
+					}]);
 					// $(allAnnos).removeClass('selected');
-					annoEl.addClass('selected');
+					// annoEl.addClass('selected');
 				}
 			});
 			
@@ -418,8 +491,6 @@
 			svgEl.drag(
 				function(dx, dy) {
 					if(factors.x == 0 && factors.y == 0) {
-						
-						
 						svgEl.attr({
 							x: extents.x + dx,
 							y: extents.y + dy
@@ -464,4 +535,89 @@
 		
 		return that;
 	};
+	
+	// Gets passed a function in options that sets the Active Shape and notifies 
+	// the presentation
+	OAC.Client.StreamingVideo.Controller.canvasController = function(options) {
+		var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.canvasClickController", options);
+		that.options = options;
+		// Create the object passed back to the Presentation
+		that.applyBindings = function(binding, opts) {
+			var ox, oy, extents, activeId, container = binding.locate('paper'),
+			closeEnough = opts.closeEnough, dx, dy, 
+			x, y, w, h, paper = opts.paper,
+			activeShapeCall = opts.activeShapeCall, 
+			offset = $(container).offset();
+			
+			
+			// Creating events that the renderings will bind to
+			binding.event.eventClick = MITHGrid.initEventFirer(true, true);
+			binding.event.eventResize = MITHGrid.initEventFirer(true, true);
+			binding.event.eventMove = MITHGrid.initEventFirer(true, true);
+			
+			binding.renderings = {};
+			
+			// Add to events 
+			binding.registerRendering = function(rendering) {
+				binding.renderings.push(rendering);
+				if(rendering.eventClickHandle !== undefined){
+					binding.event.eventClick.addListener(rendering.eventClickHandle);
+				}
+				if(rendering.eventResizeHandle !== undefined) {
+					binding.event.eventResize.addListener(rendering.eventResizeHandle);
+				}
+				if(rendering.eventMoveHandle !== undefined) {
+					binding.event.eventMove.addListener(rendering.eventMoveHandle);
+				}
+			};
+			
+			binding.unRegisterRendering = function(rendering) {
+				if(rendering.eventClickHandle !== undefined){
+					binding.event.eventClick.removeListener(rendering.eventClickHandle);
+				}
+				if(rendering.eventResizeHandle !== undefined) {
+					binding.event.eventResize.removeListener(rendering.eventResizeHandle);
+				}
+				if(rendering.eventMoveHandle !== undefined) {
+					binding.event.eventMove.removeListener(rendering.eventMoveHandle);
+				}
+			};
+			
+			
+			$(container).bind('mousedown', function(e) {
+				
+				ox = Math.abs(e.pageX - offset.left);
+				oy = Math.abs(e.pageY - offset.top);
+				
+				$.each(binding.renderings, function(i, o) {
+					extents = o.getExtents();
+					
+				});
+				
+				// Runs through each element on canvas
+				// paper.forEach(function(el) {
+				// 						x = el.attr('x');
+				// 						y = el.attr('y');
+				// 						w = (el.type == 'rect') ? el.attr('width'):el.attr('rx');
+				// 						h = (el.type == 'rect') ? el.attr('height'):el.attr('ry');
+				// 					dx = Math.abs(ox - x);
+				// 					dy = Math.abs(oy - y);
+				// 					console.log('dx '+dx+'  dy: '+dy);
+				// 					if(dx <= w) {
+				// 						if(dy <= h) {
+				// 							// get the id 
+				// 							activeId = el.data('dsID'); 
+				// 							activeShapeCall.call(activeId);
+				// 							// stop running loop
+				// 							return false;
+				// 						}
+				// 					}
+				// 				}, [ox,oy]);
+			});
+			
+		};
+		
+		return that;
+	};
+	
 }(jQuery, MITHGrid, OAC));

@@ -6,6 +6,13 @@ Presentations for canvas.js
 
 
 (function($, MITHGrid) {
+	var canvasController = OAC.Client.StreamingVideo.Controller.canvasClickController({
+		selectors: {
+			paper: 'svg'
+		}
+	});
+	
+	
 	MITHGrid.Presentation.namespace("RaphaelCanvas");
 	// Presentation for the Canvas area - area that the Raphael canvas is drawn on
 	MITHGrid.Presentation.RaphaelCanvas.initPresentation = function(container, options) {
@@ -34,7 +41,12 @@ Presentations for canvas.js
 		that.canvas = new Raphael(id, w, h);
 		
 		
-		
+		// attach binding
+		that.canvasEvents = canvasController.bind($(container), {
+			activeShapeCall: activeShapeCall,
+			closeEnough: 5,
+			paper: that.canvas
+		});
 		
 		return that;
 	};

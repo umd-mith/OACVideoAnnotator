@@ -23,6 +23,7 @@
 			}
 		});
 		
+		
 		that = MITHGrid.Application.initApp("OAC.Client.StreamingVideo", container, $.extend(true, {}, options, {
 			
 			dataViews: {
@@ -30,11 +31,12 @@
 				// is drawn
 				drawspace: {
 					dataStore: 'canvas',
-					types: ["Rectangle", "Ellipse"],
+					types: ["Rectangle","Ellipse"],
 					label: 'drawspace'
+				
 				}
 			},
-			viewSetup: '<div id="canvasSVG"></div>'+
+			viewSetup: '<div id="canvasSVG" class="canvas_svg"></div>'+
 			'<div id="annoList" class="anno_list"></div>',
 		   
 			presentations: {
@@ -45,7 +47,7 @@
 					lenses: {
 						Rectangle: function(container, view, model, itemId) {
 							// Note: Rectangle measurements x,y start at CENTER
-							var that = {},
+							var that = {id: itemId},
 							item = model.getItem(itemId),
 							c, ox, oy, bbox;
 							
@@ -61,7 +63,27 @@
 							});
 							
 							that.update = function(item) {
-
+								if(item.active[0] === true) {
+									// attaching the controller to Bounding Box
+									editBoxController.bind(c, {
+										model: model,
+										itemId: itemId,
+										calculate: {
+											extents: function() {
+												return {
+													x: c.attr("x") + (c.attr("width")/2),
+													y: c.attr("y") + (c.attr("height")/2),
+													width: c.attr("width"),
+													height: c.attr("height")
+												};
+											}
+										},
+										x: 'x',
+										y: 'y'
+									});
+								} else {
+									
+								}
 								// receiving the Object passed through
 								// model.updateItems in move()
 								try {
@@ -81,36 +103,58 @@
 								// Raphael object is updated
 								
 							};
-
+							
 							that.remove = function(item) {
 								// getting the removeItems callback
 								c.remove();
 							};
-
-							attachBBox = function(e) {
-								// attaching the controller to Bounding Box
-								editBoxController.bind(c, {
-									eventObj: e,
-									model: model,
-									itemId: itemId,
-									calculate: {
-										extents: function() {
-											return {
-												x: c.attr("x") + (c.attr("width")/2),
-												y: c.attr("y") + (c.attr("height")/2),
-												width: c.attr("width"),
-												height: c.attr("height")
-											};
-										}
-									},
-									x: 'x',
-									y: 'y'
-								});
-								
-								c.unmousedown(attachBBox);
+							// calculate the extents (x, y, width, height)
+							// of this type of shape
+							that.getExtents = function() {
+								return {
+									x: c.attr("x") + (c.attr("width")/2),
+									y: c.attr("y") + (c.attr("height")/2),
+									width: c.attr("width"),
+									height: c.attr("height")
+								};
 							};
 							
-							c.mousedown(attachBBox);
+							
+							// Event handlers
+							that.eventClickHandle = function(e, id) {
+								if(id == itemId) {
+									// Selected
+									editBoxController.bind(c, {
+										model: model,
+										itemId: itemId,
+										calculate: {
+											extents: function() {
+												return {
+													x: c.attr("x") + (c.attr("width")/2),
+													y: c.attr("y") + (c.attr("height")/2),
+													width: c.attr("width"),
+													height: c.attr("height")
+												};
+											}
+										},
+										x: 'x',
+										y: 'y'
+									});
+									
+								} else {
+									// De-select this shape
+								}
+							};
+							
+							that.eventResizeHandle = function(e, id) {
+								
+							};
+							
+							that.eventMoveHandle = function(e, id) {
+								
+							};
+							
+							that.canvasEvents.registerRendering(that);
 							
 							return that;
 						},
@@ -209,12 +253,20 @@
 							return that;
 						},
 						Ellipse: function(container, view, model, itemId) {
-							var that = {}, item = model.getItem(itemId);
+							var that = {}, item = model.getItem(itemId),
+							itemEl;
 							$("#delete"+item.id[0]).live('click',function(e){
 								e.preventDefault();
 								model.removeItems([item.id[0]]);
 							});
-							renderListItem(item, container);
+							itemEl = renderListItem(item, container);
+
+							// attaching controller to make the
+							// HTML highlighted when shape is selected
+							annoActiveController.bind(itemEl, {
+								model: model,
+								itemId: itemId
+							});
 
 							that.update = function(item) {
 								renderListItem(item, container);
@@ -232,7 +284,8 @@
 		}));
 	
 		renderListItem = function(item, container) {
-			var el = '<div id="'+item.id[0]+'" class="anno_item">'+
+			var className = (item.active)?'anno_item selected':'anno_item',
+			el = '<div id="'+item.id[0]+'" class="'+className+'">'+
 			'<p>'+item.creator[0]+'</p>'+
 			'<p>'+item.bodyContent[0]+'</p>'+
 			'<p>'+item.x[0]+'<br/>'+
@@ -267,6 +320,25 @@
 		that.ready(function() {
 			// This has been extracted into
 			// genApps.js and controls.js
+			
+			var activeShapes = [], 
+			prep = that.dataStore.canvas.prepare(["!active"]);
+			
+			// attach clickEvent listener
+			$("body").live('shapeActive', function(e, id) {
+				activeShapes = prep.evaluate([true]);
+				$.each(activeShapes, function(i, o) {
+					that.dataStore.canvas.updateItems([{
+						id: o,
+						active: false
+					}]);
+				});
+				
+				that.dataStore.canvas.updateItems([{
+					id: id,
+					active: true
+				}]);
+			});
 		});
 		
 		return that;
@@ -291,10 +363,13 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 				// posInfo contains the SVG dimensions for 
 				// a shape
 				bodyContent: {
-					type: 'String'
+					valueType: 'String'
 				},
 				targetURI: {
-					type: 'Item'
+					valueType: 'Item'
+				},
+				active: {
+					valueType: 'Bool'
 				}
 			}
 			
