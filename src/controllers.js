@@ -6,16 +6,26 @@
 	OAC.Client.StreamingVideo.Controller.annotationEditSelectionGrid = function(options) {
 		that = MITHGrid.Controller.initRaphaelController("OAC.Client.StreamingVideo.Controller.annotationEditSelectionGrid", options);
 		options = that.options;
+		that.handleSet;
+		that.midDrag;
 		that.svgBBox;
+		that.rendering;
+		
+		// Create event firers for resize and drag
+		that.eventResize = MITHGrid.initEventFirer(true, false);	
+		that.eventDrag = MITHGrid.initEventFirer(true, false);
 		
 		that.applyBindings = function(binding, opts) {
 			var ox, oy, factors = {}, extents, svgTarget, paper, attrs = {},
-			padding = 5, handles = {}, handleSet, midDrag,
+			padding = 5, handles = {}, 
 			dirs = (opts.dirs)?opts.dirs:['ul','top','ur','lft','lr','btm','ll','rgt','mid'];
+			
+			// register the rendering
+			that.rendering = opts.renderObj;
 			
 			calcFactors = function() {
 				var px, py;
-				extents = opts.calculate.extents();
+				extents = that.rendering.getExtents();
 				// extents: x, y, width, height
 				px = (4 * (ox - extents.x) / extents.width) + 2;
 				py = (4 * (oy - extents.y) / extents.height) + 2;
@@ -40,7 +50,6 @@
 				
 				// create offset factors for 
 				// bounding box
-				
 				// calculate width - height to be larger
 				// than shape
 				attrs.width = extents.width + (2 * padding);
@@ -52,31 +61,31 @@
 			};
 			
 			drawHandles = function() {
-				if(handleSet === undefined){
+				if(that.handleSet === undefined){
 					var h, handleIds = {};
 					// draw the corner and mid-point squares
-					handleSet = paper.set();
+					that.handleSet = paper.set();
 					$.each(handles, function(i, o) {
 						if(i === 'mid'){
-							midDrag = paper.rect(o.x, o.y, padding, padding);
-							o.id = midDrag.id;
+							that.midDrag = paper.rect(o.x, o.y, padding, padding);
+							o.id = that.midDrag.id;
 							
 						} else {
 							h = paper.rect(o.x, o.y, padding, padding);
 							o.id = h.id;
-							handleSet.push(h);
+							that.handleSet.push(h);
 						}
 					});
 					
 					// make them all similar looking
-					handleSet.attr({
+					that.handleSet.attr({
 						fill: 990000,
 						stroke: 'black',
 						cursor: 'pointer'
 					});
 					
-					if(midDrag !== undefined) {
-						midDrag.attr({
+					if(that.midDrag !== undefined) {
+						that.midDrag.attr({
 							fill: 990000,
 							stroke: 'black',
 							cursor: 'pointer'
@@ -89,7 +98,7 @@
 						stroke: 'green',
 						'stroke-dasharray': ["--"]
 					});	
-					// handleSet.push(that.svgBBox);
+					// that.handleSet.push(that.svgBBox);
 					
 				} 
 			};
@@ -108,7 +117,7 @@
 								y = args.y;
 								handles.ul.x = x;
 								handles.ul.y = y;
-								
+								if(console) console.log('paper '+paper+' looking for '+handles.ul.id);
 								el = paper.getById(handles.ul.id);
 								
 								el.attr({
@@ -241,19 +250,19 @@
 				});
 			};
 			
-			svgTarget = binding.locate('raphael');
+			svgTarget = that.rendering.shape;
 			// Grabbing the paper element from this shape
 			paper = svgTarget.paper;
+			if(console) console.log(paper);
 			
 			calcFactors();
 			drawHandles();
 			
-			// fire event
-			$("body:first").trigger("svgElementClicked", [opts.itemId]);
 			
-			if(midDrag !== undefined) {
-				// Attaching listener to drag-only handle (midDrag)
-				midDrag.drag(
+			if(that.midDrag !== undefined) {
+				var nx, ny, x, y;
+				// Attaching listener to drag-only handle (that.midDrag)
+				that.midDrag.drag(
 					function(dx, dy) {
 						// drag
 						// nw = extents.width + 2 * dx * factors.x + (padding * 2);
@@ -267,19 +276,13 @@
 							x: nx,
 							y: ny
 						});
+						
 						calcHandles({
 							x: nx,
 							y: ny,
 							width: extents.width + (padding * 2),
 							height: extents.height + (padding * 2)
 						});
-						opts.model.updateItems([{
-							id: opts.itemId,
-							x: x,
-							y: y,
-							w: extents.width,
-							h: extents.height
-						}]);
 					},
 					function(x, y, e) {
 						// start
@@ -289,13 +292,20 @@
 					},
 					function() {
 						// end
+						var pos = {
+							x: x,
+							y: y
+						};
+						that.eventDrag.fire(that.rendering.id, pos);
 					}
 				);
 			
 			} 
 			
 			// Attaching drag and resize handlers
-			handleSet.drag(
+			var w, h, pos;
+			that.handleSet.drag(
+				
 				function(dx, dy) {
 					var nx, ny, nw, nh;
 					if(factors.x == 0 && factors.y == 0) {
@@ -303,7 +313,7 @@
 						ny = attrs.y + (dy - (attrs.height/2));
 						that.svgBBox.attr({
 							x: nx,
-							y:  ny
+							y: ny
 						});
 						
 						calcHandles({
@@ -312,17 +322,10 @@
 							width: attrs.width,
 							height: attrs.height
 						});
-						
-						// svgEl is ahead of the actual 
-						// annotation shape
-						opts.model.updateItems([{
-							id: opts.itemId,
-							x: extents.x + dx,
-							y: extents.y + dy
-						}]);
 					}
 					else {
-						
+						w = extents.width + 2 * dx * factors.x;
+						h = extents.height + 2 * dy * factors.y;
 						nw = extents.width + 2 * dx * factors.x + (padding * 2);
 						nh = extents.height + 2 * dy * factors.y + (padding * 2);
 						nx = (extents.x - (padding/4)) - (nw/2);
@@ -333,19 +336,12 @@
 							width:  nw,
 							height: nh
 						});
-							calcHandles({
-								x: nx,
-								y: ny,
-								width: nw,
-								height: nh
-							});
-						opts.model.updateItems([{
-							id: opts.itemId,
-							x: extents.x,
-							y: extents.y,
-							w: extents.width + 2 * dx * factors.x,
-							h: extents.height + 2 * dy * factors.y
-						}]);
+						calcHandles({
+							x: nx,
+							y: ny,
+							width: nw,
+							height: nh
+						});
 					}
 				},
 			    function(x, y, e) {
@@ -356,52 +352,19 @@
 				
 				},
 				function() {
-					
+					// update 
+					pos = {
+						width: w,
+						height: h
+					};
+					that.eventResize.fire(that.rendering.id, pos);
 				}
 			);
 			
 		};
-		
-		
-		
 		return that;
 	};
 	
-	OAC.Client.StreamingVideo.Controller.annotationShapeDragController = function(options) {
-		that = MITHGrid.Controller.initRaphaelController("OAC.Client.StreamingVideo.Controller.annotationShapeDragController", options);
-		options = that.options;
-		
-		that.applyBindings = function(binding, opts) {
-			var ox, oy, svgEl;
-			
-			svgEl = binding.locate('raphael');
-			svgEl.drag(
-				function(dx, dy) {	
-					var ddx = (dx - 3), ddy = (dy - 3);
-					
-					svgEl.attr({
-						x: ox + dx,
-						y: ox + dy
-					});
-					// SvgEl stays ahead of the actual shape
-					opts.model.updateItems([{
-						id: opts.itemId,
-						x: ox + ddx,
-						y: oy + ddy
-					}]);
-				},
-				function() {
-					ox = parseInt(svgEl.attr(opts.x), 10);
-					oy = parseInt(svgEl.attr(opts.y), 10);
-				},
-				function() {
-					
-				}
-			);
-		};
-		
-		return that;
-	};
 	
 	OAC.Client.StreamingVideo.Controller.annoActiveController = function(options) {
 		var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.annoActiveController", options);
@@ -541,37 +504,36 @@
 	OAC.Client.StreamingVideo.Controller.canvasController = function(options) {
 		var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.canvasClickController", options);
 		that.options = options;
+		that.editBoxController = OAC.Client.StreamingVideo.Controller.annotationEditSelectionGrid({});
 		// Create the object passed back to the Presentation
 		that.applyBindings = function(binding, opts) {
 			var ox, oy, extents, activeId, container = binding.locate('paper'),
 			closeEnough = opts.closeEnough, dx, dy, 
 			x, y, w, h, paper = opts.paper,
-			activeShapeCall = opts.activeShapeCall, 
 			offset = $(container).offset();
 			
 			
 			// Creating events that the renderings will bind to
-			binding.event.eventClick = MITHGrid.initEventFirer(true, true);
-			binding.event.eventResize = MITHGrid.initEventFirer(true, true);
-			binding.event.eventMove = MITHGrid.initEventFirer(true, true);
+			binding.event = {};
+			binding.event.eventClick = MITHGrid.initEventFirer(true, false);
+			
 			
 			binding.renderings = {};
 			
+			binding.curRendering = '';
+			
+			
 			// Add to events 
 			binding.registerRendering = function(rendering) {
-				binding.renderings.push(rendering);
+				binding.renderings[rendering.id] = rendering;
 				if(rendering.eventClickHandle !== undefined){
 					binding.event.eventClick.addListener(rendering.eventClickHandle);
 				}
-				if(rendering.eventResizeHandle !== undefined) {
-					binding.event.eventResize.addListener(rendering.eventResizeHandle);
-				}
-				if(rendering.eventMoveHandle !== undefined) {
-					binding.event.eventMove.addListener(rendering.eventMoveHandle);
-				}
+			
 			};
 			
 			binding.unRegisterRendering = function(rendering) {
+				var tmp = {}, el;
 				if(rendering.eventClickHandle !== undefined){
 					binding.event.eventClick.removeListener(rendering.eventClickHandle);
 				}
@@ -581,6 +543,12 @@
 				if(rendering.eventMoveHandle !== undefined) {
 					binding.event.eventMove.removeListener(rendering.eventMoveHandle);
 				}
+				$.each(binding.renderings, function(i,o) {
+					if(i !== rendering.id) {
+						tmp[i] = o;
+					} 
+				});
+				binding.renderings = $.extend(true, {}, tmp);
 			};
 			
 			
@@ -591,28 +559,39 @@
 				
 				$.each(binding.renderings, function(i, o) {
 					extents = o.getExtents();
+					dx = Math.abs(ox - extents.x);
+					dy = Math.abs(oy - extents.y);
+					if(dx <= extents.width) {
+						if(dy <= extents.height) {
+							if(o.id !== binding.curRendering) {
+								
+								binding.event.eventClick.fire(o.id);
+							
+								that.editBoxController.bind(o.shape, {
+									renderObj: o
+								});
+								
+								// Attach necessary event firers
+								if(o.eventResizeHandle !== undefined) {
+									that.editBoxController.eventResize.addListener(o.eventResizeHandle);
+								}
+								if(o.eventMoveHandle !== undefined) {
+									that.editBoxController.eventDrag.addListener(o.eventMoveHandle);
+								}
+								
+								binding.curRendering = o.id;
+							}
+							// stop running loop
+							return false;
+						}
+					}
 					
 				});
 				
 				// Runs through each element on canvas
 				// paper.forEach(function(el) {
-				// 						x = el.attr('x');
-				// 						y = el.attr('y');
-				// 						w = (el.type == 'rect') ? el.attr('width'):el.attr('rx');
-				// 						h = (el.type == 'rect') ? el.attr('height'):el.attr('ry');
-				// 					dx = Math.abs(ox - x);
-				// 					dy = Math.abs(oy - y);
-				// 					console.log('dx '+dx+'  dy: '+dy);
-				// 					if(dx <= w) {
-				// 						if(dy <= h) {
-				// 							// get the id 
-				// 							activeId = el.data('dsID'); 
-				// 							activeShapeCall.call(activeId);
-				// 							// stop running loop
-				// 							return false;
-				// 						}
-				// 					}
-				// 				}, [ox,oy]);
+										
+												
 			});
 			
 		};

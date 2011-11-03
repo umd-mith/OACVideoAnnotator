@@ -6,7 +6,7 @@ Presentations for canvas.js
 
 
 (function($, MITHGrid) {
-	var canvasController = OAC.Client.StreamingVideo.Controller.canvasClickController({
+	var canvasController = OAC.Client.StreamingVideo.Controller.canvasController({
 		selectors: {
 			paper: 'svg'
 		}
@@ -43,10 +43,31 @@ Presentations for canvas.js
 		
 		// attach binding
 		that.canvasEvents = canvasController.bind($(container), {
-			activeShapeCall: activeShapeCall,
+			
 			closeEnough: 5,
 			paper: that.canvas
 		});
+		
+		that.clickEventHandle = function(id) {
+			
+			that.editBoxController.bind(c, {
+				model: model,
+				itemId: itemId,
+				calculate: {
+					extents: function() {
+						return {
+							x: c.attr("x") + (c.attr("width")/2),
+							y: c.attr("y") + (c.attr("height")/2),
+							width: c.attr("width"),
+							height: c.attr("height")
+						};
+					}
+				},
+				x: 'x',
+				y: 'y'
+			});
+		};
+		
 		
 		return that;
 	};

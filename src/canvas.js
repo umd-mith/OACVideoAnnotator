@@ -12,7 +12,7 @@
 	OAC.Client.StreamingVideo.initApp = function(container, options) {
 		var that, dragController, renderListItem;
 		dragController = OAC.Client.StreamingVideo.Controller.annotationShapeResizeController({});
-		editBoxController = OAC.Client.StreamingVideo.Controller.annotationEditSelectionGrid({});
+		
 		annoActiveController = OAC.Client.StreamingVideo.Controller.annoActiveController({
 			// attaching specific selector items here
 			selectors: {
@@ -63,38 +63,18 @@
 							});
 							
 							that.update = function(item) {
-								if(item.active[0] === true) {
-									// attaching the controller to Bounding Box
-									editBoxController.bind(c, {
-										model: model,
-										itemId: itemId,
-										calculate: {
-											extents: function() {
-												return {
-													x: c.attr("x") + (c.attr("width")/2),
-													y: c.attr("y") + (c.attr("height")/2),
-													width: c.attr("width"),
-													height: c.attr("height")
-												};
-											}
-										},
-										x: 'x',
-										y: 'y'
-									});
-								} else {
-									
-								}
+								
 								// receiving the Object passed through
 								// model.updateItems in move()
 								try {
 									if (item.x !== undefined && item.y !== undefined && item.w !== undefined && item.y !== undefined) {
-										c.attr({
+										that.shape.attr({
 											x: item.x[0] - item.w[0]/2,
 											y: item.y[0] - item.h[0]/2,
 											width: item.w[0],
 											height: item.h[0]
 										});
-										c.toBack();
+										that.shape.toBack();
 									}
 								} catch(e) {
 									console.log(e);
@@ -121,40 +101,48 @@
 							
 							
 							// Event handlers
-							that.eventClickHandle = function(e, id) {
+							that.eventClickHandle = function(id) {
 								if(id == itemId) {
 									// Selected
-									editBoxController.bind(c, {
-										model: model,
-										itemId: itemId,
-										calculate: {
-											extents: function() {
-												return {
-													x: c.attr("x") + (c.attr("width")/2),
-													y: c.attr("y") + (c.attr("height")/2),
-													width: c.attr("width"),
-													height: c.attr("height")
-												};
-											}
-										},
-										x: 'x',
-										y: 'y'
-									});
-									
+									model.updateItems([{
+										id: itemId,
+										active: true
+									}]);
 								} else {
 									// De-select this shape
+									model.updateItems([{
+										id: itemId,
+										active: false
+									}]);
 								}
 							};
 							
-							that.eventResizeHandle = function(e, id) {
-								
+							that.eventResizeHandle = function(id, pos) {
+								if(id == itemId) {
+									// update item with new width/height
+									model.updateItems([{
+										id: itemId,
+										w: pos.width,
+										h: pos.height
+									}]);
+								}
 							};
 							
-							that.eventMoveHandle = function(e, id) {
-								
+							that.eventMoveHandle = function(id, pos) {
+								if(id == itemId) {
+									// update item with new x/y
+									model.updateItems([{
+										id: itemId,
+										x: pos.x,
+										y: pos.y
+									}]);
+								}
 							};
 							
-							that.canvasEvents.registerRendering(that);
+							// register shape
+							that.shape = c;
+							
+							view.canvasEvents.registerRendering(that);
 							
 							return that;
 						},
@@ -170,27 +158,7 @@
 								fill: "red"
 							});
 							
-							attachBBox = function(e) {
-								editBoxController.bind(c, {
-									eventObj: e,
-									model: model,
-									itemId: itemId,
-									calculate: {
-										extents: function() {
-											return {
-												x: c.attr("cx"),
-												y: c.attr("cy"),
-												width: c.attr("rx") * 2,
-												height: c.attr("ry") * 2
-											};
-										}
-									},
-									x: 'cx',
-									y: 'cy'
-								});
-								
-								c.unmousedown(attachBBox);
-							};
+							
 							
 							that.update = function(item) {
 								// receiving the Object passed through
@@ -215,7 +183,6 @@
 								c.remove();
 							};
 							
-							c.mousedown(attachBBox);
 
 							return that;
 
