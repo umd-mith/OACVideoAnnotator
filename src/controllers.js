@@ -607,7 +607,7 @@
 				});
 				
 				if((activeId.length == 0) && (binding.curRendering !== undefined)) {
-					console.log('de-activating shape edit');
+					
 					// No shapes selected - de-activate current rendering and all other possible renderings
 					if(binding.curRendering.eventResizeHandle !== undefined) {
 						that.editBoxController.eventResize.removeListener(binding.curRendering.eventResizeHandle);

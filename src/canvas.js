@@ -147,7 +147,7 @@
 							return that;
 						},
 						Ellipse: function(container, view, model, itemId) {
-							var that = {},
+							var that = {id: itemId},
 							item = model.getItem(itemId),
 							c;
 							
@@ -161,6 +161,8 @@
 							
 							
 							that.update = function(item) {
+								if(item.active[0])
+								
 								// receiving the Object passed through
 								// model.updateItems in move()
 								try {
@@ -183,6 +185,60 @@
 								c.remove();
 							};
 							
+							// calculate the extents (x, y, width, height)
+							// of this type of shape
+							that.getExtents = function() {
+								return {
+									x: c.attr("cx"),
+									y: c.attr("cy"),
+									width: (c.attr("rx") * 2),
+									height: (c.attr("ry") * 2)
+								};
+							};
+							
+							// Event handlers
+							that.eventClickHandle = function(id) {
+								if(id == itemId) {
+									// Selected
+									model.updateItems([{
+										id: itemId,
+										active: true
+									}]);
+								} else {
+									// De-select this shape
+									model.updateItems([{
+										id: itemId,
+										active: false
+									}]);
+								}
+							};
+							
+							that.eventResizeHandle = function(id, pos) {
+								if(id == itemId) {
+									// update item with new width/height
+									model.updateItems([{
+										id: itemId,
+										w: pos.width,
+										h: pos.height
+									}]);
+								}
+							};
+							
+							that.eventMoveHandle = function(id, pos) {
+								if(id == itemId) {
+									// update item with new x/y
+									model.updateItems([{
+										id: itemId,
+										x: pos.x,
+										y: pos.y
+									}]);
+								}
+							};
+							
+							// register shape
+							that.shape = c;
+							
+							view.canvasEvents.registerRendering(that);
 
 							return that;
 
