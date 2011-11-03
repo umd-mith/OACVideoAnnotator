@@ -10,6 +10,8 @@
 		that.midDrag;
 		that.svgBBox;
 		that.rendering;
+		that.handles = {};
+		that.dirs = that.options.dirs ? opts.dirs:['ul','top','ur','lft','lr','btm','ll','rgt','mid'];
 		
 		// Create event firers for resize and drag
 		that.eventResize = MITHGrid.initEventFirer(true, false);	
@@ -17,8 +19,7 @@
 		
 		that.applyBindings = function(binding, opts) {
 			var ox, oy, factors = {}, extents, svgTarget, paper, attrs = {},
-			padding = 5, handles = {}, 
-			dirs = (opts.dirs)?opts.dirs:['ul','top','ur','lft','lr','btm','ll','rgt','mid'];
+			padding = 5;
 			
 			// register the rendering
 			that.rendering = opts.renderObj;
@@ -56,7 +57,7 @@
 				attrs.height = extents.height + (2 * padding);
 				attrs.x = (extents.x - (padding/8)) - (attrs.width/2);
 				attrs.y = (extents.y - (padding/8)) - (attrs.height/2);
-				
+				console.log('calc factors done, got attrs: '+JSON.stringify(attrs));
 				calcHandles(attrs);
 			};
 			
@@ -65,7 +66,7 @@
 					var h, handleIds = {};
 					// draw the corner and mid-point squares
 					that.handleSet = paper.set();
-					$.each(handles, function(i, o) {
+					$.each(that.handles, function(i, o) {
 						if(i === 'mid'){
 							that.midDrag = paper.rect(o.x, o.y, padding, padding);
 							o.id = that.midDrag.id;
@@ -100,25 +101,32 @@
 					});	
 					// that.handleSet.push(that.svgBBox);
 					
+				} else {
+					// show all the boxes and 
+					// handles
+					that.svgBBox.show();
+					that.handleSet.show();
+					that.midDrag.show();
+				
 				} 
 			};
 			
 			calcHandles = function(args) {
 				// calculate where the resize handles
 				// will be located
-				$.each(dirs, function(i, o) {
+				$.each(that.dirs, function(i, o) {
 					var el, x, y;
 					switch(o){
 						case 'ul':
-							if(handles.ul === undefined){
-								handles.ul = {x: args.x, y: args.y};
+							if(that.handles.ul === undefined){
+								that.handles.ul = {x: args.x, y: args.y};
 							} else {
 								x = args.x;
 								y = args.y;
-								handles.ul.x = x;
-								handles.ul.y = y;
-								if(console) console.log('paper '+paper+' looking for '+handles.ul.id);
-								el = paper.getById(handles.ul.id);
+								that.handles.ul.x = x;
+								that.handles.ul.y = y;
+							
+								el = paper.getById(that.handles.ul.id);
 								
 								el.attr({
 									x: x,
@@ -127,14 +135,14 @@
 							}
 							break;
 						case 'top':
-							if(handles.top === undefined) {
-								handles.top = {x: (args.x + (args.width/2)), y: args.y};
+							if(that.handles.top === undefined) {
+								that.handles.top = {x: (args.x + (args.width/2)), y: args.y};
 							} else {
 								x =  (args.x + (args.width/2));
 								y = args.y;
-								handles.top.x = x;
-								handles.top.y = y;
-								el = paper.getById(handles.top.id);
+								that.handles.top.x = x;
+								that.handles.top.y = y;
+								el = paper.getById(that.handles.top.id);
 								
 								el.attr({
 									x: x,
@@ -143,14 +151,14 @@
 							}
 							break;
 						case 'ur':
-							if(handles.ur === undefined) {
-								handles.ur = {x: ((args.x) + (args.width - padding)), y: args.y};
+							if(that.handles.ur === undefined) {
+								that.handles.ur = {x: ((args.x) + (args.width - padding)), y: args.y};
 							} else {
 								x =  (args.x + (args.width - padding));
 								y = args.y;
-								handles.ur.x = x;
-								handles.ur.y = y;
-								el = paper.getById(handles.ur.id);
+								that.handles.ur.x = x;
+								that.handles.ur.y = y;
+								el = paper.getById(that.handles.ur.id);
 								el.attr({
 									x: x,
 									y: y
@@ -158,14 +166,14 @@
 							}
 							break;
 						case 'rgt':
-							if(handles.lft === undefined) {
-								handles.lft = {x: ((args.x - padding) + args.width), y: ((args.y - padding) + (args.height/2))};
+							if(that.handles.lft === undefined) {
+								that.handles.lft = {x: ((args.x - padding) + args.width), y: ((args.y - padding) + (args.height/2))};
 							} else {
 								x =  ((args.x - padding) + args.width);
 								y = ((args.y - padding) + (args.height/2));
-								handles.lft.x = x;
-								handles.lft.y = y;
-								el = paper.getById(handles.lft.id);
+								that.handles.lft.x = x;
+								that.handles.lft.y = y;
+								el = paper.getById(that.handles.lft.id);
 								el.attr({
 									x: x,
 									y: y
@@ -173,14 +181,14 @@
 							}
 							break;
 						case 'lr':
-							if(handles.lr === undefined) {
-								handles.lr = {x: ((args.x - padding) + args.width), y: ((args.y - padding) + args.width)};
+							if(that.handles.lr === undefined) {
+								that.handles.lr = {x: ((args.x - padding) + args.width), y: ((args.y - padding) + args.width)};
 							} else {
 								x =  ((args.x - padding) + args.width);
 								y = ((args.y - padding) + args.height);
-								handles.lr.x = x;
-								handles.lr.y = y;
-								el = paper.getById(handles.lr.id);
+								that.handles.lr.x = x;
+								that.handles.lr.y = y;
+								el = paper.getById(that.handles.lr.id);
 								el.attr({
 									x: x,
 									y: y
@@ -188,14 +196,14 @@
 							}
 							break;
 						case 'btm':
-							if(handles.btm === undefined) {
-								handles.btm = {x: (args.x + (args.width/2)), y: ((args.y - padding) + args.height)};
+							if(that.handles.btm === undefined) {
+								that.handles.btm = {x: (args.x + (args.width/2)), y: ((args.y - padding) + args.height)};
 							} else {
 								x =  (args.x + (args.width/2));
 								y = ((args.y - padding) + args.height);
-								handles.btm.x = x;
-								handles.btm.y = y;
-								el = paper.getById(handles.btm.id);
+								that.handles.btm.x = x;
+								that.handles.btm.y = y;
+								el = paper.getById(that.handles.btm.id);
 								el.attr({
 									x: x,
 									y: y
@@ -203,14 +211,14 @@
 							}
 							break;
 						case 'll':
-							if(handles.ll === undefined) {
-								handles.ll = {x: args.x, y: ((args.y - padding) + args.height)};
+							if(that.handles.ll === undefined) {
+								that.handles.ll = {x: args.x, y: ((args.y - padding) + args.height)};
 							} else {
 								x =  args.x;
 								y = ((args.y - padding) + args.height);
-								handles.ll.x = x;
-								handles.ll.y = y;
-								el = paper.getById(handles.ll.id);
+								that.handles.ll.x = x;
+								that.handles.ll.y = y;
+								el = paper.getById(that.handles.ll.id);
 								el.attr({
 									x: x,
 									y: y
@@ -218,14 +226,14 @@
 							}
 							break;
 						case 'lft':
-							if(handles.rgt === undefined) {
-								handles.rgt = {x: args.x, y: (args.y + (args.height/2))};
+							if(that.handles.rgt === undefined) {
+								that.handles.rgt = {x: args.x, y: (args.y + (args.height/2))};
 							} else {
 								x =  args.x;
 								y = (args.y + (args.height/2));
-								handles.rgt.x = x;
-								handles.rgt.y = y;
-								el = paper.getById(handles.rgt.id);
+								that.handles.rgt.x = x;
+								that.handles.rgt.y = y;
+								el = paper.getById(that.handles.rgt.id);
 								el.attr({
 									x: x,
 									y: y
@@ -233,14 +241,14 @@
 							}
 							break;
 						case 'mid':
-							if(handles.mid === undefined) {
-								handles.mid = {x: (args.x + (args.width/2)), y: (args.y + (args.height/2))};
+							if(that.handles.mid === undefined) {
+								that.handles.mid = {x: (args.x + (args.width/2)), y: (args.y + (args.height/2))};
 							} else {
 								x = (args.x + (args.width/2));
 								y = (args.y + (args.height/2));
-								handles.mid.x = x;
-								handles.mid.y = y;
-								el = paper.getById(handles.mid.id);
+								that.handles.mid.x = x;
+								that.handles.mid.y = y;
+								el = paper.getById(that.handles.mid.id);
 								el.attr({
 									x: x,
 									y: y
@@ -253,7 +261,6 @@
 			svgTarget = that.rendering.shape;
 			// Grabbing the paper element from this shape
 			paper = svgTarget.paper;
-			if(console) console.log(paper);
 			
 			calcFactors();
 			drawHandles();
@@ -264,6 +271,7 @@
 				// Attaching listener to drag-only handle (that.midDrag)
 				that.midDrag.drag(
 					function(dx, dy) {
+						if('dragging '+dx+ '  '+dy);
 						// drag
 						// nw = extents.width + 2 * dx * factors.x + (padding * 2);
 						// nh = extents.height + 2 * dy * factors.y + (padding * 2);
@@ -288,6 +296,7 @@
 						// start
 						ox = e.offsetX;
 						oy = e.offsetY;
+						console.log('startDrag '+ox+' '+oy);
 						calcFactors();
 					},
 					function() {
@@ -362,6 +371,15 @@
 			);
 			
 		};
+		
+		// Function to call in order to "de-activate" the edit box
+		// (i.e. make it hidden)
+		that.deActivateEditBox = function() {
+			that.handleSet.hide();
+			that.midDrag.hide();
+			that.svgBBox.hide();
+		};
+		
 		return that;
 	};
 	
@@ -520,7 +538,7 @@
 			
 			binding.renderings = {};
 			
-			binding.curRendering = '';
+			binding.curRendering;
 			
 			
 			// Add to events 
@@ -553,7 +571,7 @@
 			
 			
 			$(container).bind('mousedown', function(e) {
-				
+				activeId = '';
 				ox = Math.abs(e.pageX - offset.left);
 				oy = Math.abs(e.pageY - offset.top);
 				
@@ -563,7 +581,8 @@
 					dy = Math.abs(oy - extents.y);
 					if(dx <= extents.width) {
 						if(dy <= extents.height) {
-							if(o.id !== binding.curRendering) {
+							activeId = o.id;
+							if((binding.curRendering === undefined) || (o.id !== binding.curRendering.id)) {
 								
 								binding.event.eventClick.fire(o.id);
 							
@@ -579,15 +598,31 @@
 									that.editBoxController.eventDrag.addListener(o.eventMoveHandle);
 								}
 								
-								binding.curRendering = o.id;
+								binding.curRendering = o;
 							}
 							// stop running loop
 							return false;
 						}
 					}
-					
 				});
 				
+				if((activeId.length == 0) && (binding.curRendering !== undefined)) {
+					console.log('de-activating shape edit');
+					// No shapes selected - de-activate current rendering and all other possible renderings
+					if(binding.curRendering.eventResizeHandle !== undefined) {
+						that.editBoxController.eventResize.removeListener(binding.curRendering.eventResizeHandle);
+					}
+					if(binding.curRendering.eventMoveHandle !== undefined) {
+						that.editBoxController.eventDrag.removeListener(binding.curRendering.eventMoveHandle);
+					}
+					
+					// de-activate rendering and all other listeners
+					binding.event.eventClick.fire('');
+					
+					// hide the editBox
+					that.editBoxController.deActivateEditBox();
+					binding.curRendering = undefined;
+				}
 				// Runs through each element on canvas
 				// paper.forEach(function(el) {
 										
