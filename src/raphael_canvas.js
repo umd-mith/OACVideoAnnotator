@@ -13,6 +13,15 @@ Presentations for canvas.js
 	});
 	
 	
+	MITHGrid.Presentation.namespace("AnnotationList");
+	MITHGrid.Presentation.AnnotationList.initPresentation = function(container, options) {
+		var that = MITHGrid.Presentation.initPresentation("AnnotationList", container, options);
+		
+		
+		
+		return that;
+	};
+	
 	MITHGrid.Presentation.namespace("RaphaelCanvas");
 	// Presentation for the Canvas area - area that the Raphael canvas is drawn on
 	MITHGrid.Presentation.RaphaelCanvas.initPresentation = function(container, options) {

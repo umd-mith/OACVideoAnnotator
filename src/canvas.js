@@ -10,18 +10,23 @@
 	OAC.Client.namespace("StreamingVideo");
 	
 	OAC.Client.StreamingVideo.initApp = function(container, options) {
-		var that, dragController, renderListItem;
-		dragController = OAC.Client.StreamingVideo.Controller.annotationShapeResizeController({});
-		
+		var that, dragController, renderListItem,
+		dragController = OAC.Client.StreamingVideo.Controller.annotationShapeResizeController({}),
 		annoActiveController = OAC.Client.StreamingVideo.Controller.annoActiveController({
 			// attaching specific selector items here
 			selectors: {
 				annotation: '',
 				annotationlist: ':parent',
-				bodycontent: '.bodyContent',
-				deleteButton: '.button.delete'
+				bodycontent: '> .bodyContent',
+				editbutton: '> .bodyContent > .button.edit',
+				editarea: '> .editArea',
+				textarea: '> .editArea > textarea',
+				updatebutton: '> .editArea > .button.update',
+				deletebutton: '> .button.delete'
 			}
 		});
+		
+		
 		
 		
 		that = MITHGrid.Application.initApp("OAC.Client.StreamingVideo", container, $.extend(true, {}, options, {
@@ -63,7 +68,15 @@
 							});
 							
 							that.update = function(item) {
-								
+								if(item.active[0]) {
+									c.attr({
+										opacity: 1
+									}).toFront();
+								} else {
+									c.attr({
+										opacity:0.5
+									}).toBack();
+								}
 								// receiving the Object passed through
 								// model.updateItems in move()
 								try {
@@ -158,10 +171,16 @@
 								fill: "red"
 							});
 							
-							
-							
 							that.update = function(item) {
-								if(item.active[0])
+								if(item.active[0]) {
+									c.attr({
+										opacity: 1
+									}).toFront();
+								} else {
+									c.attr({
+										opacity:0.5
+									}).toBack();
+								}
 								
 								// receiving the Object passed through
 								// model.updateItems in move()
@@ -259,13 +278,29 @@
 							itemEl = renderListItem(item, container);
 							
 							// attach the binding controller
-							annoActiveController.bind(itemEl, {
+							that.annoEvents = annoActiveController.bind(itemEl, {
 								model: model,
 								itemId: itemId
 							});
 							
+							that.updateEventHandle = function(id, data) {
+								if(id === itemId) {
+									model.updateItems([{
+										id: itemId,
+										bodyContent: data
+									}]);
+								}
+							};
+							
+							that.annoEvents.events.eventUpdate.addListener(that.updateEventHandle);
+							
 							that.update = function(item) {
-								renderListItem(item, container);
+								if(item.active[0]) {
+									itemEl.addClass('selected');
+								} else {
+									itemEl.removeClass('selected');
+								}
+								// renderListItem(item, container);
 							};
 							
 							that.remove = function() {
@@ -286,11 +321,22 @@
 
 							// attaching controller to make the
 							// HTML highlighted when shape is selected
-							annoActiveController.bind(itemEl, {
+							that.annoEvents = annoActiveController.bind(itemEl, {
 								model: model,
 								itemId: itemId
 							});
 
+							that.updateEventHandle = function(id, data) {
+								if(id === itemId) {
+									model.updateItems([{
+										id: itemId,
+										bodyContent: data
+									}]);
+								}
+							};
+							
+							that.annoEvents.events.eventUpdate.addListener(that.updateEventHandle);
+							
 							that.update = function(item) {
 								renderListItem(item, container);
 							};
@@ -307,38 +353,25 @@
 		}));
 	
 		renderListItem = function(item, container) {
-			var className = (item.active)?'anno_item selected':'anno_item',
+			var className = (item.active[0])?'anno_item selected':'anno_item',
 			el = '<div id="'+item.id[0]+'" class="'+className+'">'+
-			'<p>'+item.creator[0]+'</p>'+
+			'<div class="editArea">'+
+			'<textarea class="bodyContentTextArea">'+item.bodyContent[0]+'</textarea>'+
+			'<br/>'+
+			'<div id="update'+item.id[0]+'" class="button update">Update</div>'+
+			'</div>'+
+			'<div class="bodyContent">'+
 			'<p>'+item.bodyContent[0]+'</p>'+
-			'<p>'+item.x[0]+'<br/>'+
-			item.y[0]+'<br/>'+
-			item.w[0]+'<br/>'+
-			item.h[0]+'</p>'+
-			'<div id="delete'+item.id[0]+'" class="button delete">X</div>'+
+			'<div id="#edit'+item.id[0]+'" class="button edit">Edit</div>'+
+			'</div>'+
 			'</div>';
 			$("#"+item.id[0]).remove();
+			
 			$(container).append(el);
+			$("#"+item.id[0]+' > .editArea').hide();
 			return $("#"+$(container).attr('id')+" > #"+item.id[0]);
 		};
-		renderEditMenu = function(item, container) {
-			var el = '<div id="edit'+item.id[0]+'" class="editAnno">'+
-			'<div id="edit" class="button">^^</div>'+
-			'<div id="del" class="button">X</div>'+
-			'</div>', x, y;
-			
-			$(container).append(el);
-			el = $("#edit"+item.id[0]);
-			x = (item.x[0] - item.w[0]);
-			y = (item.y[0] - el.height());
-			
-			$("#edit"+item.id[0]).attr({
-				x: x,
-				y: y
-			
-			});
-			return el;
-		};
+	
 		
 		that.ready(function() {
 			// This has been extracted into

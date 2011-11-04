@@ -57,7 +57,6 @@
 				attrs.height = extents.height + (2 * padding);
 				attrs.x = (extents.x - (padding/8)) - (attrs.width/2);
 				attrs.y = (extents.y - (padding/8)) - (attrs.height/2);
-				console.log('calc factors done, got attrs: '+JSON.stringify(attrs));
 				calcHandles(attrs);
 			};
 			
@@ -101,13 +100,124 @@
 					});	
 					// that.handleSet.push(that.svgBBox);
 					
+					if(that.midDrag !== undefined) {
+						var nx, ny, x, y;
+						// Attaching listener to drag-only handle (that.midDrag)
+						that.midDrag.drag(
+							function(dx, dy) {
+								// drag
+								// nw = extents.width + 2 * dx * factors.x + (padding * 2);
+								// nh = extents.height + 2 * dy * factors.y + (padding * 2);
+								nx = (extents.x) - (extents.width/2) + dx - padding;
+								ny = (extents.y) - (extents.height/2) + dy - padding;
+								x = extents.x + dx;
+								y = extents.y + dy;
+
+								that.svgBBox.attr({
+									x: nx,
+									y: ny
+								});
+
+								calcHandles({
+									x: nx,
+									y: ny,
+									width: extents.width + (padding * 2),
+									height: extents.height + (padding * 2)
+								});
+							},
+							function(x, y, e) {
+								// start
+								ox = e.offsetX;
+								oy = e.offsetY;
+
+								calcFactors();
+							},
+							function() {
+								// end
+								var pos = {
+									x: x,
+									y: y
+								};
+								that.eventDrag.fire(that.rendering.id, pos);
+							}
+						);
+
+					} 
+
+					// Attaching drag and resize handlers
+					var w, h, pos;
+					that.handleSet.drag(
+
+						function(dx, dy) {
+							var nx, ny, nw, nh;
+							if(factors.x == 0 && factors.y == 0) {
+								nx = attrs.x + (dx - (attrs.width/2));
+								ny = attrs.y + (dy - (attrs.height/2));
+								that.svgBBox.attr({
+									x: nx,
+									y: ny
+								});
+
+								calcHandles({
+									x: attrs.x,
+									y: attrs.y,
+									width: attrs.width,
+									height: attrs.height
+								});
+							}
+							else {
+								w = extents.width + 2 * dx * factors.x;
+								h = extents.height + 2 * dy * factors.y;
+								nw = extents.width + 2 * dx * factors.x + (padding * 2);
+								nh = extents.height + 2 * dy * factors.y + (padding * 2);
+								nx = (extents.x - (padding/4)) - (nw/2);
+								ny = (extents.y - (padding/4)) - (nh/2);
+								that.svgBBox.attr({
+									x: nx,
+									y: ny,
+									width:  nw,
+									height: nh
+								});
+								calcHandles({
+									x: nx,
+									y: ny,
+									width: nw,
+									height: nh
+								});
+							}
+						},
+					    function(x, y, e) {
+							ox = e.offsetX;
+							oy = e.offsetY;
+
+							calcFactors();
+
+						},
+						function() {
+							// update 
+							pos = {
+								width: w,
+								height: h
+							};
+							that.eventResize.fire(that.rendering.id, pos);
+						}
+					);
+					
+					
 				} else {
 					// show all the boxes and 
 					// handles
 					that.svgBBox.show();
+					// adjust the SvgBBox to be around new
+					// shape
+					that.svgBBox.attr({
+						x: attrs.x,
+						y: attrs.y,
+						width: attrs.width,
+						height: attrs.height
+					});
 					that.handleSet.show();
-					that.midDrag.show();
-				
+					that.midDrag.show().toFront();
 				} 
 			};
 			
@@ -264,120 +374,15 @@
 			
 			calcFactors();
 			drawHandles();
-			
-			
-			if(that.midDrag !== undefined) {
-				var nx, ny, x, y;
-				// Attaching listener to drag-only handle (that.midDrag)
-				that.midDrag.drag(
-					function(dx, dy) {
-						if('dragging '+dx+ '  '+dy);
-						// drag
-						// nw = extents.width + 2 * dx * factors.x + (padding * 2);
-						// nh = extents.height + 2 * dy * factors.y + (padding * 2);
-						nx = (extents.x) - (extents.width/2) + dx - padding;
-						ny = (extents.y) - (extents.height/2) + dy - padding;
-						x = extents.x + dx;
-						y = extents.y + dy;
-						
-						that.svgBBox.attr({
-							x: nx,
-							y: ny
-						});
-						
-						calcHandles({
-							x: nx,
-							y: ny,
-							width: extents.width + (padding * 2),
-							height: extents.height + (padding * 2)
-						});
-					},
-					function(x, y, e) {
-						// start
-						ox = e.offsetX;
-						oy = e.offsetY;
-						console.log('startDrag '+ox+' '+oy);
-						calcFactors();
-					},
-					function() {
-						// end
-						var pos = {
-							x: x,
-							y: y
-						};
-						that.eventDrag.fire(that.rendering.id, pos);
-					}
-				);
-			
-			} 
-			
-			// Attaching drag and resize handlers
-			var w, h, pos;
-			that.handleSet.drag(
-				
-				function(dx, dy) {
-					var nx, ny, nw, nh;
-					if(factors.x == 0 && factors.y == 0) {
-						nx = attrs.x + (dx - (attrs.width/2));
-						ny = attrs.y + (dy - (attrs.height/2));
-						that.svgBBox.attr({
-							x: nx,
-							y: ny
-						});
-						
-						calcHandles({
-							x: attrs.x,
-							y: attrs.y,
-							width: attrs.width,
-							height: attrs.height
-						});
-					}
-					else {
-						w = extents.width + 2 * dx * factors.x;
-						h = extents.height + 2 * dy * factors.y;
-						nw = extents.width + 2 * dx * factors.x + (padding * 2);
-						nh = extents.height + 2 * dy * factors.y + (padding * 2);
-						nx = (extents.x - (padding/4)) - (nw/2);
-						ny = (extents.y - (padding/4)) - (nh/2);
-						that.svgBBox.attr({
-							x: nx,
-							y: ny,
-							width:  nw,
-							height: nh
-						});
-						calcHandles({
-							x: nx,
-							y: ny,
-							width: nw,
-							height: nh
-						});
-					}
-				},
-			    function(x, y, e) {
-					ox = e.offsetX;
-					oy = e.offsetY;
-				
-					calcFactors();
-				
-				},
-				function() {
-					// update 
-					pos = {
-						width: w,
-						height: h
-					};
-					that.eventResize.fire(that.rendering.id, pos);
-				}
-			);
-			
 		};
 		
 		// Function to call in order to "de-activate" the edit box
 		// (i.e. make it hidden)
 		that.deActivateEditBox = function() {
 			that.handleSet.hide();
-			that.midDrag.hide();
+			
 			that.svgBBox.hide();
+			that.midDrag.hide();
 		};
 		
 		return that;
@@ -395,24 +400,79 @@
 			
 			bodyContent = binding.locate('bodycontent');
 			allAnnos = binding.locate('annotations');
+			textArea = binding.locate('textarea');
+			editArea = binding.locate('editarea');
+			editButton = binding.locate('editbutton');
+			updateButton = binding.locate('updatebutton');
 			deleteButton = binding.locate('deletebutton');
+			
+			console.log('editButton: '+JSON.stringify(editButton));
 
-			$("body").bind("svgElementClicked", function(e, id) {
+			// Events 
+			binding.events = {};
+			binding.events.eventClick = MITHGrid.initEventFirer(true, false);
+			binding.events.eventDelete = MITHGrid.initEventFirer(true, false);
+			binding.events.eventUpdate = MITHGrid.initEventFirer(true, false);
+			binding.renderings = {};
+			binding.active = false;
+			// Event registration function - ties elements to
+			//  event handlers above
+			binding.registerRendering = function(rendering) {
+				renderings[rendering.id] = rendering;
 				
-				if(opts.itemId === id) {
-					// update the item
-					opts.model.updateItems([{
-						id: opts.itemId,
-						active: true
-					}]);
-					// $(allAnnos).removeClass('selected');
-					// annoEl.addClass('selected');
+				if(rendering.clickEventHandle !== undefined) {
+					binding.events.eventClick.addListener(rendering.clickEventHandle);
+				} 
+				if(rendering.deleteEventHandle !== undefined) {
+					
+				}
+			}; 
+			
+			binding.removeRendering = function(rendering) {
+				var tmp = {};
+				$.each(binding.renderings, function(i,o) {
+					if(i !== rendering.id) {
+						tmp[i] = o;
+					} 
+				});
+				binding.renderings = $.extend(true, {}, tmp);
+			};
+			
+			editStart = function() {
+				
+				$(editArea).show();
+				$(bodyContent).hide();
+				binding.active = true;
+			};
+			
+			editEnd = function() {
+				
+				$(editArea).hide();
+				$(bodyContent).show();
+				binding.active = false;
+			};
+			
+			editUpdate = function(e) {
+				e.preventDefault();
+				
+				var data = $(textArea).val();
+				binding.events.eventUpdate.fire(opts.itemId, data);
+				editEnd();
+			};
+			
+			$(editButton).live('click', function(e) {
+				e.preventDefault();
+				if(binding.active) {
+					editEnd();
+				} else {
+					editStart();
 				}
 			});
 			
+			$(updateButton).live('click', editUpdate);
+			
+			
 		};
-		
-		
 		return that;
 	};	
 	
@@ -550,16 +610,16 @@
 			
 			};
 			
-			binding.unRegisterRendering = function(rendering) {
+			binding.removeRendering = function(rendering) {
 				var tmp = {}, el;
 				if(rendering.eventClickHandle !== undefined){
 					binding.event.eventClick.removeListener(rendering.eventClickHandle);
 				}
 				if(rendering.eventResizeHandle !== undefined) {
-					binding.event.eventResize.removeListener(rendering.eventResizeHandle);
+					that.editBoxController.eventResize.removeListener(rendering.eventResizeHandle);
 				}
 				if(rendering.eventMoveHandle !== undefined) {
-					binding.event.eventMove.removeListener(rendering.eventMoveHandle);
+					that.editBoxController.eventDrag.removeListener(rendering.eventMoveHandle);
 				}
 				$.each(binding.renderings, function(i,o) {
 					if(i !== rendering.id) {
