@@ -98,7 +98,6 @@
 						stroke: 'green',
 						'stroke-dasharray': ["--"]
 					});	
-					// that.handleSet.push(that.svgBBox);
 					
 					if(that.midDrag !== undefined) {
 						var nx, ny, x, y;
@@ -108,8 +107,8 @@
 								// drag
 								// nw = extents.width + 2 * dx * factors.x + (padding * 2);
 								// nh = extents.height + 2 * dy * factors.y + (padding * 2);
-								nx = (extents.x) - (extents.width/2) + dx - padding;
-								ny = (extents.y) - (extents.height/2) + dy - padding;
+								nx = (attrs.x) + dx;
+								ny = (attrs.y) + dy;
 								x = extents.x + dx;
 								y = extents.y + dy;
 
@@ -117,12 +116,12 @@
 									x: nx,
 									y: ny
 								});
-
+								
 								calcHandles({
 									x: nx,
 									y: ny,
-									width: extents.width + (padding * 2),
-									height: extents.height + (padding * 2)
+									width: attrs.width,
+									height: attrs.height
 								});
 							},
 							function(x, y, e) {
@@ -141,9 +140,8 @@
 								that.eventDrag.fire(that.rendering.id, pos);
 							}
 						);
-
 					} 
-
+					
 					// Attaching drag and resize handlers
 					var w, h, pos;
 					that.handleSet.drag(
@@ -373,6 +371,7 @@
 			paper = svgTarget.paper;
 			
 			calcFactors();
+			console.log('editBox calls drawhandles');
 			drawHandles();
 		};
 		
@@ -387,6 +386,7 @@
 		
 		return that;
 	};
+	
 	
 	
 	OAC.Client.StreamingVideo.Controller.annoActiveController = function(options) {
@@ -406,7 +406,6 @@
 			updateButton = binding.locate('updatebutton');
 			deleteButton = binding.locate('deletebutton');
 			
-			console.log('editButton: '+JSON.stringify(editButton));
 
 			// Events 
 			binding.events = {};
@@ -439,14 +438,13 @@
 			};
 			
 			editStart = function() {
-				
 				$(editArea).show();
 				$(bodyContent).hide();
 				binding.active = true;
+				binding.events.eventClick.fire(opts.itemId);
 			};
 			
 			editEnd = function() {
-				
 				$(editArea).hide();
 				$(bodyContent).show();
 				binding.active = false;
@@ -470,7 +468,9 @@
 			});
 			
 			$(updateButton).live('click', editUpdate);
-			
+			$(annoEl).live('click', function(e) {
+				binding.events.eventClick.fire(opts.itemId);
+			});
 			
 		};
 		return that;
@@ -583,6 +583,7 @@
 		var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.canvasClickController", options);
 		that.options = options;
 		that.editBoxController = OAC.Client.StreamingVideo.Controller.annotationEditSelectionGrid({});
+		
 		// Create the object passed back to the Presentation
 		that.applyBindings = function(binding, opts) {
 			var ox, oy, extents, activeId, container = binding.locate('paper'),
@@ -595,7 +596,6 @@
 			binding.event = {};
 			binding.event.eventClick = MITHGrid.initEventFirer(true, false);
 			
-			
 			binding.renderings = {};
 			
 			binding.curRendering;
@@ -607,7 +607,10 @@
 				if(rendering.eventClickHandle !== undefined){
 					binding.event.eventClick.addListener(rendering.eventClickHandle);
 				}
-			
+				if(rendering.shapeIsActive !== undefined) {
+					// register the rendering shape click event
+					rendering.shapeIsActive.addListener(attachDragResize);
+				}
 			};
 			
 			binding.removeRendering = function(rendering) {
@@ -629,12 +632,40 @@
 				binding.renderings = $.extend(true, {}, tmp);
 			};
 			
+			attachDragResize = function(id) {
+				
+				if((binding.curRendering !== undefined) && (id === binding.curRendering.id)) {
+					return;
+				}
+				var o = binding.renderings[id];
+				if(o === undefined) {
+					// de-activate rendering and all other listeners
+					binding.event.eventClick.fire('');
+					// hide the editBox
+					that.editBoxController.deActivateEditBox();
+					binding.curRendering = undefined;
+					return false;
+				}
+				that.editBoxController.bind(o.shape, {
+					renderObj: o
+				});
+				
+				// Attach necessary event firers
+				if(o.eventResizeHandle !== undefined) {
+					that.editBoxController.eventResize.addListener(o.eventResizeHandle);
+				}
+				if(o.eventMoveHandle !== undefined) {
+					that.editBoxController.eventDrag.addListener(o.eventMoveHandle);
+				}
+				
+				binding.curRendering = o;
+			};
 			
+		
 			$(container).bind('mousedown', function(e) {
 				activeId = '';
 				ox = Math.abs(e.pageX - offset.left);
 				oy = Math.abs(e.pageY - offset.top);
-				
 				$.each(binding.renderings, function(i, o) {
 					extents = o.getExtents();
 					dx = Math.abs(ox - extents.x);
@@ -645,27 +676,14 @@
 							if((binding.curRendering === undefined) || (o.id !== binding.curRendering.id)) {
 								
 								binding.event.eventClick.fire(o.id);
-							
-								that.editBoxController.bind(o.shape, {
-									renderObj: o
-								});
-								
-								// Attach necessary event firers
-								if(o.eventResizeHandle !== undefined) {
-									that.editBoxController.eventResize.addListener(o.eventResizeHandle);
-								}
-								if(o.eventMoveHandle !== undefined) {
-									that.editBoxController.eventDrag.addListener(o.eventMoveHandle);
-								}
-								
-								binding.curRendering = o;
+								attachDragResize(o.id);
 							}
 							// stop running loop
 							return false;
 						}
 					}
 				});
-				
+
 				if((activeId.length == 0) && (binding.curRendering !== undefined)) {
 					
 					// No shapes selected - de-activate current rendering and all other possible renderings
@@ -682,11 +700,7 @@
 					// hide the editBox
 					that.editBoxController.deActivateEditBox();
 					binding.curRendering = undefined;
-				}
-				// Runs through each element on canvas
-				// paper.forEach(function(el) {
-										
-												
+				}				
 			});
 			
 		};

@@ -27,8 +27,6 @@
 		});
 		
 		
-		
-		
 		that = MITHGrid.Application.initApp("OAC.Client.StreamingVideo", container, $.extend(true, {}, options, {
 			
 			dataViews: {
@@ -54,7 +52,7 @@
 							// Note: Rectangle measurements x,y start at CENTER
 							var that = {id: itemId},
 							item = model.getItem(itemId),
-							c, ox, oy, bbox;
+							c, ox, oy, bbox, isActive = item.active[0];
 							
 							ox = (item.x - (item.w[0] / 2));
 							oy = (item.y - (item.h[0] / 2));
@@ -64,18 +62,21 @@
 							// fill and set opacity
 							c.attr({
 								fill: "red",
-								opacity: 1
+								opacity: isActive ? 1 : 0.5
 							});
 							
 							that.update = function(item) {
-								if(item.active[0]) {
+								if(item.active[0] && isActive === false) {
 									c.attr({
 										opacity: 1
 									}).toFront();
-								} else {
+									isActive = true;
+									that.shapeIsActive.fire(itemId);
+								} else if(item.active[0] === false){
 									c.attr({
 										opacity:0.5
 									}).toBack();
+									isActive = false;
 								}
 								// receiving the Object passed through
 								// model.updateItems in move()
@@ -87,11 +88,9 @@
 											width: item.w[0],
 											height: item.h[0]
 										});
-										that.shape.toBack();
 									}
 								} catch(e) {
 									console.log(e);
-									//	c.remove();
 								}
 								// Raphael object is updated
 								
@@ -111,7 +110,8 @@
 									height: c.attr("height")
 								};
 							};
-							
+							// Event that fires when shape has activated 
+							that.shapeIsActive = MITHGrid.initEventFirer(false, false);
 							
 							// Event handlers
 							that.eventClickHandle = function(id) {
@@ -283,6 +283,17 @@
 								itemId: itemId
 							});
 							
+							that.clickEventHandle = function(id) {
+								if(id === itemId) {
+									if(item.active[0] !== true){
+										model.updateItems([{
+											id: itemId,
+											active: true
+										}]);
+									}
+								}
+							};
+							
 							that.updateEventHandle = function(id, data) {
 								if(id === itemId) {
 									model.updateItems([{
@@ -291,7 +302,7 @@
 									}]);
 								}
 							};
-							
+							that.annoEvents.events.eventClick.addListener(that.clickEventHandle);
 							that.annoEvents.events.eventUpdate.addListener(that.updateEventHandle);
 							
 							that.update = function(item) {
@@ -300,7 +311,6 @@
 								} else {
 									itemEl.removeClass('selected');
 								}
-								// renderListItem(item, container);
 							};
 							
 							that.remove = function() {
