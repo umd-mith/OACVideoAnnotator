@@ -107,8 +107,8 @@
 								// drag
 								// nw = extents.width + 2 * dx * factors.x + (padding * 2);
 								// nh = extents.height + 2 * dy * factors.y + (padding * 2);
-								nx = (attrs.x) + dx;
-								ny = (attrs.y) + dy;
+								nx = attrs.x + dx;
+								ny = attrs.y + dy;
 								x = extents.x + dx;
 								y = extents.y + dy;
 
@@ -192,6 +192,7 @@
 
 						},
 						function() {
+							console.log('resize update');
 							// update 
 							pos = {
 								width: w,
@@ -371,7 +372,6 @@
 			paper = svgTarget.paper;
 			
 			calcFactors();
-			console.log('editBox calls drawhandles');
 			drawHandles();
 		};
 		

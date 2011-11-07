@@ -162,24 +162,28 @@
 						Ellipse: function(container, view, model, itemId) {
 							var that = {id: itemId},
 							item = model.getItem(itemId),
-							c;
+							c, isActive = item.active[0];
 							
 							// create the shape
 							c = view.canvas.ellipse(item.x[0], item.y[0], item.w[0]/2, item.h[0]/2);
 							// fill shape
 							c.attr({
-								fill: "red"
+								fill: "red",
+								opacity: isActive ? 1 : 0.5
 							});
 							
 							that.update = function(item) {
-								if(item.active[0]) {
+								if(item.active[0] && isActive === false) {
 									c.attr({
 										opacity: 1
 									}).toFront();
-								} else {
+									isActive = true;
+									that.shapeIsActive.fire(itemId);
+								} else if(item.active[0] === false){
 									c.attr({
 										opacity:0.5
 									}).toBack();
+									isActive = false;
 								}
 								
 								// receiving the Object passed through
@@ -254,11 +258,13 @@
 								}
 							};
 							
+							that.shapeIsActive = MITHGrid.initEventFirer(true, false);
+							
 							// register shape
 							that.shape = c;
 							
 							view.canvasEvents.registerRendering(that);
-
+							
 							return that;
 
 						}
