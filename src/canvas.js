@@ -354,7 +354,11 @@
 							that.annoEvents.events.eventUpdate.addListener(that.updateEventHandle);
 							
 							that.update = function(item) {
-								renderListItem(item, container);
+								if(item.active[0]) {
+									itemEl.addClass('selected');
+								} else {
+									itemEl.removeClass('selected');
+								}
 							};
 							that.remove = function() {
 								$("#"+item.id).remove();

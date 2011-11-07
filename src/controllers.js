@@ -11,6 +11,7 @@
 		that.svgBBox;
 		that.rendering;
 		that.handles = {};
+		that.itemMenu;
 		that.dirs = that.options.dirs ? opts.dirs:['ul','top','ur','lft','lr','btm','ll','rgt','mid'];
 		
 		// Create event firers for resize and drag
@@ -217,7 +218,66 @@
 					});
 					that.handleSet.show();
 					that.midDrag.show().toFront();
+					if(that.itemMenu) {
+						that.itemMenu.show();
+						that.itemMenu.attr({
+							x: (attrs.x + (attrs.width/2)),
+							y: attrs.y - (attrs.height/2) - (padding *2)
+						});
+					}
 				} 
+			};
+			// Draws menu that sits at the top-right corner
+			// of the shape
+			drawMenu = function(args) {
+				if(that.itemMenu === undefined) {
+					var x, y, w, h, editButton,
+					deleteButton, el;
+					
+					x = args.x + (args.width/2);
+					y = args.y - (args.height/2) - (padding * 2);
+					w = padding * 4;
+					h = padding * 2;
+					
+					editButton = {
+						x: x + 2,
+						y: y + 2,
+						w: (w/2) - 4,
+						h: h
+					};
+					
+					deleteButton = {
+						x: (editButton.x + editButton.w + 2),
+						y: y + 2,
+						w: (w/2) - 4,
+						h: h
+					};
+					
+					that.itemMenu = paper.set();
+					el = paper.rect(x,y,w,h);
+					el.attr({
+						fill: '#FFFFFF',
+						stroke: 000000
+					});
+					
+					that.itemMenu.push(el);
+					
+					el = paper.rect(editButton.x, editButton.y, editButton.w, editButton.h);
+					el.attr({
+						fill: 334009,
+						cursor:'pointer'
+					});
+					
+					that.itemMenu.push(el);
+					
+					el = paper.rect(deleteButton.x, deleteButton.y, deleteButton.w, deleteButton.h);
+					el.attr({
+						fill: 334009,
+						cursor: 'pointer'
+					});
+					
+					that.itemMenu.push(el);
+				}
 			};
 			
 			calcHandles = function(args) {
@@ -373,6 +433,7 @@
 			
 			calcFactors();
 			drawHandles();
+			drawMenu(extents);
 		};
 		
 		// Function to call in order to "de-activate" the edit box
