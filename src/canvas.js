@@ -264,7 +264,13 @@
 									}]);
 								}
 							};
-							
+						
+							that.eventDeleteHandle = function(id) {
+
+								if(id == itemId) {
+									model.removeItems([itemId]);
+								}
+							};
 							that.shapeIsActive = MITHGrid.initEventFirer(true, false);
 							
 							// register shape
