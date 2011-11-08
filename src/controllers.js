@@ -12,11 +12,16 @@
 		that.rendering;
 		that.handles = {};
 		that.itemMenu;
+		that.deleteButton; 
+		that.editButton;
+		that.menuContainer;
 		that.dirs = that.options.dirs ? opts.dirs:['ul','top','ur','lft','lr','btm','ll','rgt','mid'];
 		
 		// Create event firers for resize and drag
 		that.eventResize = MITHGrid.initEventFirer(true, false);	
 		that.eventDrag = MITHGrid.initEventFirer(true, false);
+		that.eventEdit = MITHGrid.initEventFirer(true, false);
+		that.eventDelete = MITHGrid.initEventFirer(true, false);
 		
 		that.applyBindings = function(binding, opts) {
 			var ox, oy, factors = {}, extents, svgTarget, paper, attrs = {},
@@ -59,6 +64,7 @@
 				attrs.x = (extents.x - (padding/8)) - (attrs.width/2);
 				attrs.y = (extents.y - (padding/8)) - (attrs.height/2);
 				calcHandles(attrs);
+				if(that.itemMenu) drawMenu(attrs);
 			};
 			
 			drawHandles = function() {
@@ -124,6 +130,14 @@
 									width: attrs.width,
 									height: attrs.height
 								});
+								if(that.itemMenu) {
+									drawMenu({
+										x: nx,
+										y: ny,
+										width: attrs.width,
+										height: attrs.height
+									});
+								}
 							},
 							function(x, y, e) {
 								// start
@@ -139,6 +153,7 @@
 									y: y
 								};
 								that.eventDrag.fire(that.rendering.id, pos);
+								
 							}
 						);
 					} 
@@ -183,6 +198,14 @@
 									width: nw,
 									height: nh
 								});
+								if(that.itemMenu) {
+									drawMenu({
+										x: nx,
+										y: ny,
+										width: nw,
+										height: nh
+									});
+								}
 							}
 						},
 					    function(x, y, e) {
@@ -200,6 +223,7 @@
 								height: h
 							};
 							that.eventResize.fire(that.rendering.id, pos);
+						
 						}
 					);
 					
@@ -220,10 +244,7 @@
 					that.midDrag.show().toFront();
 					if(that.itemMenu) {
 						that.itemMenu.show();
-						that.itemMenu.attr({
-							x: (attrs.x + (attrs.width/2)),
-							y: attrs.y - (attrs.height/2) - (padding *2)
-						});
+						drawMenu(attrs);
 					}
 				} 
 			};
@@ -231,53 +252,96 @@
 			// of the shape
 			drawMenu = function(args) {
 				if(that.itemMenu === undefined) {
-					var x, y, w, h, editButton,
-					deleteButton, el;
+					var x, y, w, h, dAttrs, eAttrs, el;
 					
 					x = args.x + (args.width/2);
-					y = args.y - (args.height/2) - (padding * 2);
-					w = padding * 4;
-					h = padding * 2;
+					y = args.y - (args.height/2) - (padding * 4);
+					w = 100;
+					h = 20;
 					
-					editButton = {
+					eAttrs = {
 						x: x + 2,
 						y: y + 2,
 						w: (w/2) - 4,
-						h: h
+						h: h - (h/8)
 					};
 					
-					deleteButton = {
-						x: (editButton.x + editButton.w + 2),
+					dAttrs = {
+						x: (eAttrs.x + eAttrs.w + 2),
 						y: y + 2,
 						w: (w/2) - 4,
-						h: h
+						h: h - (h/8)
 					};
 					
 					that.itemMenu = paper.set();
-					el = paper.rect(x,y,w,h);
-					el.attr({
+					that.menuContainer = paper.rect(x,y,w,h);
+					that.menuContainer.attr({
 						fill: '#FFFFFF',
-						stroke: 000000
+						stroke: '#000'
 					});
 					
-					that.itemMenu.push(el);
+					that.itemMenu.push(that.menuContainer);
 					
-					el = paper.rect(editButton.x, editButton.y, editButton.w, editButton.h);
-					el.attr({
+					that.editButton = paper.rect(eAttrs.x, eAttrs.y, eAttrs.w, eAttrs.h);
+					that.editButton.attr({
 						fill: 334009,
 						cursor:'pointer'
 					});
 					
-					that.itemMenu.push(el);
+					that.itemMenu.push(that.editButton);
 					
-					el = paper.rect(deleteButton.x, deleteButton.y, deleteButton.w, deleteButton.h);
-					el.attr({
+					that.deleteButton = paper.rect(dAttrs.x, dAttrs.y, dAttrs.w, dAttrs.h);
+					that.deleteButton.attr({
 						fill: 334009,
 						cursor: 'pointer'
 					});
 					
-					that.itemMenu.push(el);
+					that.itemMenu.push(that.deleteButton);
+					// attach event firers
+					that.editButton.mousedown(function() {
+						if(that.rendering !== undefined){
+							that.eventEdit.fire(that.rendering.id);
+						}
+					});
+					
+					that.deleteButton.mousedown(function() {
+						if(that.rendering !== undefined) {
+							that.eventDelete.fire(that.rendering.id);
+							
+							itemDeleted();
+							
+						}
+					});
+					
+				} else {
+					var x, y, dAttrs, eAttrs;
+					
+					x = args.x + (args.width/2);
+					y = args.y - (padding * 4) - 2;
+					
+					eAttrs = {
+						x: (x + 2),
+						y: (y + 2)
+					};
+					
+					dAttrs = {
+						x: (eAttrs.x + that.editButton.attr('width') + 2),
+						y: y + 2
+					};
+					that.menuContainer.attr({x: x, y: y});
+					that.editButton.attr(eAttrs);
+					that.deleteButton.attr(dAttrs);
 				}
+			};
+			
+			itemDeleted = function() {
+				// set rendering to undefined
+				that.rendering = undefined;
+				
+				that.itemMenu.hide();
+				that.svgBBox.hide();
+				that.handleSet.hide();
+				that.midDrag.hide();
 			};
 			
 			calcHandles = function(args) {
@@ -718,7 +782,9 @@
 				if(o.eventMoveHandle !== undefined) {
 					that.editBoxController.eventDrag.addListener(o.eventMoveHandle);
 				}
-				
+				if(o.eventDeleteHandle !== undefined) {
+					that.editBoxController.eventDelete.addListener(o.eventDeleteHandle);
+				}
 				binding.curRendering = o;
 			};
 			
