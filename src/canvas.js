@@ -11,7 +11,6 @@
 	
 	OAC.Client.StreamingVideo.initApp = function(container, options) {
 		var that, dragController, renderListItem,
-		dragController = OAC.Client.StreamingVideo.Controller.annotationShapeResizeController({}),
 		annoActiveController = OAC.Client.StreamingVideo.Controller.annoActiveController({
 			// attaching specific selector items here
 			selectors: {

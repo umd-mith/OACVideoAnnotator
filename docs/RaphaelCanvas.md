@@ -33,3 +33,8 @@ presentation.canvas
 
 The Raphaël canvas is available as the .canvas property on the presentation
 object.
+
+
+Events
+---------
+
