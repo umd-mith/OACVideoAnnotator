@@ -9,6 +9,8 @@
 	OAC.namespace("Client");
 	OAC.Client.namespace("StreamingVideo");
 	
+	
+	
 	OAC.Client.StreamingVideo.initApp = function(container, options) {
 		var that, dragController, renderListItem,
 		annoActiveController = OAC.Client.StreamingVideo.Controller.annoActiveController({
@@ -47,6 +49,14 @@
 					container: "#canvasSVG",
 					dataView: 'drawspace',
 					lenses: {
+						/*
+						* The following are lenses for shapes that
+						* are found in the dataStore. These items are using
+						* the MITHGrid.Presentation.RaphaelCanvas.canvas 
+						* object, which is a Raphaël paper object, to draw
+						* themselves. 
+						*/
+						
 						Rectangle: function(container, view, model, itemId) {
 							// Note: Rectangle measurements x,y start at CENTER
 							var that = {id: itemId},
@@ -70,12 +80,14 @@
 										opacity: 1
 									}).toFront();
 									isActive = true;
-									that.shapeIsActive.fire(itemId);
-								} else if(item.active[0] === false){
+									
+									view.editBoundingBox.attachRendering(that);
+								} else if(item.active[0] === false && isActive === true){
 									c.attr({
 										opacity:0.5
 									}).toBack();
 									isActive = false;
+									view.editBoundingBox.detachRendering();
 								}
 								// receiving the Object passed through
 								// model.updateItems in move()

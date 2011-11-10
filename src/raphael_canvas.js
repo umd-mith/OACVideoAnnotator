@@ -10,7 +10,8 @@ Presentations for canvas.js
 		selectors: {
 			paper: 'svg'
 		}
-	});
+	}),
+	editBoxController = OAC.Client.StreamingVideo.Controller.annotationEditSelectionGrid({});
 	
 	
 	MITHGrid.Presentation.namespace("AnnotationList");
@@ -57,25 +58,29 @@ Presentations for canvas.js
 			paper: that.canvas
 		});
 		
-		that.clickEventHandle = function(id) {
-			
-			that.editBoxController.bind(c, {
-				model: model,
-				itemId: itemId,
-				calculate: {
-					extents: function() {
-						return {
-							x: c.attr("x") + (c.attr("width")/2),
-							y: c.attr("y") + (c.attr("height")/2),
-							width: c.attr("width"),
-							height: c.attr("height")
-						};
-					}
-				},
-				x: 'x',
-				y: 'y'
-			});
-		};
+		that.editBoundingBox = editBoxController.bind($(container), {
+			paper: that.canvas
+		});
+		
+		// that.clickEventHandle = function(id) {
+		// 		
+		// 		that.editBoxController.bind(c, {
+		// 			model: model,
+		// 			itemId: itemId,
+		// 			calculate: {
+		// 				extents: function() {
+		// 					return {
+		// 						x: c.attr("x") + (c.attr("width")/2),
+		// 						y: c.attr("y") + (c.attr("height")/2),
+		// 						width: c.attr("width"),
+		// 						height: c.attr("height")
+		// 					};
+		// 				}
+		// 			},
+		// 			x: 'x',
+		// 			y: 'y'
+		// 		});
+		// 	};
 		
 		
 		return that;
