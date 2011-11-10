@@ -79,9 +79,6 @@
 			
 			// Function for applying a new shape to the bounding box
 			binding.attachRendering = function(rendering) {
-				if(that.rendering !== undefined) {
-					binding.deActivateEditBox();
-				}
 				
 				// register the rendering
 				that.rendering = rendering;
@@ -91,11 +88,25 @@
 				calcFactors();
 				drawHandles();
 				
+				if(that.rendering.eventResizeHandle !== undefined) {
+					that.eventResize.addListener(that.rendering.eventResizeHandle);
+				}
+				if(that.rendering.eventMoveHandle !== undefined) {
+					that.eventDrag.addListener(that.rendering.eventMoveHandle);
+				}
 			};
 			
 			// Function to call in order to "de-activate" the edit box
 			// (i.e. make it hidden)
 			binding.detachRendering = function() {
+				
+				if(that.rendering.eventResizeHandle !== undefined) {
+					that.eventResize.removeListener(that.rendering.eventResizeHandle);
+				}
+				if(that.rendering.eventMoveHandle !== undefined) {
+					that.eventDrag.removeListener(that.rendering.eventMoveHandle);
+				}
+				
 				that.handleSet.hide();
 
 				that.svgBBox.hide();
@@ -310,7 +321,7 @@
 					that.midDrag.show().toFront();
 					if(that.itemMenu) {
 						that.itemMenu.show();
-						drawMenu(extents);
+						drawMenu(attrs);
 					}
 				} 
 			};

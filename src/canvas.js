@@ -196,12 +196,13 @@
 										opacity: 1
 									}).toFront();
 									isActive = true;
-									that.shapeIsActive.fire(itemId);
-								} else if(item.active[0] === false){
+									view.editBoundingBox.attachRendering(that);
+								} else if(item.active[0] === false && isActive === true){
 									c.attr({
 										opacity:0.5
 									}).toBack();
 									isActive = false;
+									view.editBoundingBox.detachRendering();
 								}
 								
 								// receiving the Object passed through
