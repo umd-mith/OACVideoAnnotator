@@ -8,10 +8,15 @@ Presentations for canvas.js
 (function($, MITHGrid) {
 	var canvasController = OAC.Client.StreamingVideo.Controller.canvasController({
 		selectors: {
-			paper: 'svg'
+			svg: ''
 		}
 	}),
-	editBoxController = OAC.Client.StreamingVideo.Controller.annotationEditSelectionGrid({});
+	editBoxController = OAC.Client.StreamingVideo.Controller.annotationEditSelectionGrid({}),
+	keyBoardController = OAC.Client.StreamingVideo.Controller.keyBoardListener({
+		selectors: {
+			doc: ''
+		}
+	});
 	
 	
 	MITHGrid.Presentation.namespace("AnnotationList");
@@ -50,9 +55,9 @@ Presentations for canvas.js
 		// @h: Integer value for height of the SVG canvas
 		that.canvas = new Raphael(id, w, h);
 		
-		
+		console.log('container for canvas: '+JSON.stringify(container));
 		// attach binding
-		that.canvasEvents = canvasController.bind($(container), {
+		that.canvasEvents = canvasController.bind(container, {
 			
 			closeEnough: 5,
 			paper: that.canvas
@@ -62,26 +67,11 @@ Presentations for canvas.js
 			paper: that.canvas
 		});
 		
-		// that.clickEventHandle = function(id) {
-		// 		
-		// 		that.editBoxController.bind(c, {
-		// 			model: model,
-		// 			itemId: itemId,
-		// 			calculate: {
-		// 				extents: function() {
-		// 					return {
-		// 						x: c.attr("x") + (c.attr("width")/2),
-		// 						y: c.attr("y") + (c.attr("height")/2),
-		// 						width: c.attr("width"),
-		// 						height: c.attr("height")
-		// 					};
-		// 				}
-		// 			},
-		// 			x: 'x',
-		// 			y: 'y'
-		// 		});
-		// 	};
+		that.keyBoardListener = keyBoardController.bind($(document), {});
 		
+		app.events.onActiveAnnotationChange.addListener(function(id) {
+			console.log('active anno change '+id);
+		});
 		
 		return that;
 	};

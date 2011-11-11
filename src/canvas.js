@@ -28,8 +28,12 @@
 		});
 		
 		
-		that = MITHGrid.Application.initApp("OAC.Client.StreamingVideo", container, $.extend(true, {}, options, {
-			
+		app = MITHGrid.Application.initApp("OAC.Client.StreamingVideo", container, $.extend(true, {}, options, {
+			variables: {
+				ActiveAnnotation: {
+					is: 'rw'
+				}
+			},
 			dataViews: {
 				// view for the space in which data from shapes
 				// is drawn
@@ -73,7 +77,7 @@
 								fill: "red",
 								opacity: isActive ? 1 : 0.5
 							});
-							
+
 							that.update = function(item) {
 								if(item.active[0] && isActive === false) {
 									c.attr({
@@ -126,6 +130,7 @@
 							
 							// Event handlers
 							that.eventClickHandle = function(id) {
+								console.log('balls yeah');
 								if(id == itemId) {
 									// Selected
 									model.updateItems([{
@@ -174,7 +179,7 @@
 							that.shape = c;
 							
 							view.canvasEvents.registerRendering(that);
-							
+							app.events.onActiveAnnotationChange.addListener(that.eventClickHandle);
 							return that;
 						},
 						Ellipse: function(container, view, model, itemId) {
@@ -240,6 +245,7 @@
 							
 							// Event handlers
 							that.eventClickHandle = function(id) {
+								console.log('event click');
 								if(id == itemId) {
 									// Selected
 									model.updateItems([{
@@ -289,7 +295,7 @@
 							that.shape = c;
 							
 							view.canvasEvents.registerRendering(that);
-							
+							app.onActiveAnnotationChange.addListener(that.eventClickHandle);
 							return that;
 
 						}
@@ -418,31 +424,31 @@
 		};
 	
 		
-		that.ready(function() {
+		app.ready(function() {
 			// This has been extracted into
 			// genApps.js and controls.js
 			
 			var activeShapes = [], 
-			prep = that.dataStore.canvas.prepare(["!active"]);
+			prep = app.dataStore.canvas.prepare(["!active"]);
 			
 			// attach clickEvent listener
 			$("body").live('shapeActive', function(e, id) {
 				activeShapes = prep.evaluate([true]);
 				$.each(activeShapes, function(i, o) {
-					that.dataStore.canvas.updateItems([{
+					app.dataStore.canvas.updateItems([{
 						id: o,
 						active: false
 					}]);
 				});
 				
-				that.dataStore.canvas.updateItems([{
+				app.dataStore.canvas.updateItems([{
 					id: id,
 					active: true
 				}]);
 			});
 		});
 		
-		return that;
+		return app;
 	};
 }(jQuery, MITHGrid, OAC));	
 

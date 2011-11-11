@@ -18,7 +18,7 @@
 		that.options = options;
 		
 		that.applyBindings = function(binding, opts) {
-			var doc = binding.locate('');
+			var doc = binding.locate('doc');
 			
 			binding.events = {
 				eventDelete: MITHGrid.initEventFirer(true, true)
@@ -675,11 +675,11 @@
 		
 		// Create the object passed back to the Presentation
 		that.applyBindings = function(binding, opts) {
-			var ox, oy, extents, activeId, container = binding.locate('paper'),
+			var ox, oy, extents, activeId, container = binding.locate('svg'),
 			closeEnough = opts.closeEnough, dx, dy, 
 			x, y, w, h, paper = opts.paper,
 			offset = $(container).offset();
-			
+			console.log('hiya container: '+container);
 			
 			// Creating events that the renderings will bind to
 			binding.event = {};
@@ -763,9 +763,10 @@
 				// 					that.editBoxController.eventDelete.removeListener(rendering.eventDeleteHandle);
 				// 				}
 			};
-		
+		console.log('attaching the click event to '+$(container).attr('id'));
 			$(container).bind('mousedown', function(e) {
 				activeId = '';
+				
 				ox = Math.abs(e.pageX - offset.left);
 				oy = Math.abs(e.pageY - offset.top);
 				$.each(binding.renderings, function(i, o) {
@@ -776,8 +777,10 @@
 						if(dy <= extents.height) {
 							activeId = o.id;
 							if((binding.curRendering === undefined) || (o.id !== binding.curRendering.id)) {
-								binding.event.eventClick.fire(o.id);
-								attachDragResize(o.id);
+								console.log('click');
+								// binding.event.eventClick.fire(o.id);
+								app.setActiveAnnotation(o.id);
+								// attachDragResize(o.id);
 							}
 							// stop running loop
 							return false;
