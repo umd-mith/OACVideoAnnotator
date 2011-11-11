@@ -55,7 +55,7 @@ Presentations for canvas.js
 		// @h: Integer value for height of the SVG canvas
 		that.canvas = new Raphael(id, w, h);
 		
-		console.log('container for canvas: '+JSON.stringify(container));
+		
 		// attach binding
 		that.canvasEvents = canvasController.bind(container, {
 			
@@ -69,9 +69,7 @@ Presentations for canvas.js
 		
 		that.keyBoardListener = keyBoardController.bind($(document), {});
 		
-		app.events.onActiveAnnotationChange.addListener(function(id) {
-			console.log('active anno change '+id);
-		});
+		
 		
 		return that;
 	};

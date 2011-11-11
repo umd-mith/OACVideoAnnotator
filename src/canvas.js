@@ -130,7 +130,7 @@
 							
 							// Event handlers
 							that.eventClickHandle = function(id) {
-								console.log('balls yeah');
+								
 								if(id == itemId) {
 									// Selected
 									model.updateItems([{
@@ -245,7 +245,7 @@
 							
 							// Event handlers
 							that.eventClickHandle = function(id) {
-								console.log('event click');
+								
 								if(id == itemId) {
 									// Selected
 									model.updateItems([{

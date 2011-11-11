@@ -679,7 +679,7 @@
 			closeEnough = opts.closeEnough, dx, dy, 
 			x, y, w, h, paper = opts.paper,
 			offset = $(container).offset();
-			console.log('hiya container: '+container);
+			
 			
 			// Creating events that the renderings will bind to
 			binding.event = {};
@@ -763,7 +763,7 @@
 				// 					that.editBoxController.eventDelete.removeListener(rendering.eventDeleteHandle);
 				// 				}
 			};
-		console.log('attaching the click event to '+$(container).attr('id'));
+		
 			$(container).bind('mousedown', function(e) {
 				activeId = '';
 				
@@ -777,7 +777,7 @@
 						if(dy <= extents.height) {
 							activeId = o.id;
 							if((binding.curRendering === undefined) || (o.id !== binding.curRendering.id)) {
-								console.log('click');
+								
 								// binding.event.eventClick.fire(o.id);
 								app.setActiveAnnotation(o.id);
 								// attachDragResize(o.id);
