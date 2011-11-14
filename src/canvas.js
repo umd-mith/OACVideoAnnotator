@@ -46,7 +46,6 @@
 			},
 			viewSetup: '<div id="canvasSVG" class="canvas_svg"></div>'+
 			'<div id="annoList" class="anno_list"></div>',
-		   
 			presentations: {
 				raphsvg: {
 					type: MITHGrid.Presentation.RaphaelCanvas,
@@ -86,12 +85,14 @@
 									isActive = true;
 									
 									view.editBoundingBox.attachRendering(that);
+									view.keyBoardListener.events.eventDelete.addListener(that.eventDeleteHandle);
 								} else if(item.active[0] === false && isActive === true){
 									c.attr({
 										opacity:0.5
 									}).toBack();
 									isActive = false;
 									view.editBoundingBox.detachRendering();
+									view.keyBoardListener.events.eventDelete.removeListener(that.eventDeleteHandle);
 								}
 								// receiving the Object passed through
 								// model.updateItems in move()
@@ -114,6 +115,8 @@
 							that.remove = function(item) {
 								// getting the removeItems callback
 								c.remove();
+								view.editBoundingBox.detachRendering();
+								view.keyBoardListener.events.eventDelete.removeListener(that.eventDeleteHandle);
 							};
 							// calculate the extents (x, y, width, height)
 							// of this type of shape
@@ -180,6 +183,7 @@
 							
 							view.canvasEvents.registerRendering(that);
 							app.events.onActiveAnnotationChange.addListener(that.eventClickHandle);
+							
 							return that;
 						},
 						Ellipse: function(container, view, model, itemId) {

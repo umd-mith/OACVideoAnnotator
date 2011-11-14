@@ -70,7 +70,6 @@ Presentations for canvas.js
 		that.keyBoardListener = keyBoardController.bind($(document), {});
 		
 		
-		
 		return that;
 	};
 }(jQuery, MITHGrid));

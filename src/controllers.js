@@ -18,21 +18,28 @@
 		that.options = options;
 		
 		that.applyBindings = function(binding, opts) {
-			var doc = binding.locate('doc');
+			var doc = binding.locate('doc'),
+			activeId, 
+			setActiveId = function(id) {
+				activeId = id;
+			};
+			
+			app.events.onActiveAnnotationChange.addListener(setActiveId);
 			
 			binding.events = {
 				eventDelete: MITHGrid.initEventFirer(true, true)
 			};
 			
 			$(doc).keydown(function(e) {
-				
-				// If backspace or delete is pressed, 
-				// then it is interpreted as a
-				// delete call
-				if(e.keyCode === 8 || e.keyCode === 46) {
-					// delete item
-					binding.events.eventDelete.fire();
-				
+				if(activeId !== undefined || activeId !== ''){
+					// If backspace or delete is pressed, 
+					// then it is interpreted as a
+					// delete call
+					if(e.keyCode === 8 || e.keyCode === 46) {
+						// delete item
+						binding.events.eventDelete.fire(activeId);
+						activeId = '';
+					}
 				}
 				
 			});
@@ -300,11 +307,8 @@
 								height: h
 							};
 							that.eventResize.fire(that.rendering.id, pos);
-						
 						}
 					);
-				
-					
 				} else {
 					// show all the boxes and 
 					// handles
