@@ -25,3 +25,8 @@ var MITHGrid = MITHGrid || {};
 var jQuery = jQuery || {};
 var Raphael = Raphael || {};
 var OAC = OAC || {};
+
+// Set the namespace for the StreamingVideo Annotation application
+MITHGrid.globalNamespace("OAC");
+OAC.namespace("Client");
+OAC.Client.namespace("StreamingVideo");
