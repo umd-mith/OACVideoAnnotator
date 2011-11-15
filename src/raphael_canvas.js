@@ -6,7 +6,7 @@ Presentations for canvas.js
 
 
 (function ($, MITHGrid, OAC) {
-	var canvasController, editBoxController, keyBoardController, annoActiveController;
+	var canvasController, editBoxController, keyBoardController;
 	canvasController = OAC.Client.StreamingVideo.Controller.canvasController({
 		selectors: {
 			svg: ''
@@ -20,26 +20,14 @@ Presentations for canvas.js
 			doc: ''
 		}
 	});
-	annoActiveController = OAC.Client.StreamingVideo.Controller.annoActiveController({
-		// attaching specific selector items here
-		selectors: {
-			annotation: '',
-			annotationlist: ':parent',
-			bodycontent: '> .bodyContent',
-			editbutton: '> .bodyContent > .button.edit',
-			editarea: '> .editArea',
-			textarea: '> .editArea > textarea',
-			updatebutton: '> .editArea > .button.update',
-			deletebutton: '> .button.delete'
-		}
-	});
+	
 
 
 	MITHGrid.Presentation.namespace("AnnotationList");
 	MITHGrid.Presentation.AnnotationList.initPresentation = function (container, options) {
 		var that = MITHGrid.Presentation.initPresentation("AnnotationList", container, options);
 
-		that.annoListController = annoActiveController.bind($(container), {});
+		// that.annoListController = annoActiveController.bind($(container), {});
 
 		return that;
 	};

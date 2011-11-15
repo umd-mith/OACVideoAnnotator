@@ -50,18 +50,18 @@ OAC.Client.StreamingVideo.Controller.keyBoardListener = function (options) {
 * bodyContent data.
 */
 OAC.Client.StreamingVideo.Controller.annotationEditSelectionGrid = function (options) {
-	that = MITHGrid.Controller.initRaphaelController("OAC.Client.StreamingVideo.Controller.annotationEditSelectionGrid", options);
+	var that = MITHGrid.Controller.initRaphaelController("OAC.Client.StreamingVideo.Controller.annotationEditSelectionGrid", options);
 	options = that.options;
-	that.handleSet;
-	that.midDrag;
-	that.svgBBox;
-	that.rendering;
+	that.handleSet = {};
+	that.midDrag = {};
+	that.svgBBox = {};
+	that.rendering = {};
 	that.handles = {};
-	that.itemMenu;
-	that.deleteButton;
-	that.editButton;
-	that.menuContainer;
-	that.dirs = that.options.dirs ? opts.dirs:['ul','top','ur','lft','lr','btm','ll','rgt','mid'];
+	that.itemMenu = {};
+	that.deleteButton = {};
+	that.editButton = {};
+	that.menuContainer = {};
+	that.dirs = that.options.dirs || ['ul','top','ur','lft','lr','btm','ll','rgt','mid'];
 
 	// Create event firers for resize and drag
 	that.eventResize = MITHGrid.initEventFirer(true, false);
@@ -76,7 +76,8 @@ OAC.Client.StreamingVideo.Controller.annotationEditSelectionGrid = function (opt
 that.applyBindings = function (binding, opts) {
 	var ox, oy, factors = {}, extents, svgTarget, paper = opts.paper,
 	attrs = {},
-	padding = 5;
+	padding = 5,
+	calcFactors, calcHandles, drawMenu, drawHandles;
 
 	// Function for applying a new shape to the bounding box
 	binding.attachRendering = function (rendering) {
@@ -157,7 +158,7 @@ that.applyBindings = function (binding, opts) {
 	// Draws the handles defined in that.dirs as SVG
 	// rectangles and draws the SVG bounding box
 	drawHandles = function () {
-		if(that.handleSet === undefined){
+		if($.isEmptyObject(that.handleSet)){
 			var h, handleIds = {}, cursor;
 			// draw the corner and mid-point squares
 			that.handleSet = paper.set();
@@ -181,7 +182,7 @@ that.applyBindings = function (binding, opts) {
 				stroke: 'black'
 			});
 
-			if(that.midDrag !== undefined) {
+			if(!($.isEmptyObject(that.midDrag))) {
 				that.midDrag.attr({
 					fill: 990000,
 					stroke: 'black',
@@ -198,7 +199,7 @@ that.applyBindings = function (binding, opts) {
 			// Draw the accompanying menu that sits at top-right corner
 			drawMenu(attrs);
 
-			if(that.midDrag !== undefined) {
+			if(!($.isEmptyObject(that.midDrag))) {
 				var nx, ny, x, y;
 				// Attaching listener to drag-only handle (that.midDrag)
 				that.midDrag.drag(
@@ -327,7 +328,7 @@ that.applyBindings = function (binding, opts) {
 	// Draws menu that sits at the top-right corner
 	// of the shape
 	drawMenu = function (args) {
-		if(that.itemMenu === undefined) {
+		if($.isEmptyObject(that.itemMenu)) {
 			var x, y, w, h, dAttrs, eAttrs, el;
 			x = args.x + (args.width);
 			y = args.y - (padding * 4) - 2;
@@ -579,7 +580,7 @@ OAC.Client.StreamingVideo.Controller.annoActiveController = function (options) {
 	options = that.options;
 
 	that.applyBindings = function (binding, opts) {
-		var annoEl, bodyContent, allAnnos, deleteButton;
+		var annoEl, bodyContent, allAnnos, deleteButton, editArea, textArea, editButton;
 
 		annoEl = binding.locate('annotation');
 
@@ -591,7 +592,6 @@ OAC.Client.StreamingVideo.Controller.annoActiveController = function (options) {
 		updateButton = binding.locate('updatebutton');
 		deleteButton = binding.locate('deletebutton');
 
-
 		// Events
 		binding.events = {};
 		binding.events.eventClick = MITHGrid.initEventFirer(true, false);
@@ -602,26 +602,7 @@ OAC.Client.StreamingVideo.Controller.annoActiveController = function (options) {
 
 		// Event registration function - ties elements to
 		// event handlers above
-		binding.registerRendering = function (rendering) {
-			renderings[rendering.id] = rendering;
-
-			if(rendering.clickEventHandle !== undefined) {
-				binding.events.eventClick.addListener(rendering.clickEventHandle);
-			}
-			if(rendering.deleteEventHandle !== undefined) {
-
-			}
-		};
-
-		binding.removeRendering = function (rendering) {
-			var tmp = {};
-			$.each(binding.renderings, function (i,o) {
-				if(i !== rendering.id) {
-					tmp[i] = o;
-				}
-			});
-			binding.renderings = $.extend(true, {}, tmp);
-		};
+		
 
 		editStart = function () {
 			$(editArea).show();
@@ -676,7 +657,30 @@ OAC.Client.StreamingVideo.Controller.canvasController = function (options) {
 		var ox, oy, extents, activeId, container = binding.locate('svg'),
 		closeEnough = opts.closeEnough, dx, dy,
 		x, y, w, h, paper = opts.paper,
-		offset = $(container).offset();
+		offset = $(container).offset(),
+		attachDragResize = function (id) {
+
+			if((binding.curRendering !== undefined) && (id === binding.curRendering.id)) {
+				return;
+			}
+			var o = binding.renderings[id];
+			if(o === undefined) {
+				// de-activate rendering and all other listeners
+				binding.event.eventClick.fire('');
+				// hide the editBox
+				// editBoxController.deActivateEditBox();
+				binding.curRendering = undefined;
+				return false;
+			}
+
+			binding.curRendering = o;
+		},
+		detachDragResize = function (id) {
+			if((binding.curRendering !== undefined) && (id === binding.curRendering.id)) {
+				return;
+			}
+			var o = binding.renderings[id];
+		};
 
 
 		// Creating events that the renderings will bind to
@@ -714,31 +718,6 @@ OAC.Client.StreamingVideo.Controller.canvasController = function (options) {
 			binding.renderings = $.extend(true, {}, tmp);
 		};
 
-		attachDragResize = function (id) {
-
-			if((binding.curRendering !== undefined) && (id === binding.curRendering.id)) {
-				return;
-			}
-			var o = binding.renderings[id];
-			if(o === undefined) {
-				// de-activate rendering and all other listeners
-				binding.event.eventClick.fire('');
-				// hide the editBox
-				// editBoxController.deActivateEditBox();
-				binding.curRendering = undefined;
-				return false;
-			}
-
-			binding.curRendering = o;
-		};
-
-		detachDragResize = function (id) {
-			if((binding.curRendering !== undefined) && (id === binding.curRendering.id)) {
-				return;
-			}
-			var o = binding.renderings[id];
-		};
-
 		$(container).bind('mousedown', function (e) {
 			activeId = '';
 
@@ -761,28 +740,19 @@ OAC.Client.StreamingVideo.Controller.canvasController = function (options) {
 				}
 			});
 
-			if((activeId.length == 0) && (binding.curRendering !== undefined)) {
+			if((activeId.length === 0) && (binding.curRendering !== undefined)) {
 
 				// No shapes selected - de-activate current rendering and all other possible renderings
-				// if(binding.curRendering.eventResizeHandle !== undefined) {
-					// that.editBoxController.eventResize.removeListener(binding.curRendering.eventResizeHandle);
-					// }
-					// if(binding.curRendering.eventMoveHandle !== undefined) {
-						// that.editBoxController.eventDrag.removeListener(binding.curRendering.eventMoveHandle);
-						// }
+			
+				app.setActiveAnnotation('null');
+					
+				binding.curRendering = undefined;
+			}
+		});
 
-						// de-activate rendering and all other listeners
-						// binding.event.eventClick.fire('');
-						app.setActiveAnnotation('');
-						// hide the editBox
-						// that.editBoxController.deActivateEditBox();
-						binding.curRendering = undefined;
-					}
-				});
+	};
 
-			};
-
-			return that;
-		};
+	return that;
+};
 
 } (jQuery, MITHGrid, OAC));

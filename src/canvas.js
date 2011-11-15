@@ -4,12 +4,25 @@
 	* Creates a canvas using the Raphael JS library
 	*/
 
-	
-
-
 	OAC.Client.StreamingVideo.initApp = function (container, options) {
-		var app, renderListItem;
-
+		var renderListItem, annoActiveController;
+		annoActiveController = OAC.Client.StreamingVideo.Controller.annoActiveController({
+			// attaching specific selector items here
+			selectors: {
+				annotation: '',
+				annotationlist: ':parent',
+				bodycontent: '> .bodyContent',
+				editbutton: '> .bodyContent > .button.edit',
+				editarea: '> .editArea',
+				textarea: '> .editArea > textarea',
+				updatebutton: '> .editArea > .button.update',
+				deletebutton: '> .button.delete'
+			}
+		});
+		/*
+		* Creating application to run DOM and presentations
+		*
+		*/
 		app = MITHGrid.Application.initApp("OAC.Client.StreamingVideo", container, 
 			$.extend(true, {}, options, {
 				variables: {
@@ -116,7 +129,7 @@
 
 								// Event handlers
 								that.eventClickHandle = function (id) {
-
+									console.log('event click handle in rectangular '+id);
 									if(id === itemId) {
 										// Selected
 										model.updateItems([{
@@ -306,7 +319,7 @@
 								itemEl = renderListItem(item, container);
 
 								// attach the binding controller
-								that.annoEvents = view.annoActiveController.bind(itemEl, {
+								that.annoEvents = annoActiveController.bind(itemEl, {
 									model: model,
 									itemId: itemId
 								});
@@ -414,32 +427,6 @@
 			$("#"+item.id[0]+' > .editArea').hide();
 			return $("#"+$(container).attr('id')+" > #"+item.id[0]);
 		};
-
-
-		app.ready(function () {
-			// This has been extracted into
-			// genApps.js and controls.js
-
-			var activeShapes = [],
-			prep = app.dataStore.canvas.prepare(["!active"]);
-
-			// attach clickEvent listener
-			$("body").live('shapeActive', function (e, id) {
-				activeShapes = prep.evaluate([true]);
-				$.each(activeShapes, function (i, o) {
-					app.dataStore.canvas.updateItems([{
-						id: o,
-						active: false
-					}]);
-				});
-			});
-
-			app.dataStore.canvas.updateItems([{
-				id: id,
-				active: true
-			}]);
-		
-		});
 
 		return app;
 	};
