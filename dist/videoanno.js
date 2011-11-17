@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Mon Nov 14 17:00:37 2011 -0500
+ *  Date: Tue Nov 15 16:48:17 2011 -0500
  *  
  * Educational Community License, Version 2.0
  * 
@@ -161,20 +161,19 @@ OAC.Client.namespace("StreamingVideo");(function ($, MITHGrid, OAC) {
 
 								// Event handlers
 								that.eventClickHandle = function (id) {
-									console.log('event click handle in rectangular '+id);
 									if(id === itemId) {
 										// Selected
 										model.updateItems([{
 											id: itemId,
 											active: true
-											}]);
-										} else {
-											// De-select this shape
-											model.updateItems([{
-												id: itemId,
-												active: false
-											}]);
-										}
+										}]);
+									} else {
+										// De-select this shape
+										model.updateItems([{
+											id: itemId,
+											active: false
+										}]);
+									}
 								};
 				
 								that.eventResizeHandle = function (id, pos) {
@@ -184,27 +183,27 @@ OAC.Client.namespace("StreamingVideo");(function ($, MITHGrid, OAC) {
 											id: itemId,
 											w: pos.width,
 											h: pos.height
-											}]);
-										}
-									};
+										}]);
+									}
+								};
 
-									that.eventMoveHandle = function (id, pos) {
-										if(id === itemId) {
-											// update item with new x/y
-											model.updateItems([{
-												id: itemId,
-												x: pos.x,
-												y: pos.y
-												}]);
-											}
-										};
+								that.eventMoveHandle = function (id, pos) {
+									if(id === itemId) {
+										// update item with new x/y
+										model.updateItems([{
+											id: itemId,
+											x: pos.x,
+											y: pos.y
+										}]);
+									}
+								};
 
-										that.eventDeleteHandle = function (id) {
+								that.eventDeleteHandle = function (id) {
 
-											if(id === itemId) {
-												model.removeItems([itemId]);
-											}
-										};
+									if(id === itemId) {
+										model.removeItems([itemId]);
+									}
+								};
 
 								// register shape
 								that.shape = c;
@@ -362,10 +361,10 @@ OAC.Client.namespace("StreamingVideo");(function ($, MITHGrid, OAC) {
 											model.updateItems([{
 												id: itemId,
 												active: true
-												}]);
-											}
+											}]);
 										}
-									};
+									}
+								};
 
 								that.updateEventHandle = function (id, data) {
 									if(id === itemId) {
@@ -574,7 +573,9 @@ that.applyBindings = function (binding, opts) {
 	var ox, oy, factors = {}, extents, svgTarget, paper = opts.paper,
 	attrs = {},
 	padding = 5,
-	calcFactors, calcHandles, drawMenu, drawHandles;
+	calcFactors, calcHandles, drawMenu, handleIds = {}, drawHandles, 
+	handleAttrs = {}, shapeAttr = {}, menuAttrs = {}, cursor, 
+	dAttrs = {}, eAttrs = {}, el;
 
 	// Function for applying a new shape to the bounding box
 	binding.attachRendering = function (rendering) {
@@ -582,7 +583,6 @@ that.applyBindings = function (binding, opts) {
 		// register the rendering
 		that.rendering = rendering;
 		svgTarget = that.rendering.shape;
-
 
 		calcFactors();
 		drawHandles();
@@ -616,7 +616,7 @@ that.applyBindings = function (binding, opts) {
 	};
 
 	calcFactors = function () {
-		var px, py;
+		
 		extents = that.rendering.getExtents();
 		// extents: x, y, width, height
 		px = (4 * (ox - extents.x) / extents.width) + 2;
@@ -649,14 +649,16 @@ that.applyBindings = function (binding, opts) {
 		attrs.x = (extents.x - (padding/8)) - (attrs.width/2);
 		attrs.y = (extents.y - (padding/8)) - (attrs.height/2);
 		calcHandles(attrs);
-		if(that.itemMenu) drawMenu(attrs);
+		if(that.itemMenu) {
+			drawMenu(attrs);
+		}
 	};
 
 	// Draws the handles defined in that.dirs as SVG
 	// rectangles and draws the SVG bounding box
 	drawHandles = function () {
 		if($.isEmptyObject(that.handleSet)){
-			var h, handleIds = {}, cursor;
+			
 			// draw the corner and mid-point squares
 			that.handleSet = paper.set();
 			$.each(that.handles, function (i, o) {
@@ -697,7 +699,7 @@ that.applyBindings = function (binding, opts) {
 			drawMenu(attrs);
 
 			if(!($.isEmptyObject(that.midDrag))) {
-				var nx, ny, x, y;
+				
 				// Attaching listener to drag-only handle (that.midDrag)
 				that.midDrag.drag(
 					function (dx, dy) {
@@ -705,26 +707,26 @@ that.applyBindings = function (binding, opts) {
 						// away from the lens' shape and the lens shape gets updated
 						// in dataStore
 
-						nx = attrs.x + dx;
-						ny = attrs.y + dy;
-						x = extents.x + dx;
-						y = extents.y + dy;
+						handleAttrs.nx = attrs.x + dx;
+						handleAttrs.ny = attrs.y + dy;
+						shapeAttrs.x = extents.x + dx;
+						shapeAttrs.y = extents.y + dy;
 
 						that.svgBBox.attr({
-							x: nx,
-							y: ny
+							x: handleAttrs.nx,
+							y: handleAttrs.ny
 						});
 
 						calcHandles({
-							x: nx,
-							y: ny,
+							x: handleAttrs.nx,
+							y: handleAttrs.ny,
 							width: attrs.width,
 							height: attrs.height
 						});
 						if(that.itemMenu) {
 							drawMenu({
-								x: nx,
-								y: ny,
+								x: handleAttrs.nx,
+								y: handleAttrs.ny,
 								width: attrs.width,
 								height: attrs.height
 							});
@@ -741,9 +743,10 @@ that.applyBindings = function (binding, opts) {
 					function () {
 						// end
 						var pos = {
-							x: x,
-							y: y
+							x: shapeAttrs.x,
+							y: shapeAttrs.y
 						};
+					
 						that.eventDrag.fire(that.rendering.id, pos);
 						that.rendering.shape.attr({cursor: 'default'});
 					}
@@ -751,37 +754,36 @@ that.applyBindings = function (binding, opts) {
 			}
 
 			// Attaching drag and resize handlers
-			var w, h, pos;
+			
 			that.handleSet.drag(
 				function (dx, dy) {
-					var nx, ny, nw, nh;
 					// dragging here means that as element is dragged
 					// the factorial determines in which direction the
 					// shape is pulled
-					w = extents.width + 2 * dx * factors.x;
-					h = extents.height + 2 * dy * factors.y;
-					nw = extents.width + 2 * dx * factors.x + (padding * 2);
-					nh = extents.height + 2 * dy * factors.y + (padding * 2);
-					nx = (extents.x - (padding/4)) - (nw/2);
-					ny = (extents.y - (padding/4)) - (nh/2);
+					shapeAttrs.w = extents.width + 2 * dx * factors.x;
+					shapeAttrs.h = extents.height + 2 * dy * factors.y;
+					handleAttrs.nw = extents.width + 2 * dx * factors.x + (padding * 2);
+					handleAttrs.nh = extents.height + 2 * dy * factors.y + (padding * 2);
+					handleAttrs.nx = (extents.x - (padding/4)) - (nw/2);
+					handleAttrs.ny = (extents.y - (padding/4)) - (nh/2);
 					that.svgBBox.attr({
-						x: nx,
-						y: ny,
-						width: nw,
-						height: nh
+						x: handleAttrs.nx,
+						y: handleAttrs.ny,
+						width: handleAttrs.nw,
+						height: handleAttrs.nh
 					});
 					calcHandles({
-						x: nx,
-						y: ny,
-						width: nw,
-						height: nh
+						x: handleAttrs.nx,
+						y: handleAttrs.ny,
+						width: handleAttrs.nw,
+						height: handleAttrs.nh
 					});
 					if(that.itemMenu) {
 						drawMenu({
-							x: nx,
-							y: ny,
-							width: nw,
-							height: nh
+							x: handleAttrs.nx,
+							y: handleAttrs.ny,
+							width: handleAttrs.nw,
+							height: handleAttrs.nh
 						});
 					}
 				},
@@ -795,8 +797,8 @@ that.applyBindings = function (binding, opts) {
 				function () {
 					// update
 					pos = {
-						width: w,
-						height: h
+						width: shapeAttrs.w,
+						height: shapeAttrs.h
 					};
 					that.eventResize.fire(that.rendering.id, pos);
 				}
@@ -826,28 +828,28 @@ that.applyBindings = function (binding, opts) {
 	// of the shape
 	drawMenu = function (args) {
 		if($.isEmptyObject(that.itemMenu)) {
-			var x, y, w, h, dAttrs, eAttrs, el;
-			x = args.x + (args.width);
-			y = args.y - (padding * 4) - 2;
-			w = 100;
-			h = 20;
+			
+			menuAttrs.x = args.x + (args.width);
+			menuAttrs.y = args.y - (padding * 4) - 2;
+			menuAttrs.w = 100;
+			menuAttrs.h = 20;
 
 			eAttrs = {
-				x: x + 2,
-				y: y + 2,
-				w: (w/2) - 4,
-				h: h - (h/8)
+				x: menuAttrs.x + 2,
+				y: menuAttrs.y + 2,
+				w: (menuAttrs.w/2) - 4,
+				h: menuAttrs.h - (menuAttrs.h/8)
 			};
 
 			dAttrs = {
 				x: (eAttrs.x + eAttrs.w + 2),
-				y: y + 2,
-				w: (w/2) - 4,
-				h: h - (h/8)
+				y: menuAttrs.y + 2,
+				w: (menuAttrs.w/2) - 4,
+				h: menuAttrs.h - (menuAttrs.h/8)
 			};
 
 			that.itemMenu = paper.set();
-			that.menuContainer = paper.rect(x,y,w,h);
+			that.menuContainer = paper.rect(menuAttrs.x,menuAttrs.y,menuAttrs.w,menuAttrs.h);
 			that.menuContainer.attr({
 				fill: '#FFFFFF',
 				stroke: '#000'
@@ -886,21 +888,21 @@ that.applyBindings = function (binding, opts) {
 			});
 
 		} else {
-			var x, y, dAttrs, eAttrs;
+		
 
-			x = args.x + (args.width);
-			y = args.y - (padding * 4) - 2;
+			menuAttrs.x = args.x + (args.width);
+			menuAttrs.y = args.y - (padding * 4) - 2;
 
 			eAttrs = {
-				x: (x + 2),
-				y: (y + 2)
+				x: (menuAttrs.x + 2),
+				y: (menuAttrs.y + 2)
 			};
 
 			dAttrs = {
 				x: (eAttrs.x + that.editButton.attr('width') + 2),
-				y: y + 2
+				y: menuAttrs.y + 2
 			};
-			that.menuContainer.attr({x: x, y: y});
+			that.menuContainer.attr({x: menuAttrs.x, y: menuAttrs.y});
 			that.editButton.attr(eAttrs);
 			that.deleteButton.attr(dAttrs);
 		}
@@ -920,145 +922,137 @@ that.applyBindings = function (binding, opts) {
 		// calculate where the resize handles
 		// will be located
 		$.each(that.dirs, function (i, o) {
-			var el, x, y;
+			
 			switch(o){
 				case 'ul':
-				if(that.handles.ul === undefined){
-					that.handles.ul = {x: args.x, y: args.y, cursor: 'nw-resize'};
-				} else {
-					x = args.x;
-					y = args.y;
-					that.handles.ul.x = x;
-					that.handles.ul.y = y;
+					if(that.handles.ul === undefined){
+						that.handles.ul = {x: args.x, y: args.y, cursor: 'nw-resize'};
+					} else {
+					
+						that.handles.ul.x = args.x;
+						that.handles.ul.y = args.y;
 
-					el = paper.getById(that.handles.ul.id);
+						el = paper.getById(that.handles.ul.id);
 
-					el.attr({
-						x: x,
-						y: y
-					});
-				}
+						el.attr({
+							x: that.handles.ul.x,
+							y: that.handles.ul.y
+						});
+					}
 				break;
 				case 'top':
-				if(that.handles.top === undefined) {
-					that.handles.top = {x: (args.x + (args.width/2)), y: args.y, cursor: 'n-resize'};
-				} else {
-					x = (args.x + (args.width/2));
-					y = args.y;
-					that.handles.top.x = x;
-					that.handles.top.y = y;
-					el = paper.getById(that.handles.top.id);
+					if(that.handles.top === undefined) {
+						that.handles.top = {x: (args.x + (args.width/2)), y: args.y, cursor: 'n-resize'};
+					} else {
+						
+						that.handles.top.x = (args.x + (args.width/2));
+						that.handles.top.y = args.y;
+						el = paper.getById(that.handles.top.id);
 
-					el.attr({
-						x: x,
-						y: y
-					});
-				}
+						el.attr({
+							x: that.handles.top.x,
+							y: that.handles.top.y
+						});
+					}
 				break;
 				case 'ur':
-				if(that.handles.ur === undefined) {
-					that.handles.ur = {x: ((args.x) + (args.width - padding)), y: args.y, cursor: 'ne-resize'};
-				} else {
-					x = (args.x + (args.width - padding));
-					y = args.y;
-					that.handles.ur.x = x;
-					that.handles.ur.y = y;
-					el = paper.getById(that.handles.ur.id);
-					el.attr({
-						x: x,
-						y: y
-					});
-				}
+					if(that.handles.ur === undefined) {
+						that.handles.ur = {x: ((args.x) + (args.width - padding)), y: args.y, cursor: 'ne-resize'};
+					} else {
+						that.handles.ur.x = (args.x + (args.width - padding));
+						that.handles.ur.y = args.y;
+						
+						el = paper.getById(that.handles.ur.id);
+						el.attr({
+							x: that.handles.ur.x,
+							y: that.handles.ur.y
+						});
+					}
 				break;
 				case 'rgt':
-				if(that.handles.rgt === undefined) {
-					that.handles.rgt = {x: ((args.x - padding) + args.width), y: ((args.y - padding) + (args.height/2)), cursor: 'e-resize'};
-				} else {
-					x = ((args.x - padding) + args.width);
-					y = ((args.y - padding) + (args.height/2));
-					that.handles.rgt.x = x;
-					that.handles.rgt.y = y;
-					el = paper.getById(that.handles.rgt.id);
-					el.attr({
-						x: x,
-						y: y
-					});
-				}
+					if(that.handles.rgt === undefined) {
+						that.handles.rgt = {x: ((args.x - padding) + args.width), y: ((args.y - padding) + (args.height/2)), cursor: 'e-resize'};
+					} else {
+						
+						that.handles.rgt.x = ((args.x - padding) + args.width);
+						that.handles.rgt.y = ((args.y - padding) + (args.height/2));
+						el = paper.getById(that.handles.rgt.id);
+						el.attr({
+							x: that.handles.rgt.x,
+							y: that.handles.rgt.y
+						});
+					}
 				break;
 				case 'lr':
-				if(that.handles.lr === undefined) {
-					that.handles.lr = {x: ((args.x - padding) + args.width), y: ((args.y - padding) + args.width), cursor: 'se-resize'};
-				} else {
-					x = ((args.x - padding) + args.width);
-					y = ((args.y - padding) + args.height);
-					that.handles.lr.x = x;
-					that.handles.lr.y = y;
-					el = paper.getById(that.handles.lr.id);
-					el.attr({
-						x: x,
-						y: y
-					});
-				}
-				break;
+					if(that.handles.lr === undefined) {
+						that.handles.lr = {x: ((args.x - padding) + args.width), y: ((args.y - padding) + args.width), cursor: 'se-resize'};
+					} else {
+						that.handles.lr.x = ((args.x - padding) + args.width);
+						that.handles.lr.y = ((args.y - padding) + args.height);
+						
+						el = paper.getById(that.handles.lr.id);
+						el.attr({
+							x: that.handles.lr.x,
+							y: that.handles.lr.y
+						});
+					}
+					break;
 				case 'btm':
-				if(that.handles.btm === undefined) {
-					that.handles.btm = {x: (args.x + (args.width/2)), y: ((args.y - padding) + args.height), cursor: 's-resize'};
-				} else {
-					x = (args.x + (args.width/2));
-					y = ((args.y - padding) + args.height);
-					that.handles.btm.x = x;
-					that.handles.btm.y = y;
-					el = paper.getById(that.handles.btm.id);
-					el.attr({
-						x: x,
-						y: y
-					});
-				}
-				break;
+					if(that.handles.btm === undefined) {
+						that.handles.btm = {x: (args.x + (args.width/2)), y: ((args.y - padding) + args.height), cursor: 's-resize'};
+					} else {
+						that.handles.btm.x = (args.x + (args.width/2));
+						that.handles.btm.y = ((args.y - padding) + args.height);
+						 
+						el = paper.getById(that.handles.btm.id);
+						el.attr({
+							x: that.handles.btm.x,
+							y: that.handles.btm.y
+						});
+					}
+					break;
 				case 'll':
-				if(that.handles.ll === undefined) {
-					that.handles.ll = {x: args.x, y: ((args.y - padding) + args.height), cursor: 'sw-resize'};
-				} else {
-					x = args.x;
-					y = ((args.y - padding) + args.height);
-					that.handles.ll.x = x;
-					that.handles.ll.y = y;
-					el = paper.getById(that.handles.ll.id);
-					el.attr({
-						x: x,
-						y: y
-					});
-				}
-				break;
+					if(that.handles.ll === undefined) {
+						that.handles.ll = {x: args.x, y: ((args.y - padding) + args.height), cursor: 'sw-resize'};
+					} else {
+						that.handles.ll.x = args.x;
+						that.handles.ll.y = ((args.y - padding) + args.height);
+						
+						el = paper.getById(that.handles.ll.id);
+						el.attr({
+							x: that.handles.ll.x,
+							y: that.handles.ll.y
+						});
+					}
+					break;
 				case 'lft':
-				if(that.handles.lft === undefined) {
-					that.handles.lft = {x: args.x, y: (args.y + (args.height/2)), cursor: 'w-resize'};
-				} else {
-					x = args.x;
-					y = (args.y + (args.height/2));
-					that.handles.lft.x = x;
-					that.handles.lft.y = y;
-					el = paper.getById(that.handles.lft.id);
-					el.attr({
-						x: x,
-						y: y
-					});
-				}
-				break;
+					if(that.handles.lft === undefined) {
+						that.handles.lft = {x: args.x, y: (args.y + (args.height/2)), cursor: 'w-resize'};
+					} else {
+						that.handles.lft.x = args.x;
+						that.handles.lft.y = (args.y + (args.height/2));
+						
+						el = paper.getById(that.handles.lft.id);
+						el.attr({
+							x: that.handles.lft.x,
+							y: that.handles.lft.y
+						});
+					}
+					break;
 				case 'mid':
-				if(that.handles.mid === undefined) {
-					that.handles.mid = {x: (args.x + (args.width/2)), y: (args.y + (args.height/2)), cursor: 'pointer'};
-				} else {
-					x = (args.x + (args.width/2));
-					y = (args.y + (args.height/2));
-					that.handles.mid.x = x;
-					that.handles.mid.y = y;
-					el = paper.getById(that.handles.mid.id);
-					el.attr({
-						x: x,
-						y: y
-					});
-				}
+					if(that.handles.mid === undefined) {
+						that.handles.mid = {x: (args.x + (args.width/2)), y: (args.y + (args.height/2)), cursor: 'pointer'};
+					} else {
+						that.handles.mid.x = (args.x + (args.width/2));
+						that.handles.mid.y = (args.y + (args.height/2));
+						
+						el = paper.getById(that.handles.mid.id);
+						el.attr({
+							x: that.handles.mid.x,
+							y: that.handles.mid.y
+						});
+					}
+					break;
 			}
 		});
 	};
@@ -1133,7 +1127,9 @@ OAC.Client.StreamingVideo.Controller.annoActiveController = function (options) {
 
 		$(updateButton).live('click', editUpdate);
 		$(annoEl).live('click', function (e) {
-			binding.events.eventClick.fire(opts.itemId);
+		
+			// binding.events.eventClick.fire(opts.itemId);
+			app.setActiveAnnotation(opts.itemId);
 		});
 
 	};
@@ -1156,7 +1152,7 @@ OAC.Client.StreamingVideo.Controller.canvasController = function (options) {
 		x, y, w, h, paper = opts.paper,
 		offset = $(container).offset(),
 		attachDragResize = function (id) {
-
+			
 			if((binding.curRendering !== undefined) && (id === binding.curRendering.id)) {
 				return;
 			}
@@ -1171,6 +1167,7 @@ OAC.Client.StreamingVideo.Controller.canvasController = function (options) {
 			}
 
 			binding.curRendering = o;
+			
 		},
 		detachDragResize = function (id) {
 			if((binding.curRendering !== undefined) && (id === binding.curRendering.id)) {
@@ -1178,15 +1175,16 @@ OAC.Client.StreamingVideo.Controller.canvasController = function (options) {
 			}
 			var o = binding.renderings[id];
 		};
-
-
+		
+		app.events.onActiveAnnotationChange.addListener(attachDragResize);
+		
 		// Creating events that the renderings will bind to
 		binding.event = {};
 		binding.event.eventClick = MITHGrid.initEventFirer(true, false);
 
 		binding.renderings = {};
 
-		binding.curRendering;
+		binding.curRendering = undefined;
 
 
 		// Add to events
@@ -1217,11 +1215,13 @@ OAC.Client.StreamingVideo.Controller.canvasController = function (options) {
 
 		$(container).bind('mousedown', function (e) {
 			activeId = '';
-
+			offset = $(container).offset();
+			
 			ox = Math.abs(e.pageX - offset.left);
 			oy = Math.abs(e.pageY - offset.top);
 			$.each(binding.renderings, function (i, o) {
 				extents = o.getExtents();
+			
 				dx = Math.abs(ox - extents.x);
 				dy = Math.abs(oy - extents.y);
 				if(dx <= extents.width) {
@@ -1236,17 +1236,17 @@ OAC.Client.StreamingVideo.Controller.canvasController = function (options) {
 					}
 				}
 			});
-
 			if((activeId.length === 0) && (binding.curRendering !== undefined)) {
 
 				// No shapes selected - de-activate current rendering and all other possible renderings
 			
-				app.setActiveAnnotation('');
+				app.setActiveAnnotation('null');
 					
 				binding.curRendering = undefined;
 			}
 		});
-
+		
+		
 	};
 
 	return that;

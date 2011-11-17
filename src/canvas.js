@@ -129,20 +129,19 @@
 
 								// Event handlers
 								that.eventClickHandle = function (id) {
-									console.log('event click handle in rectangular '+id);
 									if(id === itemId) {
 										// Selected
 										model.updateItems([{
 											id: itemId,
 											active: true
-											}]);
-										} else {
-											// De-select this shape
-											model.updateItems([{
-												id: itemId,
-												active: false
-											}]);
-										}
+										}]);
+									} else {
+										// De-select this shape
+										model.updateItems([{
+											id: itemId,
+											active: false
+										}]);
+									}
 								};
 				
 								that.eventResizeHandle = function (id, pos) {
@@ -152,27 +151,27 @@
 											id: itemId,
 											w: pos.width,
 											h: pos.height
-											}]);
-										}
-									};
+										}]);
+									}
+								};
 
-									that.eventMoveHandle = function (id, pos) {
-										if(id === itemId) {
-											// update item with new x/y
-											model.updateItems([{
-												id: itemId,
-												x: pos.x,
-												y: pos.y
-												}]);
-											}
-										};
+								that.eventMoveHandle = function (id, pos) {
+									if(id === itemId) {
+										// update item with new x/y
+										model.updateItems([{
+											id: itemId,
+											x: pos.x,
+											y: pos.y
+										}]);
+									}
+								};
 
-										that.eventDeleteHandle = function (id) {
+								that.eventDeleteHandle = function (id) {
 
-											if(id === itemId) {
-												model.removeItems([itemId]);
-											}
-										};
+									if(id === itemId) {
+										model.removeItems([itemId]);
+									}
+								};
 
 								// register shape
 								that.shape = c;
@@ -330,10 +329,10 @@
 											model.updateItems([{
 												id: itemId,
 												active: true
-												}]);
-											}
+											}]);
 										}
-									};
+									}
+								};
 
 								that.updateEventHandle = function (id, data) {
 									if(id === itemId) {
