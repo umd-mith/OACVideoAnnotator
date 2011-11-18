@@ -9,7 +9,7 @@ var initPlugin = function() {
 	// Create Raphael canvas application controls
 	var controlApp = MITHGrid.Application.Controls.initApp("#sidebar", {}), 
 	raphApp = OAC.Client.StreamingVideo.initApp("#main", {width: 500, height: 500}),
-	initX = 110, initY = 23,
+	initX = 110, initY = 110,
 	// insert buttons into controls
 	buttons = [{
 		id: "rectangle",
@@ -27,6 +27,7 @@ var initPlugin = function() {
 				id: "rect"+items.length,
 				type: 'Rectangle',
 				shape: "rectangle",
+				active: false,
 				bodyContent: "This is an annotation marked by an rectangular space",
 				creator: 'Grant Dickie',
 				w: 100,
@@ -50,6 +51,7 @@ var initPlugin = function() {
 				id: "ellipse"+items.length,
 				type: 'Ellipse',
 				shape: "ellipse",
+				active: false,
 				bodyContent: "This is an annotation marked by an elliptical space",
 				creator: 'Grant Dickie',
 				w: 100,
