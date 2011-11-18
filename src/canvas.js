@@ -1,233 +1,436 @@
-(function($, MITHGrid, OAC) {
+(function ($, MITHGrid, OAC) {
 	/**
 	* MITHGrid Canvas
 	* Creates a canvas using the Raphael JS library
 	*/
-	
-	// Set the namespace for the StreamingVideo Annotation application
-	MITHGrid.globalNamespace("OAC");
-	OAC.namespace("Client");
-	OAC.Client.namespace("StreamingVideo");
-	
-	OAC.Client.StreamingVideo.initApp = function(container, options) {
-		var that, dragController, renderListItem;
-		//dragController = OAC.Client.StreamingVideo.Controller.annotationShapeDragController({});
-		dragController = OAC.Client.StreamingVideo.Controller.annotationShapeResizeController({});
-		
-		that = MITHGrid.Application.initApp("OAC.Client.StreamingVideo", container, $.extend(true, {}, options, {
-			dataViews: {
-				// view for the space in which data from shapes
-				// is drawn
-				drawspace: {
-					dataStore: 'canvas',
-					types: ["Rectangle", "Ellipse"],
-					label: 'drawspace'
-				}
-			},
-			viewSetup: '<div id="canvasSVG"></div>'+
-			'<div class="anno_list"></div>',
-			presentations: {
-				raphsvg: {
-					type: MITHGrid.Presentation.RaphaelCanvas,
-					container: "#canvasSVG",
-					dataView: 'drawspace',
-					lenses: {
-						Rectangle: function(container, view, model, itemId) {
-							// Note: Rectangle measurements x,y start at CENTER
-							var that = {},
-							item = model.getItem(itemId),
-							c, ox, oy;
-							
-							$("#testdone").append("<p>Raphael Object in data store:<br/> " + JSON.stringify(item) + "</p>");
-							ox = (item.x - (item.w[0] / 2));
-							oy = (item.y - (item.h[0] / 2));
 
-							// Accessing the view.canvas Object that was created in MITHGrid.Presentation.RaphSVG
-							c = view.canvas.rect(ox, oy, item.w[0], item.h[0]);
-							// fill and set opacity
-							c.attr({
-								fill: "red",
-								opacity: 1
-							});
-							
-							dragController.bind(c, {
-								model: model,
-								itemId: itemId,
-								calculate: {
-									extents: function() {
-										return {
-											x: c.attr("x") + c.attr("width")/2,
-											y: c.attr("y") + c.attr("height")/2,
-											width: c.attr("width"),
-											height: c.attr("height")
-										};
-									}
-								},
-								x: 'x',
-								y: 'y'
-							});
-
-							that.update = function(item) {
-
-								// receiving the Object passed through
-								// model.updateItems in move()
-								try {
-									if (item.x !== undefined && item.y !== undefined && item.w !== undefined && item.y !== undefined) {
-										c.attr({
-											x: item.x[0] - item.w[0]/2,
-											y: item.y[0] - item.h[0]/2,
-											width: item.w[0],
-											height: item.h[0]
-										});
-									}
-								} catch(e) {
-									console.log(e);
-									//	c.remove();
-								}
-								// Raphael object is updated
-							};
-
-							that.remove = function(item) {
-								// getting the removeItems callback
-								c.remove();
-							};
-
-							// initiate the drag feature (RaphaelJS)
-							//c.drag(move, start, up);
-
-							return that;
-						},
-						Ellipse: function(container, view, model, itemId) {
-							var that = {},
-							item = model.getItem(itemId),
-							c;
-							
-							// create the shape
-							c = view.canvas.ellipse(item.x[0], item.y[0], item.w[0]/2, item.h[0]/2);
-							// fill shape
-							c.attr({
-								fill: "red"
-							});
-							
-							dragController.bind(c,{
-								model: model,
-								itemId: itemId,
-								calculate: {
-									extents: function() {
-										return {
-											x: c.attr("cx"),
-											y: c.attr("cy"),
-											width: c.attr("rx") * 2,
-											height: c.attr("ry") * 2
-										};
-									}
-								},
-								x: 'cx',
-								y: 'cy'
-							});
-					
-							that.update = function(item) {
-								// receiving the Object passed through
-								// model.updateItems in move()
-								try {
-									if (item.x !== undefined && item.y !== undefined) {
-										c.attr({
-											cx: item.x[0],
-											cy: item.y[0],
-											rx: item.w[0] / 2,
-											ry: item.h[0] / 2
-										});
-									}
-								} catch(e) {
-									console.log(e);
-									//	c.remove();
-								}
-								// Raphael object is updated
-							};
-					
-							that.remove = function() {
-								c.remove();
-							};
-
-
-							return that;
-
-						}
+	OAC.Client.StreamingVideo.initApp = function (container, options) {
+		var renderListItem, annoActiveController;
+		annoActiveController = OAC.Client.StreamingVideo.Controller.annoActiveController({
+			// attaching specific selector items here
+			selectors: {
+				annotation: '',
+				annotationlist: ':parent',
+				bodycontent: '> .bodyContent',
+				editbutton: '> .bodyContent > .button.edit',
+				editarea: '> .editArea',
+				textarea: '> .editArea > textarea',
+				updatebutton: '> .editArea > .button.update',
+				deletebutton: '> .button.delete'
+			}
+		});
+		/*
+		* Creating application to run DOM and presentations
+		*
+		*/
+		app = MITHGrid.Application.initApp("OAC.Client.StreamingVideo", container, 
+			$.extend(true, {}, options, {
+				variables: {
+					ActiveAnnotation: {
+						is: 'rw'
 					}
 				},
-				annoItem: {
-					type: MITHGrid.Presentation.SimpleText,
-					dataView: 'drawspace',
-					container: '.anno_list',
-					lenses: {
-						Rectangle: function(container, view, model, itemId) {
-							var that = {}, item = model.getItem(itemId);
-							$("#delete"+item.id[0]).live('click',function(e){
-								e.preventDefault();
-								model.removeItems([item.id[0]]);
-							});
-							renderListItem(item, container);
-					
-							that.update = function(item) {
-								renderListItem(item, container);
-							};
-					
-							that.remove = function() {
-						
-								$("#"+item.id).remove();
-							};
-						
-							return that;
-						},
-						Ellipse: function(container, view, model, itemId) {
-							var that = {}, item = model.getItem(itemId);
-							$("#delete"+item.id[0]).live('click',function(e){
-								e.preventDefault();
-								model.removeItems([item.id[0]]);
-							});
-							renderListItem(item, container);
+				dataViews: {
+					// view for the space in which data from shapes
+					// is drawn
+					drawspace: {
+						dataStore: 'canvas',
+						types: ["Rectangle","Ellipse"],
+						label: 'drawspace'
 
-							that.update = function(item) {
-								renderListItem(item, container);
-							};
-							that.remove = function() {
-								$("#"+item.id).remove();
-							};
-							return that;
-						}
 					}
-				}
-			},
-			cWidth: options.width,
-			cHeight: options.height
-		})
+				},
+				viewSetup: '<div id="canvasSVG" class="canvas_svg"></div>'+
+				'<div id="annoList" class="anno_list"></div>',
+				presentations: {
+					raphsvg: {
+						type: MITHGrid.Presentation.RaphaelCanvas,
+						container: "#canvasSVG",
+						dataView: 'drawspace',
+						lenses: {
+							/*
+							* The following are lenses for shapes that
+							* are found in the dataStore. These items are using
+							* the MITHGrid.Presentation.RaphaelCanvas.canvas
+							* object, which is a Raphaël paper object, to draw
+							* themselves.
+							*/
+
+							Rectangle: function (container, view, model, itemId) {
+								// Note: Rectangle measurements x,y start at CENTER
+								var that = {id: itemId},
+								item = model.getItem(itemId),
+								c, ox, oy, bbox, isActive = item.active[0];
+
+								ox = (item.x - (item.w[0] / 2));
+								oy = (item.y - (item.h[0] / 2));
+
+								// Accessing the view.canvas Object that was created in MITHGrid.Presentation.RaphSVG
+								c = view.canvas.rect(ox, oy, item.w[0], item.h[0]);
+								// fill and set opacity
+								c.attr({
+									fill: "red",
+									opacity: isActive ? 1 : 0.5
+								});
+
+								that.update = function (item) {
+									if(item.active[0] && isActive === false) {
+										c.attr({
+											opacity: 1
+										}).toFront();
+										isActive = true;
+
+										view.editBoundingBox.attachRendering(that);
+										view.keyBoardListener.events.eventDelete.addListener(that.eventDeleteHandle);
+									} else if(item.active[0] === false && isActive === true){
+										c.attr({
+											opacity:0.5
+										}).toBack();
+										isActive = false;
+										view.editBoundingBox.detachRendering();
+										view.keyBoardListener.events.eventDelete.removeListener(that.eventDeleteHandle);
+									}
+									// receiving the Object passed through
+									// model.updateItems in move()
+									try {
+										if (item.x !== undefined && item.y !== undefined && item.w !== undefined && item.y !== undefined) {
+											that.shape.attr({
+												x: item.x[0] - item.w[0]/2,
+												y: item.y[0] - item.h[0]/2,
+												width: item.w[0],
+												height: item.h[0]
+											});
+										}
+									} catch(e) {
+										console.log(e);
+									}
+									// Raphael object is updated
+
+								};
+
+								that.remove = function (item) {
+									// getting the removeItems callback
+									c.remove();
+									view.editBoundingBox.detachRendering();
+									view.keyBoardListener.events.eventDelete.removeListener(that.eventDeleteHandle);
+								};
+								// calculate the extents (x, y, width, height)
+								// of this type of shape
+								that.getExtents = function () {
+									return {
+										x: c.attr("x") + (c.attr("width")/2),
+										y: c.attr("y") + (c.attr("height")/2),
+										width: c.attr("width"),
+										height: c.attr("height")
+									};
+								};
+								// Event that fires when shape has activated
+								that.shapeIsActive = MITHGrid.initEventFirer(false, false);
+
+								// Event handlers
+								that.eventClickHandle = function (id) {
+									if(id === itemId) {
+										// Selected
+										model.updateItems([{
+											id: itemId,
+											active: true
+										}]);
+									} else {
+										// De-select this shape
+										model.updateItems([{
+											id: itemId,
+											active: false
+										}]);
+									}
+								};
+				
+								that.eventResizeHandle = function (id, pos) {
+									if(id === itemId) {
+										// update item with new width/height
+										model.updateItems([{
+											id: itemId,
+											w: pos.width,
+											h: pos.height
+										}]);
+									}
+								};
+
+								that.eventMoveHandle = function (id, pos) {
+									if(id === itemId) {
+										// update item with new x/y
+										model.updateItems([{
+											id: itemId,
+											x: pos.x,
+											y: pos.y
+										}]);
+									}
+								};
+
+								that.eventDeleteHandle = function (id) {
+
+									if(id === itemId) {
+										model.removeItems([itemId]);
+									}
+								};
+
+								// register shape
+								that.shape = c;
+
+								view.canvasEvents.registerRendering(that);
+								app.events.onActiveAnnotationChange.addListener(that.eventClickHandle);
+
+								return that;
+							},
+							Ellipse: function (container, view, model, itemId) {
+								var that = {id: itemId},
+								item = model.getItem(itemId),
+								c, isActive = item.active[0];
+
+								// create the shape
+								c = view.canvas.ellipse(item.x[0], item.y[0], item.w[0]/2, item.h[0]/2);
+								// fill shape
+								c.attr({
+									fill: "red",
+									opacity: isActive ? 1 : 0.5
+								});
+
+								that.update = function (item) {
+									if(item.active[0] && isActive === false) {
+										c.attr({
+											opacity: 1
+										}).toFront();
+										isActive = true;
+										view.editBoundingBox.attachRendering(that);
+										view.keyBoardListener.events.eventDelete.addListener(that.eventDeleteHandle);
+									} else if(item.active[0] === false && isActive === true){
+										c.attr({
+											opacity:0.5
+										}).toBack();
+										isActive = false;
+										view.editBoundingBox.detachRendering();
+										view.keyBoardListener.events.eventDelete.removeListener(that.eventDeleteHandle);
+									}
+
+									// receiving the Object passed through
+									// model.updateItems in move()
+									try {
+										if (item.x !== undefined && item.y !== undefined) {
+											c.attr({
+												cx: item.x[0],
+												cy: item.y[0],
+												rx: item.w[0] / 2,
+												ry: item.h[0] / 2
+											});
+										}
+									} catch(e) {
+										console.log(e);
+
+									}
+									// Raphael object is updated
+								};
+
+								that.remove = function () {
+									c.remove();
+									view.editBoundingBox.detachRendering();
+									view.keyBoardListener.events.eventDelete.removeListener(that.eventDeleteHandle);
+								};
+
+								// calculate the extents (x, y, width, height)
+								// of this type of shape
+								that.getExtents = function () {
+									return {
+										x: c.attr("cx"),
+										y: c.attr("cy"),
+										width: (c.attr("rx") * 2),
+										height: (c.attr("ry") * 2)
+									};
+								};
+
+								// Event handlers
+								that.eventClickHandle = function (id) {
+									if(id === itemId) {
+										// Selected
+										model.updateItems([{
+											id: itemId,
+											active: true
+										}]);
+									} else {
+										// De-select this shape
+										model.updateItems([{
+											id: itemId,
+											active: false
+										}]);
+									}
+								};
+
+								that.eventResizeHandle = function (id, pos) {
+									if(id === itemId) {
+										// update item with new width/height
+										model.updateItems([{
+											id: itemId,
+											w: pos.width,
+											h: pos.height
+										}]);
+									}
+								};
+
+								that.eventMoveHandle = function (id, pos) {
+									if(id === itemId) {
+										// update item with new x/y
+										model.updateItems([{
+											id: itemId,
+											x: pos.x,
+											y: pos.y
+										}]);
+									}
+								};
+
+								that.eventDeleteHandle = function (id) {
+
+									if(id === itemId) {
+										model.removeItems([itemId]);
+									}
+								};
+					
+								that.shapeIsActive = MITHGrid.initEventFirer(true, false);
+
+								// register shape
+								that.shape = c;
+
+								view.canvasEvents.registerRendering(that);
+								app.events.onActiveAnnotationChange.addListener(that.eventClickHandle);
+								return that;
+
+							}
+						}
+					},
+					annoItem: {
+						type: MITHGrid.Presentation.AnnotationList,
+						dataView: 'drawspace',
+						container: '.anno_list',
+						lenses: {
+							Rectangle: function (container, view, model, itemId) {
+								var that = {}, item = model.getItem(itemId), itemEl;
+								$("#delete"+item.id[0]).live('click',function (e){
+									e.preventDefault();
+									model.removeItems([item.id[0]]);
+								});
+								itemEl = renderListItem(item, container);
+
+								// attach the binding controller
+								that.annoEvents = annoActiveController.bind(itemEl, {
+									model: model,
+									itemId: itemId
+								});
+
+								that.clickEventHandle = function (id) {
+									if(id === itemId) {
+										if(item.active[0] !== true){
+											model.updateItems([{
+												id: itemId,
+												active: true
+											}]);
+										}
+									}
+								};
+
+								that.updateEventHandle = function (id, data) {
+									if(id === itemId) {
+										model.updateItems([{
+											id: itemId,
+											bodyContent: data
+										}]);
+									}
+								};
+								that.annoEvents.events.eventClick.addListener(that.clickEventHandle);
+								that.annoEvents.events.eventUpdate.addListener(that.updateEventHandle);
+
+								that.update = function (item) {
+									if(item.active[0]) {
+										itemEl.addClass('selected');
+									} else {
+										itemEl.removeClass('selected');
+									}
+								};
+
+								that.remove = function () {
+
+									$("#"+item.id).remove();
+								};
+
+								return that;
+							},
+							Ellipse: function (container, view, model, itemId) {
+								var that = {}, item = model.getItem(itemId),
+								itemEl;
+								$("#delete"+item.id[0]).live('click',function (e){
+									e.preventDefault();
+									model.removeItems([item.id[0]]);
+								});
+								itemEl = renderListItem(item, container);
+
+								// attaching controller to make the
+								// HTML highlighted when shape is selected
+								that.annoEvents = annoActiveController.bind(itemEl, {
+									model: model,
+									itemId: itemId
+								});
+
+								that.updateEventHandle = function (id, data) {
+									if(id === itemId) {
+										model.updateItems([{
+											id: itemId,
+											bodyContent: data
+										}]);
+									 }
+								};
+
+								that.annoEvents.events.eventUpdate.addListener(that.updateEventHandle);
+
+								that.update = function (item) {
+									if(item.active[0]) {
+										itemEl.addClass('selected');
+									} else {
+										itemEl.removeClass('selected');
+									}
+								};
+								that.remove = function () {
+									$("#"+item.id).remove();
+								};
+								return that;
+							}
+						} //annoItem lenses
+					} //annoItem
+				},
+				cWidth: options.width,
+				cHeight: options.height
+			})
 		);
-		
-		renderListItem = function(item, container) {
-			var el = '<div id="'+item.id[0]+'" class="anno_item">'+
-			'<p>'+item.creator[0]+'</p>'+
+
+		renderListItem = function (item, container) {
+			var className = (item.active[0])?'anno_item selected':'anno_item',
+			el = '<div id="'+item.id[0]+'" class="'+className+'">'+
+			'<div class="editArea">'+
+			'<textarea class="bodyContentTextArea">'+item.bodyContent[0]+'</textarea>'+
+			'<br/>'+
+			'<div id="update'+item.id[0]+'" class="button update">Update</div>'+
+			'</div>'+
+			'<div class="bodyContent">'+
 			'<p>'+item.bodyContent[0]+'</p>'+
-			'<p>'+item.x[0]+'<br/>'+
-			item.y[0]+'<br/>'+
-			item.w[0]+'<br/>'+
-			item.h[0]+'</p>'+
-			'<div id="delete'+item.id[0]+'">X</div>'+
+			'<div id="#edit'+item.id[0]+'" class="button edit">Edit</div>'+
+			'</div>'+
 			'</div>';
 			$("#"+item.id[0]).remove();
+
 			$(container).append(el);
-			
+			$("#"+item.id[0]+' > .editArea').hide();
+			return $("#"+$(container).attr('id')+" > #"+item.id[0]);
 		};
-		
-		that.ready(function() {
-			// This has been extracted into
-			// genApps.js and controls.js
-		});
-		
-		return that;
+
+		return app;
 	};
-}(jQuery, MITHGrid, OAC));	
-
-
+} (jQuery, MITHGrid, OAC));
+															
 // Default library for the Canvas application
 MITHGrid.defaults("OAC.Client.StreamingVideo", {
 	// Data store for the Application
@@ -242,17 +445,20 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 				Ellipse: {}
 			},
 			properties: {
-				// posInfo contains the SVG dimensions for 
+				// posInfo contains the SVG dimensions for
 				// a shape
 				bodyContent: {
-					type: 'String'
+					valueType: 'String'
 				},
 				targetURI: {
-					type: 'Item'
+					valueType: 'Item'
+				},
+				active: {
+					valueType: 'Bool'
 				}
 			}
-			
+
 		}
-		
+
 	}
 });
