@@ -694,21 +694,11 @@ OAC.Client.StreamingVideo.Controller.canvasController = function (options) {
 		// Add to events
 		binding.registerRendering = function (rendering) {
 			binding.renderings[rendering.id] = rendering;
-			if(rendering.eventClickHandle !== undefined){
-				binding.event.eventClick.addListener(rendering.eventClickHandle);
-			}
-			if(rendering.shapeIsActive !== undefined) {
-				// register the rendering shape click event
-				rendering.shapeIsActive.addListener(attachDragResize);
-			}
+			
 		};
 
 		binding.removeRendering = function (rendering) {
 			var tmp = {}, el;
-			if(rendering.eventClickHandle !== undefined){
-				binding.event.eventClick.removeListener(rendering.eventClickHandle);
-			}
-
 			$.each(binding.renderings, function (i,o) {
 				if(i !== rendering.id) {
 					tmp[i] = o;

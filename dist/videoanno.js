@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Tue Nov 15 16:48:17 2011 -0500
+ *  Date: Thu Nov 17 15:08:41 2011 -0500
  *  
  * Educational Community License, Version 2.0
  * 
@@ -1190,9 +1190,9 @@ OAC.Client.StreamingVideo.Controller.canvasController = function (options) {
 		// Add to events
 		binding.registerRendering = function (rendering) {
 			binding.renderings[rendering.id] = rendering;
-			if(rendering.eventClickHandle !== undefined){
-				binding.event.eventClick.addListener(rendering.eventClickHandle);
-			}
+			// if(rendering.eventClickHandle !== undefined){
+			// 				binding.event.eventClick.addListener(rendering.eventClickHandle);
+			// 			}
 			if(rendering.shapeIsActive !== undefined) {
 				// register the rendering shape click event
 				rendering.shapeIsActive.addListener(attachDragResize);
