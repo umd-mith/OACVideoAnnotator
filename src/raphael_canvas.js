@@ -7,7 +7,7 @@ Presentations for canvas.js
 
 (function ($, MITHGrid, OAC) {
 	var canvasController, editBoxController, keyBoardController;
-	canvasController = OAC.Client.StreamingVideo.Controller.canvasController({
+	canvasController = OAC.Client.StreamingVideo.Controller.canvasClickController({
 		selectors: {
 			svg: ''
 		}

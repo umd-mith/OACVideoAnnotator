@@ -8,9 +8,11 @@ $(document).ready(function() {
 
 	var rect = {}, rectItem = {
 		id: 'rect1',
-		type: 'rect',
-		shape: 'rect',
+		type: 'Rectangle',
+		shape: 'rectangle',
+		active: false,
 		bodyContent: "Annotation",
+		creator: 'Grant Dickie',
 		x: 10,
 		y: 10,
 		w: 100,
@@ -20,10 +22,10 @@ $(document).ready(function() {
 	module("Shapes");
 	
 	test("Check Canvas and create rectangle", function() {
-		expect(2);
+		expect(23);
 		
 		
-		canvas = MITHGrid.Application.Canvas.initApp('#test-258603', {width: 100, height: 100});
+		canvas = OAC.Client.StreamingVideo.initApp('#test-258603', {width: 100, height: 100});
 		ok(canvas, "Canvas application created");
 		
 		
@@ -33,14 +35,10 @@ $(document).ready(function() {
 		} catch(e) {
 			ok(false, "Object didn't load");
 		}
-	});
-	
-	test("Check rectangle object and Canvas functionality", function() {
-		expect(17);
-		
+
 		search = canvas.dataStore.canvas.prepare(["!shape"]);
-		result = search.evaluate(["rect"]);
-		ok((result.length>0), "Rect is successfully loaded");
+		result = search.evaluate(["rectangle"]);
+		ok((result.length>0), "Rectangle is successfully loaded");
 		
 		// test if Rect object has all the necessary components
 		rect = canvas.dataStore.canvas.getItem("rect1");
@@ -60,13 +58,13 @@ $(document).ready(function() {
 		});
 	});
 	
-	//  Make sure that shapes are correctly updated	
-	
-	
 	
 	test("Check for oval", function() {
 		expect(1);
+		
+		
 		search = canvas.dataStore.canvas.prepare(["!shape"]); 
+		
 		canvas.dataStore.canvas.loadItems([{
 			id: "oval1",
 			type: 'oval',
@@ -83,7 +81,9 @@ $(document).ready(function() {
 	});
 	
 	test("Update oval", function() {
-		expect(3);
+		expect(4);
+		canvas = OAC.Client.StreamingVideo.initApp('#test-258603', {width: 100, height: 100});
+		ok(canvas, "Canvas application created");
 		
 		canvas.dataStore.canvas.updateItems([{
 			id: "oval1",

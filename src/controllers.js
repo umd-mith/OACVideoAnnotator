@@ -645,7 +645,7 @@ OAC.Client.StreamingVideo.Controller.annoActiveController = function (options) {
 * Listens for all clicks on the canvas and connects shapes with the
 * Edit controller above
 */
-OAC.Client.StreamingVideo.Controller.canvasController = function (options) {
+OAC.Client.StreamingVideo.Controller.canvasClickController = function (options) {
 	var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.canvasClickController", options);
 	that.options = options;
 
@@ -730,8 +730,8 @@ OAC.Client.StreamingVideo.Controller.canvasController = function (options) {
 					}
 				}
 			});
+			
 			if((activeId.length === 0) && (binding.curRendering !== undefined)) {
-
 				// No shapes selected - de-activate current rendering and all other possible renderings
 			
 				app.setActiveAnnotation('null');

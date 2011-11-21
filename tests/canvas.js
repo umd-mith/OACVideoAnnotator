@@ -7,13 +7,5 @@ $(document).ready(function() {
 		ok(MITHGrid.Presentation.RaphaelCanvas !== undefined, "Canvas Presentation exists");		
 		
 	});
-	
-	test("Check Canvas availability", function() {
-		var presentation;
-		expect(3);
-		
-		$.each(['canvas','canvasEvents','editBoundingBox'], function(i, o) {
-			ok(MITHGrid.Presentation.RaphaelCanvas[o], "Checked "+o);
-		});
-	});
+
 });

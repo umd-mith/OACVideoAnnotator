@@ -30,7 +30,9 @@ var app = {};
 // Set the namespace for the StreamingVideo Annotation application
 MITHGrid.globalNamespace("OAC");
 OAC.namespace("Client");
-OAC.Client.namespace("StreamingVideo");(function ($, MITHGrid, OAC) {
+OAC.Client.namespace("StreamingVideo");
+
+(function ($, MITHGrid, OAC) {
 	/**
 	* MITHGrid Canvas
 	* Creates a canvas using the Raphael JS library
