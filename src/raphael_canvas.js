@@ -6,29 +6,30 @@ Presentations for canvas.js
 
 
 (function ($, MITHGrid, OAC) {
-	var canvasController, editBoxController, keyBoardController;
-	canvasController = OAC.Client.StreamingVideo.Controller.canvasController({
-		selectors: {
-			svg: ''
-		}
-	});
-	editBoxController = OAC.Client.StreamingVideo.Controller.annotationEditSelectionGrid({
-
-	});
-	keyBoardController = OAC.Client.StreamingVideo.Controller.keyBoardListener({
-		selectors: {
-			doc: ''
-		}
-	});
-	
-
-
 	MITHGrid.Presentation.namespace("AnnotationList");
 	MITHGrid.Presentation.AnnotationList.initPresentation = function (container, options) {
-		var that = MITHGrid.Presentation.initPresentation("AnnotationList", container, options);
+		var that = MITHGrid.Presentation.initPresentation("AnnotationList", container, options), activeRenderingId;
 
 		// that.annoListController = annoActiveController.bind($(container), {});
-
+		that.eventActiveRenderingChange = function(id) {
+			var rendering;
+			if(typeof activeRenderingId !== "undefined" && activeRenderingId !== null) {
+				rendering = that.renderingFor(activeRenderingId);
+			}
+			if(activeRenderingId !== id) {
+				if(rendering && typeof rendering.makeInactive !== "undefined") {
+					rendering.makeInactive();
+				}
+				if(typeof id !== "undefined" && id !== null) {
+					rendering = that.renderingFor(id);
+					if(rendering && typeof rendering.makeActive !== "undefined") {
+						rendering.makeActive();
+					}
+				}
+				activeRenderingId = id;
+			}
+		};
+		
 		return that;
 	};
 
@@ -36,7 +37,27 @@ Presentations for canvas.js
 	// Presentation for the Canvas area - area that the Raphael canvas is drawn on
 	MITHGrid.Presentation.RaphaelCanvas.initPresentation = function (container, options) {
 		var that = MITHGrid.Presentation.initPresentation("RaphaelCanvas", container, options),
-			id = $(container).attr('id'), h, w;
+			id = $(container).attr('id'), h, w, activeRenderingId, 
+			canvasController, keyBoardController, editBoxController;
+		
+		canvasController = OAC.Client.StreamingVideo.Controller.canvasController({
+			application: that.options.application,
+			selectors: {
+				svg: ''
+			}
+		});
+		
+		keyBoardController = OAC.Client.StreamingVideo.Controller.keyBoardListener({
+			application: that.options.application,
+			selectors: {
+				doc: ''
+			}
+		});
+		
+		editBoxController = OAC.Client.StreamingVideo.Controller.annotationEditSelectionGrid({
+			application: that.options.application
+		});
+			
 		if (options.cWidth !== undefined) {
 			w = options.cWidth;
 		}
@@ -72,7 +93,25 @@ Presentations for canvas.js
 
 		that.keyBoardListener = keyBoardController.bind($('body'), {});
 
-
+		that.eventActiveRenderingChange = function(id) {
+			var rendering;
+			if(typeof activeRenderingId !== "undefined" && activeRenderingId !== null) {
+				rendering = that.renderingFor(activeRenderingId);
+			}
+			if(activeRenderingId !== id) {
+				if(rendering && typeof rendering.makeInactive !== "undefined") {
+					rendering.makeInactive();
+				}
+				if(typeof id !== "undefined" && id !== null) {
+					rendering = that.renderingFor(id);
+					if(rendering && typeof rendering.makeActive !== "undefined") {
+						rendering.makeActive();
+					}
+				}
+				activeRenderingId = id;
+			}
+		};
+				
 		return that;
 	};
 }(jQuery, MITHGrid, OAC));
