@@ -627,7 +627,7 @@ OAC.Client.StreamingVideo.Controller.annoActiveController = function (options) {
 			binding.events.onUpdate.fire(opts.itemId, data);
 			editEnd();
 		};
-
+/*
 		$(editButton).bind('click', function (e) {
 			e.preventDefault();
 			if(binding.active) {
@@ -636,12 +636,28 @@ OAC.Client.StreamingVideo.Controller.annoActiveController = function (options) {
 				editStart();
 			}
 		});
+		*/
+		$(bodyContent).bind('dblclick', function(e) {
+			e.preventDefault();
+			if(binding.active) {
+				editEnd();
+			} else {
+				editStart();
+			}
+		});
 
-		$(updateButton).bind('click', editUpdate);
+	//	$(updateButton).bind('click', editUpdate);
 		$(annoEl).bind('click', function (e) {
 		
 			// binding.events.onClick.fire(opts.itemId);
 			options.application.setActiveAnnotation(opts.itemId);
+		});
+		
+		options.application.events.onActiveAnnotationChange.addListener(function(id) {
+			if(id !== opts.id && binding.active) {
+				editUpdate({preventDefault: function(){}});
+				editEnd();
+			}
 		});
 
 	};
@@ -724,21 +740,29 @@ OAC.Client.StreamingVideo.Controller.canvasController = function (options) {
 			
 			ox = Math.abs(e.pageX - offset.left);
 			oy = Math.abs(e.pageY - offset.top);
+			if(binding.curRendering !== undefined) {
+				extents = binding.curRendering.getExtents();
+				dx = Math.abs(ox - extents.x);
+				dy = Math.abs(oy - extents.y);
+				if(dx <= extents.width/2+3 && dy <= extents.height/2+3) {
+					// nothing has changed
+					return;
+				}
+			}
 			$.each(binding.renderings, function (i, o) {
 				extents = o.getExtents();
 			
 				dx = Math.abs(ox - extents.x);
 				dy = Math.abs(oy - extents.y);
-				if(dx <= extents.width) {
-					if(dy <= extents.height) {
-						activeId = o.id;
-						if((binding.curRendering === undefined) || (o.id !== binding.curRendering.id)) {
-							binding.curRendering = o;
-							options.application.setActiveAnnotation(o.id);
-						}
-						// stop running loop
-						return false;
+				// the '3' is for the drag boxes around the object
+				if(dx <= extents.width/2+3 && dy <= extents.height/2+3) {
+					activeId = o.id;
+					if((binding.curRendering === undefined) || (o.id !== binding.curRendering.id)) {
+						binding.curRendering = o;
+						options.application.setActiveAnnotation(o.id);
 					}
+					// stop running loop
+					return false;
 				}
 			});
 			if((activeId.length === 0) && (binding.curRendering !== undefined)) {
@@ -750,7 +774,6 @@ OAC.Client.StreamingVideo.Controller.canvasController = function (options) {
 				binding.curRendering = undefined;
 			}
 		});
-		
 		
 	};
 

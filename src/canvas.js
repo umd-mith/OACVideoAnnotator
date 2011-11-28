@@ -43,6 +43,28 @@
 					model.removeItems([itemId]);
 				}
 			};
+			
+			that.eventResizeHandle = function (id, pos) {
+				if(id === itemId) {
+					// update item with new width/height
+					model.updateItems([{
+						id: itemId,
+						w: pos.width,
+						h: pos.height
+					}]);
+				}
+			};
+
+			that.eventMoveHandle = function (id, pos) {
+				if(id === itemId) {
+					// update item with new x/y
+					model.updateItems([{
+						id: itemId,
+						x: pos.x,
+						y: pos.y
+					}]);
+				}
+			};
 
 			return that;
 		};
@@ -90,7 +112,7 @@
 			};
 			
 			that.update = function (item) {
-				// TODO: update text
+				$(itemEl).find(".bodyContent").text(item.bodyContent[0]);
 			};
 			
 			that.remove = function () {
@@ -125,7 +147,7 @@
 
 					}
 				},
-				viewSetup: '<div id="canvasSVG" class="canvas_svg"></div>'+
+				viewSetup: '<div class="canvas_svg_holder"><div id="canvasSVG" class="canvas_svg"></div></div>'+
 				'<div id="annoList" class="anno_list"></div>',
 				presentations: {
 					raphsvg: {
@@ -177,7 +199,6 @@
 
 								};
 
-
 								// calculate the extents (x, y, width, height)
 								// of this type of shape
 								that.getExtents = function () {
@@ -191,30 +212,6 @@
 								// Event that fires when shape has activated
 							//	that.events ||= {};
 							//	that.events.onShapeIsActive = MITHGrid.initEventFirer(false, false);
-
-								// Event handlers
-				
-								that.eventResizeHandle = function (id, pos) {
-									if(id === itemId) {
-										// update item with new width/height
-										model.updateItems([{
-											id: itemId,
-											w: pos.width,
-											h: pos.height
-										}]);
-									}
-								};
-
-								that.eventMoveHandle = function (id, pos) {
-									if(id === itemId) {
-										// update item with new x/y
-										model.updateItems([{
-											id: itemId,
-											x: pos.x,
-											y: pos.y
-										}]);
-									}
-								};
 
 								// register shape
 								that.shape = c;
@@ -267,30 +264,6 @@
 										height: (c.attr("ry") * 2)
 									};
 								};
-
-								// Event handlers
-
-								that.eventResizeHandle = function (id, pos) {
-									if(id === itemId) {
-										// update item with new width/height
-										model.updateItems([{
-											id: itemId,
-											w: pos.width,
-											h: pos.height
-										}]);
-									}
-								};
-
-								that.eventMoveHandle = function (id, pos) {
-									if(id === itemId) {
-										// update item with new x/y
-										model.updateItems([{
-											id: itemId,
-											x: pos.x,
-											y: pos.y
-										}]);
-									}
-								};
 					
 							//	that.events ||= {};
 							//	that.events.onShapeIsActive = MITHGrid.initEventFirer(true, false);
@@ -325,12 +298,12 @@
 				'<div class="anno_item">'+
 					'<div class="editArea">'+
 						'<textarea class="bodyContentTextArea"></textarea>'+ 
-						'<br/>'+
-						'<div class="button update">Update</div>'+
+					//	'<br/>'+
+					//	'<div class="button update">Update</div>'+
 					'</div>'+
 					'<div class="body">'+
 						'<p class="bodyContent"></p>' +
-						'<div class="button edit">Edit</div>'+
+					//	'<div class="button edit">Edit</div>'+
 					'</div>'+
 				'</div>'),
 				bodyContentTextArea = $(el).find(".bodyContentTextArea"),

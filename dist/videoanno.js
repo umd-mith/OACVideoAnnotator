@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Fri Nov 18 10:36:52 2011 -0800
+ *  Date: Mon Nov 28 13:10:21 2011 -0500
  *  
  * Educational Community License, Version 2.0
  * 
@@ -75,6 +75,28 @@ OAC.Client.namespace("StreamingVideo");(function ($, MITHGrid, OAC) {
 					model.removeItems([itemId]);
 				}
 			};
+			
+			that.eventResizeHandle = function (id, pos) {
+				if(id === itemId) {
+					// update item with new width/height
+					model.updateItems([{
+						id: itemId,
+						w: pos.width,
+						h: pos.height
+					}]);
+				}
+			};
+
+			that.eventMoveHandle = function (id, pos) {
+				if(id === itemId) {
+					// update item with new x/y
+					model.updateItems([{
+						id: itemId,
+						x: pos.x,
+						y: pos.y
+					}]);
+				}
+			};
 
 			return that;
 		};
@@ -122,7 +144,7 @@ OAC.Client.namespace("StreamingVideo");(function ($, MITHGrid, OAC) {
 			};
 			
 			that.update = function (item) {
-				// TODO: update text
+				$(itemEl).find(".bodyContent").text(item.bodyContent[0]);
 			};
 			
 			that.remove = function () {
@@ -157,7 +179,7 @@ OAC.Client.namespace("StreamingVideo");(function ($, MITHGrid, OAC) {
 
 					}
 				},
-				viewSetup: '<div id="canvasSVG" class="canvas_svg"></div>'+
+				viewSetup: '<div class="canvas_svg_holder"><div id="canvasSVG" class="canvas_svg"></div></div>'+
 				'<div id="annoList" class="anno_list"></div>',
 				presentations: {
 					raphsvg: {
@@ -209,7 +231,6 @@ OAC.Client.namespace("StreamingVideo");(function ($, MITHGrid, OAC) {
 
 								};
 
-
 								// calculate the extents (x, y, width, height)
 								// of this type of shape
 								that.getExtents = function () {
@@ -223,30 +244,6 @@ OAC.Client.namespace("StreamingVideo");(function ($, MITHGrid, OAC) {
 								// Event that fires when shape has activated
 							//	that.events ||= {};
 							//	that.events.onShapeIsActive = MITHGrid.initEventFirer(false, false);
-
-								// Event handlers
-				
-								that.eventResizeHandle = function (id, pos) {
-									if(id === itemId) {
-										// update item with new width/height
-										model.updateItems([{
-											id: itemId,
-											w: pos.width,
-											h: pos.height
-										}]);
-									}
-								};
-
-								that.eventMoveHandle = function (id, pos) {
-									if(id === itemId) {
-										// update item with new x/y
-										model.updateItems([{
-											id: itemId,
-											x: pos.x,
-											y: pos.y
-										}]);
-									}
-								};
 
 								// register shape
 								that.shape = c;
@@ -299,30 +296,6 @@ OAC.Client.namespace("StreamingVideo");(function ($, MITHGrid, OAC) {
 										height: (c.attr("ry") * 2)
 									};
 								};
-
-								// Event handlers
-
-								that.eventResizeHandle = function (id, pos) {
-									if(id === itemId) {
-										// update item with new width/height
-										model.updateItems([{
-											id: itemId,
-											w: pos.width,
-											h: pos.height
-										}]);
-									}
-								};
-
-								that.eventMoveHandle = function (id, pos) {
-									if(id === itemId) {
-										// update item with new x/y
-										model.updateItems([{
-											id: itemId,
-											x: pos.x,
-											y: pos.y
-										}]);
-									}
-								};
 					
 							//	that.events ||= {};
 							//	that.events.onShapeIsActive = MITHGrid.initEventFirer(true, false);
@@ -357,12 +330,12 @@ OAC.Client.namespace("StreamingVideo");(function ($, MITHGrid, OAC) {
 				'<div class="anno_item">'+
 					'<div class="editArea">'+
 						'<textarea class="bodyContentTextArea"></textarea>'+ 
-						'<br/>'+
-						'<div class="button update">Update</div>'+
+					//	'<br/>'+
+					//	'<div class="button update">Update</div>'+
 					'</div>'+
 					'<div class="body">'+
 						'<p class="bodyContent"></p>' +
-						'<div class="button edit">Edit</div>'+
+					//	'<div class="button edit">Edit</div>'+
 					'</div>'+
 				'</div>'),
 				bodyContentTextArea = $(el).find(".bodyContentTextArea"),
@@ -1059,7 +1032,7 @@ OAC.Client.StreamingVideo.Controller.annoActiveController = function (options) {
 			binding.events.onUpdate.fire(opts.itemId, data);
 			editEnd();
 		};
-
+/*
 		$(editButton).bind('click', function (e) {
 			e.preventDefault();
 			if(binding.active) {
@@ -1068,12 +1041,28 @@ OAC.Client.StreamingVideo.Controller.annoActiveController = function (options) {
 				editStart();
 			}
 		});
+		*/
+		$(bodyContent).bind('dblclick', function(e) {
+			e.preventDefault();
+			if(binding.active) {
+				editEnd();
+			} else {
+				editStart();
+			}
+		});
 
-		$(updateButton).bind('click', editUpdate);
+	//	$(updateButton).bind('click', editUpdate);
 		$(annoEl).bind('click', function (e) {
 		
 			// binding.events.onClick.fire(opts.itemId);
 			options.application.setActiveAnnotation(opts.itemId);
+		});
+		
+		options.application.events.onActiveAnnotationChange.addListener(function(id) {
+			if(id !== opts.id && binding.active) {
+				editUpdate({preventDefault: function(){}});
+				editEnd();
+			}
 		});
 
 	};
@@ -1156,21 +1145,29 @@ OAC.Client.StreamingVideo.Controller.canvasController = function (options) {
 			
 			ox = Math.abs(e.pageX - offset.left);
 			oy = Math.abs(e.pageY - offset.top);
+			if(binding.curRendering !== undefined) {
+				extents = binding.curRendering.getExtents();
+				dx = Math.abs(ox - extents.x);
+				dy = Math.abs(oy - extents.y);
+				if(dx <= extents.width/2+3 && dy <= extents.height/2+3) {
+					// nothing has changed
+					return;
+				}
+			}
 			$.each(binding.renderings, function (i, o) {
 				extents = o.getExtents();
 			
 				dx = Math.abs(ox - extents.x);
 				dy = Math.abs(oy - extents.y);
-				if(dx <= extents.width) {
-					if(dy <= extents.height) {
-						activeId = o.id;
-						if((binding.curRendering === undefined) || (o.id !== binding.curRendering.id)) {
-							binding.curRendering = o;
-							options.application.setActiveAnnotation(o.id);
-						}
-						// stop running loop
-						return false;
+				// the '3' is for the drag boxes around the object
+				if(dx <= extents.width/2+3 && dy <= extents.height/2+3) {
+					activeId = o.id;
+					if((binding.curRendering === undefined) || (o.id !== binding.curRendering.id)) {
+						binding.curRendering = o;
+						options.application.setActiveAnnotation(o.id);
 					}
+					// stop running loop
+					return false;
 				}
 			});
 			if((activeId.length === 0) && (binding.curRendering !== undefined)) {
@@ -1182,7 +1179,6 @@ OAC.Client.StreamingVideo.Controller.canvasController = function (options) {
 				binding.curRendering = undefined;
 			}
 		});
-		
 		
 	};
 
