@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Thu Nov 17 15:08:41 2011 -0500
+ *  Date: Mon Nov 21 16:23:40 2011 -0500
  *  
  * Educational Community License, Version 2.0
  * 
@@ -30,9 +30,7 @@ var app = {};
 // Set the namespace for the StreamingVideo Annotation application
 MITHGrid.globalNamespace("OAC");
 OAC.namespace("Client");
-OAC.Client.namespace("StreamingVideo");
-
-(function ($, MITHGrid, OAC) {
+OAC.Client.namespace("StreamingVideo");(function ($, MITHGrid, OAC) {
 	/**
 	* MITHGrid Canvas
 	* Creates a canvas using the Raphael JS library
@@ -576,7 +574,7 @@ that.applyBindings = function (binding, opts) {
 	attrs = {},
 	padding = 5,
 	calcFactors, calcHandles, drawMenu, handleIds = {}, drawHandles, 
-	handleAttrs = {}, shapeAttr = {}, menuAttrs = {}, cursor, 
+	handleAttrs = {}, shapeAttrs = {}, menuAttrs = {}, cursor, 
 	dAttrs = {}, eAttrs = {}, el;
 
 	// Function for applying a new shape to the bounding box
@@ -1143,7 +1141,7 @@ OAC.Client.StreamingVideo.Controller.annoActiveController = function (options) {
 * Listens for all clicks on the canvas and connects shapes with the
 * Edit controller above
 */
-OAC.Client.StreamingVideo.Controller.canvasController = function (options) {
+OAC.Client.StreamingVideo.Controller.canvasClickController = function (options) {
 	var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.canvasClickController", options);
 	that.options = options;
 
@@ -1192,21 +1190,11 @@ OAC.Client.StreamingVideo.Controller.canvasController = function (options) {
 		// Add to events
 		binding.registerRendering = function (rendering) {
 			binding.renderings[rendering.id] = rendering;
-			// if(rendering.eventClickHandle !== undefined){
-			// 				binding.event.eventClick.addListener(rendering.eventClickHandle);
-			// 			}
-			if(rendering.shapeIsActive !== undefined) {
-				// register the rendering shape click event
-				rendering.shapeIsActive.addListener(attachDragResize);
-			}
+			
 		};
 
 		binding.removeRendering = function (rendering) {
 			var tmp = {}, el;
-			if(rendering.eventClickHandle !== undefined){
-				binding.event.eventClick.removeListener(rendering.eventClickHandle);
-			}
-
 			$.each(binding.renderings, function (i,o) {
 				if(i !== rendering.id) {
 					tmp[i] = o;
@@ -1238,8 +1226,8 @@ OAC.Client.StreamingVideo.Controller.canvasController = function (options) {
 					}
 				}
 			});
+			
 			if((activeId.length === 0) && (binding.curRendering !== undefined)) {
-
 				// No shapes selected - de-activate current rendering and all other possible renderings
 			
 				app.setActiveAnnotation('null');
@@ -1264,7 +1252,7 @@ Presentations for canvas.js
 
 (function ($, MITHGrid, OAC) {
 	var canvasController, editBoxController, keyBoardController;
-	canvasController = OAC.Client.StreamingVideo.Controller.canvasController({
+	canvasController = OAC.Client.StreamingVideo.Controller.canvasClickController({
 		selectors: {
 			svg: ''
 		}

@@ -78,7 +78,7 @@ that.applyBindings = function (binding, opts) {
 	attrs = {},
 	padding = 5,
 	calcFactors, calcHandles, drawMenu, handleIds = {}, drawHandles, 
-	handleAttrs = {}, shapeAttr = {}, menuAttrs = {}, cursor, 
+	handleAttrs = {}, shapeAttrs = {}, menuAttrs = {}, cursor, 
 	dAttrs = {}, eAttrs = {}, el;
 
 	// Function for applying a new shape to the bounding box
