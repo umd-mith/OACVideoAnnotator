@@ -152,24 +152,24 @@
 
             calcFactors = function() {
                 var px,
-                py;
+                py;			
                 extents = activeRendering.getExtents();
                 // extents: x, y, width, height
                 px = (4 * (ox - extents.x) / extents.width) + 2;
                 py = (4 * (oy - extents.y) / extents.height) + 2;
-                if (px < 1) {
+                if (px < 1.5) {
                     factors.x = -1;
                 }
-                else if (px < 3) {
+                else if (px < 2.5) {
                     factors.x = 0;
                 }
                 else {
                     factors.x = 1;
                 }
-                if (py < 1) {
+                if (py < 1.5) {
                     factors.y = -1;
                 }
-                else if (py < 3) {
+                else if (py < 2.5) {
                     factors.y = 0;
                 }
                 else {
@@ -273,8 +273,8 @@
                         },
                         function(x, y, e) {
                             // start
-                            ox = e.offsetX;
-                            oy = e.offsetY;
+                            ox = e.layerX;
+	                        oy = e.layerY;
 
                             calcFactors();
                             activeRendering.shape.attr({
@@ -302,10 +302,10 @@
                         // dragging here means that as element is dragged
                         // the factorial determines in which direction the
                         // shape is pulled
-                        shapeAttrs.w = extents.width + 2 * dx * factors.x;
-                        shapeAttrs.h = extents.height + 2 * dy * factors.y;
-                        handleAttrs.nw = extents.width + 2 * dx * factors.x + (padding * 2);
-                        handleAttrs.nh = extents.height + 2 * dy * factors.y + (padding * 2);
+                        shapeAttrs.w = Math.abs(extents.width + 2 * dx * factors.x);
+                        shapeAttrs.h = Math.abs(extents.height + 2 * dy * factors.y);
+                        handleAttrs.nw = shapeAttrs.w + (padding * 2);
+                        handleAttrs.nh = shapeAttrs.h + (padding * 2);
                         handleAttrs.nx = (extents.x - (padding / 4)) - (handleAttrs.nw / 2);
                         handleAttrs.ny = (extents.y - (padding / 4)) - (handleAttrs.nh / 2);
                         svgBBox.attr({
@@ -329,12 +329,11 @@
                             });
                         }
                     },
-                    function(x, y, e) {
-                        ox = e.offsetX;
-                        oy = e.offsetY;
+                    function(x, y, e) {	
+                        ox = e.layerX;
+                        oy = e.layerY;
 
                         calcFactors();
-
                     },
                     function() {
                         // update

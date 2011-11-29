@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Mon Nov 28 16:41:44 2011 -0500
+ *  Date: Tue Nov 29 13:57:45 2011 -0500
  *  
  * Educational Community License, Version 2.0
  * 
@@ -556,24 +556,24 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 
             calcFactors = function() {
                 var px,
-                py;
+                py;			
                 extents = activeRendering.getExtents();
                 // extents: x, y, width, height
                 px = (4 * (ox - extents.x) / extents.width) + 2;
                 py = (4 * (oy - extents.y) / extents.height) + 2;
-                if (px < 1) {
+                if (px < 1.5) {
                     factors.x = -1;
                 }
-                else if (px < 3) {
+                else if (px < 2.5) {
                     factors.x = 0;
                 }
                 else {
                     factors.x = 1;
                 }
-                if (py < 1) {
+                if (py < 1.5) {
                     factors.y = -1;
                 }
-                else if (py < 3) {
+                else if (py < 2.5) {
                     factors.y = 0;
                 }
                 else {
@@ -677,8 +677,8 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
                         },
                         function(x, y, e) {
                             // start
-                            ox = e.offsetX;
-                            oy = e.offsetY;
+                            ox = e.layerX;
+	                        oy = e.layerY;
 
                             calcFactors();
                             activeRendering.shape.attr({
@@ -706,10 +706,10 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
                         // dragging here means that as element is dragged
                         // the factorial determines in which direction the
                         // shape is pulled
-                        shapeAttrs.w = extents.width + 2 * dx * factors.x;
-                        shapeAttrs.h = extents.height + 2 * dy * factors.y;
-                        handleAttrs.nw = extents.width + 2 * dx * factors.x + (padding * 2);
-                        handleAttrs.nh = extents.height + 2 * dy * factors.y + (padding * 2);
+                        shapeAttrs.w = Math.abs(extents.width + 2 * dx * factors.x);
+                        shapeAttrs.h = Math.abs(extents.height + 2 * dy * factors.y);
+                        handleAttrs.nw = shapeAttrs.w + (padding * 2);
+                        handleAttrs.nh = shapeAttrs.h + (padding * 2);
                         handleAttrs.nx = (extents.x - (padding / 4)) - (handleAttrs.nw / 2);
                         handleAttrs.ny = (extents.y - (padding / 4)) - (handleAttrs.nh / 2);
                         svgBBox.attr({
@@ -733,12 +733,11 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
                             });
                         }
                     },
-                    function(x, y, e) {
-                        ox = e.offsetX;
-                        oy = e.offsetY;
+                    function(x, y, e) {	
+                        ox = e.layerX;
+                        oy = e.layerY;
 
                         calcFactors();
-
                     },
                     function() {
                         // update
@@ -902,77 +901,13 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
                 $.each(dirs,
                 function(i, o) {
 					var data = handleCalculationData[o];
+					if(data === undefined) { return; }
 					if(handles[o] === undefined) {
 						handles[o] = calcHandle(data[0], data[1], data[2], data[3], data[4]);
 					}
 					else {
 						recalcHandle(handles[o], data[1], data[2], data[3], data[4]);
 					}
-/*                    switch (o) {
-                    case 'ul':
-                        if (handles.ul === undefined) {
-                            handles.ul = calcHandle('nw', 0, 0, 0, 0);
-                        } else {
-							recalcHandle(handles.ul, 0, 0, 0, 0);
-                        }
-                        break;
-                    case 'top':
-                        if (handles.top === undefined) {
-                            handles.top = calcHandle('n', 1, 0, 0, 0);
-                        } else {
-							recalcHandle(handles.top, 1, 0, 0, 0);
-                        }
-                        break;
-                    case 'ur':
-                        if (handles.ur === undefined) {
-                            handles.ur = calcHandle('ne', 2, -1, 0, 0);
-                        } else {
-							recalcHandle(handles.ur, 2, -1, 0, 0);
-                        }
-                        break;
-                    case 'rgt':
-                        if (handles.rgt === undefined) {
-                            handles.rgt = calcHandle('e', 2, -1, 1, -1);
-                        } else {
-							recalcHandle(handles.rgt, 2, -1, 1, -1);
-                        }
-                        break;
-                    case 'lr':
-                        if (handles.lr === undefined) {
-                            handles.lr = calcHandle('se', 2, -1, 2, -1);
-                        } else {
-							recalcHandle(handles.lr, 2, -1, 2, -1);
-                        }
-                        break;
-                    case 'btm':
-                        if (handles.btm === undefined) {
-                            handles.btm = calcHandle('s', 1, 0, 2, -1);
-                        } else {
-							recalcHandle(handles.btm, 1, 0, 2, -1);
-                        }
-                        break;
-                    case 'll':
-                        if (handles.ll === undefined) {
-                            handles.ll = calcHandle('sw', 0, 0, 2, -1);
-                        } else {
-							recalcHandle(handles.ll, 0, 0, 2, -1);
-                        }
-                        break;
-                    case 'lft':
-                        if (handles.lft === undefined) {
-                            handles.lft = calcHandle('w', 0, 0, 1, 0);
-                        } else {
-							recalcHandle(handles.lft, 0, 0, 1, 0);
-                        }
-                        break;
-                    case 'mid':
-                        if (handles.mid === undefined) {
-                            handles.mid = calcHandle('pointer', 1, 0, 1, 0);
-                        } else {
-							recalcHandle(handles.mid, 1, 0, 1, 0);
-                        }
-                        break;
-                    } */
                 });
             };
         };
