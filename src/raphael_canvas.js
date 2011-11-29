@@ -17,7 +17,7 @@ Presentations for canvas.js
 				rendering = that.renderingFor(activeRenderingId);
 			}
 			if(activeRenderingId !== id) {
-				if(rendering && typeof rendering.makeInactive !== "undefined") {
+				if(rendering !== null && typeof rendering !== "undefined" && typeof rendering.makeInactive !== "undefined") {
 					rendering.makeInactive();
 				}
 				if(typeof id !== "undefined" && id !== null) {
@@ -99,12 +99,12 @@ Presentations for canvas.js
 				rendering = that.renderingFor(activeRenderingId);
 			}
 			if(activeRenderingId !== id) {
-				if(rendering && typeof rendering.makeInactive !== "undefined") {
+				if(rendering !== null && typeof(rendering) !== "undefined" && typeof(rendering.makeInactive) !== "undefined") {
 					rendering.makeInactive();
 				}
 				if(typeof id !== "undefined" && id !== null) {
 					rendering = that.renderingFor(id);
-					if(rendering && typeof rendering.makeActive !== "undefined") {
+					if(rendering !== null && typeof(rendering) !== "undefined" && typeof rendering.makeActive !== "undefined") {
 						rendering.makeActive();
 					}
 				}

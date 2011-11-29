@@ -38,7 +38,6 @@
 			};
 
 			that.eventDeleteHandle = function (id) {
-
 				if(id === itemId) {
 					model.removeItems([itemId]);
 				}
