@@ -1,21 +1,15 @@
 (function($, MITHGrid, OAC) {
-    OAC.Client.StreamingVideo.namespace('Controller');
+    var Controller = OAC.Client.StreamingVideo.namespace('Controller');
+	Controller.namespace("KeyboardListener");
 
-    MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.keyBoardListener", {
-        bind: {
-            events: {
-                onDelete: ["preventable", "unicast"]
-            }
-        }
-    });
     /*
 	 * Keyboard Listener Controller
 	 *
 	 * Keyboard listener - listens to keydown events on the document
 	 * level (not sure if it will work on lower DOM elements)
      */
-    OAC.Client.StreamingVideo.Controller.keyBoardListener = function(options) {
-        var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.keyBoardListener", options);
+    Controller.KeyboardListener.initController = function(options) {
+        var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.KeyboardListener", options);
         options = that.options;
 
         that.applyBindings = function(binding, opts) {
@@ -45,14 +39,7 @@
         return that;
     };
 
-    MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.annotationEditSelectionGrid", {
-        events: {
-            onResize: "preventable",
-            onDrag: "preventable",
-            onEdit: "preventable",
-            onDelete: "preventable"
-        }
-    });
+	Controller.namespace("AnnotationEditSelectionGrid");
     /*
 	 * Annotation Selection Grid
 	 *
@@ -60,19 +47,14 @@
 	 * act as the resize and drag tool. Only edits the SVG data - no annotation
 	 * bodyContent data.
      */
-    OAC.Client.StreamingVideo.Controller.annotationEditSelectionGrid = function(options) {
-        var that = MITHGrid.Controller.initRaphaelController("OAC.Client.StreamingVideo.Controller.annotationEditSelectionGrid", options),
-        handleSet = {},
-        midDrag = {},
-        dirs = [],
-        svgBBox = {},
-        itemMenu = {},
-        handles = {},
-        activeRendering = {};
+    Controller.AnnotationEditSelectionGrid.initController = function(options) {
+        var that = MITHGrid.Controller.initController(
+						"OAC.Client.StreamingVideo.Controller.AnnotationEditSelectionGrid", 
+                        options
+					),
+		dirs = [];
+
         options = that.options;
-        that.deleteButton = {}; // **
-        that.editButton = {};   // ** - and change live() to on()
-        that.menuContainer = {};// **
         dirs = that.options.dirs || ['ul', 'top', 'ur', 'lft', 'lr', 'btm', 'll', 'rgt', 'mid'];
 
         /*
@@ -82,9 +64,17 @@
         that.applyBindings = function(binding, opts) {
             var ox,
             oy,
+	        handleSet = {},
+	        midDrag = {},
+	        svgBBox = {},
+	        itemMenu = {},
+	        handles = {},
+	        activeRendering,
+			deleteButton = {},
+			editButton = {},
+			menuContainer = {},
             factors = {},
             extents,
-            svgTarget,
             paper = opts.paper,
             attrs = {},
             padding = 5,
@@ -103,25 +93,33 @@
 			handleCalculationData = {},
             el;
 
+			that.events.onResize.addListener(function(id, pos) {
+				if(activeRendering !== undefined && activeRendering.eventResize !== undefined) {
+					activeRendering.eventResize(id, pos);
+				}
+			});
+
+			that.events.onMove.addListener(function(id, pos) {
+				if(activeRendering !== undefined && activeRendering.eventMove !== undefined) {
+					activeRendering.eventMove(id, pos);
+				}
+			});
+
+			that.events.onDelete.addListener(function(id) {
+				if(activeRendering !== undefined && activeRendering.eventDelete !== undefined) {
+					activeRendering.eventDelete(id);
+				}
+			});
+			
             // Function for applying a new shape to the bounding box
             binding.attachRendering = function(newRendering) {
-
+                binding.detachRendering();
+				if(newRendering === undefined) { return; }
                 // register the rendering
                 activeRendering = newRendering;
-                svgTarget = activeRendering.shape;
 
                 calcFactors();
                 drawHandles();
-
-                if (activeRendering.eventResizeHandle !== undefined) {
-                    that.events.onResize.addListener(activeRendering.eventResizeHandle);
-                }
-                if (activeRendering.eventMoveHandle !== undefined) {
-                    that.events.onDrag.addListener(activeRendering.eventMoveHandle);
-                }
-                if (activeRendering.eventDeleteHandle !== undefined) {
-                    that.events.onDelete.addListener(activeRendering.eventDeleteHandle);
-                }
             };
 
             // Function to call in order to "de-activate" the edit box
@@ -130,17 +128,7 @@
                 if (typeof(activeRendering) === "undefined" || activeRendering === null) {
                     return;
                 }
-
-                if (activeRendering.eventResizeHandle !== undefined) {
-                    that.events.onResize.removeListener(activeRendering.eventResizeHandle);
-                }
-                if (activeRendering.eventMoveHandle !== undefined) {
-                    that.events.onDrag.removeListener(activeRendering.eventMoveHandle);
-                }
-                if (activeRendering.eventDeleteHandle !== undefined) {
-                    that.events.onDelete.removeListener(activeRendering.eventDeleteHandle);
-                }
-
+				activeRendering = undefined;
                 handleSet.hide();
 
                 svgBBox.hide();
@@ -151,30 +139,7 @@
             };
 
             calcFactors = function() {
-                var px,
-                py;			
                 extents = activeRendering.getExtents();
-                // extents: x, y, width, height
-                px = (4 * (ox - extents.x) / extents.width) + 2;
-                py = (4 * (oy - extents.y) / extents.height) + 2;
-                if (px < 1.5) {
-                    factors.x = -1;
-                }
-                else if (px < 2.5) {
-                    factors.x = 0;
-                }
-                else {
-                    factors.x = 1;
-                }
-                if (py < 1.5) {
-                    factors.y = -1;
-                }
-                else if (py < 2.5) {
-                    factors.y = 0;
-                }
-                else {
-                    factors.y = 1;
-                }
 
                 // create offset factors for
                 // bounding box
@@ -274,8 +239,7 @@
                         function(x, y, e) {
                             // start
                             ox = e.layerX;
-	                        oy = e.layerY;
-
+                            oy = e.layerY;
                             calcFactors();
                             activeRendering.shape.attr({
                                 cursor: 'move'
@@ -288,7 +252,7 @@
                                 y: shapeAttrs.y
                             };
 
-                            that.events.onDrag.fire(activeRendering.id, pos);
+                            that.events.onMove.fire(activeRendering.id, pos);
                             activeRendering.shape.attr({
                                 cursor: 'default'
                             });
@@ -302,8 +266,8 @@
                         // dragging here means that as element is dragged
                         // the factorial determines in which direction the
                         // shape is pulled
-                        shapeAttrs.w = Math.abs(extents.width + 2 * dx * factors.x);
-                        shapeAttrs.h = Math.abs(extents.height + 2 * dy * factors.y);
+                        shapeAttrs.w = Math.abs(extents.width + dx * factors.x);
+                        shapeAttrs.h = Math.abs(extents.height + dy * factors.y);
                         handleAttrs.nw = shapeAttrs.w + (padding * 2);
                         handleAttrs.nh = shapeAttrs.h + (padding * 2);
                         handleAttrs.nx = (extents.x - (padding / 4)) - (handleAttrs.nw / 2);
@@ -330,9 +294,32 @@
                         }
                     },
                     function(x, y, e) {	
-                        ox = e.layerX;
-                        oy = e.layerY;
-
+		                var px,
+		                py;			
+		                extents = activeRendering.getExtents();
+						ox = e.layerX;
+	                    oy = e.layerY;
+		                // extents: x, y, width, height
+		                px = (8 * (ox - extents.x) / extents.width) + 4;
+		                py = (8 * (oy - extents.y) / extents.height) + 4;
+		                if (px < 3) {
+		                    factors.x = -2;
+		                }
+		                else if (px < 5) {
+		                    factors.x = 0;
+		                }
+		                else {
+		                    factors.x = 2;
+		                }
+		                if (py < 3) {
+		                    factors.y = -2;
+		                }
+		                else if (py < 5) {
+		                    factors.y = 0;
+		                }
+		                else {
+		                    factors.y = 2;
+		                }
                         calcFactors();
                     },
                     function() {
@@ -341,7 +328,9 @@
                             width: shapeAttrs.w,
                             height: shapeAttrs.h
                         };
-                        that.events.onResize.fire(activeRendering.id, pos);
+						if(activeRendering !== undefined) {
+                            that.events.onResize.fire(activeRendering.id, pos);
+						}
                     }
                     );
                 } else {
@@ -378,49 +367,49 @@
                     eAttrs = {
                         x: menuAttrs.x + 2,
                         y: menuAttrs.y + 2,
-                        w: (menuAttrs.w / 2) - 4,
+                        w: menuAttrs.w / 2 - 4,
                         h: menuAttrs.h - (menuAttrs.h / 8)
                     };
 
                     dAttrs = {
                         x: (eAttrs.x + eAttrs.w + 2),
                         y: menuAttrs.y + 2,
-                        w: (menuAttrs.w / 2) - 4,
+                        w: menuAttrs.w / 2 - 4,
                         h: menuAttrs.h - (menuAttrs.h / 8)
                     };
 
                     itemMenu = paper.set();
-                    that.menuContainer = paper.rect(menuAttrs.x, menuAttrs.y, menuAttrs.w, menuAttrs.h);
-                    that.menuContainer.attr({
+                    menuContainer = paper.rect(menuAttrs.x, menuAttrs.y, menuAttrs.w, menuAttrs.h);
+                    menuContainer.attr({
                         fill: '#FFFFFF',
                         stroke: '#000'
                     });
 
-                    itemMenu.push(that.menuContainer);
+                    itemMenu.push(menuContainer);
 
-                    that.editButton = paper.rect(eAttrs.x, eAttrs.y, eAttrs.w, eAttrs.h);
-                    that.editButton.attr({
+                    editButton = paper.rect(eAttrs.x, eAttrs.y, eAttrs.w, eAttrs.h);
+                    editButton.attr({
                         fill: 334009,
                         cursor: 'pointer'
                     });
 
-                    itemMenu.push(that.editButton);
+                    itemMenu.push(editButton);
 
-                    that.deleteButton = paper.rect(dAttrs.x, dAttrs.y, dAttrs.w, dAttrs.h);
-                    that.deleteButton.attr({
+                    deleteButton = paper.rect(dAttrs.x, dAttrs.y, dAttrs.w, dAttrs.h);
+                    deleteButton.attr({
                         fill: 334009,
                         cursor: 'pointer'
                     });
 
-                    itemMenu.push(that.deleteButton);
+                    itemMenu.push(deleteButton);
                     // attach event firers
-                    that.editButton.mousedown(function() {
+                    editButton.mousedown(function() {
                         if (activeRendering !== undefined) {
                             that.events.onEdit.fire(activeRendering.id);
                         }
                     });
 
-                    that.deleteButton.mousedown(function() {
+                    deleteButton.mousedown(function() {
                         if (activeRendering !== undefined) {
                             that.events.onDelete.fire(activeRendering.id);
                             itemDeleted();
@@ -439,15 +428,15 @@
                     };
 
                     dAttrs = {
-                        x: (eAttrs.x + that.editButton.attr('width') + 2),
+                        x: (eAttrs.x + editButton.attr('width') + 2),
                         y: menuAttrs.y + 2
                     };
-                    that.menuContainer.attr({
+                    menuContainer.attr({
                         x: menuAttrs.x,
                         y: menuAttrs.y
                     });
-                    that.editButton.attr(eAttrs);
-                    that.deleteButton.attr(dAttrs);
+                    editButton.attr(eAttrs);
+                    deleteButton.attr(dAttrs);
                 }
             };
 
@@ -466,7 +455,7 @@
 				ul:  [ 'nw', 0,  0, 0,  0 ],
 				top: [  'n', 1,  0, 0,  0 ],
 				ur:  [ 'ne', 2, -1, 0,  0 ],
-				rgt: [  'e', 2, -1, 1, -1 ],
+				rgt: [  'e', 2, -1, 1,  0 ],
 				lr:  [ 'se', 2, -1, 2, -1 ],
 				btm: [  's', 1,  0, 2, -1 ],
 				ll:  [ 'sw', 0,  0, 2, -1 ],
@@ -481,7 +470,7 @@
 					return {
 						x: args.x + xn * args.width / 2 + xp * padding,
 						y: args.y + yn * args.height / 2 + yp * padding,
-						cursor: type === "pointer" ? type : type + "-resize"
+						cursor: type.length > 2 ? type : type + "-resize"
 					};
 				},
 				recalcHandle = function(info, xn, xp, yn, yp) {
@@ -511,22 +500,13 @@
         return that;
     };
 
-    MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.annoActiveController", {
-        bind: {
-            events: {
-                onClick: "preventable",
-                onDelete: "preventable",
-                onUpdate: "preventable"
-            }
-        }
-    });
-
     /*
 * Annotation Active Controller
 * Handles HTML annotation lens
 */
-    OAC.Client.StreamingVideo.Controller.annoActiveController = function(options) {
-        var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.annoActiveController", options);
+	Controller.namespace("AnnoActiveController");
+    Controller.AnnoActiveController.initController = function(options) {
+        var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.AnnoActiveController", options);
         options = that.options;
 
         that.applyBindings = function(binding, opts) {
@@ -540,25 +520,20 @@
             editArea = binding.locate('editarea'),
             editButton = binding.locate('editbutton'),
             updateButton = binding.locate('updatebutton'),
-            deleteButton = binding.locate('deletebutton');
-
-            binding.renderings = {};
-            binding.active = false;
-
-            // Event registration function - ties elements to
-            // event handlers above
+            deleteButton = binding.locate('deletebutton'),
+			bindingActive = false;
 
             editStart = function() {
                 $(editArea).show();
                 $(bodyContent).hide();
-                binding.active = true;
+                bindingActive = true;
                 binding.events.onClick.fire(opts.itemId);
             };
 
             editEnd = function() {
                 $(editArea).hide();
                 $(bodyContent).show();
-                binding.active = false;
+                bindingActive = false;
             };
 
             editUpdate = function(e) {
@@ -571,7 +546,7 @@
             $(bodyContent).bind('dblclick',
             function(e) {
                 e.preventDefault();
-                if (binding.active) {
+                if (bindingActive) {
                     editEnd();
                 } else {
                     editStart();
@@ -585,7 +560,7 @@
             });
 
             options.application.events.onActiveAnnotationChange.addListener(function(id) {
-                if (id !== opts.id && binding.active) {
+                if (id !== opts.id && bindingActive) {
                     editUpdate({
                         preventDefault: function() {}
                     });
@@ -597,20 +572,14 @@
         return that;
     };
 
-    MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.canvasClickController", {
-        bind: {
-            events: {
-                onClick: "preventable"
-            }
-        }
-    });
     /*
 * Canvas Controller
 * Listens for all clicks on the canvas and connects shapes with the
 * Edit controller above
 */
-    OAC.Client.StreamingVideo.Controller.canvasController = function(options) {
-        var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.canvasClickController", options);
+	Controller.namespace("CanvasClickController");
+    Controller.CanvasClickController.initController = function(options) {
+        var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.CanvasClickController", options);
         options = that.options;
 
         // Create the object passed back to the Presentation
@@ -627,57 +596,44 @@
             y,
             w,
             h,
+			curRendering,
+			renderings = {},
             paper = opts.paper,
             offset = $(container).offset(),
             attachDragResize = function(id) {
 				var o;
-                if ((binding.curRendering !== undefined) && (id === binding.curRendering.id)) {
+                if ((curRendering !== undefined) && (id === curRendering.id)) {
                     return;
                 }
-                o = binding.renderings[id];
+                o = renderings[id];
                 if (o === undefined) {
                     // de-activate rendering and all other listeners
                     binding.events.onClick.fire(undefined);
                     // hide the editBox
                     // editBoxController.deActivateEditBox();
-                    binding.curRendering = undefined;
+                    curRendering = undefined;
                     return false;
                 }
 
-                binding.curRendering = o;
+                curRendering = o;
 
             },
             detachDragResize = function(id) {
-                if ((binding.curRendering !== undefined) && (id === binding.curRendering.id)) {
+                if ((curRendering !== undefined) && (id === curRendering.id)) {
                     return;
                 }
-                var o = binding.renderings[id];
+                var o = renderings[id];
             };
 
             options.application.events.onActiveAnnotationChange.addListener(attachDragResize);
 
-            binding.renderings = {};
-
-            binding.curRendering = undefined;
-
-
             // Add to events
             binding.registerRendering = function(newRendering) {
-                binding.renderings[newRendering.id] = newRendering;
+                renderings[newRendering.id] = newRendering;
             };
 
             binding.removeRendering = function(oldRendering) {
-                var tmp = {},
-                el;
-                delete binding.renderings[oldRendering.id];
-                /*
-			$.each(binding.renderings, function (i,o) {
-				if(i !== oldRendering.id) {
-					tmp[i] = o;
-				}
-			});
-			binding.renderings = $.extend(true, {}, tmp);
-			*/
+                delete renderings[oldRendering.id];
             };
 
             $(container).bind('mousedown',
@@ -687,37 +643,36 @@
 
                 ox = Math.abs(e.pageX - offset.left);
                 oy = Math.abs(e.pageY - offset.top);
-                if (binding.curRendering !== undefined) {
-                    extents = binding.curRendering.getExtents();
+                if (curRendering !== undefined) {
+                    extents = curRendering.getExtents();
                     dx = Math.abs(ox - extents.x);
                     dy = Math.abs(oy - extents.y);
-                    if (dx <= extents.width / 2 + 3 && dy <= extents.height / 2 + 3) {
+                    if (dx < extents.width / 2 + 4 && dy < extents.height / 2 + 4) {
                         // nothing has changed
                         return;
                     }
                 }
-                $.each(binding.renderings,
+                $.each(renderings,
                 function(i, o) {
                     extents = o.getExtents();
 
                     dx = Math.abs(ox - extents.x);
                     dy = Math.abs(oy - extents.y);
                     // the '3' is for the drag boxes around the object
-                    if (dx <= extents.width / 2 + 3 && dy <= extents.height / 2 + 3) {
+                    if (dx < extents.width / 2 + 4 && dy < extents.height / 2 + 4) {
                         activeId = o.id;
-                        if ((binding.curRendering === undefined) || (o.id !== binding.curRendering.id)) {
-                            binding.curRendering = o;
+                        if ((curRendering === undefined) || (o.id !== curRendering.id)) {
+                            curRendering = o;
                             options.application.setActiveAnnotation(o.id);
                         }
                         // stop running loop
                         return false;
                     }
                 });
-                if ((activeId.length === 0) && (binding.curRendering !== undefined)) {
+                if ((activeId.length === 0) && (curRendering !== undefined)) {
                     // No shapes selected - de-activate current rendering and all other possible renderings
                     options.application.setActiveAnnotation(undefined);
-
-                    binding.curRendering = undefined;
+                    curRendering = undefined;
                 }
             });
 

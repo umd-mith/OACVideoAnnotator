@@ -8,55 +8,24 @@ Presentations for canvas.js
 (function ($, MITHGrid, OAC) {
 	MITHGrid.Presentation.namespace("AnnotationList");
 	MITHGrid.Presentation.AnnotationList.initPresentation = function (container, options) {
-		var that = MITHGrid.Presentation.initPresentation("AnnotationList", container, options), activeRenderingId;
+		var that = MITHGrid.Presentation.initPresentation("MITHGrid.Presentation.AnnotationList", container, options);
 
-		// that.annoListController = annoActiveController.bind($(container), {});
-		that.eventActiveRenderingChange = function(id) {
-			var rendering;
-			if(typeof activeRenderingId !== "undefined" && activeRenderingId !== null) {
-				rendering = that.renderingFor(activeRenderingId);
-			}
-			if(activeRenderingId !== id) {
-				if(rendering !== null && typeof rendering !== "undefined" && typeof rendering.makeInactive !== "undefined") {
-					rendering.makeInactive();
-				}
-				if(typeof id !== "undefined" && id !== null) {
-					rendering = that.renderingFor(id);
-					if(rendering && typeof rendering.makeActive !== "undefined") {
-						rendering.makeActive();
-					}
-				}
-				activeRenderingId = id;
-			}
-		};
-		
 		return that;
 	};
 
 	MITHGrid.Presentation.namespace("RaphaelCanvas");
 	// Presentation for the Canvas area - area that the Raphael canvas is drawn on
 	MITHGrid.Presentation.RaphaelCanvas.initPresentation = function (container, options) {
-		var that = MITHGrid.Presentation.initPresentation("RaphaelCanvas", container, options),
-			id = $(container).attr('id'), h, w, activeRenderingId, 
-			canvasController, keyBoardController, editBoxController;
+		var that = MITHGrid.Presentation.initPresentation("MITHGrid.Presentation.RaphaelCanvas", container, options),
+			id = $(container).attr('id'), h, w, 
+			canvasController, keyBoardController, editBoxController, superRender, canvasBinding, keyboardBinding, e,
+			superEventFocusChange, editBoundingBoxBinding;
 		
-		canvasController = OAC.Client.StreamingVideo.Controller.canvasController({
-			application: that.options.application,
-			selectors: {
-				svg: ''
-			}
-		});
+		options = that.options;
 		
-		keyBoardController = OAC.Client.StreamingVideo.Controller.keyBoardListener({
-			application: that.options.application,
-			selectors: {
-				doc: ''
-			}
-		});
-		
-		editBoxController = OAC.Client.StreamingVideo.Controller.annotationEditSelectionGrid({
-			application: that.options.application
-		});
+		canvasController = options.controllers.canvas;
+		keyBoardController = options.controllers.keyboard;
+		editBoxController = options.controllers.editBox;
 			
 		if (options.cWidth !== undefined) {
 			w = options.cWidth;
@@ -79,37 +48,38 @@ Presentations for canvas.js
 		// @h: Integer value for height of the SVG canvas
 		that.canvas = new Raphael(id, w, h);
 
-
 		// attach binding
-		that.canvasEvents = canvasController.bind(container, {
-
+		canvasBinding = canvasController.bind($(container), {
 			closeEnough: 5,
 			paper: that.canvas
 		});
 
-		that.editBoundingBox = editBoxController.bind($(container), {
+		editBoundingBoxBinding = editBoxController.bind($(container), {
 			paper: that.canvas
 		});
-
-		that.keyBoardListener = keyBoardController.bind($('body'), {});
-
-		that.eventActiveRenderingChange = function(id) {
-			var rendering;
-			if(typeof activeRenderingId !== "undefined" && activeRenderingId !== null) {
-				rendering = that.renderingFor(activeRenderingId);
+		
+		keyboardBinding = keyBoardController.bind($('body'), {});
+		
+		that.events = that.events || {};
+		for(e in keyboardBinding.events) {
+			that.events[e] = keyboardBinding.events[e];
+		}
+		
+		superRender = that.render;
+		
+		that.render = function(c, m, i) {
+			var rendering = superRender(c, m, i);
+			if(rendering !== undefined) {
+				canvasBinding.registerRendering(rendering);
 			}
-			if(activeRenderingId !== id) {
-				if(rendering !== null && typeof(rendering) !== "undefined" && typeof(rendering.makeInactive) !== "undefined") {
-					rendering.makeInactive();
-				}
-				if(typeof id !== "undefined" && id !== null) {
-					rendering = that.renderingFor(id);
-					if(rendering !== null && typeof(rendering) !== "undefined" && typeof rendering.makeActive !== "undefined") {
-						rendering.makeActive();
-					}
-				}
-				activeRenderingId = id;
-			}
+			return rendering;
+		};
+		
+		superEventFocusChange = that.eventFocusChange;
+		
+		that.eventFocusChange = function(id) {
+			superEventFocusChange(id);
+			editBoundingBoxBinding.attachRendering(that.renderingFor(id));
 		};
 				
 		return that;

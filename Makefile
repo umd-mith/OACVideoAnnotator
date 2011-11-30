@@ -12,9 +12,9 @@ JS_ENGINE ?= `which node nodejs`
 COMPILER = ${JS_ENGINE} ${BUILD_DIR}/uglify.js --unsafe
 POST_COMPILER = ${JS_ENGINE} ${BUILD_DIR}/post-compile.js
 
-BASE_FILES = ${SRC_DIR}/canvas.js \
-	${SRC_DIR}/controllers.js \
-	${SRC_DIR}/raphael_canvas.js 
+BASE_FILES = ${SRC_DIR}/controllers.js \
+	${SRC_DIR}/raphael_canvas.js \
+	${SRC_DIR}/canvas.js
 
 MG = ${DIST_DIR}/videoanno.js
 MG_MIN = ${DIST_DIR}/videoanno.min.js

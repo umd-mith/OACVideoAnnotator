@@ -3,9 +3,14 @@
 	* MITHGrid Canvas
 	* Creates a canvas using the Raphael JS library
 	*/
-
+	// generating the canvasId allows us to have multiple instances of the app on a page and still
+	// have a unique ID as expected by the Raphaël library
+	var canvasId = 1;
 	OAC.Client.StreamingVideo.initApp = function (container, options) {
-		var renderListItem, annoActiveController, app, svgLens, textLens;
+		var renderListItem, annoActiveController, app, svgLens, textLens,
+		    myCanvasId = 'OAC-Client-StreamingVideo-SVG-Canvas-' + canvasId;
+		
+		canvasId += 1;
 		
 		/*
 		svgLens builds an object with functionality common to all SVG shapes on the canvas.
@@ -14,36 +19,27 @@
 		svgLens = function (container, view, model, itemId) {
 			var that = {id: itemId};
 
-			that.makeActive = function() {
+			that.eventFocus = function() {
 				that.shape.attr({
 					opacity: 1
 				}).toFront();
-				view.editBoundingBox.attachRendering(that);
-				view.keyBoardListener.events.onDelete.addListener(that.eventDeleteHandle);
+				view.events.onDelete.addListener(that.eventDelete);
 			};
 			
-			that.makeInactive = function() {
+			that.eventUnfocus = function() {
 				that.shape.attr({
 					opacity:0.5
 				}).toBack();
-				view.editBoundingBox.detachRendering();
-				view.keyBoardListener.events.onDelete.removeListener(that.eventDeleteHandle);
+				view.events.onDelete.removeListener(that.eventDelete);
 			};
 
-			that.remove = function (item) {
-				// getting the removeItems callback
-				that.shape.remove();
-				view.editBoundingBox.detachRendering();
-				view.keyBoardListener.events.onDelete.removeListener(that.eventDeleteHandle);
-			};
-
-			that.eventDeleteHandle = function (id) {
+			that.eventDelete = function (id) {
 				if(id === itemId) {
 					model.removeItems([itemId]);
 				}
 			};
 			
-			that.eventResizeHandle = function (id, pos) {
+			that.eventResize = function (id, pos) {
 				if(id === itemId) {
 					// update item with new width/height
 					model.updateItems([{
@@ -54,7 +50,7 @@
 				}
 			};
 
-			that.eventMoveHandle = function (id, pos) {
+			that.eventMove = function (id, pos) {
 				if(id === itemId) {
 					// update item with new x/y
 					model.updateItems([{
@@ -63,6 +59,11 @@
 						y: pos.y
 					}]);
 				}
+			};
+			
+			that.remove = function (item) {
+				// getting the removeItems callback
+				that.shape.remove();
 			};
 
 			return that;
@@ -73,22 +74,18 @@
 		 */
 		textLens = function (container, view, model, itemId) {
 			var that = {}, item = model.getItem(itemId),
-			itemEl;
-			// TODO: move this binding to a controller
-			$("#delete"+item.id[0]).live('click',function (e){
-				e.preventDefault();
-				model.removeItems([item.id[0]]);
-			});
+			itemEl, annoEvents;
+			
 			itemEl = renderListItem(item, container);
 
 			// attaching controller to make the
 			// HTML highlighted when shape is selected
-			that.annoEvents = annoActiveController.bind(itemEl, {
+			annoEvents = annoActiveController.bind(itemEl, {
 				model: model,
 				itemId: itemId
 			});
 
-			that.updateEventHandle = function (id, data) {
+			that.eventUpdate = function (id, data) {
 				if(id === itemId) {
 					model.updateItems([{
 						id: itemId,
@@ -97,18 +94,16 @@
 				 }
 			};
 			
-			that.clickEventHandle = app.setActiveAnnotation;
-
-			that.annoEvents.events.onClick.addListener(that.clickEventHandle);
-			that.annoEvents.events.onUpdate.addListener(that.updateEventHandle);
-
-			that.makeActive = function() {
+			that.eventFocus = function() {
 				itemEl.addClass('selected');
 			};
 			
-			that.makeInactive = function() {
+			that.eventUnfocus = function() {
 				itemEl.removeClass('selected');
 			};
+			
+			annoEvents.events.onClick.addListener(app.setActiveAnnotation);
+			annoEvents.events.onUpdate.addListener(that.eventUpdate);
 			
 			that.update = function (item) {
 				$(itemEl).find(".bodyContent").text(item.bodyContent[0]);
@@ -118,10 +113,6 @@
 				$(itemEl).remove();
 			};
 			
-			if(app.getActiveAnnotation() === itemId) {
-				that.makeActive();
-			}
-			
 			return that;
 		};
 		
@@ -130,29 +121,12 @@
 		*
 		*/
 		app = MITHGrid.Application.initApp("OAC.Client.StreamingVideo", container, 
-			$.extend(true, {}, options, {
-				variables: {
-					ActiveAnnotation: {
-						is: 'rw'
-					}
-				},
-				dataViews: {
-					// view for the space in which data from shapes
-					// is drawn
-					drawspace: {
-						dataStore: 'canvas',
-						types: ["Rectangle","Ellipse"],
-						label: 'drawspace'
-
-					}
-				},
-				viewSetup: '<div class="canvas_svg_holder"><div id="canvasSVG" class="canvas_svg"></div></div>'+
-				'<div id="annoList" class="anno_list"></div>',
+			$.extend(true, {}, {
+				viewSetup: '<div class="canvas_svg_holder"><div id="' + myCanvasId + '" class="canvas_svg"></div></div>'+
+				'<div class="anno_list"></div>',
 				presentations: {
 					raphsvg: {
-						type: MITHGrid.Presentation.RaphaelCanvas,
-						container: "#canvasSVG",
-						dataView: 'drawspace',
+						container: "#" + myCanvasId,
 						lenses: {
 							/*
 							* The following are lenses for shapes that
@@ -166,7 +140,7 @@
 								// Note: Rectangle measurements x,y start at CENTER
 								var that = svgLens(container, view, model, itemId),
 								item = model.getItem(itemId),
-								c, ox, oy, bbox, isActive = (itemId === app.getActiveAnnotation());
+								c, ox, oy, bbox;
 
 								ox = (item.x - (item.w[0] / 2));
 								oy = (item.y - (item.h[0] / 2));
@@ -176,7 +150,7 @@
 								// fill and set opacity
 								c.attr({
 									fill: "red",
-									opacity: isActive ? 1 : 0.5
+									opacity: 0.5
 								});
 								
 								that.update = function (item) {
@@ -184,7 +158,7 @@
 									// model.updateItems in move()
 									try {
 										if (item.x !== undefined && item.y !== undefined && item.w !== undefined && item.y !== undefined) {
-											that.shape.attr({
+											c.attr({
 												x: item.x[0] - item.w[0]/2,
 												y: item.y[0] - item.h[0]/2,
 												width: item.w[0],
@@ -208,29 +182,23 @@
 										height: c.attr("height")
 									};
 								};
-								// Event that fires when shape has activated
-							//	that.events ||= {};
-							//	that.events.onShapeIsActive = MITHGrid.initEventFirer(false, false);
 
 								// register shape
 								that.shape = c;
-
-								view.canvasEvents.registerRendering(that);
-								//app.events.onActiveAnnotationChange.addListener(that.eventClickHandle);
-
+								
 								return that;
 							},
 							Ellipse: function (container, view, model, itemId) {
 								var that = svgLens(container, view, model, itemId),
 								item = model.getItem(itemId),
-								c, isActive = (itemId === app.getActiveAnnotation());
+								c;
 
 								// create the shape
 								c = view.canvas.ellipse(item.x[0], item.y[0], item.w[0]/2, item.h[0]/2);
 								// fill shape
 								c.attr({
 									fill: "red",
-									opacity: isActive ? 1 : 0.5
+									opacity: 0.5
 								});
 								
 
@@ -263,24 +231,15 @@
 										height: (c.attr("ry") * 2)
 									};
 								};
-					
-							//	that.events ||= {};
-							//	that.events.onShapeIsActive = MITHGrid.initEventFirer(true, false);
 
 								// register shape
 								that.shape = c;
 
-								view.canvasEvents.registerRendering(that);
-								//app.events.onActiveAnnotationChange.addListener(that.eventClickHandle);
 								return that;
-
 							}
 						}
 					},
 					annoItem: {
-						type: MITHGrid.Presentation.AnnotationList,
-						dataView: 'drawspace',
-						container: '.anno_list',
 						lenses: {
 							Rectangle: textLens,
 							Ellipse: textLens
@@ -289,7 +248,7 @@
 				},
 				cWidth: options.width,
 				cHeight: options.height
-			})
+			}, options)
 		);
 
 		renderListItem = function (item, container) {
@@ -297,12 +256,9 @@
 				'<div class="anno_item">'+
 					'<div class="editArea">'+
 						'<textarea class="bodyContentTextArea"></textarea>'+ 
-					//	'<br/>'+
-					//	'<div class="button update">Update</div>'+
 					'</div>'+
 					'<div class="body">'+
 						'<p class="bodyContent"></p>' +
-					//	'<div class="button edit">Edit</div>'+
 					'</div>'+
 				'</div>'),
 				bodyContentTextArea = $(el).find(".bodyContentTextArea"),
@@ -315,58 +271,13 @@
 		};
 		
 		app.ready(function() {
-			annoActiveController = OAC.Client.StreamingVideo.Controller.annoActiveController({
-				// attaching specific selector items here
-				application: app,
-				selectors: {
-					annotation: '',
-					annotationlist: ':parent',
-					bodycontent: '.bodyContent',
-					body: '.body',
-					editbutton: '.button.edit',
-					editarea: '.editArea',
-					textarea: '.editArea > textarea',
-					updatebutton: '.button.update',
-					deletebutton: '.button.delete'
-				}
-			});
-			app.events.onActiveAnnotationChange.addListener(app.presentation.raphsvg.eventActiveRenderingChange);
-			app.events.onActiveAnnotationChange.addListener(app.presentation.annoItem.eventActiveRenderingChange);
+			annoActiveController = app.controller.annoActive;
+			app.events.onActiveAnnotationChange.addListener(app.presentation.raphsvg.eventFocusChange);
+			app.events.onActiveAnnotationChange.addListener(app.presentation.annoItem.eventFocusChange);
 		});
 		
-
 		return app;
 	};
 } (jQuery, MITHGrid, OAC));
 															
 // Default library for the Canvas application
-MITHGrid.defaults("OAC.Client.StreamingVideo", {
-	// Data store for the Application
-	dataStores: {
-		canvas: {
-			// put in here the types of data that will
-			// be represented in OACVideoAnnotator
-			types:{
-				// types of shapes -- to add a new
-				// shape object, add it here
-				Rectangle: {},
-				Ellipse: {}
-			},
-			properties: {
-				// posInfo contains the SVG dimensions for
-				// a shape
-				bodyContent: {
-					valueType: 'String'
-				},
-				targetURI: {
-					valueType: 'Item'
-				},
-				active: {
-					valueType: 'Bool'
-				}
-			}
-
-		}
-
-	}
-});
