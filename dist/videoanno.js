@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Fri Dec 2 13:46:48 2011 -0500
+ *  Date: Fri Dec 2 13:47:14 2011 -0500
  *  
  * Educational Community License, Version 2.0
  * 
@@ -985,6 +985,10 @@ Presentations for canvas.js
 			annoActiveController = app.controller.annoActive;
 			app.events.onActiveAnnotationChange.addListener(app.presentation.raphsvg.eventFocusChange);
 			app.events.onActiveAnnotationChange.addListener(app.presentation.annoItem.eventFocusChange);
+			app.events.onCurrentTimeChange.addListener(function(t) {
+				// five seconds on either side of the current time
+				app.dataView.currentAnnotations.setKeyRange(t-5, t+5);
+			});
 		});
 		
 		app.ready(function() {
@@ -1169,6 +1173,9 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 	variables: {
 		ActiveAnnotation: {
 			is: 'rw'
+		},
+		CurrentTime: {
+			is: 'rw'
 		}
 	},
 	dataViews: {
@@ -1177,6 +1184,12 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 		drawspace: {
 			dataStore: 'canvas',
 			types: ["Rectangle","Ellipse"]
+		},
+		currentAnnotations: {
+			dataStore: 'drawspace',
+			type: MITHGrid.Data.RangePager,
+			leftExpressions: [ '.start_ntp' ],
+			rightExpressions: [ '.end_ntp' ]
 		}
 	},
 	// Data store for the Application
@@ -1198,6 +1211,12 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 				},
 				targetURI: {
 					valueType: 'uri'
+				},
+				start_ntp: {
+					valueType: "numeric"
+				},
+				end_ntp: {
+					valueType: "numeric"
 				}
 			}
 
@@ -1207,7 +1226,7 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 	presentations: {
 		raphsvg: {
 			type: MITHGrid.Presentation.RaphaelCanvas,
-			dataView: 'drawspace',
+			dataView: 'currentAnnotations',
 			controllers: {
 				keyboard: "keyboard",
 				editBox: "editBox",
@@ -1216,7 +1235,7 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 		},
 		annoItem: {
 			type: MITHGrid.Presentation.AnnotationList,
-			dataView: 'drawspace',
+			dataView: 'currentAnnotations',
 			container: '.anno_list'
 		} //annoItem
 	}

@@ -69,6 +69,9 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 	variables: {
 		ActiveAnnotation: {
 			is: 'rw'
+		},
+		CurrentTime: {
+			is: 'rw'
 		}
 	},
 	dataViews: {
@@ -77,6 +80,12 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 		drawspace: {
 			dataStore: 'canvas',
 			types: ["Rectangle","Ellipse"]
+		},
+		currentAnnotations: {
+			dataStore: 'drawspace',
+			type: MITHGrid.Data.RangePager,
+			leftExpressions: [ '.start_ntp' ],
+			rightExpressions: [ '.end_ntp' ]
 		}
 	},
 	// Data store for the Application
@@ -98,6 +107,12 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 				},
 				targetURI: {
 					valueType: 'uri'
+				},
+				start_ntp: {
+					valueType: "numeric"
+				},
+				end_ntp: {
+					valueType: "numeric"
 				}
 			}
 
@@ -107,7 +122,7 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 	presentations: {
 		raphsvg: {
 			type: MITHGrid.Presentation.RaphaelCanvas,
-			dataView: 'drawspace',
+			dataView: 'currentAnnotations',
 			controllers: {
 				keyboard: "keyboard",
 				editBox: "editBox",
@@ -116,7 +131,7 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 		},
 		annoItem: {
 			type: MITHGrid.Presentation.AnnotationList,
-			dataView: 'drawspace',
+			dataView: 'currentAnnotations',
 			container: '.anno_list'
 		} //annoItem
 	}

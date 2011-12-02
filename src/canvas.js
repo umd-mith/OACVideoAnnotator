@@ -181,6 +181,10 @@
 			annoActiveController = app.controller.annoActive;
 			app.events.onActiveAnnotationChange.addListener(app.presentation.raphsvg.eventFocusChange);
 			app.events.onActiveAnnotationChange.addListener(app.presentation.annoItem.eventFocusChange);
+			app.events.onCurrentTimeChange.addListener(function(t) {
+				// five seconds on either side of the current time
+				app.dataView.currentAnnotations.setKeyRange(t-5, t+5);
+			});
 		});
 		
 		app.ready(function() {
