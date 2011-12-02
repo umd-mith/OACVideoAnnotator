@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Fri Dec 2 10:04:00 2011 -0500
+ *  Date: Fri Dec 2 13:46:48 2011 -0500
  *  
  * Educational Community License, Version 2.0
  * 
@@ -944,6 +944,7 @@ Presentations for canvas.js
 			
 			that.update = function (item) {
 				$(itemEl).find(".bodyContent").text(item.bodyContent[0]);
+				$(itemEl).find(".bodyContentTextArea").text(item.bodyContent[0]);
 			};
 			
 			that.remove = function () {
@@ -952,8 +953,6 @@ Presentations for canvas.js
 			
 			return that;
 		};
-		
-
 
 		renderListItem = function (item, container) {
 			var el = $(

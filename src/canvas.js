@@ -140,6 +140,7 @@
 			
 			that.update = function (item) {
 				$(itemEl).find(".bodyContent").text(item.bodyContent[0]);
+				$(itemEl).find(".bodyContentTextArea").text(item.bodyContent[0]);
 			};
 			
 			that.remove = function () {
@@ -148,8 +149,6 @@
 			
 			return that;
 		};
-		
-
 
 		renderListItem = function (item, container) {
 			var el = $(
