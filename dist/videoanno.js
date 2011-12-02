@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Wed Nov 30 14:24:42 2011 -0500
+ *  Date: Fri Dec 2 10:04:00 2011 -0500
  *  
  * Educational Community License, Version 2.0
  * 
@@ -817,10 +817,43 @@ Presentations for canvas.js
 		canvasId += 1;
 		
 		/*
+		* Creating application to run DOM and presentations
+		*
+		*/
+		app = MITHGrid.Application.initApp("OAC.Client.StreamingVideo", container, 
+			$.extend(true, {}, {
+				viewSetup: '<div class="canvas_svg_holder"><div id="' + myCanvasId + '" class="canvas_svg"></div></div>'+
+				'<div class="anno_list"></div>',
+				presentations: {
+					raphsvg: {
+						container: "#" + myCanvasId,
+						lenses: {
+							/*
+							* The following are lenses for shapes that
+							* are found in the dataStore. These items are using
+							* the MITHGrid.Presentation.RaphaelCanvas.canvas
+							* object, which is a Raphaël paper object, to draw
+							* themselves.
+							*/
+						}
+					},
+					annoItem: {
+						lenses: {
+				//			Rectangle: textLens,
+				//			Ellipse: textLens
+						} //annoItem lenses
+					} //annoItem
+				},
+				cWidth: options.width,
+				cHeight: options.height
+			}, options)
+		);
+		
+		/*
 		svgLens builds an object with functionality common to all SVG shapes on the canvas.
 		The methods expect the SVG shape object to be in that.shape
 		 */
-		svgLens = function (container, view, model, itemId) {
+		app.initShapeLens = function (container, view, model, itemId) {
 			var that = {id: itemId};
 
 			that.eventFocus = function() {
@@ -876,7 +909,7 @@ Presentations for canvas.js
 		/*
 		textLens returns a rendering of the text body of an annotation regardless of the shape
 		 */
-		textLens = function (container, view, model, itemId) {
+		app.initTextLens = function (container, view, model, itemId) {
 			var that = {}, item = model.getItem(itemId),
 			itemEl, annoEvents;
 			
@@ -920,38 +953,7 @@ Presentations for canvas.js
 			return that;
 		};
 		
-		/*
-		* Creating application to run DOM and presentations
-		*
-		*/
-		app = MITHGrid.Application.initApp("OAC.Client.StreamingVideo", container, 
-			$.extend(true, {}, {
-				viewSetup: '<div class="canvas_svg_holder"><div id="' + myCanvasId + '" class="canvas_svg"></div></div>'+
-				'<div class="anno_list"></div>',
-				presentations: {
-					raphsvg: {
-						container: "#" + myCanvasId,
-						lenses: {
-							/*
-							* The following are lenses for shapes that
-							* are found in the dataStore. These items are using
-							* the MITHGrid.Presentation.RaphaelCanvas.canvas
-							* object, which is a Raphaël paper object, to draw
-							* themselves.
-							*/
-						}
-					},
-					annoItem: {
-						lenses: {
-				//			Rectangle: textLens,
-				//			Ellipse: textLens
-						} //annoItem lenses
-					} //annoItem
-				},
-				cWidth: options.width,
-				cHeight: options.height
-			}, options)
-		);
+
 
 		renderListItem = function (item, container) {
 			var el = $(
@@ -971,10 +973,7 @@ Presentations for canvas.js
 			$(el).find(".editArea").hide();
 			return $(el); 
 		};
-		
-		app.initShapeLens = svgLens;
-		app.initTextLens = textLens;
-		
+
 		app.addShape = function(key, svgShape) {
 			app.presentation.raphsvg.addLens(key, svgShape);
 		};
@@ -990,7 +989,6 @@ Presentations for canvas.js
 		});
 		
 		app.ready(function() {
-			console.log("Adding rectangle lens");
 			app.addShape("Rectangle", function (container, view, model, itemId) {
 				// Note: Rectangle measurements x,y start at CENTER
 				var that = app.initShapeLens(container, view, model, itemId),
@@ -1043,7 +1041,6 @@ Presentations for canvas.js
 				
 				return that;
 			});
-			console.log("adding ellipse lens");
 			app.addShape("Ellipse", function (container, view, model, itemId) {
 				var that = app.initShapeLens(container, view, model, itemId),
 				item = model.getItem(itemId),
