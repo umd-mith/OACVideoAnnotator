@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Tue Nov 29 15:06:52 2011 -0500
+ *  Date: Wed Nov 30 14:24:42 2011 -0500
  *  
  * Educational Community License, Version 2.0
  * 
@@ -939,114 +939,12 @@ Presentations for canvas.js
 							* object, which is a Raphaël paper object, to draw
 							* themselves.
 							*/
-
-							Rectangle: function (container, view, model, itemId) {
-								// Note: Rectangle measurements x,y start at CENTER
-								var that = svgLens(container, view, model, itemId),
-								item = model.getItem(itemId),
-								c, ox, oy, bbox;
-
-								ox = (item.x - (item.w[0] / 2));
-								oy = (item.y - (item.h[0] / 2));
-
-								// Accessing the view.canvas Object that was created in MITHGrid.Presentation.RaphSVG
-								c = view.canvas.rect(ox, oy, item.w[0], item.h[0]);
-								// fill and set opacity
-								c.attr({
-									fill: "red",
-									opacity: 0.5
-								});
-								
-								that.update = function (item) {
-									// receiving the Object passed through
-									// model.updateItems in move()
-									try {
-										if (item.x !== undefined && item.y !== undefined && item.w !== undefined && item.y !== undefined) {
-											c.attr({
-												x: item.x[0] - item.w[0]/2,
-												y: item.y[0] - item.h[0]/2,
-												width: item.w[0],
-												height: item.h[0]
-											});
-										}
-									} catch(e) {
-										MITHGrid.debug(e);
-									}
-									// Raphael object is updated
-
-								};
-
-								// calculate the extents (x, y, width, height)
-								// of this type of shape
-								that.getExtents = function () {
-									return {
-										x: c.attr("x") + (c.attr("width")/2),
-										y: c.attr("y") + (c.attr("height")/2),
-										width: c.attr("width"),
-										height: c.attr("height")
-									};
-								};
-
-								// register shape
-								that.shape = c;
-								
-								return that;
-							},
-							Ellipse: function (container, view, model, itemId) {
-								var that = svgLens(container, view, model, itemId),
-								item = model.getItem(itemId),
-								c;
-
-								// create the shape
-								c = view.canvas.ellipse(item.x[0], item.y[0], item.w[0]/2, item.h[0]/2);
-								// fill shape
-								c.attr({
-									fill: "red",
-									opacity: 0.5
-								});
-								
-
-								that.update = function (item) {
-									// receiving the Object passed through
-									// model.updateItems in move()
-									try {
-										if (item.x !== undefined && item.y !== undefined) {
-											c.attr({
-												cx: item.x[0],
-												cy: item.y[0],
-												rx: item.w[0] / 2,
-												ry: item.h[0] / 2
-											});
-										}
-									} catch(e) {
-										MITHGrid.debug(e);
-
-									}
-									// Raphael object is updated
-								};
-
-								// calculate the extents (x, y, width, height)
-								// of this type of shape
-								that.getExtents = function () {
-									return {
-										x: c.attr("cx"),
-										y: c.attr("cy"),
-										width: (c.attr("rx") * 2),
-										height: (c.attr("ry") * 2)
-									};
-								};
-
-								// register shape
-								that.shape = c;
-
-								return that;
-							}
 						}
 					},
 					annoItem: {
 						lenses: {
-							Rectangle: textLens,
-							Ellipse: textLens
+				//			Rectangle: textLens,
+				//			Ellipse: textLens
 						} //annoItem lenses
 					} //annoItem
 				},
@@ -1074,10 +972,130 @@ Presentations for canvas.js
 			return $(el); 
 		};
 		
+		app.initShapeLens = svgLens;
+		app.initTextLens = textLens;
+		
+		app.addShape = function(key, svgShape) {
+			app.presentation.raphsvg.addLens(key, svgShape);
+		};
+		
+		app.addBody = function(key, textLens) {
+			app.presentation.annoItem.addLens(key, textLens);
+		};
+		
 		app.ready(function() {
 			annoActiveController = app.controller.annoActive;
 			app.events.onActiveAnnotationChange.addListener(app.presentation.raphsvg.eventFocusChange);
 			app.events.onActiveAnnotationChange.addListener(app.presentation.annoItem.eventFocusChange);
+		});
+		
+		app.ready(function() {
+			console.log("Adding rectangle lens");
+			app.addShape("Rectangle", function (container, view, model, itemId) {
+				// Note: Rectangle measurements x,y start at CENTER
+				var that = app.initShapeLens(container, view, model, itemId),
+				item = model.getItem(itemId),
+				c, ox, oy, bbox;
+
+				ox = (item.x - (item.w[0] / 2));
+				oy = (item.y - (item.h[0] / 2));
+
+				// Accessing the view.canvas Object that was created in MITHGrid.Presentation.RaphSVG
+				c = view.canvas.rect(ox, oy, item.w[0], item.h[0]);
+				// fill and set opacity
+				c.attr({
+					fill: "red",
+					opacity: 0.5
+				});
+				
+				that.update = function (item) {
+					// receiving the Object passed through
+					// model.updateItems in move()
+					try {
+						if (item.x !== undefined && item.y !== undefined && item.w !== undefined && item.y !== undefined) {
+							c.attr({
+								x: item.x[0] - item.w[0]/2,
+								y: item.y[0] - item.h[0]/2,
+								width: item.w[0],
+								height: item.h[0]
+							});
+						}
+					} catch(e) {
+						MITHGrid.debug(e);
+					}
+					// Raphael object is updated
+
+				};
+
+				// calculate the extents (x, y, width, height)
+				// of this type of shape
+				that.getExtents = function () {
+					return {
+						x: c.attr("x") + (c.attr("width")/2),
+						y: c.attr("y") + (c.attr("height")/2),
+						width: c.attr("width"),
+						height: c.attr("height")
+					};
+				};
+
+				// register shape
+				that.shape = c;
+				
+				return that;
+			});
+			console.log("adding ellipse lens");
+			app.addShape("Ellipse", function (container, view, model, itemId) {
+				var that = app.initShapeLens(container, view, model, itemId),
+				item = model.getItem(itemId),
+				c;
+
+				// create the shape
+				c = view.canvas.ellipse(item.x[0], item.y[0], item.w[0]/2, item.h[0]/2);
+				// fill shape
+				c.attr({
+					fill: "red",
+					opacity: 0.5
+				});
+				
+
+				that.update = function (item) {
+					// receiving the Object passed through
+					// model.updateItems in move()
+					try {
+						if (item.x !== undefined && item.y !== undefined) {
+							c.attr({
+								cx: item.x[0],
+								cy: item.y[0],
+								rx: item.w[0] / 2,
+								ry: item.h[0] / 2
+							});
+						}
+					} catch(e) {
+						MITHGrid.debug(e);
+
+					}
+					// Raphael object is updated
+				};
+
+				// calculate the extents (x, y, width, height)
+				// of this type of shape
+				that.getExtents = function () {
+					return {
+						x: c.attr("cx"),
+						y: c.attr("cy"),
+						width: (c.attr("rx") * 2),
+						height: (c.attr("ry") * 2)
+					};
+				};
+
+				// register shape
+				that.shape = c;
+
+				return that;
+			});
+			
+			app.addBody("Rectangle", app.initTextLens);
+			app.addBody("Ellipse", app.initTextLens);
 		});
 		
 		return app;
