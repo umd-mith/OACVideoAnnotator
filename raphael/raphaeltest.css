@@ -23,21 +23,28 @@ body {
 	float: right;
 }
 .anno_item {
-	
+	padding: 3px;
 }
 .anno_item.selected {
-	padding: .5em;
+	padding: 1px;
 	border: dashed black 2px;
 }
-.canvas_svg {
+.canvas_svg_holder {
 	padding: 10px;
 	background: #FFF;
 	border: 2px solid red;
-	height: 766px;
-	width: 600px;
+/*	height: 766px;
+	width: 600px; */
 	margin-right: 15px;
 	margin-left: 20px;
 	float: left;
+}
+.canvas_svg {
+	height: 766px;
+	width: 600px;
+	margin: 0px;
+	padding: 0px;
+	border: 0px;
 }
 .controlarea {
 	padding: 2px;
