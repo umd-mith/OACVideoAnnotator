@@ -45,7 +45,7 @@ var initPlugin = function() {
 			e.preventDefault();
 			var count = raphApp.dataStore.canvas.prepare(['!shape']), items;
 			
-			items = count.evaluate(["oval"]);
+			items = count.evaluate(["Ellipse"]);
 			// create an oval object
 			raphApp.dataStore.canvas.loadItems([{
 				id: "ellipse"+items.length,

@@ -764,8 +764,8 @@ that.applyBindings = function (binding, opts) {
 					shapeAttrs.h = extents.height + 2 * dy * factors.y;
 					handleAttrs.nw = extents.width + 2 * dx * factors.x + (padding * 2);
 					handleAttrs.nh = extents.height + 2 * dy * factors.y + (padding * 2);
-					handleAttrs.nx = (extents.x - (padding/4)) - (nw/2);
-					handleAttrs.ny = (extents.y - (padding/4)) - (nh/2);
+					handleAttrs.nx = (extents.x - (padding/4)) - (handleAttrs.nw/2);
+					handleAttrs.ny = (extents.y - (padding/4)) - (handleAttrs.nh/2);
 					that.svgBBox.attr({
 						x: handleAttrs.nx,
 						y: handleAttrs.ny,
