@@ -45,6 +45,8 @@
 			}, options)
 		);
 		
+	
+		
 		/*
 		svgLens builds an object with functionality common to all SVG shapes on the canvas.
 		The methods expect the SVG shape object to be in that.shape
@@ -107,9 +109,26 @@
 		 */
 		app.initTextLens = function (container, view, model, itemId) {
 			var that = {}, item = model.getItem(itemId),
-			itemEl, annoEvents;
+			itemEl, annoEvents, bodyContentTextArea, bodyContent;
 			
-			itemEl = renderListItem(item, container);
+			itemEl = 
+			$('<div class="anno_item">'+
+				'<div class="editArea">'+
+					'<textarea class="bodyContentTextArea"></textarea>'+ 
+				'</div>'+
+				'<div class="body">'+
+					'<p class="bodyContent"></p>' +
+				'</div>'+
+			'</div>');
+				
+			bodyContentTextArea = $(itemEl).find(".bodyContentTextArea");
+			bodyContent = $(itemEl).find(".bodyContent");
+			
+			$(bodyContentTextArea).text(item.bodyContent[0]);
+			$(bodyContent).text(item.bodyContent[0]);
+			
+			$(container).append(itemEl);
+			$(itemEl).find(".editArea").hide();
 
 			// attaching controller to make the
 			// HTML highlighted when shape is selected
@@ -150,24 +169,17 @@
 			return that;
 		};
 
-		renderListItem = function (item, container) {
-			var el = $(
-				'<div class="anno_item">'+
-					'<div class="editArea">'+
-						'<textarea class="bodyContentTextArea"></textarea>'+ 
-					'</div>'+
-					'<div class="body">'+
-						'<p class="bodyContent"></p>' +
-					'</div>'+
-				'</div>'),
-				bodyContentTextArea = $(el).find(".bodyContentTextArea"),
-				bodyContent = $(el).find(".bodyContent");
-			$(bodyContentTextArea).text(item.bodyContent[0]);
-			$(bodyContent).text(item.bodyContent[0]);
-			$(container).append(el);
-			$(el).find(".editArea").hide();
-			return $(el); 
+		/*
+		Creates an HTML div that acts as a button
+		*/
+		app.buttonFeature = function(container, view, model, itemId) {
+			var that = {}, item = model.getItem(itemId);
+			
+			
+			
+			return that;
 		};
+
 
 		app.addShape = function(key, svgShape) {
 			app.presentation.raphsvg.addLens(key, svgShape);
