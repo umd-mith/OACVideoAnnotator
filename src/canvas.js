@@ -18,7 +18,8 @@
 		*/
 		app = MITHGrid.Application.initApp("OAC.Client.StreamingVideo", container, 
 			$.extend(true, {}, {
-				viewSetup: '<div class="canvas_svg_holder"><div id="' + myCanvasId + '" class="canvas_svg"></div></div>'+
+				viewSetup: '<div id="sidebar' + myCanvasId + '" class="controlarea"></div>'+ 
+				'<div class="canvas_svg_holder"><div id="' + myCanvasId + '" class="canvas_svg"></div></div>'+
 				'<div class="anno_list"></div>',
 				presentations: {
 					raphsvg: {
@@ -172,10 +173,36 @@
 		/*
 		Creates an HTML div that acts as a button
 		*/
-		app.buttonFeature = function(container, view, model, itemId) {
-			var that = {}, item = model.getItem(itemId);
+		app.buttonFeature = function(container, grouping, action, callback) {
+			/*
+			Check to make sure button isn't already present
+			*/
+			if($('#' + action) !== 0) {
+				return false; // Abort
+			}
 			
+			var that = {}, item, buttons = $(".button"), groupEl;
 			
+			/*
+			Set the group element where this button should go in. If no group 
+			element is yet created, create that group element with name *grouping*
+			*/
+			if($(container).find('#' + grouping) === 0) {
+				$(container).append('<div id="' + grouping + '" class="buttongrouping"></div>');
+				
+			} 
+			
+			groupEl = $("#" + grouping);
+			
+			/*
+			generate HTML for button, then attach the callback. action
+			refers to ID and also the title of the button
+			*/
+			item = '<div id="' + action + '" class="button"></div>';
+			
+			$(groupEl).append(item);
+			
+			$("#" + action).live('click');
 			
 			return that;
 		};
