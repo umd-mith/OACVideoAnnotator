@@ -6,26 +6,7 @@ Presentations for canvas.js
 
 
 (function ($, MITHGrid, OAC) {
-<<<<<<< HEAD
-	var canvasController, editBoxController, keyBoardController;
-	canvasController = OAC.Client.StreamingVideo.Controller.canvasClickController({
-		selectors: {
-			svg: ''
-		}
-	});
-	editBoxController = OAC.Client.StreamingVideo.Controller.annotationEditSelectionGrid({
 
-	});
-	keyBoardController = OAC.Client.StreamingVideo.Controller.keyBoardListener({
-		selectors: {
-			doc: ''
-		}
-	});
-	
-
-
-=======
->>>>>>> f9e46cec8fbafd7cc37c8a1255f8d492a0d9f99d
 	MITHGrid.Presentation.namespace("AnnotationList");
 	MITHGrid.Presentation.AnnotationList.initPresentation = function (container, options) {
 		var that = MITHGrid.Presentation.initPresentation("MITHGrid.Presentation.AnnotationList", container, options);

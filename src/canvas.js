@@ -32,14 +32,17 @@
 							* object, which is a Raphaël paper object, to draw
 							* themselves.
 							*/
-						}
+						},
+						lensKey: ['.shapeType']
 					},
 					annoItem: {
 						lenses: {
 				//			Rectangle: textLens,
 				//			Ellipse: textLens
-						} //annoItem lenses
+						}, //annoItem lenses
+						lensKey: ['.bodyType']
 					} //annoItem
+					
 				},
 				cWidth: options.width,
 				cHeight: options.height
@@ -173,21 +176,23 @@
 		/*
 		Creates an HTML div that acts as a button
 		*/
-		app.buttonFeature = function(container, grouping, action, callback) {
+		app.buttonFeature = function(grouping, action, callbacks) {
 			/*
 			Check to make sure button isn't already present
 			*/
-			if($('#' + action) !== 0) {
+			if($('#' + action).length !== 0) {
+			
 				return false; // Abort
 			}
 			
-			var that = {}, item, buttons = $(".button"), groupEl;
+			var that = {}, item, buttons = $(".button"), groupEl, 
+			container = $("#sidebar" + myCanvasId);
 			
 			/*
 			Set the group element where this button should go in. If no group 
 			element is yet created, create that group element with name *grouping*
 			*/
-			if($(container).find('#' + grouping) === 0) {
+			if($(container).find('#' + grouping).length === 0) {
 				$(container).append('<div id="' + grouping + '" class="buttongrouping"></div>');
 				
 			} 
@@ -198,11 +203,20 @@
 			generate HTML for button, then attach the callback. action
 			refers to ID and also the title of the button
 			*/
-			item = '<div id="' + action + '" class="button"></div>';
+			item = '<div id="' + action + '" class="button">' + action + '</div>';
 			
 			$(groupEl).append(item);
 			
-			$("#" + action).live('click');
+			that.element = $("#" + action);
+			
+			/*
+			Attach callbacks: Note, all callback arrays must be associative and have
+			their event type as key and function as value 
+			*/
+			$.each(callbacks, function(i, o) {
+				that.element.live(i, o);
+				that[i] = o;
+			});
 			
 			return that;
 		};
@@ -283,7 +297,6 @@
 				var that = app.initShapeLens(container, view, model, itemId),
 				item = model.getItem(itemId),
 				c;
-
 				// create the shape
 				c = view.canvas.ellipse(item.x[0], item.y[0], item.w[0]/2, item.h[0]/2);
 				// fill shape
@@ -329,8 +342,64 @@
 				return that;
 			});
 			
-			app.addBody("Rectangle", app.initTextLens);
-			app.addBody("Ellipse", app.initTextLens);
+			app.addBody("Text", app.initTextLens);
+			// app.addBody("Ellipse", app.initTextLens);
+			
+			/*
+			Adding in button features for annotation creation
+			*/
+			var rectButton, ellipseButton;
+			
+			rectButton = app.buttonFeature('Shapes', 'Rectangle', {
+				
+				
+				
+				'click': function(e) {
+					var query, items;
+					query = app.dataStore.canvas.prepare(['!shapeType']);
+					items = query.evaluate(['Rectangle']);
+					app.dataStore.canvas.loadItems([{
+						id: "rect"+items.length,
+						type: 'Annotation',
+						shapeType: 'Rectangle',
+						bodyType: 'Text',
+						bodyContent: "This is an annotation marked by an rectangular space",
+						creator: 'Grant Dickie',
+						start_ntp: 0,
+						end_ntp: 1,
+						w: 100,
+						h: 100,
+						x: 100,
+						y: 100
+					}]);
+				}
+				
+			});
+			
+			ellipseButton = app.buttonFeature('Shapes', 'Ellipse', {
+				
+				'click': function(e) {
+					var query, items;
+					query = app.dataStore.canvas.prepare(['!shapeType']);
+					items = query.evaluate(['Ellipse']);
+					app.dataStore.canvas.loadItems([{
+						id: "ellipse"+items.length,
+						type: 'Annotation',
+						shapeType: 'Ellipse',
+						bodyType: 'Text',
+						bodyContent: "This is an annotation marked by an rectangular space",
+						creator: 'Grant Dickie',
+						start_ntp: 0,
+						end_ntp: 1,
+						w: 100,
+						h: 100,
+						x: 100,
+						y: 100
+					}]);
+				}
+				
+			});
+			
 		});
 		
 		return app;

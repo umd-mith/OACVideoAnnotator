@@ -6,11 +6,7 @@ body {
 	
 }
 #sidebar {
-	padding: 10px;
-	background: #FF6600;
-	color: #000066;
-	float: left;
-	height: 400px;
+	
 }
 
 .anno_list {
@@ -47,10 +43,15 @@ body {
 	border: 0px;
 }
 .controlarea {
-	padding: 2px;
+	padding: 10px;
+	background: #FF6600;
+	color: #000066;
+	float: left;
+	height: 400px;
 	
 }
-.controlarea .button_item {
+
+.controlarea .buttongrouping {
 	padding: 2px;
 	background: #FFF;
 	color: #5272e7;
@@ -64,5 +65,4 @@ body {
 	font-size: 14px;
 	border: 1px solid red;
 	cursor: pointer;
-	width: 50%;
 }

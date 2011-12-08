@@ -79,7 +79,7 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 		// is drawn
 		drawspace: {
 			dataStore: 'canvas',
-			types: ["Rectangle","Ellipse"]
+			types: ["Annotation"]
 		},
 		currentAnnotations: {
 			dataStore: 'drawspace',
@@ -96,12 +96,15 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 			types:{
 				// types of shapes -- to add a new
 				// shape object, add it here
-				Rectangle: {},
-				Ellipse: {}
+				Annotation: {}
 			},
 			properties: {
-				// posInfo contains the SVG dimensions for
-				// a shape
+				shapeType: {
+					valueType: 'text'
+				},
+				bodyType: {
+					valueType: 'text'
+				},
 				bodyContent: {
 					valueType: 'text'
 				},

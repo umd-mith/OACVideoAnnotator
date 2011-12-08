@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Fri Dec 2 13:47:14 2011 -0500
+ *  Date: Wed Dec 7 11:24:55 2011 -0500
  *  
  * Educational Community License, Version 2.0
  * 
@@ -722,6 +722,7 @@ Presentations for canvas.js
 
 
 (function ($, MITHGrid, OAC) {
+
 	MITHGrid.Presentation.namespace("AnnotationList");
 	MITHGrid.Presentation.AnnotationList.initPresentation = function (container, options) {
 		var that = MITHGrid.Presentation.initPresentation("MITHGrid.Presentation.AnnotationList", container, options);
@@ -822,7 +823,8 @@ Presentations for canvas.js
 		*/
 		app = MITHGrid.Application.initApp("OAC.Client.StreamingVideo", container, 
 			$.extend(true, {}, {
-				viewSetup: '<div class="canvas_svg_holder"><div id="' + myCanvasId + '" class="canvas_svg"></div></div>'+
+				viewSetup: '<div id="sidebar' + myCanvasId + '" class="controlarea"></div>'+ 
+				'<div class="canvas_svg_holder"><div id="' + myCanvasId + '" class="canvas_svg"></div></div>'+
 				'<div class="anno_list"></div>',
 				presentations: {
 					raphsvg: {
@@ -835,19 +837,24 @@ Presentations for canvas.js
 							* object, which is a Raphaël paper object, to draw
 							* themselves.
 							*/
-						}
+						},
+						lensKey: ['.shapeType']
 					},
 					annoItem: {
 						lenses: {
 				//			Rectangle: textLens,
 				//			Ellipse: textLens
-						} //annoItem lenses
+						}, //annoItem lenses
+						lensKey: ['.bodyType']
 					} //annoItem
+					
 				},
 				cWidth: options.width,
 				cHeight: options.height
 			}, options)
 		);
+		
+	
 		
 		/*
 		svgLens builds an object with functionality common to all SVG shapes on the canvas.
@@ -911,9 +918,26 @@ Presentations for canvas.js
 		 */
 		app.initTextLens = function (container, view, model, itemId) {
 			var that = {}, item = model.getItem(itemId),
-			itemEl, annoEvents;
+			itemEl, annoEvents, bodyContentTextArea, bodyContent;
 			
-			itemEl = renderListItem(item, container);
+			itemEl = 
+			$('<div class="anno_item">'+
+				'<div class="editArea">'+
+					'<textarea class="bodyContentTextArea"></textarea>'+ 
+				'</div>'+
+				'<div class="body">'+
+					'<p class="bodyContent"></p>' +
+				'</div>'+
+			'</div>');
+				
+			bodyContentTextArea = $(itemEl).find(".bodyContentTextArea");
+			bodyContent = $(itemEl).find(".bodyContent");
+			
+			$(bodyContentTextArea).text(item.bodyContent[0]);
+			$(bodyContent).text(item.bodyContent[0]);
+			
+			$(container).append(itemEl);
+			$(itemEl).find(".editArea").hide();
 
 			// attaching controller to make the
 			// HTML highlighted when shape is selected
@@ -954,24 +978,54 @@ Presentations for canvas.js
 			return that;
 		};
 
-		renderListItem = function (item, container) {
-			var el = $(
-				'<div class="anno_item">'+
-					'<div class="editArea">'+
-						'<textarea class="bodyContentTextArea"></textarea>'+ 
-					'</div>'+
-					'<div class="body">'+
-						'<p class="bodyContent"></p>' +
-					'</div>'+
-				'</div>'),
-				bodyContentTextArea = $(el).find(".bodyContentTextArea"),
-				bodyContent = $(el).find(".bodyContent");
-			$(bodyContentTextArea).text(item.bodyContent[0]);
-			$(bodyContent).text(item.bodyContent[0]);
-			$(container).append(el);
-			$(el).find(".editArea").hide();
-			return $(el); 
+		/*
+		Creates an HTML div that acts as a button
+		*/
+		app.buttonFeature = function(grouping, action, callbacks) {
+			/*
+			Check to make sure button isn't already present
+			*/
+			if($('#' + action).length !== 0) {
+			
+				return false; // Abort
+			}
+			
+			var that = {}, item, buttons = $(".button"), groupEl, 
+			container = $("#sidebar" + myCanvasId);
+			
+			/*
+			Set the group element where this button should go in. If no group 
+			element is yet created, create that group element with name *grouping*
+			*/
+			if($(container).find('#' + grouping).length === 0) {
+				$(container).append('<div id="' + grouping + '" class="buttongrouping"></div>');
+				
+			} 
+			
+			groupEl = $("#" + grouping);
+			
+			/*
+			generate HTML for button, then attach the callback. action
+			refers to ID and also the title of the button
+			*/
+			item = '<div id="' + action + '" class="button">' + action + '</div>';
+			
+			$(groupEl).append(item);
+			
+			that.element = $("#" + action);
+			
+			/*
+			Attach callbacks: Note, all callback arrays must be associative and have
+			their event type as key and function as value 
+			*/
+			$.each(callbacks, function(i, o) {
+				that.element.live(i, o);
+				that[i] = o;
+			});
+			
+			return that;
 		};
+
 
 		app.addShape = function(key, svgShape) {
 			app.presentation.raphsvg.addLens(key, svgShape);
@@ -1048,7 +1102,6 @@ Presentations for canvas.js
 				var that = app.initShapeLens(container, view, model, itemId),
 				item = model.getItem(itemId),
 				c;
-
 				// create the shape
 				c = view.canvas.ellipse(item.x[0], item.y[0], item.w[0]/2, item.h[0]/2);
 				// fill shape
@@ -1094,8 +1147,64 @@ Presentations for canvas.js
 				return that;
 			});
 			
-			app.addBody("Rectangle", app.initTextLens);
-			app.addBody("Ellipse", app.initTextLens);
+			app.addBody("Text", app.initTextLens);
+			// app.addBody("Ellipse", app.initTextLens);
+			
+			/*
+			Adding in button features for annotation creation
+			*/
+			var rectButton, ellipseButton;
+			
+			rectButton = app.buttonFeature('Shapes', 'Rectangle', {
+				
+				
+				
+				'click': function(e) {
+					var query, items;
+					query = app.dataStore.canvas.prepare(['!shapeType']);
+					items = query.evaluate(['Rectangle']);
+					app.dataStore.canvas.loadItems([{
+						id: "rect"+items.length,
+						type: 'Annotation',
+						shapeType: 'Rectangle',
+						bodyType: 'Text',
+						bodyContent: "This is an annotation marked by an rectangular space",
+						creator: 'Grant Dickie',
+						start_ntp: 0,
+						end_ntp: 1,
+						w: 100,
+						h: 100,
+						x: 100,
+						y: 100
+					}]);
+				}
+				
+			});
+			
+			ellipseButton = app.buttonFeature('Shapes', 'Ellipse', {
+				
+				'click': function(e) {
+					var query, items;
+					query = app.dataStore.canvas.prepare(['!shapeType']);
+					items = query.evaluate(['Ellipse']);
+					app.dataStore.canvas.loadItems([{
+						id: "ellipse"+items.length,
+						type: 'Annotation',
+						shapeType: 'Ellipse',
+						bodyType: 'Text',
+						bodyContent: "This is an annotation marked by an rectangular space",
+						creator: 'Grant Dickie',
+						start_ntp: 0,
+						end_ntp: 1,
+						w: 100,
+						h: 100,
+						x: 100,
+						y: 100
+					}]);
+				}
+				
+			});
+			
 		});
 		
 		return app;
@@ -1183,7 +1292,7 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 		// is drawn
 		drawspace: {
 			dataStore: 'canvas',
-			types: ["Rectangle","Ellipse"]
+			types: ["Annotation"]
 		},
 		currentAnnotations: {
 			dataStore: 'drawspace',
@@ -1200,12 +1309,15 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 			types:{
 				// types of shapes -- to add a new
 				// shape object, add it here
-				Rectangle: {},
-				Ellipse: {}
+				Annotation: {}
 			},
 			properties: {
-				// posInfo contains the SVG dimensions for
-				// a shape
+				shapeType: {
+					valueType: 'text'
+				},
+				bodyType: {
+					valueType: 'text'
+				},
 				bodyContent: {
 					valueType: 'text'
 				},
