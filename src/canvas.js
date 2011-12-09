@@ -45,11 +45,10 @@
 					
 				},
 				cWidth: options.width,
-				cHeight: options.height
+				cHeight: options.height,
+				currentMode: ''
 			}, options)
 		);
-		
-	
 		
 		/*
 		svgLens builds an object with functionality common to all SVG shapes on the canvas.
@@ -194,8 +193,7 @@
 			*/
 			if($(container).find('#' + grouping).length === 0) {
 				$(container).append('<div id="' + grouping + '" class="buttongrouping"></div>');
-				
-			} 
+			}
 			
 			groupEl = $("#" + grouping);
 			
@@ -221,6 +219,21 @@
 			return that;
 		};
 
+		/*
+		Sets the currentMode variable
+		*/
+		app.setCurrentMode = function(mode) {
+			app.currentMode = mode;
+			
+		};
+		
+		
+		/*
+		Gets the currentMode variable
+		*/
+		app.getCurrentMode = function() {
+			return app.currentMode;
+		};
 
 		app.addShape = function(key, svgShape) {
 			app.presentation.raphsvg.addLens(key, svgShape);
@@ -351,9 +364,6 @@
 			var rectButton, ellipseButton;
 			
 			rectButton = app.buttonFeature('Shapes', 'Rectangle', {
-				
-				
-				
 				'click': function(e) {
 					var query, items;
 					query = app.dataStore.canvas.prepare(['!shapeType']);
@@ -372,6 +382,8 @@
 						x: 100,
 						y: 100
 					}]);
+					
+					app.setCurrentMode('drawRectangle');
 				}
 				
 			});
@@ -396,6 +408,8 @@
 						x: 100,
 						y: 100
 					}]);
+					
+					app.setCurrentMode('drawEllipse');
 				}
 				
 			});

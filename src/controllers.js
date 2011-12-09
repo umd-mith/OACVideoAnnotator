@@ -681,4 +681,41 @@
         return that;
     };
 
+	/*
+	Controls the Annotation Creation Tools set by app.buttonFeature
+	*/
+	Controller.AnnotationCreationButton.initController = function(options) {
+		var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.AnnotationCreationButton", options);
+        options = that.options;
+
+		that.applyBindings = function(binding, opts) {
+			var buttonEl, active = false;
+			
+			/*
+			Mousedown: activate button - set as active mode
+			Mousedown #2: de-activate button - unset active mode
+			onCurrentModeChange: if != id passed, deactivate, else do nothing
+			*/
+			buttonEl = binding.locate('button');
+			
+			$(buttonEl).live('mousedown', function(e) {
+				if(active === false) {
+					active = true;
+					
+				} else if(active === true) {
+					active = false;
+				}
+			});
+			
+			onCurrentModeChangeHandle = function(id) {
+				
+			};
+			
+			options.application.events.onCurrentModeChange.addListener({});
+		};
+		
+
+		return that;
+	};
+	
 } (jQuery, MITHGrid, OAC));
