@@ -500,6 +500,96 @@
         return that;
     };
 
+	/*
+	* Shape Creation Box
+	* Similar to the Edit bounding box, but displays differently
+	* and listens for events from canvasClickController in "create" mode
+	*/
+	Controller.namespace('ShapeCreateBox');
+	Controller.ShapeCreateBox.initController = function(options) {
+		var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.ShapeCreateBox", options);
+        options = that.options;
+
+		that.applyBindings = function(binding, opts) {
+			/*
+			 * Bounding box is created once in memory - it should be bound to the
+			 * canvas/paper object or something that contains more than 1 shape.
+	         */
+	        var ox,
+            oy,
+	        svgBBox = {},
+	        activeRendering,
+            factors = {},
+            paper = opts.paper,
+            attrs = {},
+            padding = 1,
+            drawMenu,
+            itemDeleted,
+            shapeAttrs = {},
+            cursor,
+            el;
+
+            /*
+			Creates the SVGBBOX which acts as a guide to the user 
+			of how big their shape will be once shapeDone is fired
+			*/
+			binding.createGuide = function(coords) {
+				// coordinates are top x,y values
+				attrs.x = coords[0];
+				attrs.y = coords[1];
+				attrs.width = (coords[0] + padding);
+				attrs.height = (coords[1] + padding);
+				if($.isEmptyObject(svgBBox)) {
+					svgBBox = paper.rect(attrs.x, attrs.y, attrs.width, attrs.height);
+                    svgBBox.attr({
+                        stroke: 'green',
+                        'stroke-dasharray': ["--"]
+                    });
+
+				} else {
+					// show all the boxes and
+                    // handles
+                    svgBBox.show();
+                    // adjust the SvgBBox to be around new
+                    // shape
+                    svgBBox.attr({
+                        x: attrs.x,
+                        y: attrs.y,
+                        width: attrs.width,
+                        height: attrs.height
+                    });
+				}
+				
+			};
+			
+			/*
+			Take passed x,y coords and set as bottom-right, not
+			top left
+			*/
+			binding.resizeGuide = function(coords) {
+				attrs.width = (coords[0] + attrs.x);
+				attrs.height = (coords[1] + attrs.y);
+				svgBBox.attr({
+					width: attrs.width,
+					height: attrs.height
+				});
+			};
+			
+			binding.completeShape = function(coords) {
+				attrs.width = (coords[0] + attrs.x);
+				attrs.height = (coords[1] + attrs.y);
+				svgBBox.attr({
+					width: attrs.width,
+					height: attrs.height
+				});
+				svgBBox.hide();
+				return attrs;
+			};
+		};
+		
+		return that;
+	};
+
     /*
 * Annotation Active Controller
 * Handles HTML annotation lens
@@ -579,74 +669,7 @@
 */
 	Controller.namespace("CanvasClickController");
     Controller.CanvasClickController.initController = function(options) {
-        var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.CanvasClickController", options),
-		drawShape = function(container) {
-			/*
-			Sets mousedown, mouseup, mousedrag to draw a 
-			shape on the canvas.
-			*/
-			var mouseMode = 0, 
-			topLeft = [], 
-			bottomRight = [],
-			x,
-			y,
-			w,
-			h;
-			
-			/*
-			MouseMode cycles through three settings:
-			0: stasis
-			1: Mousedown and ready to drag
-			2: Mouse being dragged
-			*/
-			
-			
-			// remove all previous bindings
-			$(container).unbind();
-			
-			$(container).mousedown(function(e) {
-				if(mouseMode > 0) {
-					return;
-				}
-				
-				x = e.offsetX();
-				y = e.offsetY();
-				
-				topLeft = [x, y];
-				
-				mouseMode = 1;
-				// Set start mode
-				that.events.onShapeStart.fire(topLeft);
-			});
-			
-			$(container).mousedrag(function(e) {
-				if(mouseMode === 2 || mouseMode === 0) {
-					return;
-				}
-				
-				x = e.offsetX();
-				y = e.offsetY();
-				bottomRight = [x,y];
-				that.events.onShapeStart.fire(bottomRight);
-			});
-			
-			$(container).mouseup(function(e) {
-				if(mouseMode < 1) {
-					return;
-				}
-				mouseMode = 0;
-			});
-			
-			
-		},
-		selectShape = function() {
-			/*
-			Sets mousedown events to select shapes, not to draw
-			them.
-			*/
-			
-			
-		};
+        var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.CanvasClickController", options);
 		options = that.options;
         // Create the object passed back to the Presentation
         that.applyBindings = function(binding, opts) {
@@ -654,7 +677,6 @@
             oy,
             extents,
             activeId,
-            container = binding.locate('svg'),
             closeEnough = opts.closeEnough,
             dx,
             dy,
@@ -665,7 +687,7 @@
 			curRendering,
 			renderings = {},
             paper = opts.paper,
-            offset = $(container).offset(),
+			offset,
             attachDragResize = function(id) {
 				var o;
                 if ((curRendering !== undefined) && (id === curRendering.id)) {
@@ -689,10 +711,121 @@
                     return;
                 }
                 var o = renderings[id];
-            };
+            },
+			drawShape = function(container) {
+				/*
+				Sets mousedown, mouseup, mousedrag to draw a 
+				shape on the canvas.
+				*/
+				var mouseMode = 0, 
+				topLeft = [], 
+				bottomRight = [],
+				x,
+				y,
+				w,
+				h;
+
+				/*
+				MouseMode cycles through three settings:
+				0: stasis
+				1: Mousedown and ready to drag
+				2: Mouse being dragged
+				*/
+				// remove all previous bindings
+				$(container).unbind();
+
+				$(container).mousedown(function(e) {
+					if(mouseMode > 0) {
+						return;
+					}
+					x = e.offsetX();
+					y = e.offsetY();
+					topLeft = [x, y];
+					mouseMode = 1;
+					that.events.onShapeStart.fire(topLeft);
+				});
+
+				$(container).mousedrag(function(e) {
+					if(mouseMode === 2 || mouseMode === 0) {
+						return;
+					}
+					x = e.offsetX();
+					y = e.offsetY();
+					bottomRight = [x,y];
+					that.events.onShapeDrag.fire(bottomRight);
+				});
+
+				$(container).mouseup(function(e) {
+					if(mouseMode < 1) {
+						return;
+					}
+					mouseMode = 0;
+					if(bottomRight === undefined) {
+						bottomRight = [x + 5, y + 5];
+					}
+					that.events.onShapeDone.fire(bottomRight);
+				});
+
+
+			},
+			selectShape = function(container) {
+				/*
+				Sets mousedown events to select shapes, not to draw
+				them.
+				*/
+				$(container).unbind();
+				$(container).bind('mousedown',
+	            function(e) {
+	                activeId = '';
+	                offset = $(container).offset();
+
+	                ox = Math.abs(e.pageX - offset.left);
+	                oy = Math.abs(e.pageY - offset.top);
+	                if (curRendering !== undefined) {
+	                    extents = curRendering.getExtents();
+	                    dx = Math.abs(ox - extents.x);
+	                    dy = Math.abs(oy - extents.y);
+	                    if (dx < extents.width / 2 + 4 && dy < extents.height / 2 + 4) {
+	                        // nothing has changed
+	                        return;
+	                    }
+	                }
+	                $.each(renderings,
+	                function(i, o) {
+	                    extents = o.getExtents();
+
+	                    dx = Math.abs(ox - extents.x);
+	                    dy = Math.abs(oy - extents.y);
+	                    // the '3' is for the drag boxes around the object
+	                    if (dx < extents.width / 2 + 4 && dy < extents.height / 2 + 4) {
+	                        activeId = o.id;
+	                        if ((curRendering === undefined) || (o.id !== curRendering.id)) {
+	                            curRendering = o;
+	                            options.application.setActiveAnnotation(o.id);
+	                        }
+	                        // stop running loop
+	                        return false;
+	                    }
+	                });
+	                if ((activeId.length === 0) && (curRendering !== undefined)) {
+	                    // No shapes selected - de-activate current rendering and all other possible renderings
+	                    options.application.setActiveAnnotation(undefined);
+	                    curRendering = undefined;
+	                }
+	            });
+
+			};
 
             options.application.events.onActiveAnnotationChange.addListener(attachDragResize);
-
+			options.application.events.onCurrentModeChange.addListener(function(mode) {
+				if(mode === 'Rectangle' || mode === 'Ellipse') {
+					console.log('mode: '+mode);
+					drawShape(binding.locate('svg'));
+				} else if(mode === 'Select') {
+					selectShape(binding.locate('svg'));
+				}
+			});
+			
             // Add to events
             binding.registerRendering = function(newRendering) {
                 renderings[newRendering.id] = newRendering;
@@ -702,45 +835,7 @@
                 delete renderings[oldRendering.id];
             };
 
-            $(container).bind('mousedown',
-            function(e) {
-                activeId = '';
-                offset = $(container).offset();
-
-                ox = Math.abs(e.pageX - offset.left);
-                oy = Math.abs(e.pageY - offset.top);
-                if (curRendering !== undefined) {
-                    extents = curRendering.getExtents();
-                    dx = Math.abs(ox - extents.x);
-                    dy = Math.abs(oy - extents.y);
-                    if (dx < extents.width / 2 + 4 && dy < extents.height / 2 + 4) {
-                        // nothing has changed
-                        return;
-                    }
-                }
-                $.each(renderings,
-                function(i, o) {
-                    extents = o.getExtents();
-
-                    dx = Math.abs(ox - extents.x);
-                    dy = Math.abs(oy - extents.y);
-                    // the '3' is for the drag boxes around the object
-                    if (dx < extents.width / 2 + 4 && dy < extents.height / 2 + 4) {
-                        activeId = o.id;
-                        if ((curRendering === undefined) || (o.id !== curRendering.id)) {
-                            curRendering = o;
-                            options.application.setActiveAnnotation(o.id);
-                        }
-                        // stop running loop
-                        return false;
-                    }
-                });
-                if ((activeId.length === 0) && (curRendering !== undefined)) {
-                    // No shapes selected - de-activate current rendering and all other possible renderings
-                    options.application.setActiveAnnotation(undefined);
-                    curRendering = undefined;
-                }
-            });
+            
 
         };
 
@@ -750,12 +845,13 @@
 	/*
 	Controls the Annotation Creation Tools set by app.buttonFeature
 	*/
+	Controller.namespace('AnnotationCreationButton');
 	Controller.AnnotationCreationButton.initController = function(options) {
 		var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.AnnotationCreationButton", options);
         options = that.options;
 
 		that.applyBindings = function(binding, opts) {
-			var buttonEl, active = false;
+			var buttonEl, active = false, onCurrentModeChangeHandle, id;
 			
 			/*
 			Mousedown: activate button - set as active mode

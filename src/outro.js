@@ -44,7 +44,6 @@ MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.AnnotationCreationButton
 		}
 	}
 });
-
 MITHGrid.defaults("OAC.Client.StreamingVideo", {
 	controllers: {
 		keyboard: {
@@ -53,8 +52,11 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 				doc: ''
 			}
 		},
-		editBox: {
+		shapeEditBox: {
 			type: OAC.Client.StreamingVideo.Controller.AnnotationEditSelectionGrid
+		},
+		shapeCreateBox: {
+			type: OAC.Client.StreamingVideo.Controller.ShapeCreateBox
 		},
 		canvas: {
 			type: OAC.Client.StreamingVideo.Controller.CanvasClickController,
@@ -75,6 +77,12 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 				updatebutton: '.button.update',
 				deletebutton: '.button.delete'
 			}
+		},
+		buttonActive: {
+			type: OAC.Client.StreamingVideo.Controller.AnnotationCreationButton,
+			selectors: {
+				button: ''
+			}
 		}
 	},
 	variables: {
@@ -82,6 +90,9 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 			is: 'rw'
 		},
 		CurrentTime: {
+			is: 'rw'
+		},
+		CurrentMode: {
 			is: 'rw'
 		}
 	},
@@ -140,7 +151,9 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 			controllers: {
 				keyboard: "keyboard",
 				editBox: "editBox",
-				canvas: "canvas"
+				canvas: "canvas",
+				shapeCreateBox: "shapeCreateBox",
+				shapeEditBox: "shapeEditBox"
 			}
 		},
 		annoItem: {

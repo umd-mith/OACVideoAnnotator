@@ -19,15 +19,18 @@ Presentations for canvas.js
 	MITHGrid.Presentation.RaphaelCanvas.initPresentation = function (container, options) {
 		var that = MITHGrid.Presentation.initPresentation("MITHGrid.Presentation.RaphaelCanvas", container, options),
 			id = $(container).attr('id'), h, w, 
-			canvasController, keyBoardController, editBoxController, superRender, canvasBinding, keyboardBinding, e,
+			canvasController, keyBoardController, editBoxController, superRender, canvasBinding, 
+			keyboardBinding, shapeCreateController, shapeCreateBinding, e,
 			superEventFocusChange, editBoundingBoxBinding;
 		
 		options = that.options;
 		
 		canvasController = options.controllers.canvas;
 		keyBoardController = options.controllers.keyboard;
-		editBoxController = options.controllers.editBox;
-			
+		editBoxController = options.controllers.shapeEditBox;
+		shapeCreateController = options.controllers.shapeCreateBox;
+		
+		
 		if (options.cWidth !== undefined) {
 			w = options.cWidth;
 		}
@@ -59,11 +62,19 @@ Presentations for canvas.js
 			paper: that.canvas
 		});
 		
+		shapeCreateBinding = shapeCreateController.bind($(container), {
+			paper: that.canvas
+		});
+		
 		keyboardBinding = keyBoardController.bind($('body'), {});
 		
 		that.events = that.events || {};
 		for(e in keyboardBinding.events) {
 			that.events[e] = keyboardBinding.events[e];
+		}
+		
+		for(e in canvasBinding.events) {
+			that.events[e] = canvasBinding.events[e];
 		}
 		
 		superRender = that.render;

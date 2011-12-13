@@ -207,15 +207,6 @@
 			
 			that.element = $("#" + action);
 			
-			/*
-			Attach callbacks: Note, all callback arrays must be associative and have
-			their event type as key and function as value 
-			*/
-			$.each(callbacks, function(i, o) {
-				that.element.live(i, o);
-				that[i] = o;
-			});
-			
 			return that;
 		};
 

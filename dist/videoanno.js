@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Wed Dec 7 11:24:55 2011 -0500
+ *  Date: Tue Dec 13 09:42:38 2011 -0500
  *  
  * Educational Community License, Version 2.0
  * 
@@ -532,6 +532,96 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
         return that;
     };
 
+	/*
+	* Shape Creation Box
+	* Similar to the Edit bounding box, but displays differently
+	* and listens for events from canvasClickController in "create" mode
+	*/
+	Controller.namespace('ShapeCreateBox');
+	Controller.ShapeCreateBox.initController = function(options) {
+		var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.ShapeCreateBox", options);
+        options = that.options;
+
+		that.applyBindings = function(binding, opts) {
+			/*
+			 * Bounding box is created once in memory - it should be bound to the
+			 * canvas/paper object or something that contains more than 1 shape.
+	         */
+	        var ox,
+            oy,
+	        svgBBox = {},
+	        activeRendering,
+            factors = {},
+            paper = opts.paper,
+            attrs = {},
+            padding = 1,
+            drawMenu,
+            itemDeleted,
+            shapeAttrs = {},
+            cursor,
+            el;
+
+            /*
+			Creates the SVGBBOX which acts as a guide to the user 
+			of how big their shape will be once shapeDone is fired
+			*/
+			binding.createGuide = function(coords) {
+				// coordinates are top x,y values
+				attrs.x = coords[0];
+				attrs.y = coords[1];
+				attrs.width = (coords[0] + padding);
+				attrs.height = (coords[1] + padding);
+				if($.isEmptyObject(svgBBox)) {
+					svgBBox = paper.rect(attrs.x, attrs.y, attrs.width, attrs.height);
+                    svgBBox.attr({
+                        stroke: 'green',
+                        'stroke-dasharray': ["--"]
+                    });
+
+				} else {
+					// show all the boxes and
+                    // handles
+                    svgBBox.show();
+                    // adjust the SvgBBox to be around new
+                    // shape
+                    svgBBox.attr({
+                        x: attrs.x,
+                        y: attrs.y,
+                        width: attrs.width,
+                        height: attrs.height
+                    });
+				}
+				
+			};
+			
+			/*
+			Take passed x,y coords and set as bottom-right, not
+			top left
+			*/
+			binding.resizeGuide = function(coords) {
+				attrs.width = (coords[0] + attrs.x);
+				attrs.height = (coords[1] + attrs.y);
+				svgBBox.attr({
+					width: attrs.width,
+					height: attrs.height
+				});
+			};
+			
+			binding.completeShape = function(coords) {
+				attrs.width = (coords[0] + attrs.x);
+				attrs.height = (coords[1] + attrs.y);
+				svgBBox.attr({
+					width: attrs.width,
+					height: attrs.height
+				});
+				svgBBox.hide();
+				return attrs;
+			};
+		};
+		
+		return that;
+	};
+
     /*
 * Annotation Active Controller
 * Handles HTML annotation lens
@@ -612,15 +702,13 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 	Controller.namespace("CanvasClickController");
     Controller.CanvasClickController.initController = function(options) {
         var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.CanvasClickController", options);
-        options = that.options;
-
+		options = that.options;
         // Create the object passed back to the Presentation
         that.applyBindings = function(binding, opts) {
             var ox,
             oy,
             extents,
             activeId,
-            container = binding.locate('svg'),
             closeEnough = opts.closeEnough,
             dx,
             dy,
@@ -631,7 +719,7 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 			curRendering,
 			renderings = {},
             paper = opts.paper,
-            offset = $(container).offset(),
+			offset,
             attachDragResize = function(id) {
 				var o;
                 if ((curRendering !== undefined) && (id === curRendering.id)) {
@@ -655,10 +743,121 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
                     return;
                 }
                 var o = renderings[id];
-            };
+            },
+			drawShape = function(container) {
+				/*
+				Sets mousedown, mouseup, mousedrag to draw a 
+				shape on the canvas.
+				*/
+				var mouseMode = 0, 
+				topLeft = [], 
+				bottomRight = [],
+				x,
+				y,
+				w,
+				h;
+
+				/*
+				MouseMode cycles through three settings:
+				0: stasis
+				1: Mousedown and ready to drag
+				2: Mouse being dragged
+				*/
+				// remove all previous bindings
+				$(container).unbind();
+
+				$(container).mousedown(function(e) {
+					if(mouseMode > 0) {
+						return;
+					}
+					x = e.offsetX();
+					y = e.offsetY();
+					topLeft = [x, y];
+					mouseMode = 1;
+					that.events.onShapeStart.fire(topLeft);
+				});
+
+				$(container).mousedrag(function(e) {
+					if(mouseMode === 2 || mouseMode === 0) {
+						return;
+					}
+					x = e.offsetX();
+					y = e.offsetY();
+					bottomRight = [x,y];
+					that.events.onShapeDrag.fire(bottomRight);
+				});
+
+				$(container).mouseup(function(e) {
+					if(mouseMode < 1) {
+						return;
+					}
+					mouseMode = 0;
+					if(bottomRight === undefined) {
+						bottomRight = [x + 5, y + 5];
+					}
+					that.events.onShapeDone.fire(bottomRight);
+				});
+
+
+			},
+			selectShape = function(container) {
+				/*
+				Sets mousedown events to select shapes, not to draw
+				them.
+				*/
+				$(container).unbind();
+				$(container).bind('mousedown',
+	            function(e) {
+	                activeId = '';
+	                offset = $(container).offset();
+
+	                ox = Math.abs(e.pageX - offset.left);
+	                oy = Math.abs(e.pageY - offset.top);
+	                if (curRendering !== undefined) {
+	                    extents = curRendering.getExtents();
+	                    dx = Math.abs(ox - extents.x);
+	                    dy = Math.abs(oy - extents.y);
+	                    if (dx < extents.width / 2 + 4 && dy < extents.height / 2 + 4) {
+	                        // nothing has changed
+	                        return;
+	                    }
+	                }
+	                $.each(renderings,
+	                function(i, o) {
+	                    extents = o.getExtents();
+
+	                    dx = Math.abs(ox - extents.x);
+	                    dy = Math.abs(oy - extents.y);
+	                    // the '3' is for the drag boxes around the object
+	                    if (dx < extents.width / 2 + 4 && dy < extents.height / 2 + 4) {
+	                        activeId = o.id;
+	                        if ((curRendering === undefined) || (o.id !== curRendering.id)) {
+	                            curRendering = o;
+	                            options.application.setActiveAnnotation(o.id);
+	                        }
+	                        // stop running loop
+	                        return false;
+	                    }
+	                });
+	                if ((activeId.length === 0) && (curRendering !== undefined)) {
+	                    // No shapes selected - de-activate current rendering and all other possible renderings
+	                    options.application.setActiveAnnotation(undefined);
+	                    curRendering = undefined;
+	                }
+	            });
+
+			};
 
             options.application.events.onActiveAnnotationChange.addListener(attachDragResize);
-
+			options.application.events.onCurrentModeChange.addListener(function(mode) {
+				if(mode === 'Rectangle' || mode === 'Ellipse') {
+					console.log('mode: '+mode);
+					drawShape(binding.locate('svg'));
+				} else if(mode === 'Select') {
+					selectShape(binding.locate('svg'));
+				}
+			});
+			
             // Add to events
             binding.registerRendering = function(newRendering) {
                 renderings[newRendering.id] = newRendering;
@@ -668,51 +867,64 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
                 delete renderings[oldRendering.id];
             };
 
-            $(container).bind('mousedown',
-            function(e) {
-                activeId = '';
-                offset = $(container).offset();
-
-                ox = Math.abs(e.pageX - offset.left);
-                oy = Math.abs(e.pageY - offset.top);
-                if (curRendering !== undefined) {
-                    extents = curRendering.getExtents();
-                    dx = Math.abs(ox - extents.x);
-                    dy = Math.abs(oy - extents.y);
-                    if (dx < extents.width / 2 + 4 && dy < extents.height / 2 + 4) {
-                        // nothing has changed
-                        return;
-                    }
-                }
-                $.each(renderings,
-                function(i, o) {
-                    extents = o.getExtents();
-
-                    dx = Math.abs(ox - extents.x);
-                    dy = Math.abs(oy - extents.y);
-                    // the '3' is for the drag boxes around the object
-                    if (dx < extents.width / 2 + 4 && dy < extents.height / 2 + 4) {
-                        activeId = o.id;
-                        if ((curRendering === undefined) || (o.id !== curRendering.id)) {
-                            curRendering = o;
-                            options.application.setActiveAnnotation(o.id);
-                        }
-                        // stop running loop
-                        return false;
-                    }
-                });
-                if ((activeId.length === 0) && (curRendering !== undefined)) {
-                    // No shapes selected - de-activate current rendering and all other possible renderings
-                    options.application.setActiveAnnotation(undefined);
-                    curRendering = undefined;
-                }
-            });
+            
 
         };
 
         return that;
     };
 
+	/*
+	Controls the Annotation Creation Tools set by app.buttonFeature
+	*/
+	Controller.namespace('AnnotationCreationButton');
+	Controller.AnnotationCreationButton.initController = function(options) {
+		var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.AnnotationCreationButton", options);
+        options = that.options;
+
+		that.applyBindings = function(binding, opts) {
+			var buttonEl, active = false, onCurrentModeChangeHandle, id;
+			
+			/*
+			Mousedown: activate button - set as active mode
+			Mousedown #2: de-activate button - unset active mode
+			onCurrentModeChange: if != id passed, deactivate, else do nothing
+			*/
+			buttonEl = binding.locate('button');
+			
+			$(buttonEl).live('mousedown', function(e) {
+				if(active === false) {
+					active = true;
+					options.application.events.onCurrentModeChange.fire(opts.action);
+					$(buttonEl).addClass("active");
+				} else if(active === true) {
+					active = false;
+					options.application.events.onCurrentModeChange.fire('');
+					$(buttonEl).removeClass("active");
+				}
+			});
+			
+			onCurrentModeChangeHandle = function(action) {
+				if(id === '') {
+					// set to nothing
+					active = false;
+					$(buttonEl).removeClass("active");
+				} else if(action === options.action) {
+					active = true;
+					$(buttonEl).addClass('active');
+				} else {
+					active = false;
+					$(buttonEl).removeClass("active");
+				}
+			};
+			
+			options.application.events.onCurrentModeChange.addListener(onCurrentModeChangeHandle);
+		};
+		
+
+		return that;
+	};
+	
 } (jQuery, MITHGrid, OAC));
 /*
 Presentations for canvas.js
@@ -735,15 +947,18 @@ Presentations for canvas.js
 	MITHGrid.Presentation.RaphaelCanvas.initPresentation = function (container, options) {
 		var that = MITHGrid.Presentation.initPresentation("MITHGrid.Presentation.RaphaelCanvas", container, options),
 			id = $(container).attr('id'), h, w, 
-			canvasController, keyBoardController, editBoxController, superRender, canvasBinding, keyboardBinding, e,
+			canvasController, keyBoardController, editBoxController, superRender, canvasBinding, 
+			keyboardBinding, shapeCreateController, shapeCreateBinding, e,
 			superEventFocusChange, editBoundingBoxBinding;
 		
 		options = that.options;
 		
 		canvasController = options.controllers.canvas;
 		keyBoardController = options.controllers.keyboard;
-		editBoxController = options.controllers.editBox;
-			
+		editBoxController = options.controllers.shapeEditBox;
+		shapeCreateController = options.controllers.shapeCreateBox;
+		
+		
 		if (options.cWidth !== undefined) {
 			w = options.cWidth;
 		}
@@ -775,11 +990,19 @@ Presentations for canvas.js
 			paper: that.canvas
 		});
 		
+		shapeCreateBinding = shapeCreateController.bind($(container), {
+			paper: that.canvas
+		});
+		
 		keyboardBinding = keyBoardController.bind($('body'), {});
 		
 		that.events = that.events || {};
 		for(e in keyboardBinding.events) {
 			that.events[e] = keyboardBinding.events[e];
+		}
+		
+		for(e in canvasBinding.events) {
+			that.events[e] = canvasBinding.events[e];
 		}
 		
 		superRender = that.render;
@@ -850,11 +1073,10 @@ Presentations for canvas.js
 					
 				},
 				cWidth: options.width,
-				cHeight: options.height
+				cHeight: options.height,
+				currentMode: ''
 			}, options)
 		);
-		
-	
 		
 		/*
 		svgLens builds an object with functionality common to all SVG shapes on the canvas.
@@ -999,8 +1221,7 @@ Presentations for canvas.js
 			*/
 			if($(container).find('#' + grouping).length === 0) {
 				$(container).append('<div id="' + grouping + '" class="buttongrouping"></div>');
-				
-			} 
+			}
 			
 			groupEl = $("#" + grouping);
 			
@@ -1014,18 +1235,23 @@ Presentations for canvas.js
 			
 			that.element = $("#" + action);
 			
-			/*
-			Attach callbacks: Note, all callback arrays must be associative and have
-			their event type as key and function as value 
-			*/
-			$.each(callbacks, function(i, o) {
-				that.element.live(i, o);
-				that[i] = o;
-			});
-			
 			return that;
 		};
 
+		/*
+		Sets the currentMode variable
+		*/
+		app.setCurrentMode = function(mode) {
+			app.currentMode = mode;
+		};
+		
+		
+		/*
+		Gets the currentMode variable
+		*/
+		app.getCurrentMode = function() {
+			return app.currentMode;
+		};
 
 		app.addShape = function(key, svgShape) {
 			app.presentation.raphsvg.addLens(key, svgShape);
@@ -1079,7 +1305,6 @@ Presentations for canvas.js
 						MITHGrid.debug(e);
 					}
 					// Raphael object is updated
-
 				};
 
 				// calculate the extents (x, y, width, height)
@@ -1156,9 +1381,6 @@ Presentations for canvas.js
 			var rectButton, ellipseButton;
 			
 			rectButton = app.buttonFeature('Shapes', 'Rectangle', {
-				
-				
-				
 				'click': function(e) {
 					var query, items;
 					query = app.dataStore.canvas.prepare(['!shapeType']);
@@ -1177,6 +1399,8 @@ Presentations for canvas.js
 						x: 100,
 						y: 100
 					}]);
+					
+					app.setCurrentMode('drawRectangle');
 				}
 				
 			});
@@ -1201,6 +1425,8 @@ Presentations for canvas.js
 						x: 100,
 						y: 100
 					}]);
+					
+					app.setCurrentMode('drawEllipse');
 				}
 				
 			});
@@ -1247,6 +1473,16 @@ MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.KeyboardListener", {
     }
 });
 
+MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.AnnotationCreationButton", {
+	bind: {
+		events: {
+			onCurrentModeChange: null,
+			onShapeStart: null,
+			onShapeExpand: null,
+			onShapeDone: null
+		}
+	}
+});
 MITHGrid.defaults("OAC.Client.StreamingVideo", {
 	controllers: {
 		keyboard: {
@@ -1255,8 +1491,11 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 				doc: ''
 			}
 		},
-		editBox: {
+		shapeEditBox: {
 			type: OAC.Client.StreamingVideo.Controller.AnnotationEditSelectionGrid
+		},
+		shapeCreateBox: {
+			type: OAC.Client.StreamingVideo.Controller.ShapeCreateBox
 		},
 		canvas: {
 			type: OAC.Client.StreamingVideo.Controller.CanvasClickController,
@@ -1277,6 +1516,12 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 				updatebutton: '.button.update',
 				deletebutton: '.button.delete'
 			}
+		},
+		buttonActive: {
+			type: OAC.Client.StreamingVideo.Controller.AnnotationCreationButton,
+			selectors: {
+				button: ''
+			}
 		}
 	},
 	variables: {
@@ -1284,6 +1529,9 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 			is: 'rw'
 		},
 		CurrentTime: {
+			is: 'rw'
+		},
+		CurrentMode: {
 			is: 'rw'
 		}
 	},
@@ -1342,7 +1590,9 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 			controllers: {
 				keyboard: "keyboard",
 				editBox: "editBox",
-				canvas: "canvas"
+				canvas: "canvas",
+				shapeCreateBox: "shapeCreateBox",
+				shapeEditBox: "shapeEditBox"
 			}
 		},
 		annoItem: {
