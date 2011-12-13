@@ -224,7 +224,6 @@
 		*/
 		app.setCurrentMode = function(mode) {
 			app.currentMode = mode;
-			
 		};
 		
 		
@@ -287,7 +286,6 @@
 						MITHGrid.debug(e);
 					}
 					// Raphael object is updated
-
 				};
 
 				// calculate the extents (x, y, width, height)

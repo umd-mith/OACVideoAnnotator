@@ -579,9 +579,75 @@
 */
 	Controller.namespace("CanvasClickController");
     Controller.CanvasClickController.initController = function(options) {
-        var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.CanvasClickController", options);
-        options = that.options;
-
+        var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.CanvasClickController", options),
+		drawShape = function(container) {
+			/*
+			Sets mousedown, mouseup, mousedrag to draw a 
+			shape on the canvas.
+			*/
+			var mouseMode = 0, 
+			topLeft = [], 
+			bottomRight = [],
+			x,
+			y,
+			w,
+			h;
+			
+			/*
+			MouseMode cycles through three settings:
+			0: stasis
+			1: Mousedown and ready to drag
+			2: Mouse being dragged
+			*/
+			
+			
+			// remove all previous bindings
+			$(container).unbind();
+			
+			$(container).mousedown(function(e) {
+				if(mouseMode > 0) {
+					return;
+				}
+				
+				x = e.offsetX();
+				y = e.offsetY();
+				
+				topLeft = [x, y];
+				
+				mouseMode = 1;
+				// Set start mode
+				that.events.onShapeStart.fire(topLeft);
+			});
+			
+			$(container).mousedrag(function(e) {
+				if(mouseMode === 2 || mouseMode === 0) {
+					return;
+				}
+				
+				x = e.offsetX();
+				y = e.offsetY();
+				bottomRight = [x,y];
+				that.events.onShapeStart.fire(bottomRight);
+			});
+			
+			$(container).mouseup(function(e) {
+				if(mouseMode < 1) {
+					return;
+				}
+				mouseMode = 0;
+			});
+			
+			
+		},
+		selectShape = function() {
+			/*
+			Sets mousedown events to select shapes, not to draw
+			them.
+			*/
+			
+			
+		};
+		options = that.options;
         // Create the object passed back to the Presentation
         that.applyBindings = function(binding, opts) {
             var ox,
@@ -701,17 +767,30 @@
 			$(buttonEl).live('mousedown', function(e) {
 				if(active === false) {
 					active = true;
-					
+					options.application.events.onCurrentModeChange.fire(opts.action);
+					$(buttonEl).addClass("active");
 				} else if(active === true) {
 					active = false;
+					options.application.events.onCurrentModeChange.fire('');
+					$(buttonEl).removeClass("active");
 				}
 			});
 			
-			onCurrentModeChangeHandle = function(id) {
-				
+			onCurrentModeChangeHandle = function(action) {
+				if(id === '') {
+					// set to nothing
+					active = false;
+					$(buttonEl).removeClass("active");
+				} else if(action === options.action) {
+					active = true;
+					$(buttonEl).addClass('active');
+				} else {
+					active = false;
+					$(buttonEl).removeClass("active");
+				}
 			};
 			
-			options.application.events.onCurrentModeChange.addListener({});
+			options.application.events.onCurrentModeChange.addListener(onCurrentModeChangeHandle);
 		};
 		
 
