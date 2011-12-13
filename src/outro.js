@@ -2,7 +2,10 @@
 MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.CanvasClickController", {
     bind: {
         events: {
-            onClick: null
+            onClick: null,
+			onShapeStart: null,
+			onShapeDrag: null,
+			onShapeDone: null
         }
     }
 });
@@ -37,13 +40,12 @@ MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.KeyboardListener", {
 MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.AnnotationCreationButton", {
 	bind: {
 		events: {
-			onCurrentModeChange: null,
-			onShapeStart: null,
-			onShapeExpand: null,
-			onShapeDone: null
+			onCurrentModeChange: null
+			
 		}
 	}
 });
+
 MITHGrid.defaults("OAC.Client.StreamingVideo", {
 	controllers: {
 		keyboard: {

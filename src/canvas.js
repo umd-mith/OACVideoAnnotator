@@ -207,6 +207,10 @@
 			
 			that.element = $("#" + action);
 			
+			app.controller.buttonActive.bind(that.element, {
+				action: action
+			});
+			
 			return that;
 		};
 

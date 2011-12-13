@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Tue Dec 13 09:42:38 2011 -0500
+ *  Date: Tue Dec 13 16:08:57 2011 -0500
  *  
  * Educational Community License, Version 2.0
  * 
@@ -746,7 +746,7 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
             },
 			drawShape = function(container) {
 				/*
-				Sets mousedown, mouseup, mousedrag to draw a 
+				Sets mousedown, mouseup, mousemove to draw a 
 				shape on the canvas.
 				*/
 				var mouseMode = 0, 
@@ -770,21 +770,21 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 					if(mouseMode > 0) {
 						return;
 					}
-					x = e.offsetX();
-					y = e.offsetY();
-					topLeft = [x, y];
+					x = e.offsetX;
+					y = e.offsetY;
+					topLeft = [x,y];
 					mouseMode = 1;
-					that.events.onShapeStart.fire(topLeft);
+					binding.events.onShapeStart.fire(topLeft);
 				});
 
-				$(container).mousedrag(function(e) {
+				$(container).mousemove(function(e) {
 					if(mouseMode === 2 || mouseMode === 0) {
 						return;
 					}
-					x = e.offsetX();
-					y = e.offsetY();
+					x = e.offsetX;
+					y = e.offsetY;
 					bottomRight = [x,y];
-					that.events.onShapeDrag.fire(bottomRight);
+					binding.events.onShapeDrag.fire(bottomRight);
 				});
 
 				$(container).mouseup(function(e) {
@@ -795,7 +795,7 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 					if(bottomRight === undefined) {
 						bottomRight = [x + 5, y + 5];
 					}
-					that.events.onShapeDone.fire(bottomRight);
+					binding.events.onShapeDone.fire(bottomRight);
 				});
 
 
@@ -850,8 +850,8 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 
             options.application.events.onActiveAnnotationChange.addListener(attachDragResize);
 			options.application.events.onCurrentModeChange.addListener(function(mode) {
+				console.log('mode: '+mode);
 				if(mode === 'Rectangle' || mode === 'Ellipse') {
-					console.log('mode: '+mode);
 					drawShape(binding.locate('svg'));
 				} else if(mode === 'Select') {
 					selectShape(binding.locate('svg'));
@@ -895,6 +895,7 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 			$(buttonEl).live('mousedown', function(e) {
 				if(active === false) {
 					active = true;
+					console.log('options.application');
 					options.application.events.onCurrentModeChange.fire(opts.action);
 					$(buttonEl).addClass("active");
 				} else if(active === true) {
@@ -1235,6 +1236,10 @@ Presentations for canvas.js
 			
 			that.element = $("#" + action);
 			
+			app.controller.buttonActive.bind(that.element, {
+				action: action
+			});
+			
 			return that;
 		};
 
@@ -1441,7 +1446,10 @@ Presentations for canvas.js
 MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.CanvasClickController", {
     bind: {
         events: {
-            onClick: null
+            onClick: null,
+			onShapeStart: null,
+			onShapeDrag: null,
+			onShapeDone: null
         }
     }
 });
@@ -1476,13 +1484,12 @@ MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.KeyboardListener", {
 MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.AnnotationCreationButton", {
 	bind: {
 		events: {
-			onCurrentModeChange: null,
-			onShapeStart: null,
-			onShapeExpand: null,
-			onShapeDone: null
+			onCurrentModeChange: null
+			
 		}
 	}
 });
+
 MITHGrid.defaults("OAC.Client.StreamingVideo", {
 	controllers: {
 		keyboard: {
