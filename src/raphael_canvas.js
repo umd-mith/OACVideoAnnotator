@@ -25,16 +25,16 @@ Presentations for canvas.js
 		
 		options = that.options;
 		
+		
+		
 		canvasController = options.controllers.canvas;
 		keyBoardController = options.controllers.keyboard;
 		editBoxController = options.controllers.shapeEditBox;
 		shapeCreateController = options.controllers.shapeCreateBox;
 		
-		
 		if (options.cWidth !== undefined) {
 			w = options.cWidth;
-		}
-		else {
+		} else {
 			w = $(container).width();
 		}
 		if (options.cHeight !== undefined) {
@@ -73,10 +73,6 @@ Presentations for canvas.js
 			that.events[e] = keyboardBinding.events[e];
 		}
 		
-		for(e in canvasBinding.events) {
-			that.events[e] = canvasBinding.events[e];
-		}
-		
 		superRender = that.render;
 		
 		that.render = function(c, m, i) {
@@ -93,6 +89,25 @@ Presentations for canvas.js
 			superEventFocusChange(id);
 			editBoundingBoxBinding.attachRendering(that.renderingFor(id));
 		};
+		
+		/*
+		Registering canvas special events for start, drag, stop
+		*/
+		canvasBinding.events.onShapeStart.addListener(function(coords) {
+			shapeCreateBinding.createGuide(coords);
+		});
+		
+		canvasBinding.events.onShapeDrag.addListener(function(coords) {
+			shapeCreateBinding.resizeGuide(coords);
+		});
+		
+		canvasBinding.events.onShapeDone.addListener(function(coords) {
+			var shape;
+			
+			shape = shapeCreateBinding.completeShape(coords);
+			options.application.events.onCreateAnnotationChange.fire(coords);
+			
+		});
 				
 		return that;
 	};

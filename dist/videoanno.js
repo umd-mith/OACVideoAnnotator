@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Tue Dec 13 16:08:57 2011 -0500
+ *  Date: Tue Dec 13 16:56:17 2011 -0500
  *  
  * Educational Community License, Version 2.0
  * 
@@ -577,7 +577,7 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
                         stroke: 'green',
                         'stroke-dasharray': ["--"]
                     });
-
+					
 				} else {
 					// show all the boxes and
                     // handles
@@ -599,8 +599,8 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 			top left
 			*/
 			binding.resizeGuide = function(coords) {
-				attrs.width = (coords[0] + attrs.x);
-				attrs.height = (coords[1] + attrs.y);
+				attrs.width = (attrs.x - coords[0]);
+				attrs.height = (attrs.y - coords[1]);
 				svgBBox.attr({
 					width: attrs.width,
 					height: attrs.height
@@ -608,8 +608,8 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 			};
 			
 			binding.completeShape = function(coords) {
-				attrs.width = (coords[0] + attrs.x);
-				attrs.height = (coords[1] + attrs.y);
+				attrs.width = (attrs.x - coords[0]);
+				attrs.height = (attrs.y - coords[1]);
 				svgBBox.attr({
 					width: attrs.width,
 					height: attrs.height
@@ -755,7 +755,8 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 				x,
 				y,
 				w,
-				h;
+				h,
+				position = $(container).position();
 
 				/*
 				MouseMode cycles through three settings:
@@ -770,8 +771,8 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 					if(mouseMode > 0) {
 						return;
 					}
-					x = e.offsetX;
-					y = e.offsetY;
+					x = e.pageX - position.left;
+					y = e.pageY - position.top;
 					topLeft = [x,y];
 					mouseMode = 1;
 					binding.events.onShapeStart.fire(topLeft);
@@ -781,8 +782,8 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 					if(mouseMode === 2 || mouseMode === 0) {
 						return;
 					}
-					x = e.offsetX;
-					y = e.offsetY;
+					x = e.pageX - position.left;
+					y = e.pageY - position.top;
 					bottomRight = [x,y];
 					binding.events.onShapeDrag.fire(bottomRight);
 				});
@@ -795,10 +796,13 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 					if(bottomRight === undefined) {
 						bottomRight = [x + 5, y + 5];
 					}
-					binding.events.onShapeDone.fire(bottomRight);
+					binding.events.onShapeDone.fire({
+						x: topLeft[0],
+						y: topLeft[1],
+						width: (topLeft[0] + bottomRight[0]),
+						height: (topLeft[1] + bottomRight[1])
+					});
 				});
-
-
 			},
 			selectShape = function(container) {
 				/*
@@ -850,7 +854,6 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 
             options.application.events.onActiveAnnotationChange.addListener(attachDragResize);
 			options.application.events.onCurrentModeChange.addListener(function(mode) {
-				console.log('mode: '+mode);
 				if(mode === 'Rectangle' || mode === 'Ellipse') {
 					drawShape(binding.locate('svg'));
 				} else if(mode === 'Select') {
@@ -866,9 +869,6 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
             binding.removeRendering = function(oldRendering) {
                 delete renderings[oldRendering.id];
             };
-
-            
-
         };
 
         return that;
@@ -895,7 +895,6 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 			$(buttonEl).live('mousedown', function(e) {
 				if(active === false) {
 					active = true;
-					console.log('options.application');
 					options.application.events.onCurrentModeChange.fire(opts.action);
 					$(buttonEl).addClass("active");
 				} else if(active === true) {
@@ -954,16 +953,16 @@ Presentations for canvas.js
 		
 		options = that.options;
 		
+		
+		
 		canvasController = options.controllers.canvas;
 		keyBoardController = options.controllers.keyboard;
 		editBoxController = options.controllers.shapeEditBox;
 		shapeCreateController = options.controllers.shapeCreateBox;
 		
-		
 		if (options.cWidth !== undefined) {
 			w = options.cWidth;
-		}
-		else {
+		} else {
 			w = $(container).width();
 		}
 		if (options.cHeight !== undefined) {
@@ -1002,10 +1001,6 @@ Presentations for canvas.js
 			that.events[e] = keyboardBinding.events[e];
 		}
 		
-		for(e in canvasBinding.events) {
-			that.events[e] = canvasBinding.events[e];
-		}
-		
 		superRender = that.render;
 		
 		that.render = function(c, m, i) {
@@ -1022,6 +1017,25 @@ Presentations for canvas.js
 			superEventFocusChange(id);
 			editBoundingBoxBinding.attachRendering(that.renderingFor(id));
 		};
+		
+		/*
+		Registering canvas special events for start, drag, stop
+		*/
+		canvasBinding.events.onShapeStart.addListener(function(coords) {
+			shapeCreateBinding.createGuide(coords);
+		});
+		
+		canvasBinding.events.onShapeDrag.addListener(function(coords) {
+			shapeCreateBinding.resizeGuide(coords);
+		});
+		
+		canvasBinding.events.onShapeDone.addListener(function(coords) {
+			var shape;
+			
+			shape = shapeCreateBinding.completeShape(coords);
+			options.application.events.onCreateAnnotationChange.fire(coords);
+			
+		});
 				
 		return that;
 	};
@@ -1043,7 +1057,6 @@ Presentations for canvas.js
 		
 		/*
 		* Creating application to run DOM and presentations
-		*
 		*/
 		app = MITHGrid.Application.initApp("OAC.Client.StreamingVideo", container, 
 			$.extend(true, {}, {
@@ -1132,7 +1145,7 @@ Presentations for canvas.js
 				// getting the removeItems callback
 				that.shape.remove();
 			};
-
+			
 			return that;
 		};
 		
@@ -1214,7 +1227,8 @@ Presentations for canvas.js
 			}
 			
 			var that = {}, item, buttons = $(".button"), groupEl, 
-			container = $("#sidebar" + myCanvasId);
+			container = $("#sidebar" + myCanvasId), buttonBinding,
+			idSearch, idCount;
 			
 			/*
 			Set the group element where this button should go in. If no group 
@@ -1236,7 +1250,7 @@ Presentations for canvas.js
 			
 			that.element = $("#" + action);
 			
-			app.controller.buttonActive.bind(that.element, {
+			buttonBinding = app.controller.buttonActive.bind(that.element, {
 				action: action
 			});
 			
@@ -1273,6 +1287,27 @@ Presentations for canvas.js
 			app.events.onCurrentTimeChange.addListener(function(t) {
 				// five seconds on either side of the current time
 				app.dataView.currentAnnotations.setKeyRange(t-5, t+5);
+			});
+			app.events.onCreateAnnotationChange.addListener(function(attrs) {
+				var idSearch, idCount;
+				
+				idSearch = app.dataStore.canvas.prepare(['.type']);
+				idCount = idSearch.evaluate('Annotation');
+				app.dataStore.canvas.loadItems([{
+					id: "anno" + idCount,
+					type: "Annotation",
+					bodyContent: "Text",
+					shapeType: app.getCurrentMode(),
+					x: attrs.x,
+					y: attrs.y,
+					w: attrs.width,
+					h: attrs.height,
+					start_ntp: 10,
+					end_ntp: 40
+				}]);
+			});
+			app.events.onCurrentModeChange.addListener(function(mode) {
+				app.setCurrentMode(mode);
 			});
 		});
 		
@@ -1383,59 +1418,13 @@ Presentations for canvas.js
 			/*
 			Adding in button features for annotation creation
 			*/
-			var rectButton, ellipseButton;
+			var rectButton, ellipseButton, selectButton;
 			
-			rectButton = app.buttonFeature('Shapes', 'Rectangle', {
-				'click': function(e) {
-					var query, items;
-					query = app.dataStore.canvas.prepare(['!shapeType']);
-					items = query.evaluate(['Rectangle']);
-					app.dataStore.canvas.loadItems([{
-						id: "rect"+items.length,
-						type: 'Annotation',
-						shapeType: 'Rectangle',
-						bodyType: 'Text',
-						bodyContent: "This is an annotation marked by an rectangular space",
-						creator: 'Grant Dickie',
-						start_ntp: 0,
-						end_ntp: 1,
-						w: 100,
-						h: 100,
-						x: 100,
-						y: 100
-					}]);
-					
-					app.setCurrentMode('drawRectangle');
-				}
-				
-			});
+			rectButton = app.buttonFeature('Shapes', 'Rectangle');
 			
-			ellipseButton = app.buttonFeature('Shapes', 'Ellipse', {
-				
-				'click': function(e) {
-					var query, items;
-					query = app.dataStore.canvas.prepare(['!shapeType']);
-					items = query.evaluate(['Ellipse']);
-					app.dataStore.canvas.loadItems([{
-						id: "ellipse"+items.length,
-						type: 'Annotation',
-						shapeType: 'Ellipse',
-						bodyType: 'Text',
-						bodyContent: "This is an annotation marked by an rectangular space",
-						creator: 'Grant Dickie',
-						start_ntp: 0,
-						end_ntp: 1,
-						w: 100,
-						h: 100,
-						x: 100,
-						y: 100
-					}]);
-					
-					app.setCurrentMode('drawEllipse');
-				}
-				
-			});
+			ellipseButton = app.buttonFeature('Shapes', 'Ellipse');
 			
+			selectButton = app.buttonFeature('General', 'Select');
 		});
 		
 		return app;
@@ -1490,6 +1479,14 @@ MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.AnnotationCreationButton
 	}
 });
 
+MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.ShapeCreateBox", {
+	bind: {
+		events: {
+			
+		}
+	}
+});
+
 MITHGrid.defaults("OAC.Client.StreamingVideo", {
 	controllers: {
 		keyboard: {
@@ -1532,6 +1529,9 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 		}
 	},
 	variables: {
+		CreateAnnotation: {
+			is: 'rw'
+		},
 		ActiveAnnotation: {
 			is: 'rw'
 		},

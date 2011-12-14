@@ -14,7 +14,6 @@
 		
 		/*
 		* Creating application to run DOM and presentations
-		*
 		*/
 		app = MITHGrid.Application.initApp("OAC.Client.StreamingVideo", container, 
 			$.extend(true, {}, {
@@ -103,7 +102,7 @@
 				// getting the removeItems callback
 				that.shape.remove();
 			};
-
+			
 			return that;
 		};
 		
@@ -185,7 +184,8 @@
 			}
 			
 			var that = {}, item, buttons = $(".button"), groupEl, 
-			container = $("#sidebar" + myCanvasId);
+			container = $("#sidebar" + myCanvasId), buttonBinding,
+			idSearch, idCount;
 			
 			/*
 			Set the group element where this button should go in. If no group 
@@ -207,7 +207,7 @@
 			
 			that.element = $("#" + action);
 			
-			app.controller.buttonActive.bind(that.element, {
+			buttonBinding = app.controller.buttonActive.bind(that.element, {
 				action: action
 			});
 			
@@ -244,6 +244,27 @@
 			app.events.onCurrentTimeChange.addListener(function(t) {
 				// five seconds on either side of the current time
 				app.dataView.currentAnnotations.setKeyRange(t-5, t+5);
+			});
+			app.events.onCreateAnnotationChange.addListener(function(attrs) {
+				var idSearch, idCount;
+				
+				idSearch = app.dataStore.canvas.prepare(['.type']);
+				idCount = idSearch.evaluate('Annotation');
+				app.dataStore.canvas.loadItems([{
+					id: "anno" + idCount,
+					type: "Annotation",
+					bodyContent: "Text",
+					shapeType: app.getCurrentMode(),
+					x: attrs.x,
+					y: attrs.y,
+					w: attrs.width,
+					h: attrs.height,
+					start_ntp: 10,
+					end_ntp: 40
+				}]);
+			});
+			app.events.onCurrentModeChange.addListener(function(mode) {
+				app.setCurrentMode(mode);
 			});
 		});
 		
@@ -354,59 +375,13 @@
 			/*
 			Adding in button features for annotation creation
 			*/
-			var rectButton, ellipseButton;
+			var rectButton, ellipseButton, selectButton;
 			
-			rectButton = app.buttonFeature('Shapes', 'Rectangle', {
-				'click': function(e) {
-					var query, items;
-					query = app.dataStore.canvas.prepare(['!shapeType']);
-					items = query.evaluate(['Rectangle']);
-					app.dataStore.canvas.loadItems([{
-						id: "rect"+items.length,
-						type: 'Annotation',
-						shapeType: 'Rectangle',
-						bodyType: 'Text',
-						bodyContent: "This is an annotation marked by an rectangular space",
-						creator: 'Grant Dickie',
-						start_ntp: 0,
-						end_ntp: 1,
-						w: 100,
-						h: 100,
-						x: 100,
-						y: 100
-					}]);
-					
-					app.setCurrentMode('drawRectangle');
-				}
-				
-			});
+			rectButton = app.buttonFeature('Shapes', 'Rectangle');
 			
-			ellipseButton = app.buttonFeature('Shapes', 'Ellipse', {
-				
-				'click': function(e) {
-					var query, items;
-					query = app.dataStore.canvas.prepare(['!shapeType']);
-					items = query.evaluate(['Ellipse']);
-					app.dataStore.canvas.loadItems([{
-						id: "ellipse"+items.length,
-						type: 'Annotation',
-						shapeType: 'Ellipse',
-						bodyType: 'Text',
-						bodyContent: "This is an annotation marked by an rectangular space",
-						creator: 'Grant Dickie',
-						start_ntp: 0,
-						end_ntp: 1,
-						w: 100,
-						h: 100,
-						x: 100,
-						y: 100
-					}]);
-					
-					app.setCurrentMode('drawEllipse');
-				}
-				
-			});
+			ellipseButton = app.buttonFeature('Shapes', 'Ellipse');
 			
+			selectButton = app.buttonFeature('General', 'Select');
 		});
 		
 		return app;

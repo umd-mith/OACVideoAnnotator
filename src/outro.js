@@ -46,6 +46,14 @@ MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.AnnotationCreationButton
 	}
 });
 
+MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.ShapeCreateBox", {
+	bind: {
+		events: {
+			
+		}
+	}
+});
+
 MITHGrid.defaults("OAC.Client.StreamingVideo", {
 	controllers: {
 		keyboard: {
@@ -88,6 +96,9 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 		}
 	},
 	variables: {
+		CreateAnnotation: {
+			is: 'rw'
+		},
 		ActiveAnnotation: {
 			is: 'rw'
 		},

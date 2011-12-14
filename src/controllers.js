@@ -545,7 +545,7 @@
                         stroke: 'green',
                         'stroke-dasharray': ["--"]
                     });
-
+					
 				} else {
 					// show all the boxes and
                     // handles
@@ -567,8 +567,8 @@
 			top left
 			*/
 			binding.resizeGuide = function(coords) {
-				attrs.width = (coords[0] + attrs.x);
-				attrs.height = (coords[1] + attrs.y);
+				attrs.width = (attrs.x - coords[0]);
+				attrs.height = (attrs.y - coords[1]);
 				svgBBox.attr({
 					width: attrs.width,
 					height: attrs.height
@@ -576,8 +576,8 @@
 			};
 			
 			binding.completeShape = function(coords) {
-				attrs.width = (coords[0] + attrs.x);
-				attrs.height = (coords[1] + attrs.y);
+				attrs.width = (attrs.x - coords[0]);
+				attrs.height = (attrs.y - coords[1]);
 				svgBBox.attr({
 					width: attrs.width,
 					height: attrs.height
@@ -723,7 +723,8 @@
 				x,
 				y,
 				w,
-				h;
+				h,
+				position = $(container).position();
 
 				/*
 				MouseMode cycles through three settings:
@@ -738,8 +739,8 @@
 					if(mouseMode > 0) {
 						return;
 					}
-					x = e.offsetX;
-					y = e.offsetY;
+					x = e.pageX - position.left;
+					y = e.pageY - position.top;
 					topLeft = [x,y];
 					mouseMode = 1;
 					binding.events.onShapeStart.fire(topLeft);
@@ -749,8 +750,8 @@
 					if(mouseMode === 2 || mouseMode === 0) {
 						return;
 					}
-					x = e.offsetX;
-					y = e.offsetY;
+					x = e.pageX - position.left;
+					y = e.pageY - position.top;
 					bottomRight = [x,y];
 					binding.events.onShapeDrag.fire(bottomRight);
 				});
@@ -763,10 +764,13 @@
 					if(bottomRight === undefined) {
 						bottomRight = [x + 5, y + 5];
 					}
-					binding.events.onShapeDone.fire(bottomRight);
+					binding.events.onShapeDone.fire({
+						x: topLeft[0],
+						y: topLeft[1],
+						width: (topLeft[0] + bottomRight[0]),
+						height: (topLeft[1] + bottomRight[1])
+					});
 				});
-
-
 			},
 			selectShape = function(container) {
 				/*
@@ -818,7 +822,6 @@
 
             options.application.events.onActiveAnnotationChange.addListener(attachDragResize);
 			options.application.events.onCurrentModeChange.addListener(function(mode) {
-				console.log('mode: '+mode);
 				if(mode === 'Rectangle' || mode === 'Ellipse') {
 					drawShape(binding.locate('svg'));
 				} else if(mode === 'Select') {
@@ -834,9 +837,6 @@
             binding.removeRendering = function(oldRendering) {
                 delete renderings[oldRendering.id];
             };
-
-            
-
         };
 
         return that;
@@ -863,7 +863,6 @@
 			$(buttonEl).live('mousedown', function(e) {
 				if(active === false) {
 					active = true;
-					console.log('options.application');
 					options.application.events.onCurrentModeChange.fire(opts.action);
 					$(buttonEl).addClass("active");
 				} else if(active === true) {
