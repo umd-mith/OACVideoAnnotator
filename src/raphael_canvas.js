@@ -105,8 +105,8 @@ Presentations for canvas.js
 			var shape;
 			
 			shape = shapeCreateBinding.completeShape(coords);
-			options.application.events.onCreateAnnotationChange.fire(coords);
 			
+			options.application.events.onCreateAnnotationChange.fire(coords);
 		});
 				
 		return that;

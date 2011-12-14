@@ -522,7 +522,7 @@
             factors = {},
             paper = opts.paper,
             attrs = {},
-            padding = 1,
+            padding = 10,
             drawMenu,
             itemDeleted,
             shapeAttrs = {},
@@ -567,8 +567,10 @@
 			top left
 			*/
 			binding.resizeGuide = function(coords) {
-				attrs.width = (attrs.x - coords[0]);
-				attrs.height = (attrs.y - coords[1]);
+				
+				attrs.width = (coords[0] - attrs.x);
+				attrs.height = (coords[1] - attrs.y);
+				
 				svgBBox.attr({
 					width: attrs.width,
 					height: attrs.height
@@ -576,8 +578,9 @@
 			};
 			
 			binding.completeShape = function(coords) {
-				attrs.width = (attrs.x - coords[0]);
-				attrs.height = (attrs.y - coords[1]);
+				console.log('complete shape ' + JSON.stringify(coords));
+				attrs.width = coords.width;
+				attrs.height = coords.height;
 				svgBBox.attr({
 					width: attrs.width,
 					height: attrs.height
@@ -724,7 +727,7 @@
 				y,
 				w,
 				h,
-				position = $(container).position();
+				offset = $(container).offset();
 
 				/*
 				MouseMode cycles through three settings:
@@ -739,8 +742,8 @@
 					if(mouseMode > 0) {
 						return;
 					}
-					x = e.pageX - position.left;
-					y = e.pageY - position.top;
+					x = e.pageX - offset.left;
+					y = e.pageY - offset.top;
 					topLeft = [x,y];
 					mouseMode = 1;
 					binding.events.onShapeStart.fire(topLeft);
@@ -750,8 +753,8 @@
 					if(mouseMode === 2 || mouseMode === 0) {
 						return;
 					}
-					x = e.pageX - position.left;
-					y = e.pageY - position.top;
+					x = e.pageX - offset.left;
+					y = e.pageY - offset.top;
 					bottomRight = [x,y];
 					binding.events.onShapeDrag.fire(bottomRight);
 				});

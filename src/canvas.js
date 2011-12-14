@@ -273,13 +273,10 @@
 				// Note: Rectangle measurements x,y start at CENTER
 				var that = app.initShapeLens(container, view, model, itemId),
 				item = model.getItem(itemId),
-				c, ox, oy, bbox;
-
-				ox = (item.x - (item.w[0] / 2));
-				oy = (item.y - (item.h[0] / 2));
+				c, bbox;
 
 				// Accessing the view.canvas Object that was created in MITHGrid.Presentation.RaphSVG
-				c = view.canvas.rect(ox, oy, item.w[0], item.h[0]);
+				c = view.canvas.rect(item.x, item.y, item.w, item.h);
 				// fill and set opacity
 				c.attr({
 					fill: "red",

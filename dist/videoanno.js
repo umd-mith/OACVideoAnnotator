@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Tue Dec 13 16:56:17 2011 -0500
+ *  Date: Wed Dec 14 13:54:41 2011 -0500
  *  
  * Educational Community License, Version 2.0
  * 
@@ -554,7 +554,7 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
             factors = {},
             paper = opts.paper,
             attrs = {},
-            padding = 1,
+            padding = 10,
             drawMenu,
             itemDeleted,
             shapeAttrs = {},
@@ -599,8 +599,10 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 			top left
 			*/
 			binding.resizeGuide = function(coords) {
-				attrs.width = (attrs.x - coords[0]);
-				attrs.height = (attrs.y - coords[1]);
+				
+				attrs.width = (coords[0] - attrs.x);
+				attrs.height = (coords[1] - attrs.y);
+				
 				svgBBox.attr({
 					width: attrs.width,
 					height: attrs.height
@@ -608,8 +610,9 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 			};
 			
 			binding.completeShape = function(coords) {
-				attrs.width = (attrs.x - coords[0]);
-				attrs.height = (attrs.y - coords[1]);
+				console.log('complete shape ' + JSON.stringify(coords));
+				attrs.width = coords.width;
+				attrs.height = coords.height;
 				svgBBox.attr({
 					width: attrs.width,
 					height: attrs.height
@@ -756,7 +759,7 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 				y,
 				w,
 				h,
-				position = $(container).position();
+				offset = $(container).offset();
 
 				/*
 				MouseMode cycles through three settings:
@@ -771,8 +774,8 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 					if(mouseMode > 0) {
 						return;
 					}
-					x = e.pageX - position.left;
-					y = e.pageY - position.top;
+					x = e.pageX - offset.left;
+					y = e.pageY - offset.top;
 					topLeft = [x,y];
 					mouseMode = 1;
 					binding.events.onShapeStart.fire(topLeft);
@@ -782,8 +785,8 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 					if(mouseMode === 2 || mouseMode === 0) {
 						return;
 					}
-					x = e.pageX - position.left;
-					y = e.pageY - position.top;
+					x = e.pageX - offset.left;
+					y = e.pageY - offset.top;
 					bottomRight = [x,y];
 					binding.events.onShapeDrag.fire(bottomRight);
 				});
@@ -1033,8 +1036,8 @@ Presentations for canvas.js
 			var shape;
 			
 			shape = shapeCreateBinding.completeShape(coords);
-			options.application.events.onCreateAnnotationChange.fire(coords);
 			
+			options.application.events.onCreateAnnotationChange.fire(coords);
 		});
 				
 		return that;
@@ -1316,13 +1319,10 @@ Presentations for canvas.js
 				// Note: Rectangle measurements x,y start at CENTER
 				var that = app.initShapeLens(container, view, model, itemId),
 				item = model.getItem(itemId),
-				c, ox, oy, bbox;
-
-				ox = (item.x - (item.w[0] / 2));
-				oy = (item.y - (item.h[0] / 2));
+				c, bbox;
 
 				// Accessing the view.canvas Object that was created in MITHGrid.Presentation.RaphSVG
-				c = view.canvas.rect(ox, oy, item.w[0], item.h[0]);
+				c = view.canvas.rect(item.x, item.y, item.w, item.h);
 				// fill and set opacity
 				c.attr({
 					fill: "red",
