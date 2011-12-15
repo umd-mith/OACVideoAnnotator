@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Wed Dec 14 15:31:05 2011 -0500
+ *  Date: Thu Dec 15 12:17:21 2011 -0500
  *  
  * Educational Community License, Version 2.0
  * 
@@ -614,6 +614,7 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 				attrs.y -= coords.height/2;
 				attrs.width = coords.width;
 				attrs.height = coords.height;
+				console.log('attrs in completeShape '+JSON.stringify(attrs));
 				svgBBox.attr({
 					width: attrs.width,
 					height: attrs.height
@@ -925,7 +926,6 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 			options.application.events.onCurrentModeChange.addListener(onCurrentModeChangeHandle);
 		};
 		
-
 		return that;
 	};
 	
@@ -1035,14 +1035,15 @@ Presentations for canvas.js
 		
 		canvasBinding.events.onShapeDone.addListener(function(coords) {
 			var shape, idCount, idSearch;
-			idSearch = app.dataStore.canvas.prepare(['.type']);
+			idSearch = options.application.dataStore.canvas.prepare(['.type']);
 			idCount = idSearch.evaluate('Annotation');
 			shape = shapeCreateBinding.completeShape(coords);
-			that.loadItems([{
+			options.application.dataStore.canvas.loadItems([{
 				id: "anno" + idCount,
 				type: "Annotation",
-				bodyContent: "Text",
-				shapeType: app.getCurrentMode(),
+				bodyType: "Text",
+				bodyContent: "text",
+				shapeType: options.application.getCurrentMode(),
 				x: coords.x,
 				y: coords.y,
 				w: coords.width,
@@ -1173,6 +1174,7 @@ Presentations for canvas.js
 			
 			itemEl = 
 			$('<div class="anno_item">'+
+				'<p class="bodyContentInstructions">Double click on Annotation text to open edit window.</p>'+
 				'<div class="editArea">'+
 					'<textarea class="bodyContentTextArea"></textarea>'+ 
 				'</div>'+
@@ -1237,7 +1239,6 @@ Presentations for canvas.js
 			Check to make sure button isn't already present
 			*/
 			if($('#' + action).length !== 0) {
-			
 				return false; // Abort
 			}
 			
@@ -1278,7 +1279,6 @@ Presentations for canvas.js
 		app.setCurrentMode = function(mode) {
 			app.currentMode = mode;
 		};
-		
 		
 		/*
 		Gets the currentMode variable

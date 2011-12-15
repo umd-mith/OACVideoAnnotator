@@ -103,14 +103,15 @@ Presentations for canvas.js
 		
 		canvasBinding.events.onShapeDone.addListener(function(coords) {
 			var shape, idCount, idSearch;
-			idSearch = app.dataStore.canvas.prepare(['.type']);
+			idSearch = options.application.dataStore.canvas.prepare(['.type']);
 			idCount = idSearch.evaluate('Annotation');
 			shape = shapeCreateBinding.completeShape(coords);
-			that.loadItems([{
+			options.application.dataStore.canvas.loadItems([{
 				id: "anno" + idCount,
 				type: "Annotation",
-				bodyContent: "Text",
-				shapeType: app.getCurrentMode(),
+				bodyType: "Text",
+				bodyContent: "text",
+				shapeType: options.application.getCurrentMode(),
 				x: coords.x,
 				y: coords.y,
 				w: coords.width,

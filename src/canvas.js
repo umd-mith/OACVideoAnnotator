@@ -115,6 +115,7 @@
 			
 			itemEl = 
 			$('<div class="anno_item">'+
+				'<p class="bodyContentInstructions">Double click on Annotation text to open edit window.</p>'+
 				'<div class="editArea">'+
 					'<textarea class="bodyContentTextArea"></textarea>'+ 
 				'</div>'+
@@ -179,7 +180,6 @@
 			Check to make sure button isn't already present
 			*/
 			if($('#' + action).length !== 0) {
-			
 				return false; // Abort
 			}
 			
@@ -220,7 +220,6 @@
 		app.setCurrentMode = function(mode) {
 			app.currentMode = mode;
 		};
-		
 		
 		/*
 		Gets the currentMode variable

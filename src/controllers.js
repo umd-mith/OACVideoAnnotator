@@ -582,6 +582,7 @@
 				attrs.y -= coords.height/2;
 				attrs.width = coords.width;
 				attrs.height = coords.height;
+				console.log('attrs in completeShape '+JSON.stringify(attrs));
 				svgBBox.attr({
 					width: attrs.width,
 					height: attrs.height
@@ -893,7 +894,6 @@
 			options.application.events.onCurrentModeChange.addListener(onCurrentModeChangeHandle);
 		};
 		
-
 		return that;
 	};
 	

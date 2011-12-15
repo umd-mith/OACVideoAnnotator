@@ -25,6 +25,10 @@ body {
 	padding: 1px;
 	border: dashed black 2px;
 }
+.anno_item .bodyContentInstructions {
+	font-size: 12px;
+	color: grey;
+}
 .canvas_svg_holder {
 	padding: 10px;
 	background: #FFF;
@@ -72,8 +76,7 @@ body {
 	padding: .5em;
 	font-size: 26px;
 	border: 1px dotted green;
-	cursor: pointer;
-	
+	cursor: pointer;	
 }
 
 .button.active {
