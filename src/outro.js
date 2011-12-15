@@ -96,9 +96,6 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 		}
 	},
 	variables: {
-		CreateAnnotation: {
-			is: 'rw'
-		},
 		ActiveAnnotation: {
 			is: 'rw'
 		},

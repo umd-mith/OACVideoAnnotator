@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Thu Dec 15 14:07:45 2011 -0500
+ *  Date: Thu Dec 15 14:57:08 2011 -0500
  *  
  * Educational Community License, Version 2.0
  * 
@@ -621,7 +621,7 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 					width: attrs.width,
 					height: attrs.height
 				});
-				// svgBBox.hide();
+				svgBBox.hide();
 				return {
 					x: attrs.x,
 					y: attrs.y,

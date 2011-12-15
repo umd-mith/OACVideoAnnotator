@@ -6,7 +6,10 @@ Presentations for canvas.js
 
 
 (function ($, MITHGrid, OAC) {
-
+	/*
+	Presentation that extends SimpleText in order to add new 
+	functionality for Annotation HTML lens
+	*/
 	MITHGrid.Presentation.namespace("AnnotationList");
 	MITHGrid.Presentation.AnnotationList.initPresentation = function (container, options) {
 		var that = MITHGrid.Presentation.initPresentation("MITHGrid.Presentation.AnnotationList", container, options);
@@ -107,6 +110,11 @@ Presentations for canvas.js
 			idSearch = options.application.dataStore.canvas.prepare(['.type']);
 			idCount = idSearch.evaluate('Annotation');
 			shape = shapeCreateBinding.completeShape(coords);
+			
+			/*
+			Adjust x,y in order to fit data store 
+			model
+			*/
 			options.application.dataStore.canvas.loadItems([{
 				id: "anno" + idCount,
 				type: "Annotation",

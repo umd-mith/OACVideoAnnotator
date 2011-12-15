@@ -589,7 +589,7 @@
 					width: attrs.width,
 					height: attrs.height
 				});
-				// svgBBox.hide();
+				svgBBox.hide();
 				return {
 					x: attrs.x,
 					y: attrs.y,
