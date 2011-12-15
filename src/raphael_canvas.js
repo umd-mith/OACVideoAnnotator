@@ -102,11 +102,22 @@ Presentations for canvas.js
 		});
 		
 		canvasBinding.events.onShapeDone.addListener(function(coords) {
-			var shape;
-			
+			var shape, idCount, idSearch;
+			idSearch = app.dataStore.canvas.prepare(['.type']);
+			idCount = idSearch.evaluate('Annotation');
 			shape = shapeCreateBinding.completeShape(coords);
-			
-			options.application.events.onCreateAnnotationChange.fire(coords);
+			that.loadItems([{
+				id: "anno" + idCount,
+				type: "Annotation",
+				bodyContent: "Text",
+				shapeType: app.getCurrentMode(),
+				x: coords.x,
+				y: coords.y,
+				w: coords.width,
+				h: coords.height,
+				start_ntp: 10,
+				end_ntp: 40
+			}]);
 		});
 				
 		return that;

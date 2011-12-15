@@ -245,24 +245,6 @@
 				// five seconds on either side of the current time
 				app.dataView.currentAnnotations.setKeyRange(t-5, t+5);
 			});
-			app.events.onCreateAnnotationChange.addListener(function(attrs) {
-				var idSearch, idCount;
-				
-				idSearch = app.dataStore.canvas.prepare(['.type']);
-				idCount = idSearch.evaluate('Annotation');
-				app.dataStore.canvas.loadItems([{
-					id: "anno" + idCount,
-					type: "Annotation",
-					bodyContent: "Text",
-					shapeType: app.getCurrentMode(),
-					x: attrs.x,
-					y: attrs.y,
-					w: attrs.width,
-					h: attrs.height,
-					start_ntp: 10,
-					end_ntp: 40
-				}]);
-			});
 			app.events.onCurrentModeChange.addListener(function(mode) {
 				app.setCurrentMode(mode);
 			});
@@ -276,7 +258,7 @@
 				c, bbox;
 
 				// Accessing the view.canvas Object that was created in MITHGrid.Presentation.RaphSVG
-				c = view.canvas.rect(item.x, item.y, item.w, item.h);
+				c = view.canvas.rect(item.x[0] - item.w[0]/2, item.y[0] - item.h[0]/2, item.w[0], item.h[0]);
 				// fill and set opacity
 				c.attr({
 					fill: "red",

@@ -578,7 +578,8 @@
 			};
 			
 			binding.completeShape = function(coords) {
-				console.log('complete shape ' + JSON.stringify(coords));
+				attrs.x -= coords.width/2;
+				attrs.y -= coords.height/2;
 				attrs.width = coords.width;
 				attrs.height = coords.height;
 				svgBBox.attr({

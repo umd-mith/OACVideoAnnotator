@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Wed Dec 14 13:54:41 2011 -0500
+ *  Date: Wed Dec 14 15:31:05 2011 -0500
  *  
  * Educational Community License, Version 2.0
  * 
@@ -610,7 +610,8 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 			};
 			
 			binding.completeShape = function(coords) {
-				console.log('complete shape ' + JSON.stringify(coords));
+				attrs.x -= coords.width/2;
+				attrs.y -= coords.height/2;
 				attrs.width = coords.width;
 				attrs.height = coords.height;
 				svgBBox.attr({
@@ -1033,11 +1034,22 @@ Presentations for canvas.js
 		});
 		
 		canvasBinding.events.onShapeDone.addListener(function(coords) {
-			var shape;
-			
+			var shape, idCount, idSearch;
+			idSearch = app.dataStore.canvas.prepare(['.type']);
+			idCount = idSearch.evaluate('Annotation');
 			shape = shapeCreateBinding.completeShape(coords);
-			
-			options.application.events.onCreateAnnotationChange.fire(coords);
+			that.loadItems([{
+				id: "anno" + idCount,
+				type: "Annotation",
+				bodyContent: "Text",
+				shapeType: app.getCurrentMode(),
+				x: coords.x,
+				y: coords.y,
+				w: coords.width,
+				h: coords.height,
+				start_ntp: 10,
+				end_ntp: 40
+			}]);
 		});
 				
 		return that;
@@ -1291,24 +1303,6 @@ Presentations for canvas.js
 				// five seconds on either side of the current time
 				app.dataView.currentAnnotations.setKeyRange(t-5, t+5);
 			});
-			app.events.onCreateAnnotationChange.addListener(function(attrs) {
-				var idSearch, idCount;
-				
-				idSearch = app.dataStore.canvas.prepare(['.type']);
-				idCount = idSearch.evaluate('Annotation');
-				app.dataStore.canvas.loadItems([{
-					id: "anno" + idCount,
-					type: "Annotation",
-					bodyContent: "Text",
-					shapeType: app.getCurrentMode(),
-					x: attrs.x,
-					y: attrs.y,
-					w: attrs.width,
-					h: attrs.height,
-					start_ntp: 10,
-					end_ntp: 40
-				}]);
-			});
 			app.events.onCurrentModeChange.addListener(function(mode) {
 				app.setCurrentMode(mode);
 			});
@@ -1322,7 +1316,7 @@ Presentations for canvas.js
 				c, bbox;
 
 				// Accessing the view.canvas Object that was created in MITHGrid.Presentation.RaphSVG
-				c = view.canvas.rect(item.x, item.y, item.w, item.h);
+				c = view.canvas.rect(item.x[0] - item.w[0]/2, item.y[0] - item.h[0]/2, item.w[0], item.h[0]);
 				// fill and set opacity
 				c.attr({
 					fill: "red",
@@ -1432,6 +1426,7 @@ Presentations for canvas.js
 } (jQuery, MITHGrid, OAC));
 															
 // Default library for the Canvas application
+
 MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.CanvasClickController", {
     bind: {
         events: {
