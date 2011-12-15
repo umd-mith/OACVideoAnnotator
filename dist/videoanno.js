@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Thu Dec 15 12:17:21 2011 -0500
+ *  Date: Thu Dec 15 14:07:45 2011 -0500
  *  
  * Educational Community License, Version 2.0
  * 
@@ -609,18 +609,25 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 				});
 			};
 			
+			/*
+			Take the saved coordinates and pass them back 
+			to the calling function
+			*/
 			binding.completeShape = function(coords) {
-				attrs.x -= coords.width/2;
-				attrs.y -= coords.height/2;
 				attrs.width = coords.width;
 				attrs.height = coords.height;
-				console.log('attrs in completeShape '+JSON.stringify(attrs));
+				
 				svgBBox.attr({
 					width: attrs.width,
 					height: attrs.height
 				});
-				svgBBox.hide();
-				return attrs;
+				// svgBBox.hide();
+				return {
+					x: attrs.x,
+					y: attrs.y,
+					width: attrs.width,
+					height: attrs.height
+				};
 			};
 		};
 		
@@ -780,6 +787,7 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 					y = e.pageY - offset.top;
 					topLeft = [x,y];
 					mouseMode = 1;
+					
 					binding.events.onShapeStart.fire(topLeft);
 				});
 
@@ -804,8 +812,8 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 					binding.events.onShapeDone.fire({
 						x: topLeft[0],
 						y: topLeft[1],
-						width: (topLeft[0] + bottomRight[0]),
-						height: (topLeft[1] + bottomRight[1])
+						width: (bottomRight[0] - topLeft[0]),
+						height: (bottomRight[1] - topLeft[1])
 					});
 				});
 			},
@@ -1034,6 +1042,7 @@ Presentations for canvas.js
 		});
 		
 		canvasBinding.events.onShapeDone.addListener(function(coords) {
+			
 			var shape, idCount, idSearch;
 			idSearch = options.application.dataStore.canvas.prepare(['.type']);
 			idCount = idSearch.evaluate('Annotation');
@@ -1042,10 +1051,10 @@ Presentations for canvas.js
 				id: "anno" + idCount,
 				type: "Annotation",
 				bodyType: "Text",
-				bodyContent: "text",
+				bodyContent: "This is an annotation for a " + options.application.getCurrentMode(),
 				shapeType: options.application.getCurrentMode(),
-				x: coords.x,
-				y: coords.y,
+				x: (coords.x + (coords.width / 2)),
+				y: (coords.y + (coords.height / 2)),
 				w: coords.width,
 				h: coords.height,
 				start_ntp: 10,
@@ -1314,9 +1323,8 @@ Presentations for canvas.js
 				var that = app.initShapeLens(container, view, model, itemId),
 				item = model.getItem(itemId),
 				c, bbox;
-
 				// Accessing the view.canvas Object that was created in MITHGrid.Presentation.RaphSVG
-				c = view.canvas.rect(item.x[0] - item.w[0]/2, item.y[0] - item.h[0]/2, item.w[0], item.h[0]);
+				c = view.canvas.rect(item.x[0] - (item.w[0]/2), item.y[0] - (item.h[0]/2), item.w[0], item.h[0]);
 				// fill and set opacity
 				c.attr({
 					fill: "red",

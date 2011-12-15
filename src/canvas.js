@@ -255,9 +255,8 @@
 				var that = app.initShapeLens(container, view, model, itemId),
 				item = model.getItem(itemId),
 				c, bbox;
-
 				// Accessing the view.canvas Object that was created in MITHGrid.Presentation.RaphSVG
-				c = view.canvas.rect(item.x[0] - item.w[0]/2, item.y[0] - item.h[0]/2, item.w[0], item.h[0]);
+				c = view.canvas.rect(item.x[0] - (item.w[0]/2), item.y[0] - (item.h[0]/2), item.w[0], item.h[0]);
 				// fill and set opacity
 				c.attr({
 					fill: "red",

@@ -102,6 +102,7 @@ Presentations for canvas.js
 		});
 		
 		canvasBinding.events.onShapeDone.addListener(function(coords) {
+			
 			var shape, idCount, idSearch;
 			idSearch = options.application.dataStore.canvas.prepare(['.type']);
 			idCount = idSearch.evaluate('Annotation');
@@ -110,10 +111,10 @@ Presentations for canvas.js
 				id: "anno" + idCount,
 				type: "Annotation",
 				bodyType: "Text",
-				bodyContent: "text",
+				bodyContent: "This is an annotation for a " + options.application.getCurrentMode(),
 				shapeType: options.application.getCurrentMode(),
-				x: coords.x,
-				y: coords.y,
+				x: (coords.x + (coords.width / 2)),
+				y: (coords.y + (coords.height / 2)),
 				w: coords.width,
 				h: coords.height,
 				start_ntp: 10,
