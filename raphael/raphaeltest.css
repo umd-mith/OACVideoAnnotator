@@ -48,7 +48,6 @@ body {
 	color: #000066;
 	float: left;
 	height: 400px;
-	
 }
 
 .controlarea .buttongrouping {
@@ -64,5 +63,21 @@ body {
 	padding: .5em;
 	font-size: 14px;
 	border: 1px solid red;
+	cursor: pointer;
+}
+
+.button:hover {
+	padding: .5em;
+	font-size: 14px;
+	border: 1px dotted green;
+	cursor: pointer;
+}
+
+.button.active {
+	padding: .5em;
+	font-size: 16px;
+	text-decoration: bold;
+	color: green;
+	border: 1px dotted green;
 	cursor: pointer;
 }
