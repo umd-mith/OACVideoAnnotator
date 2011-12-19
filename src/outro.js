@@ -2,7 +2,10 @@
 MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.CanvasClickController", {
     bind: {
         events: {
-            onClick: null
+            onClick: null,
+			onShapeStart: null,
+			onShapeDrag: null,
+			onShapeDone: null
         }
     }
 });
@@ -34,6 +37,23 @@ MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.KeyboardListener", {
     }
 });
 
+MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.AnnotationCreationButton", {
+	bind: {
+		events: {
+			onCurrentModeChange: null
+			
+		}
+	}
+});
+
+MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.ShapeCreateBox", {
+	bind: {
+		events: {
+			
+		}
+	}
+});
+
 MITHGrid.defaults("OAC.Client.StreamingVideo", {
 	controllers: {
 		keyboard: {
@@ -42,8 +62,11 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 				doc: ''
 			}
 		},
-		editBox: {
+		shapeEditBox: {
 			type: OAC.Client.StreamingVideo.Controller.AnnotationEditSelectionGrid
+		},
+		shapeCreateBox: {
+			type: OAC.Client.StreamingVideo.Controller.ShapeCreateBox
 		},
 		canvas: {
 			type: OAC.Client.StreamingVideo.Controller.CanvasClickController,
@@ -64,6 +87,12 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 				updatebutton: '.button.update',
 				deletebutton: '.button.delete'
 			}
+		},
+		buttonActive: {
+			type: OAC.Client.StreamingVideo.Controller.AnnotationCreationButton,
+			selectors: {
+				button: ''
+			}
 		}
 	},
 	variables: {
@@ -71,6 +100,10 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 			is: 'rw'
 		},
 		CurrentTime: {
+			is: 'rw',
+			"default": 0
+		},
+		CurrentMode: {
 			is: 'rw'
 		}
 	},
@@ -79,7 +112,7 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 		// is drawn
 		drawspace: {
 			dataStore: 'canvas',
-			types: ["Rectangle","Ellipse"]
+			types: ["Annotation"]
 		},
 		currentAnnotations: {
 			dataStore: 'drawspace',
@@ -96,12 +129,15 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 			types:{
 				// types of shapes -- to add a new
 				// shape object, add it here
-				Rectangle: {},
-				Ellipse: {}
+				Annotation: {}
 			},
 			properties: {
-				// posInfo contains the SVG dimensions for
-				// a shape
+				shapeType: {
+					valueType: 'text'
+				},
+				bodyType: {
+					valueType: 'text'
+				},
 				bodyContent: {
 					valueType: 'text'
 				},
@@ -122,16 +158,18 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 	presentations: {
 		raphsvg: {
 			type: MITHGrid.Presentation.RaphaelCanvas,
-			dataView: 'currentAnnotations',
+			dataView: 'drawspace',
 			controllers: {
 				keyboard: "keyboard",
 				editBox: "editBox",
-				canvas: "canvas"
+				canvas: "canvas",
+				shapeCreateBox: "shapeCreateBox",
+				shapeEditBox: "shapeEditBox"
 			}
 		},
 		annoItem: {
 			type: MITHGrid.Presentation.AnnotationList,
-			dataView: 'currentAnnotations',
+			dataView: 'drawspace',
 			container: '.anno_list'
 		} //annoItem
 	}
