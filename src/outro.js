@@ -100,7 +100,8 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 			is: 'rw'
 		},
 		CurrentTime: {
-			is: 'rw'
+			is: 'rw',
+			"default": 0
 		},
 		CurrentMode: {
 			is: 'rw'
@@ -157,7 +158,7 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 	presentations: {
 		raphsvg: {
 			type: MITHGrid.Presentation.RaphaelCanvas,
-			dataView: 'currentAnnotations',
+			dataView: 'drawspace',
 			controllers: {
 				keyboard: "keyboard",
 				editBox: "editBox",
@@ -168,7 +169,7 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 		},
 		annoItem: {
 			type: MITHGrid.Presentation.AnnotationList,
-			dataView: 'currentAnnotations',
+			dataView: 'drawspace',
 			container: '.anno_list'
 		} //annoItem
 	}

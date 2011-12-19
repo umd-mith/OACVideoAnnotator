@@ -258,12 +258,18 @@
             app.addShape(type, lensF);
         };
 
+
+		/*
+		*
+		Called Externally to insert a shape into the data Store regardless of what SVG
+		type it is
+		*/
         app.insertShape = function(coords) {
             var shapeItem,
             idSearch = app.dataStore.canvas.prepare(['!type']),
             idCount = idSearch.evaluate('Annotation'),
-            ntp_start = 10,
-            ntp_end = 30,
+            ntp_start = app.getCurrentTime(),
+            ntp_end = app.getCurrentTime() + 1,
             curMode = app.getCurrentMode(),
 			shape;
 			shape = app.shapeTypes[curMode].calc(coords);
@@ -277,8 +283,6 @@
 				ntp_end: ntp_end
             };
 			$.extend(shapeItem, shape);
-			
-			console.log(JSON.stringify(shapeItem));
 			app.dataStore.canvas.loadItems([shapeItem]);
         };
 
@@ -310,8 +314,6 @@
                 item = model.getItem(itemId),
                 c,
                 bbox;
-			
-				console.log("Rectangle lens " + JSON.stringify(item));
 			
                 // Accessing the view.canvas Object that was created in MITHGrid.Presentation.RaphSVG
                 c = view.canvas.rect(item.x[0] - (item.w[0] / 2), item.y[0] - (item.h[0] / 2), item.w[0], item.h[0]);

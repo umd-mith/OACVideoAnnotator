@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Thu Dec 15 16:40:31 2011 -0500
+ *  Date: Mon Dec 19 14:54:21 2011 -0500
  *  
  * Educational Community License, Version 2.0
  * 
@@ -1348,12 +1348,18 @@ Presentations for canvas.js
             app.addShape(type, lensF);
         };
 
+
+		/*
+		*
+		Called Externally to insert a shape into the data Store regardless of what SVG
+		type it is
+		*/
         app.insertShape = function(coords) {
             var shapeItem,
             idSearch = app.dataStore.canvas.prepare(['!type']),
             idCount = idSearch.evaluate('Annotation'),
-            ntp_start = 10,
-            ntp_end = 30,
+            ntp_start = app.getCurrentTime(),
+            ntp_end = app.getCurrentTime() + 1,
             curMode = app.getCurrentMode(),
 			shape;
 			shape = app.shapeTypes[curMode].calc(coords);
@@ -1367,8 +1373,6 @@ Presentations for canvas.js
 				ntp_end: ntp_end
             };
 			$.extend(shapeItem, shape);
-			
-			console.log(JSON.stringify(shapeItem));
 			app.dataStore.canvas.loadItems([shapeItem]);
         };
 
@@ -1400,8 +1404,6 @@ Presentations for canvas.js
                 item = model.getItem(itemId),
                 c,
                 bbox;
-			
-				console.log("Rectangle lens " + JSON.stringify(item));
 			
                 // Accessing the view.canvas Object that was created in MITHGrid.Presentation.RaphSVG
                 c = view.canvas.rect(item.x[0] - (item.w[0] / 2), item.y[0] - (item.h[0] / 2), item.w[0], item.h[0]);
@@ -1637,7 +1639,8 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 			is: 'rw'
 		},
 		CurrentTime: {
-			is: 'rw'
+			is: 'rw',
+			"default": 0
 		},
 		CurrentMode: {
 			is: 'rw'
@@ -1694,7 +1697,7 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 	presentations: {
 		raphsvg: {
 			type: MITHGrid.Presentation.RaphaelCanvas,
-			dataView: 'currentAnnotations',
+			dataView: 'drawspace',
 			controllers: {
 				keyboard: "keyboard",
 				editBox: "editBox",
@@ -1705,7 +1708,7 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 		},
 		annoItem: {
 			type: MITHGrid.Presentation.AnnotationList,
-			dataView: 'currentAnnotations',
+			dataView: 'drawspace',
 			container: '.anno_list'
 		} //annoItem
 	}
