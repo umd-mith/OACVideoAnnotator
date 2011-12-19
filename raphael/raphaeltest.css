@@ -6,11 +6,7 @@ body {
 	
 }
 #sidebar {
-	padding: 10px;
-	background: #FF6600;
-	color: #000066;
-	float: left;
-	height: 400px;
+	
 }
 
 .anno_list {
@@ -28,6 +24,10 @@ body {
 .anno_item.selected {
 	padding: 1px;
 	border: dashed black 2px;
+}
+.anno_item .bodyContentInstructions {
+	font-size: 12px;
+	color: grey;
 }
 .canvas_svg_holder {
 	padding: 10px;
@@ -47,22 +47,43 @@ body {
 	border: 0px;
 }
 .controlarea {
-	padding: 2px;
-	
+	padding: 10px;
+	background: #FF6600;
+	color: #000066;
+	float: left;
+	height: 400px;
+	width: 300px;
 }
-.controlarea .button_item {
-	padding: 2px;
+
+.controlarea .buttongrouping {
+	padding: 5px;
 	background: #FFF;
 	color: #5272e7;
 	border: 1px solid red;
 	margin-top: 10px;
 	cursor: pointer;
+	width: 230px;
 }
 
 .button {
 	padding: .5em;
-	font-size: 14px;
+	font-size: 24px;
 	border: 1px solid red;
 	cursor: pointer;
-	width: 50%;
+}
+
+.button:hover {
+	padding: .5em;
+	font-size: 26px;
+	border: 1px dotted green;
+	cursor: pointer;	
+}
+
+.button.active {
+	padding: .5em;
+	font-size: 26px;
+	text-decoration: bold;
+	color: green;
+	border: 1px dotted green;
+	cursor: pointer;
 }
