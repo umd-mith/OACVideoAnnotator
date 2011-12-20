@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Mon Dec 19 14:54:21 2011 -0500
+ *  Date: Mon Dec 19 15:29:11 2011 -0500
  *  
  * Educational Community License, Version 2.0
  * 
@@ -441,14 +441,34 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
                             that.events.onEdit.fire(activeRendering.id);
                         }
                     });
-
+					editButton.hover(function() {
+						editButton.attr({
+							fill: 443009
+						});
+					}, 
+					function() {
+						editButton.attr({
+							fill: 334009
+						});
+					});
+					
+					
                     deleteButton.mousedown(function() {
                         if (activeRendering !== undefined) {
                             that.events.onDelete.fire(activeRendering.id);
                             itemDeleted();
                         }
                     });
-
+					deleteButton.hover(function() {
+						deleteButton.attr({
+							fill: 443009
+						});
+					}, 
+					function() {
+						deleteButton.attr({
+							fill: 334009
+						});
+					});
                 } else {
 
 
@@ -680,7 +700,7 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
                 editEnd();
             };
 
-            $(bodyContent).bind('dblclick',
+            $(annoEl).bind('dblclick',
             function(e) {
                 e.preventDefault();
                 if (bindingActive) {
@@ -1220,7 +1240,7 @@ Presentations for canvas.js
 
             itemEl =
             $('<div class="anno_item">' +
-            '<p class="bodyContentInstructions">Double click on Annotation text to open edit window.</p>' +
+            '<p class="bodyContentInstructions">Double click here to open edit window.</p>' +
             '<div class="editArea">' +
             '<textarea class="bodyContentTextArea"></textarea>' +
             '</div>' +
@@ -1387,7 +1407,10 @@ Presentations for canvas.js
         });
 
         app.ready(function() {
-			var calcRectangle, calcEllipse, lensRectangle, lensEllipse;
+			var calcRectangle, calcEllipse, lensRectangle, lensEllipse,
+			rectButton,
+            ellipseButton,
+            selectButton;
 			
 			calcRectangle =  function(coords) {
 				var attrs = {};
@@ -1397,7 +1420,6 @@ Presentations for canvas.js
 				attrs.h = coords.height;
 				return attrs;
 			};
-			
 			lensRectangle = function(container, view, model, itemId) {
                 // Note: Rectangle measurements x,y start at CENTER
                 var that = app.initShapeLens(container, view, model, itemId),
@@ -1451,7 +1473,7 @@ Presentations for canvas.js
             app.addShapeType("Rectangle",
 			{
 				calc: calcRectangle,
-            	lens: lensRectangle
+				lens: lensRectangle
             });
 			
 			calcEllipse = function(coords) {
@@ -1521,9 +1543,6 @@ Presentations for canvas.js
             /*
 			Adding in button features for annotation creation
 			*/
-            var rectButton,
-            ellipseButton,
-            selectButton;
 
             rectButton = app.buttonFeature('Shapes', 'Rectangle');
 
