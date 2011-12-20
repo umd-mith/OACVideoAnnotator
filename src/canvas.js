@@ -130,7 +130,7 @@
 
             itemEl =
             $('<div class="anno_item">' +
-            '<p class="bodyContentInstructions">Double click on Annotation text to open edit window.</p>' +
+            '<p class="bodyContentInstructions">Double click here to open edit window.</p>' +
             '<div class="editArea">' +
             '<textarea class="bodyContentTextArea"></textarea>' +
             '</div>' +
@@ -297,7 +297,10 @@
         });
 
         app.ready(function() {
-			var calcRectangle, calcEllipse, lensRectangle, lensEllipse;
+			var calcRectangle, calcEllipse, lensRectangle, lensEllipse,
+			rectButton,
+            ellipseButton,
+            selectButton;
 			
 			calcRectangle =  function(coords) {
 				var attrs = {};
@@ -307,7 +310,6 @@
 				attrs.h = coords.height;
 				return attrs;
 			};
-			
 			lensRectangle = function(container, view, model, itemId) {
                 // Note: Rectangle measurements x,y start at CENTER
                 var that = app.initShapeLens(container, view, model, itemId),
@@ -361,7 +363,7 @@
             app.addShapeType("Rectangle",
 			{
 				calc: calcRectangle,
-            	lens: lensRectangle
+				lens: lensRectangle
             });
 			
 			calcEllipse = function(coords) {
@@ -431,9 +433,6 @@
             /*
 			Adding in button features for annotation creation
 			*/
-            var rectButton,
-            ellipseButton,
-            selectButton;
 
             rectButton = app.buttonFeature('Shapes', 'Rectangle');
 
