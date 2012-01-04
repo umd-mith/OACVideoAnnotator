@@ -15,7 +15,7 @@ $(document).ready(function() {
 			ok(id.length === 0, "Click event returned no shapes clicked");
 		};
 		
-		ok($.isFunction(OAC.Client.StreamingVideo.Controller.canvasController), "OAC.Client.StreamingVideo.Controller.canvasController is defined");
+		ok($.isFunction(Controller.canvasController), "OAC.Client.StreamingVideo.Controller.canvasController is defined");
 		
 		// test for activeAnnotation tests
 		ok(canvas.events.onActiveAnnotationChange, "canvas.events.onActiveAnnotationChange");
@@ -24,8 +24,7 @@ $(document).ready(function() {
 		
 		
 		canvas.events.onActiveAnnotationChange.addListener(checkCanvasClick);
-		console.log($("#canvasSVG").length);
-		$("#canvasSVG").trigger("click");
+		$("#canvasSVG")[0].click();
 		
 	});
 	
