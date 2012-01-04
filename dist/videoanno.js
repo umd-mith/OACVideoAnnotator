@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Mon Dec 19 15:29:11 2011 -0500
+ *  Date: Tue Dec 20 15:05:07 2011 -0500
  *  
  * Educational Community License, Version 2.0
  * 
@@ -1579,12 +1579,14 @@ MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.AnnoActiveController", {
 });
 
 MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.AnnotationEditSelectionGrid", {
-    events: {
-        onResize: null,
-        onMove: null,
-        onEdit: null,
-        onDelete: null
-    }
+    bind: {
+		events: {
+	        onResize: null,
+	        onMove: null,
+	        onEdit: null,
+	        onDelete: null
+	    }
+	}
 });
 
 MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.KeyboardListener", {

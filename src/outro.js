@@ -21,12 +21,14 @@ MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.AnnoActiveController", {
 });
 
 MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.AnnotationEditSelectionGrid", {
-    events: {
-        onResize: null,
-        onMove: null,
-        onEdit: null,
-        onDelete: null
-    }
+    bind: {
+		events: {
+	        onResize: null,
+	        onMove: null,
+	        onEdit: null,
+	        onDelete: null
+	    }
+	}
 });
 
 MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.KeyboardListener", {

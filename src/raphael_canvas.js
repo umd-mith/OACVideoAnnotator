@@ -34,7 +34,8 @@ Presentations for canvas.js
         shapeCreateBinding,
         e,
         superEventFocusChange,
-        editBoundingBoxBinding;
+        editBoundingBoxBinding,
+		fade;
 
         options = that.options;
 
@@ -80,7 +81,44 @@ Presentations for canvas.js
         });
 
         keyboardBinding = keyBoardController.bind($('body'), {});
-
+		
+		eventCurrentTimeChange = function(npt) {
+			var searchAnnos, annoIds,
+			anno, fadeIn, fadeOut,
+			calcOpacity = function(n, start, end) {
+				if(n < start) {
+					// fading in
+					return (1 / (start - n));
+				} else if(n > end) {
+					// fading out
+					return (1 / (n - end));
+				} else if(n > start && n < end) {
+					return 1;
+				} else {
+					return 0;
+				}
+			};
+			
+			searchAnnos = options.application.dataStores.canvas.prepare(['.type']);
+			annoIds = searchAnnos.evaluate('Annotation');
+			$.each(annoIds, function(i, o) {
+				anno = options.application.dataStores.canvas.getItem(o);
+				fadeIn = anno[0].npt_start - options.fadeStart;
+				fadeOut = anno[0].npt_end + options.fadeStart;
+				/*
+				If within the parameters to show annotation, show annotation
+				*/
+				if((npt < anno[0].npt_start) && (npt > fadeIn)) {
+					
+				} else if((npt > anno[0].npt_end) && (npt < fadeOut)) {
+					
+				} else {
+					
+				}
+			});
+			
+		};
+		
         that.events = that.events || {};
         for (e in keyboardBinding.events) {
             that.events[e] = keyboardBinding.events[e];
@@ -115,26 +153,12 @@ Presentations for canvas.js
         });
 
         canvasBinding.events.onShapeDone.addListener(function(coords) {
-
             /*
 			Adjust x,y in order to fit data store 
 			model
 			*/
 			var shape = shapeCreateBinding.completeShape(coords);
 			options.application.insertShape(shape);
-            // options.application.dataStore.canvas.loadItems([{
-            //                id: "anno" + idCount,
-            //                type: "Annotation",
-            //                bodyType: "Text",
-            //                bodyContent: "This is an annotation for a " + options.application.getCurrentMode(),
-            //                shapeType: options.application.getCurrentMode(),
-            //                x: (coords.x + (coords.width / 2)),
-            //                y: (coords.y + (coords.height / 2)),
-            //                w: coords.width,
-            //                h: coords.height,
-            //                start_ntp: 10,
-            //                end_ntp: 40
-            //            }]);
         });
 
         return that;

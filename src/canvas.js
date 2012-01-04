@@ -12,6 +12,7 @@
         app,
         svgLens,
         textLens,
+		fade,
         myCanvasId = 'OAC-Client-StreamingVideo-SVG-Canvas-' + canvasId;
 
         canvasId += 1;
@@ -258,7 +259,12 @@
             app.addShape(type, lensF);
         };
 
-
+		/*
+		Fade In and Fade Out
+		Returns value for opacity of a given annotation 
+		*/
+		
+		
 		/*
 		*
 		Called Externally to insert a shape into the data Store regardless of what SVG
@@ -285,7 +291,7 @@
 			$.extend(shapeItem, shape);
 			app.dataStore.canvas.loadItems([shapeItem]);
         };
-
+		
         app.ready(function() {
             annoActiveController = app.controller.annoActive;
             app.events.onActiveAnnotationChange.addListener(app.presentation.raphsvg.eventFocusChange);
