@@ -409,34 +409,34 @@
                             that.events.onEdit.fire(activeRendering.id);
                         }
                     });
-					editButton.hover(function() {
-						editButton.attr({
-							fill: 443009
-						});
-					}, 
-					function() {
-						editButton.attr({
-							fill: 334009
-						});
-					});
-					
-					
+                    editButton.hover(function() {
+                        editButton.attr({
+                            fill: 443009
+                        });
+                    },
+                    function() {
+                        editButton.attr({
+                            fill: 334009
+                        });
+                    });
+
+
                     deleteButton.mousedown(function() {
                         if (activeRendering !== undefined) {
                             that.events.onDelete.fire(activeRendering.id);
                             itemDeleted();
                         }
                     });
-					deleteButton.hover(function() {
-						deleteButton.attr({
-							fill: 443009
-						});
-					}, 
-					function() {
-						deleteButton.attr({
-							fill: 334009
-						});
-					});
+                    deleteButton.hover(function() {
+                        deleteButton.attr({
+                            fill: 443009
+                        });
+                    },
+                    function() {
+                        deleteButton.attr({
+                            fill: 334009
+                        });
+                    });
                 } else {
 
 

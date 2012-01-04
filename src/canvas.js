@@ -12,7 +12,7 @@
         app,
         svgLens,
         textLens,
-		fade,
+        fade,
         myCanvasId = 'OAC-Client-StreamingVideo-SVG-Canvas-' + canvasId;
 
         canvasId += 1;
@@ -54,10 +54,10 @@
         options)
         );
 
-		app.cWidth = 100;
-		app.cHeight = 100;
-		
-		app.shapeTypes = {};
+        app.cWidth = 100;
+        app.cHeight = 100;
+
+        app.shapeTypes = {};
 
         /*
 		svgLens builds an object with functionality common to all SVG shapes on the canvas.
@@ -247,19 +247,21 @@
 		and dataStore item load function
 		*/
         app.addShapeType = function(type, args) {
-            var button, calcF, lensF;
+            var button,
+            calcF,
+            lensF;
 
-			calcF = args.calc;
-			lensF = args.lens;
+            calcF = args.calc;
+            lensF = args.lens;
             button = app.buttonFeature('Shapes', type);
-			// add to shapeTypes array
-			app.shapeTypes[type] = {
-				calc: calcF
-			};
+            // add to shapeTypes array
+            app.shapeTypes[type] = {
+                calc: calcF
+            };
             app.addShape(type, lensF);
         };
 
-		/*
+        /*
 		*
 		Called Externally to insert a shape into the data Store regardless of what SVG
 		type it is
@@ -271,24 +273,24 @@
             ntp_start = app.getCurrentTime() - 1,
             ntp_end = app.getCurrentTime() + 1,
             curMode = app.getCurrentMode(),
-			shape;
-			shape = app.shapeTypes[curMode].calc(coords);
-			
+            shape;
+            shape = app.shapeTypes[curMode].calc(coords);
+
             shapeItem = {
                 id: "anno" + idCount.length,
                 type: "Annotation",
                 bodyType: "Text",
                 bodyContent: "This is an annotation for " + curMode,
                 shapeType: curMode,
-				opacity: 1,
-				ntp_start: ntp_start,
-				ntp_end: ntp_end
+                opacity: 1,
+                ntp_start: ntp_start,
+                ntp_end: ntp_end
             };
-			$.extend(shapeItem, shape);
-			app.dataStore.canvas.loadItems([shapeItem]);
-			
+            $.extend(shapeItem, shape);
+            app.dataStore.canvas.loadItems([shapeItem]);
+
         };
-		
+
         app.ready(function() {
             annoActiveController = app.controller.annoActive;
             app.events.onActiveAnnotationChange.addListener(app.presentation.raphsvg.eventFocusChange);
@@ -301,26 +303,28 @@
         });
 
         app.ready(function() {
-			var calcRectangle, calcEllipse, lensRectangle, lensEllipse,
-			rectButton,
+            var calcRectangle,
+            calcEllipse,
+            lensRectangle,
+            lensEllipse,
+            rectButton,
             ellipseButton,
             selectButton;
-			
-			calcRectangle =  function(coords) {
-				var attrs = {};
-				attrs.x = (coords.x + (coords.width / 2));
-				attrs.y = (coords.y + (coords.height / 2));
-				attrs.w = coords.width;
-				attrs.h = coords.height;
-				return attrs;
-			};
-			lensRectangle = function(container, view, model, itemId) {
+
+            calcRectangle = function(coords) {
+                var attrs = {};
+                attrs.x = (coords.x + (coords.width / 2));
+                attrs.y = (coords.y + (coords.height / 2));
+                attrs.w = coords.width;
+                attrs.h = coords.height;
+                return attrs;
+            };
+            lensRectangle = function(container, view, model, itemId) {
                 // Note: Rectangle measurements x,y start at CENTER
                 var that = app.initShapeLens(container, view, model, itemId),
                 item = model.getItem(itemId),
                 c,
                 bbox;
-			console.log('item loading into rectangle lens: ' + itemId);
                 // Accessing the view.canvas Object that was created in MITHGrid.Presentation.RaphSVG
                 c = view.canvas.rect(item.x[0] - (item.w[0] / 2), item.y[0] - (item.h[0] / 2), item.w[0], item.h[0]);
                 // fill and set opacity
@@ -362,24 +366,24 @@
                 that.shape = c;
 
                 return that;
-			};
-			
+            };
+
             app.addShapeType("Rectangle",
-			{
-				calc: calcRectangle,
-				lens: lensRectangle
+            {
+                calc: calcRectangle,
+                lens: lensRectangle
             });
-			
-			calcEllipse = function(coords) {
-				var attrs = {};
-				attrs.x = coords.x + (coords.width / 2);
-				attrs.y = coords.y + (coords.height / 2);
-				attrs.w = coords.width;
-				attrs.h = coords.height;
-				return attrs;
-			};
-			
-			lensEllipse = function(container, view, model, itemId) {
+
+            calcEllipse = function(coords) {
+                var attrs = {};
+                attrs.x = coords.x + (coords.width / 2);
+                attrs.y = coords.y + (coords.height / 2);
+                attrs.w = coords.width;
+                attrs.h = coords.height;
+                return attrs;
+            };
+
+            lensEllipse = function(container, view, model, itemId) {
                 var that = app.initShapeLens(container, view, model, itemId),
                 item = model.getItem(itemId),
                 c;
@@ -426,10 +430,10 @@
                 that.shape = c;
 
                 return that;
-			};
+            };
             app.addShapeType("Ellipse", {
-				calc: calcEllipse,
-	            lens: lensEllipse
+                calc: calcEllipse,
+                lens: lensEllipse
             });
 
             app.addBody("Text", app.initTextLens);
@@ -444,7 +448,6 @@
 
             selectButton = app.buttonFeature('General', 'Select');
 
-			console.log('current tiiiime: ' + app.getCurrentTime());
         });
 
         return app;
