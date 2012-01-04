@@ -35,7 +35,7 @@ Presentations for canvas.js
         e,
         superEventFocusChange,
         editBoundingBoxBinding,
-		fade;
+		eventCurrentTimeChange;
 
         options = that.options;
 
@@ -99,22 +99,18 @@ Presentations for canvas.js
 				}
 			};
 			
-			searchAnnos = options.application.dataStores.canvas.prepare(['.type']);
+			searchAnnos = options.application.dataStore.canvas.prepare(['.type']);
 			annoIds = searchAnnos.evaluate('Annotation');
 			$.each(annoIds, function(i, o) {
-				anno = options.application.dataStores.canvas.getItem(o);
+				anno = options.application.dataStore.canvas.getItem(o);
 				fadeIn = anno[0].npt_start - options.fadeStart;
 				fadeOut = anno[0].npt_end + options.fadeStart;
-				/*
-				If within the parameters to show annotation, show annotation
-				*/
-				if((npt < anno[0].npt_start) && (npt > fadeIn)) {
-					
-				} else if((npt > anno[0].npt_end) && (npt < fadeOut)) {
-					
-				} else {
-					
-				}
+				
+				options.application.dataStore.canvas.updateItems([{
+					id: anno[0].id,
+					type: anno[0].type,
+					opacity: calcOpacity(npt, fadeIn, fadeOut)
+				}]);
 			});
 			
 		};
@@ -125,7 +121,9 @@ Presentations for canvas.js
         }
 
         superRender = that.render;
-
+		
+		options.application.events.onCurrentTimeChange.addListener(eventCurrentTimeChange);
+		
         that.render = function(c, m, i) {
             var rendering = superRender(c, m, i);
             if (rendering !== undefined) {

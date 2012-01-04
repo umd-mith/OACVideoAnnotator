@@ -260,12 +260,6 @@
         };
 
 		/*
-		Fade In and Fade Out
-		Returns value for opacity of a given annotation 
-		*/
-		
-		
-		/*
 		*
 		Called Externally to insert a shape into the data Store regardless of what SVG
 		type it is
@@ -274,22 +268,25 @@
             var shapeItem,
             idSearch = app.dataStore.canvas.prepare(['!type']),
             idCount = idSearch.evaluate('Annotation'),
-            ntp_start = app.getCurrentTime(),
+            ntp_start = app.getCurrentTime() - 1,
             ntp_end = app.getCurrentTime() + 1,
             curMode = app.getCurrentMode(),
 			shape;
 			shape = app.shapeTypes[curMode].calc(coords);
+			
             shapeItem = {
                 id: "anno" + idCount.length,
                 type: "Annotation",
                 bodyType: "Text",
                 bodyContent: "This is an annotation for " + curMode,
                 shapeType: curMode,
+				opacity: 1,
 				ntp_start: ntp_start,
 				ntp_end: ntp_end
             };
 			$.extend(shapeItem, shape);
 			app.dataStore.canvas.loadItems([shapeItem]);
+			
         };
 		
         app.ready(function() {
@@ -299,6 +296,7 @@
             app.events.onCurrentTimeChange.addListener(function(t) {
                 // five seconds on either side of the current time
                 app.dataView.currentAnnotations.setKeyRange(t - 5, t + 5);
+
             });
         });
 
@@ -322,7 +320,7 @@
                 item = model.getItem(itemId),
                 c,
                 bbox;
-			
+			console.log('item loading into rectangle lens: ' + itemId);
                 // Accessing the view.canvas Object that was created in MITHGrid.Presentation.RaphSVG
                 c = view.canvas.rect(item.x[0] - (item.w[0] / 2), item.y[0] - (item.h[0] / 2), item.w[0], item.h[0]);
                 // fill and set opacity
@@ -445,6 +443,8 @@
             ellipseButton = app.buttonFeature('Shapes', 'Ellipse');
 
             selectButton = app.buttonFeature('General', 'Select');
+
+			console.log('current tiiiime: ' + app.getCurrentTime());
         });
 
         return app;

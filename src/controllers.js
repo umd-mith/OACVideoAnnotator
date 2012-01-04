@@ -92,19 +92,19 @@
             handleCalculationData = {},
             el;
 
-            that.events.onResize.addListener(function(id, pos) {
+            binding.events.onResize.addListener(function(id, pos) {
                 if (activeRendering !== undefined && activeRendering.eventResize !== undefined) {
                     activeRendering.eventResize(id, pos);
                 }
             });
 
-            that.events.onMove.addListener(function(id, pos) {
+            binding.events.onMove.addListener(function(id, pos) {
                 if (activeRendering !== undefined && activeRendering.eventMove !== undefined) {
                     activeRendering.eventMove(id, pos);
                 }
             });
 
-            that.events.onDelete.addListener(function(id) {
+            binding.events.onDelete.addListener(function(id) {
                 if (activeRendering !== undefined && activeRendering.eventDelete !== undefined) {
                     activeRendering.eventDelete(id);
                 }
