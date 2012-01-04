@@ -34,7 +34,8 @@ Presentations for canvas.js
         shapeCreateBinding,
         e,
         superEventFocusChange,
-        editBoundingBoxBinding;
+        editBoundingBoxBinding,
+        eventCurrentTimeChange;
 
         options = that.options;
 
@@ -81,12 +82,51 @@ Presentations for canvas.js
 
         keyboardBinding = keyBoardController.bind($('body'), {});
 
+        eventCurrentTimeChange = function(npt) {
+            var searchAnnos,
+            annoIds,
+            anno,
+            fadeIn,
+            fadeOut,
+            calcOpacity = function(n, start, end) {
+                if (n < start) {
+                    // fading in
+                    return (1 / (start - n));
+                } else if (n > end) {
+                    // fading out
+                    return (1 / (n - end));
+                } else if (n > start && n < end) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            };
+
+            searchAnnos = options.application.dataStore.canvas.prepare(['.type']);
+            annoIds = searchAnnos.evaluate('Annotation');
+            $.each(annoIds,
+            function(i, o) {
+                anno = options.application.dataStore.canvas.getItem(o);
+                fadeIn = anno[0].npt_start - options.fadeStart;
+                fadeOut = anno[0].npt_end + options.fadeStart;
+
+                options.application.dataStore.canvas.updateItems([{
+                    id: anno[0].id,
+                    type: anno[0].type,
+                    opacity: calcOpacity(npt, fadeIn, fadeOut)
+                }]);
+            });
+
+        };
+
         that.events = that.events || {};
         for (e in keyboardBinding.events) {
             that.events[e] = keyboardBinding.events[e];
         }
 
         superRender = that.render;
+
+        options.application.events.onCurrentTimeChange.addListener(eventCurrentTimeChange);
 
         that.render = function(c, m, i) {
             var rendering = superRender(c, m, i);
@@ -115,26 +155,12 @@ Presentations for canvas.js
         });
 
         canvasBinding.events.onShapeDone.addListener(function(coords) {
-
             /*
 			Adjust x,y in order to fit data store 
 			model
 			*/
-			var shape = shapeCreateBinding.completeShape(coords);
-			options.application.insertShape(shape);
-            // options.application.dataStore.canvas.loadItems([{
-            //                id: "anno" + idCount,
-            //                type: "Annotation",
-            //                bodyType: "Text",
-            //                bodyContent: "This is an annotation for a " + options.application.getCurrentMode(),
-            //                shapeType: options.application.getCurrentMode(),
-            //                x: (coords.x + (coords.width / 2)),
-            //                y: (coords.y + (coords.height / 2)),
-            //                w: coords.width,
-            //                h: coords.height,
-            //                start_ntp: 10,
-            //                end_ntp: 40
-            //            }]);
+            var shape = shapeCreateBinding.completeShape(coords);
+            options.application.insertShape(shape);
         });
 
         return that;

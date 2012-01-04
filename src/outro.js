@@ -21,12 +21,14 @@ MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.AnnoActiveController", {
 });
 
 MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.AnnotationEditSelectionGrid", {
-    events: {
-        onResize: null,
-        onMove: null,
-        onEdit: null,
-        onDelete: null
-    }
+    bind: {
+		events: {
+	        onResize: null,
+	        onMove: null,
+	        onEdit: null,
+	        onDelete: null
+	    }
+	}
 });
 
 MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.KeyboardListener", {
@@ -41,7 +43,6 @@ MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.AnnotationCreationButton
 	bind: {
 		events: {
 			onCurrentModeChange: null
-			
 		}
 	}
 });
@@ -117,8 +118,8 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 		currentAnnotations: {
 			dataStore: 'drawspace',
 			type: MITHGrid.Data.RangePager,
-			leftExpressions: [ '.start_ntp' ],
-			rightExpressions: [ '.end_ntp' ]
+			leftExpressions: [ '.ntp_start' ],
+			rightExpressions: [ '.ntp_end' ]
 		}
 	},
 	// Data store for the Application
@@ -144,6 +145,9 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 				targetURI: {
 					valueType: 'uri'
 				},
+				opacity: {
+					valueType: 'numeric'
+				},
 				start_ntp: {
 					valueType: "numeric"
 				},
@@ -158,7 +162,7 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 	presentations: {
 		raphsvg: {
 			type: MITHGrid.Presentation.RaphaelCanvas,
-			dataView: 'drawspace',
+			dataView: 'currentAnnotations',
 			controllers: {
 				keyboard: "keyboard",
 				editBox: "editBox",
@@ -169,7 +173,7 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 		},
 		annoItem: {
 			type: MITHGrid.Presentation.AnnotationList,
-			dataView: 'drawspace',
+			dataView: 'currentAnnotations',
 			container: '.anno_list'
 		} //annoItem
 	}
