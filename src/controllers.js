@@ -931,5 +931,31 @@
 
         return that;
     };
-
+	
+	Controller.namespace('sliderButton');
+	Controller.sliderButton.initController = function(options) {
+		var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.sliderButton", options);
+		options = that.options;
+		
+		that.applyBindings = function(binding, opts) {
+			var sliderElement, sliderStart, sliderMove;
+			
+			sliderStart = function(e, ui) {
+				options.application.setCurrentTime(ui.value);
+			};
+			
+			sliderMove = function(e, ui) {
+				options.application.setCurrentTime(ui.value);
+			};
+			sliderElement = binding.locate("slider");
+			
+			$(sliderElement).slider({
+				start: sliderStart,
+				slide: sliderMove
+			});
+			
+		};
+		
+		return that;
+	};
 } (jQuery, MITHGrid, OAC));

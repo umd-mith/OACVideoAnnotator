@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Wed Jan 4 13:15:37 2012 -0500
+ *  Date: Wed Jan 4 13:17:08 2012 -0500
  *  
  * Educational Community License, Version 2.0
  * 
@@ -963,7 +963,33 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 
         return that;
     };
-
+	
+	Controller.namespace('sliderButton');
+	Controller.sliderButton.initController = function(options) {
+		var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.sliderButton", options);
+		options = that.options;
+		
+		that.applyBindings = function(binding, opts) {
+			var sliderElement, sliderStart, sliderMove;
+			
+			sliderStart = function(e, ui) {
+				options.application.setCurrentTime(ui.value);
+			};
+			
+			sliderMove = function(e, ui) {
+				options.application.setCurrentTime(ui.value);
+			};
+			sliderElement = binding.locate("slider");
+			
+			$(sliderElement).slider({
+				start: sliderStart,
+				slide: sliderMove
+			});
+			
+		};
+		
+		return that;
+	};
 } (jQuery, MITHGrid, OAC));
 /*
 Presentations for canvas.js
@@ -1068,9 +1094,10 @@ Presentations for canvas.js
                     return 0;
                 }
             };
-
+			
             searchAnnos = options.application.dataStore.canvas.prepare(['.type']);
             annoIds = searchAnnos.evaluate('Annotation');
+			
             $.each(annoIds,
             function(i, o) {
                 anno = options.application.dataStore.canvas.getItem(o);
@@ -1161,6 +1188,7 @@ Presentations for canvas.js
         {
             viewSetup: '<div id="sidebar' + myCanvasId + '" class="controlarea"></div>' +
             '<div class="canvas_svg_holder"><div id="' + myCanvasId + '" class="canvas_svg"></div></div>' +
+
             '<div class="anno_list"></div>',
             presentations: {
                 raphsvg: {
@@ -1327,7 +1355,7 @@ Presentations for canvas.js
         /*
 		Creates an HTML div that acts as a button
 		*/
-        app.buttonFeature = function(grouping, action) {
+        app.buttonFeature = function(area, grouping, action) {
             /*
 			Check to make sure button isn't already present
 			*/
@@ -1341,32 +1369,52 @@ Presentations for canvas.js
             buttons = $(".button"),
             groupEl,
             container = $("#sidebar" + myCanvasId),
-            buttonBinding;
+            buttonBinding,
+            insertButton,
+            insertSlider;
 
-            /*
-			Set the group element where this button should go in. If no group 
-			element is yet created, create that group element with name *grouping*
-			*/
-            if ($(container).find('#' + grouping).length === 0) {
-                $(container).append('<div id="' + grouping + '" class="buttongrouping"></div>');
+            if (area === 'buttongrouping') {
+                /*
+				Set the group element where this button should go in. If no group 
+				element is yet created, create that group element with name *grouping*
+				*/
+                if ($(container).find('#' + grouping).length === 0) {
+                    $(container).append('<div id="' + grouping + '" class="buttongrouping"></div>');
+                }
+
+                groupEl = $("#" + grouping);
+
+                /*
+				generate HTML for button, then attach the callback. action
+				refers to ID and also the title of the button
+				*/
+                item = '<div id="' + action + '" class="button">' + action + '</div>';
+
+                $(groupEl).append(item);
+
+                that.element = $("#" + action);
+
+                buttonBinding = app.controller.buttonActive.bind(that.element, {
+                    action: action
+                });
+            } else if (area === 'slidergrouping') {
+                if ($(container).find('#' + grouping).length === 0) {
+                    $(container).append('<div id="' + grouping + '" class="slidergrouping"></div>');
+                }
+
+                groupEl = $("#" + grouping);
+
+                /*
+				HTML for slider button
+				*/
+                item = '<div id="' + action + '"><div class="header">' + action + '</div><div id="slider"></div></div>';
+                $(groupEl).append(item);
+                that.element = $("#" + action);
+
+                buttonBinding = app.controller.slider.bind(that.element, {
+                    action: action
+                });
             }
-
-            groupEl = $("#" + grouping);
-
-            /*
-			generate HTML for button, then attach the callback. action
-			refers to ID and also the title of the button
-			*/
-            item = '<div id="' + action + '" class="button">' + action + '</div>';
-
-            $(groupEl).append(item);
-
-            that.element = $("#" + action);
-
-            buttonBinding = app.controller.buttonActive.bind(that.element, {
-                action: action
-            });
-
             return that;
         };
 
@@ -1424,7 +1472,6 @@ Presentations for canvas.js
             };
             $.extend(shapeItem, shape);
             app.dataStore.canvas.loadItems([shapeItem]);
-
         };
 
         app.ready(function() {
@@ -1434,7 +1481,6 @@ Presentations for canvas.js
             app.events.onCurrentTimeChange.addListener(function(t) {
                 // five seconds on either side of the current time
                 app.dataView.currentAnnotations.setKeyRange(t - 5, t + 5);
-
             });
         });
 
@@ -1445,7 +1491,8 @@ Presentations for canvas.js
             lensEllipse,
             rectButton,
             ellipseButton,
-            selectButton;
+            selectButton,
+            sliderButton;
 
             calcRectangle = function(coords) {
                 var attrs = {};
@@ -1578,12 +1625,46 @@ Presentations for canvas.js
 			Adding in button features for annotation creation
 			*/
 
-            rectButton = app.buttonFeature('Shapes', 'Rectangle');
+            rectButton = app.buttonFeature('buttongrouping', 'Shapes', 'Rectangle');
 
-            ellipseButton = app.buttonFeature('Shapes', 'Ellipse');
+            ellipseButton = app.buttonFeature('buttongrouping', 'Shapes', 'Ellipse');
 
-            selectButton = app.buttonFeature('General', 'Select');
+            selectButton = app.buttonFeature('buttongrouping', 'General', 'Select');
 
+            sliderButton = app.buttonFeature('slidergrouping', 'Time', 'progress');
+			
+			
+			// Add some items to test
+			app.dataStore.canvas.loadItems([{
+				id: "anno0",
+				type: "Annotation",
+				bodyType: "text",
+				bodyContent: "Annotation here",
+				creator: "Grant Dickie",
+				x: 0,
+				y: 0,
+				w: 100,
+				h: 100,
+				shapeType: "Rectangle",
+				ntp_start: -1,
+				ntp_end: 1,
+				opacity: 1
+			}]);
+			app.dataStore.canvas.loadItems([{
+				id: "anno1",
+				type: "Annotation",
+				bodyType: "text",
+				bodyContent: "Annotation here",
+				creator: "Grant Dickie",
+				x: 10,
+				y: 20,
+				w: 20,
+				h: 100,
+				shapeType: "Rectangle",
+				ntp_start: 5,
+				ntp_end: 10,
+				opacity: 1
+			}]);
         });
 
         return app;
@@ -1686,6 +1767,12 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 			type: OAC.Client.StreamingVideo.Controller.AnnotationCreationButton,
 			selectors: {
 				button: ''
+			}
+		},
+		slider: {
+			type: OAC.Client.StreamingVideo.Controller.sliderButton,
+			selectors: {
+				slider: '#slider'
 			}
 		}
 	},

@@ -101,9 +101,10 @@ Presentations for canvas.js
                     return 0;
                 }
             };
-
+			
             searchAnnos = options.application.dataStore.canvas.prepare(['.type']);
             annoIds = searchAnnos.evaluate('Annotation');
+			
             $.each(annoIds,
             function(i, o) {
                 anno = options.application.dataStore.canvas.getItem(o);

@@ -94,6 +94,12 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 			selectors: {
 				button: ''
 			}
+		},
+		slider: {
+			type: OAC.Client.StreamingVideo.Controller.sliderButton,
+			selectors: {
+				slider: '#slider'
+			}
 		}
 	},
 	variables: {
