@@ -98,7 +98,8 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 		slider: {
 			type: OAC.Client.StreamingVideo.Controller.sliderButton,
 			selectors: {
-				slider: '#slider'
+				slider: '#slider',
+				timedisplay: '.timedisplay'
 			}
 		}
 	},
@@ -175,7 +176,8 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 				canvas: "canvas",
 				shapeCreateBox: "shapeCreateBox",
 				shapeEditBox: "shapeEditBox"
-			}
+			},
+			fadeStart: 5
 		},
 		annoItem: {
 			type: MITHGrid.Presentation.AnnotationList,

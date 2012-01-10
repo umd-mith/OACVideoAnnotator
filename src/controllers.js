@@ -938,14 +938,16 @@
 		options = that.options;
 		
 		that.applyBindings = function(binding, opts) {
-			var sliderElement, sliderStart, sliderMove;
-			
+			var sliderElement, displayElement, sliderStart, sliderMove;
+			displayElement = binding.locate('timedisplay');
 			sliderStart = function(e, ui) {
 				options.application.setCurrentTime(ui.value);
+				$(displayElement).text('TIME: ' + ui.value);
 			};
 			
 			sliderMove = function(e, ui) {
 				options.application.setCurrentTime(ui.value);
+				$(displayElement).text('TIME: ' + ui.value);
 			};
 			sliderElement = binding.locate("slider");
 			

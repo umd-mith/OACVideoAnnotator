@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Wed Jan 4 13:17:08 2012 -0500
+ *  Date: Mon Jan 9 16:08:47 2012 -0500
  *  
  * Educational Community License, Version 2.0
  * 
@@ -970,14 +970,16 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 		options = that.options;
 		
 		that.applyBindings = function(binding, opts) {
-			var sliderElement, sliderStart, sliderMove;
-			
+			var sliderElement, displayElement, sliderStart, sliderMove;
+			displayElement = binding.locate('timedisplay');
 			sliderStart = function(e, ui) {
 				options.application.setCurrentTime(ui.value);
+				$(displayElement).text('TIME: ' + ui.value);
 			};
 			
 			sliderMove = function(e, ui) {
 				options.application.setCurrentTime(ui.value);
+				$(displayElement).text('TIME: ' + ui.value);
 			};
 			sliderElement = binding.locate("slider");
 			
@@ -1028,7 +1030,9 @@ Presentations for canvas.js
         e,
         superEventFocusChange,
         editBoundingBoxBinding,
-        eventCurrentTimeChange;
+        eventCurrentTimeChange,
+        searchAnnos,
+        allAnnosModel;
 
         options = that.options;
 
@@ -1075,42 +1079,48 @@ Presentations for canvas.js
 
         keyboardBinding = keyBoardController.bind($('body'), {});
 
+
         eventCurrentTimeChange = function(npt) {
-            var searchAnnos,
-            annoIds,
+	console.log('npt: ' + npt);
+            var annoIds,
             anno,
             fadeIn,
             fadeOut,
-            calcOpacity = function(n, start, end) {
-                if (n < start) {
+            calcOpacity = function(n, fstart, fend, start, end) {
+                var val = 0;
+                if ((n < start) && (n >= fstart)) {
                     // fading in
-                    return (1 / (start - n));
-                } else if (n > end) {
+                    val = (1 / (start - n));
+                    val = val.toFixed(1);
+                } else if ((n > end) && (n <= fend)) {
                     // fading out
-                    return (1 / (n - end));
+                    val = (1 / (n - end));
+                    val = val.toFixed(1);
                 } else if (n > start && n < end) {
-                    return 1;
-                } else {
-                    return 0;
+                    val = 1;
                 }
+                return val;
             };
 			
-            searchAnnos = options.application.dataStore.canvas.prepare(['.type']);
             annoIds = searchAnnos.evaluate('Annotation');
-			
+            
             $.each(annoIds,
             function(i, o) {
-                anno = options.application.dataStore.canvas.getItem(o);
-                fadeIn = anno[0].npt_start - options.fadeStart;
-                fadeOut = anno[0].npt_end + options.fadeStart;
-
-                options.application.dataStore.canvas.updateItems([{
-                    id: anno[0].id,
-                    type: anno[0].type,
-                    opacity: calcOpacity(npt, fadeIn, fadeOut)
+                anno = allAnnosModel.getItem(o);
+                fadeIn = parseInt(anno.ntp_start, 10) - options.fadeStart;
+                fadeOut = parseInt(anno.ntp_end, 10) + options.fadeStart;
+                console.log('fadeIn: ' + fadeIn + '  fadeOut  ' + fadeOut);
+                console.log('anno.id: ' + anno.id);
+                console.log('opacity: ' + calcOpacity(npt, fadeIn, fadeOut, parseInt(anno.ntp_start, 10), parseInt(anno.ntp_end, 10)));
+                allAnnosModel.updateItems([{
+                    id: anno.id,
+                    x: anno.x,
+                    y: anno.y,
+                    w: anno.w,
+                    h: anno.h,
+                    opacity: calcOpacity(npt, fadeIn, fadeOut, parseInt(anno.ntp_start, 10), parseInt(anno.ntp_end, 10))
                 }]);
             });
-
         };
 
         that.events = that.events || {};
@@ -1123,11 +1133,24 @@ Presentations for canvas.js
         options.application.events.onCurrentTimeChange.addListener(eventCurrentTimeChange);
 
         that.render = function(c, m, i) {
-            var rendering = superRender(c, m, i);
+            var rendering = superRender(c, m, i),
+            tempStore;
             if (rendering !== undefined) {
                 canvasBinding.registerRendering(rendering);
+                tempStore = m;
+                while (tempStore.dataStore) {
+
+                    tempStore = tempStore.dataStore;
+                }
+                allAnnosModel = tempStore;
+                searchAnnos = allAnnosModel.prepare(['!type']);
+
             }
             return rendering;
+        };
+
+        that.update = function(item) {
+            searchAnnos = allAnnosModel.prepare(['!type']);
         };
 
         superEventFocusChange = that.eventFocusChange;
@@ -1407,7 +1430,8 @@ Presentations for canvas.js
                 /*
 				HTML for slider button
 				*/
-                item = '<div id="' + action + '"><div class="header">' + action + '</div><div id="slider"></div></div>';
+                item = '<div id="' + action + '"><div class="header">' + action + '</div>' +
+                '<div id="slider"></div><div class="timedisplay"></div></div>';
                 $(groupEl).append(item);
                 that.element = $("#" + action);
 
@@ -1513,19 +1537,22 @@ Presentations for canvas.js
                 // fill and set opacity
                 c.attr({
                     fill: "red",
-                    opacity: 0.5
+                    opacity: item.opacity
                 });
 
                 that.update = function(item) {
                     // receiving the Object passed through
                     // model.updateItems in move()
+					console.log('update reached in rectangle ' + item.x);
                     try {
                         if (item.x !== undefined && item.y !== undefined && item.w !== undefined && item.y !== undefined) {
+							console.log('update item ' + item.opacity);
                             c.attr({
                                 x: item.x[0] - item.w[0] / 2,
                                 y: item.y[0] - item.h[0] / 2,
                                 width: item.w[0],
-                                height: item.h[0]
+                                height: item.h[0],
+								opacity: item.opacity
                             });
                         }
                     } catch(e) {
@@ -1632,39 +1659,39 @@ Presentations for canvas.js
             selectButton = app.buttonFeature('buttongrouping', 'General', 'Select');
 
             sliderButton = app.buttonFeature('slidergrouping', 'Time', 'progress');
-			
-			
-			// Add some items to test
-			app.dataStore.canvas.loadItems([{
-				id: "anno0",
-				type: "Annotation",
-				bodyType: "text",
-				bodyContent: "Annotation here",
-				creator: "Grant Dickie",
-				x: 0,
-				y: 0,
-				w: 100,
-				h: 100,
-				shapeType: "Rectangle",
-				ntp_start: -1,
-				ntp_end: 1,
-				opacity: 1
-			}]);
-			app.dataStore.canvas.loadItems([{
-				id: "anno1",
-				type: "Annotation",
-				bodyType: "text",
-				bodyContent: "Annotation here",
-				creator: "Grant Dickie",
-				x: 10,
-				y: 20,
-				w: 20,
-				h: 100,
-				shapeType: "Rectangle",
-				ntp_start: 5,
-				ntp_end: 10,
-				opacity: 1
-			}]);
+
+
+            // Add some items to test
+            app.dataStore.canvas.loadItems([{
+                id: "anno0",
+                type: "Annotation",
+                bodyType: "text",
+                bodyContent: "Annotation here",
+                creator: "Grant Dickie",
+                x: 100,
+                y: 460,
+                w: 100,
+                h: 100,
+                shapeType: "Rectangle",
+                ntp_start: 6,
+                ntp_end: 45,
+                opacity: 0
+            }]);
+            app.dataStore.canvas.loadItems([{
+                id: "anno1",
+                type: "Annotation",
+                bodyType: "text",
+                bodyContent: "Annotation here",
+                creator: "Grant Dickie",
+                x: 340,
+                y: 220,
+                w: 20,
+                h: 100,
+                shapeType: "Rectangle",
+                ntp_start: 16,
+                ntp_end: 33,
+                opacity: 0
+            }]);
         });
 
         return app;
@@ -1772,7 +1799,8 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 		slider: {
 			type: OAC.Client.StreamingVideo.Controller.sliderButton,
 			selectors: {
-				slider: '#slider'
+				slider: '#slider',
+				timedisplay: '.timedisplay'
 			}
 		}
 	},
@@ -1849,7 +1877,8 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 				canvas: "canvas",
 				shapeCreateBox: "shapeCreateBox",
 				shapeEditBox: "shapeEditBox"
-			}
+			},
+			fadeStart: 5
 		},
 		annoItem: {
 			type: MITHGrid.Presentation.AnnotationList,

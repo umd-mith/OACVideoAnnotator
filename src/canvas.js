@@ -244,7 +244,8 @@
                 /*
 				HTML for slider button
 				*/
-                item = '<div id="' + action + '"><div class="header">' + action + '</div><div id="slider"></div></div>';
+                item = '<div id="' + action + '"><div class="header">' + action + '</div>' +
+                '<div id="slider"></div><div class="timedisplay"></div></div>';
                 $(groupEl).append(item);
                 that.element = $("#" + action);
 
@@ -350,19 +351,22 @@
                 // fill and set opacity
                 c.attr({
                     fill: "red",
-                    opacity: 0.5
+                    opacity: item.opacity
                 });
 
                 that.update = function(item) {
                     // receiving the Object passed through
                     // model.updateItems in move()
+					console.log('update reached in rectangle ' + item.x);
                     try {
                         if (item.x !== undefined && item.y !== undefined && item.w !== undefined && item.y !== undefined) {
+							console.log('update item ' + item.opacity);
                             c.attr({
                                 x: item.x[0] - item.w[0] / 2,
                                 y: item.y[0] - item.h[0] / 2,
                                 width: item.w[0],
-                                height: item.h[0]
+                                height: item.h[0],
+								opacity: item.opacity
                             });
                         }
                     } catch(e) {
@@ -469,39 +473,39 @@
             selectButton = app.buttonFeature('buttongrouping', 'General', 'Select');
 
             sliderButton = app.buttonFeature('slidergrouping', 'Time', 'progress');
-			
-			
-			// Add some items to test
-			app.dataStore.canvas.loadItems([{
-				id: "anno0",
-				type: "Annotation",
-				bodyType: "text",
-				bodyContent: "Annotation here",
-				creator: "Grant Dickie",
-				x: 0,
-				y: 0,
-				w: 100,
-				h: 100,
-				shapeType: "Rectangle",
-				ntp_start: -1,
-				ntp_end: 1,
-				opacity: 1
-			}]);
-			app.dataStore.canvas.loadItems([{
-				id: "anno1",
-				type: "Annotation",
-				bodyType: "text",
-				bodyContent: "Annotation here",
-				creator: "Grant Dickie",
-				x: 10,
-				y: 20,
-				w: 20,
-				h: 100,
-				shapeType: "Rectangle",
-				ntp_start: 5,
-				ntp_end: 10,
-				opacity: 1
-			}]);
+
+
+            // Add some items to test
+            app.dataStore.canvas.loadItems([{
+                id: "anno0",
+                type: "Annotation",
+                bodyType: "text",
+                bodyContent: "Annotation here",
+                creator: "Grant Dickie",
+                x: 100,
+                y: 460,
+                w: 100,
+                h: 100,
+                shapeType: "Rectangle",
+                ntp_start: 6,
+                ntp_end: 45,
+                opacity: 0
+            }]);
+            app.dataStore.canvas.loadItems([{
+                id: "anno1",
+                type: "Annotation",
+                bodyType: "text",
+                bodyContent: "Annotation here",
+                creator: "Grant Dickie",
+                x: 340,
+                y: 220,
+                w: 20,
+                h: 100,
+                shapeType: "Rectangle",
+                ntp_start: 16,
+                ntp_end: 33,
+                opacity: 0
+            }]);
         });
 
         return app;
