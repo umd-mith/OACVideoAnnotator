@@ -357,10 +357,9 @@
                 that.update = function(item) {
                     // receiving the Object passed through
                     // model.updateItems in move()
-					console.log('update reached in rectangle ' + item.x);
                     try {
                         if (item.x !== undefined && item.y !== undefined && item.w !== undefined && item.y !== undefined) {
-							console.log('update item ' + item.opacity);
+							console.log('update item ' + item.id[0] + '  ' + item.opacity);
                             c.attr({
                                 x: item.x[0] - item.w[0] / 2,
                                 y: item.y[0] - item.h[0] / 2,

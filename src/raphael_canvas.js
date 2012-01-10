@@ -86,11 +86,12 @@ Presentations for canvas.js
 
 
         eventCurrentTimeChange = function(npt) {
-	console.log('npt: ' + npt);
+            console.log('npt: ' + npt);
             var annoIds,
             anno,
             fadeIn,
             fadeOut,
+            fOpac,
             calcOpacity = function(n, fstart, fend, start, end) {
                 var val = 0;
                 if ((n < start) && (n >= fstart)) {
@@ -99,32 +100,36 @@ Presentations for canvas.js
                     val = val.toFixed(1);
                 } else if ((n > end) && (n <= fend)) {
                     // fading out
-                    val = (1 / (n - end));
+                    val = (1 / (fend - n));
                     val = val.toFixed(1);
-                } else if (n > start && n < end) {
+                } else if ((n >= fstart) && (n <= fend) && (n >= start) && (n <= end)) {
                     val = 1;
                 }
                 return val;
             };
-			
+
             annoIds = searchAnnos.evaluate('Annotation');
-            
+
             $.each(annoIds,
             function(i, o) {
                 anno = allAnnosModel.getItem(o);
                 fadeIn = parseInt(anno.ntp_start, 10) - options.fadeStart;
                 fadeOut = parseInt(anno.ntp_end, 10) + options.fadeStart;
+                fOpac = calcOpacity(npt, fadeIn, fadeOut, parseInt(anno.ntp_start, 10), parseInt(anno.ntp_end, 10));
                 console.log('fadeIn: ' + fadeIn + '  fadeOut  ' + fadeOut);
                 console.log('anno.id: ' + anno.id);
-                console.log('opacity: ' + calcOpacity(npt, fadeIn, fadeOut, parseInt(anno.ntp_start, 10), parseInt(anno.ntp_end, 10)));
-                allAnnosModel.updateItems([{
-                    id: anno.id,
-                    x: anno.x,
-                    y: anno.y,
-                    w: anno.w,
-                    h: anno.h,
-                    opacity: calcOpacity(npt, fadeIn, fadeOut, parseInt(anno.ntp_start, 10), parseInt(anno.ntp_end, 10))
-                }]);
+                console.log('opacity: ' + fOpac);
+
+                if (parseInt(anno.opacity, 10) !== fOpac) {
+                    allAnnosModel.updateItems([{
+                        id: anno.id,
+                        x: anno.x,
+                        y: anno.y,
+                        w: anno.w,
+                        h: anno.h,
+                        opacity: calcOpacity(npt, fadeIn, fadeOut, parseInt(anno.ntp_start, 10), parseInt(anno.ntp_end, 10))
+                    }]);
+                }
             });
         };
 

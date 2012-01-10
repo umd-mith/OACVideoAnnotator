@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Mon Jan 9 16:08:47 2012 -0500
+ *  Date: Tue Jan 10 15:27:39 2012 -0500
  *  
  * Educational Community License, Version 2.0
  * 
@@ -1081,11 +1081,12 @@ Presentations for canvas.js
 
 
         eventCurrentTimeChange = function(npt) {
-	console.log('npt: ' + npt);
+            console.log('npt: ' + npt);
             var annoIds,
             anno,
             fadeIn,
             fadeOut,
+            fOpac,
             calcOpacity = function(n, fstart, fend, start, end) {
                 var val = 0;
                 if ((n < start) && (n >= fstart)) {
@@ -1094,32 +1095,36 @@ Presentations for canvas.js
                     val = val.toFixed(1);
                 } else if ((n > end) && (n <= fend)) {
                     // fading out
-                    val = (1 / (n - end));
+                    val = (1 / (fend - n));
                     val = val.toFixed(1);
-                } else if (n > start && n < end) {
+                } else if ((n >= fstart) && (n <= fend) && (n >= start) && (n <= end)) {
                     val = 1;
                 }
                 return val;
             };
-			
+
             annoIds = searchAnnos.evaluate('Annotation');
-            
+
             $.each(annoIds,
             function(i, o) {
                 anno = allAnnosModel.getItem(o);
                 fadeIn = parseInt(anno.ntp_start, 10) - options.fadeStart;
                 fadeOut = parseInt(anno.ntp_end, 10) + options.fadeStart;
+                fOpac = calcOpacity(npt, fadeIn, fadeOut, parseInt(anno.ntp_start, 10), parseInt(anno.ntp_end, 10));
                 console.log('fadeIn: ' + fadeIn + '  fadeOut  ' + fadeOut);
                 console.log('anno.id: ' + anno.id);
-                console.log('opacity: ' + calcOpacity(npt, fadeIn, fadeOut, parseInt(anno.ntp_start, 10), parseInt(anno.ntp_end, 10)));
-                allAnnosModel.updateItems([{
-                    id: anno.id,
-                    x: anno.x,
-                    y: anno.y,
-                    w: anno.w,
-                    h: anno.h,
-                    opacity: calcOpacity(npt, fadeIn, fadeOut, parseInt(anno.ntp_start, 10), parseInt(anno.ntp_end, 10))
-                }]);
+                console.log('opacity: ' + fOpac);
+
+                if (parseInt(anno.opacity, 10) !== fOpac) {
+                    allAnnosModel.updateItems([{
+                        id: anno.id,
+                        x: anno.x,
+                        y: anno.y,
+                        w: anno.w,
+                        h: anno.h,
+                        opacity: calcOpacity(npt, fadeIn, fadeOut, parseInt(anno.ntp_start, 10), parseInt(anno.ntp_end, 10))
+                    }]);
+                }
             });
         };
 
@@ -1543,10 +1548,9 @@ Presentations for canvas.js
                 that.update = function(item) {
                     // receiving the Object passed through
                     // model.updateItems in move()
-					console.log('update reached in rectangle ' + item.x);
                     try {
                         if (item.x !== undefined && item.y !== undefined && item.w !== undefined && item.y !== undefined) {
-							console.log('update item ' + item.opacity);
+							console.log('update item ' + item.id[0] + '  ' + item.opacity);
                             c.attr({
                                 x: item.x[0] - item.w[0] / 2,
                                 y: item.y[0] - item.h[0] / 2,
