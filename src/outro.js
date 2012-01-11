@@ -123,7 +123,7 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 			types: ["Annotation"]
 		},
 		currentAnnotations: {
-			dataStore: 'drawspace',
+			dataStore: 'canvas',
 			type: MITHGrid.Data.RangePager,
 			leftExpressions: [ '.ntp_start' ],
 			rightExpressions: [ '.ntp_end' ]
@@ -162,9 +162,7 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 					valueType: "numeric"
 				}
 			}
-
 		}
-
 	},
 	presentations: {
 		raphsvg: {

@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Tue Jan 10 15:27:39 2012 -0500
+ *  Date: Tue Jan 10 16:46:44 2012 -0500
  *  
  * Educational Community License, Version 2.0
  * 
@@ -1081,7 +1081,6 @@ Presentations for canvas.js
 
 
         eventCurrentTimeChange = function(npt) {
-            console.log('npt: ' + npt);
             var annoIds,
             anno,
             fadeIn,
@@ -1095,26 +1094,22 @@ Presentations for canvas.js
                     val = val.toFixed(1);
                 } else if ((n > end) && (n <= fend)) {
                     // fading out
-                    val = (1 / (fend - n));
+                    val = (1 / (n - end));
                     val = val.toFixed(1);
                 } else if ((n >= fstart) && (n <= fend) && (n >= start) && (n <= end)) {
                     val = 1;
                 }
                 return val;
             };
-
+			searchAnnos = options.dataView.prepare(['!type']);
             annoIds = searchAnnos.evaluate('Annotation');
-
             $.each(annoIds,
             function(i, o) {
                 anno = allAnnosModel.getItem(o);
                 fadeIn = parseInt(anno.ntp_start, 10) - options.fadeStart;
                 fadeOut = parseInt(anno.ntp_end, 10) + options.fadeStart;
                 fOpac = calcOpacity(npt, fadeIn, fadeOut, parseInt(anno.ntp_start, 10), parseInt(anno.ntp_end, 10));
-                console.log('fadeIn: ' + fadeIn + '  fadeOut  ' + fadeOut);
-                console.log('anno.id: ' + anno.id);
-                console.log('opacity: ' + fOpac);
-
+               
                 if (parseInt(anno.opacity, 10) !== fOpac) {
                     allAnnosModel.updateItems([{
                         id: anno.id,
@@ -1148,14 +1143,10 @@ Presentations for canvas.js
                     tempStore = tempStore.dataStore;
                 }
                 allAnnosModel = tempStore;
-                searchAnnos = allAnnosModel.prepare(['!type']);
+                searchAnnos = options.dataView.prepare(['!type']);
 
             }
             return rendering;
-        };
-
-        that.update = function(item) {
-            searchAnnos = allAnnosModel.prepare(['!type']);
         };
 
         superEventFocusChange = that.eventFocusChange;
@@ -1544,13 +1535,12 @@ Presentations for canvas.js
                     fill: "red",
                     opacity: item.opacity
                 });
-
+				$(c.node).attr('id',item.id[0]);
                 that.update = function(item) {
                     // receiving the Object passed through
                     // model.updateItems in move()
                     try {
                         if (item.x !== undefined && item.y !== undefined && item.w !== undefined && item.y !== undefined) {
-							console.log('update item ' + item.id[0] + '  ' + item.opacity);
                             c.attr({
                                 x: item.x[0] - item.w[0] / 2,
                                 y: item.y[0] - item.h[0] / 2,
@@ -1696,8 +1686,10 @@ Presentations for canvas.js
                 ntp_end: 33,
                 opacity: 0
             }]);
-        });
 
+			app.setCurrentTime(0);
+        });
+		
         return app;
     };
 } (jQuery, MITHGrid, OAC));
@@ -1828,7 +1820,7 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 			types: ["Annotation"]
 		},
 		currentAnnotations: {
-			dataStore: 'drawspace',
+			dataStore: 'canvas',
 			type: MITHGrid.Data.RangePager,
 			leftExpressions: [ '.ntp_start' ],
 			rightExpressions: [ '.ntp_end' ]
@@ -1867,9 +1859,7 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 					valueType: "numeric"
 				}
 			}
-
 		}
-
 	},
 	presentations: {
 		raphsvg: {
