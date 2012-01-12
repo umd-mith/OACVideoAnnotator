@@ -35,11 +35,11 @@ Presentations for canvas.js
         e,
         superEventFocusChange,
         editBoundingBoxBinding,
-        eventCurrentTimeChange;
+        eventCurrentTimeChange,
+        searchAnnos,
+        allAnnosModel;
 
         options = that.options;
-
-
 
         canvasController = options.controllers.canvas;
         keyBoardController = options.controllers.keyboard;
@@ -82,41 +82,48 @@ Presentations for canvas.js
 
         keyboardBinding = keyBoardController.bind($('body'), {});
 
+
         eventCurrentTimeChange = function(npt) {
-            var searchAnnos,
-            annoIds,
+            var annoIds,
             anno,
             fadeIn,
             fadeOut,
-            calcOpacity = function(n, start, end) {
-                if (n < start) {
+            fOpac,
+            calcOpacity = function(n, fstart, fend, start, end) {
+                var val = 0;
+                if ((n < start) && (n >= fstart)) {
                     // fading in
-                    return (1 / (start - n));
-                } else if (n > end) {
+                    val = (1 / (start - n));
+                    val = val.toFixed(1);
+                } else if ((n > end) && (n <= fend)) {
                     // fading out
-                    return (1 / (n - end));
-                } else if (n > start && n < end) {
-                    return 1;
-                } else {
-                    return 0;
+                    val = (1 / (n - end));
+                    val = val.toFixed(1);
+                } else if ((n >= fstart) && (n <= fend) && (n >= start) && (n <= end)) {
+                    val = 1;
                 }
+                return val;
             };
-
-            searchAnnos = options.application.dataStore.canvas.prepare(['.type']);
+			searchAnnos = options.dataView.prepare(['!type']);
             annoIds = searchAnnos.evaluate('Annotation');
             $.each(annoIds,
             function(i, o) {
-                anno = options.application.dataStore.canvas.getItem(o);
-                fadeIn = anno[0].npt_start - options.fadeStart;
-                fadeOut = anno[0].npt_end + options.fadeStart;
-
-                options.application.dataStore.canvas.updateItems([{
-                    id: anno[0].id,
-                    type: anno[0].type,
-                    opacity: calcOpacity(npt, fadeIn, fadeOut)
-                }]);
+                anno = allAnnosModel.getItem(o);
+                fadeIn = parseInt(anno.ntp_start, 10) - options.fadeStart;
+                fadeOut = parseInt(anno.ntp_end, 10) + options.fadeStart;
+                fOpac = calcOpacity(npt, fadeIn, fadeOut, parseInt(anno.ntp_start, 10), parseInt(anno.ntp_end, 10));
+               
+                if (parseInt(anno.opacity, 10) !== fOpac) {
+                    allAnnosModel.updateItems([{
+                        id: anno.id,
+                        x: anno.x,
+                        y: anno.y,
+                        w: anno.w,
+                        h: anno.h,
+                        opacity: calcOpacity(npt, fadeIn, fadeOut, parseInt(anno.ntp_start, 10), parseInt(anno.ntp_end, 10))
+                    }]);
+                }
             });
-
         };
 
         that.events = that.events || {};
@@ -129,9 +136,18 @@ Presentations for canvas.js
         options.application.events.onCurrentTimeChange.addListener(eventCurrentTimeChange);
 
         that.render = function(c, m, i) {
-            var rendering = superRender(c, m, i);
+            var rendering = superRender(c, m, i),
+            tempStore;
             if (rendering !== undefined) {
                 canvasBinding.registerRendering(rendering);
+                tempStore = m;
+                while (tempStore.dataStore) {
+
+                    tempStore = tempStore.dataStore;
+                }
+                allAnnosModel = tempStore;
+                searchAnnos = options.dataView.prepare(['!type']);
+
             }
             return rendering;
         };
