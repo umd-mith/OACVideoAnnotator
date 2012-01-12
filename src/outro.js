@@ -94,6 +94,13 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 			selectors: {
 				button: ''
 			}
+		},
+		slider: {
+			type: OAC.Client.StreamingVideo.Controller.sliderButton,
+			selectors: {
+				slider: '#slider',
+				timedisplay: '.timedisplay'
+			}
 		}
 	},
 	variables: {
@@ -116,7 +123,7 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 			types: ["Annotation"]
 		},
 		currentAnnotations: {
-			dataStore: 'drawspace',
+			dataStore: 'canvas',
 			type: MITHGrid.Data.RangePager,
 			leftExpressions: [ '.ntp_start' ],
 			rightExpressions: [ '.ntp_end' ]
@@ -155,9 +162,7 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 					valueType: "numeric"
 				}
 			}
-
 		}
-
 	},
 	presentations: {
 		raphsvg: {
@@ -169,7 +174,8 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 				canvas: "canvas",
 				shapeCreateBox: "shapeCreateBox",
 				shapeEditBox: "shapeEditBox"
-			}
+			},
+			fadeStart: 5
 		},
 		annoItem: {
 			type: MITHGrid.Presentation.AnnotationList,

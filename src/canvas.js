@@ -25,6 +25,7 @@
         {
             viewSetup: '<div id="sidebar' + myCanvasId + '" class="controlarea"></div>' +
             '<div class="canvas_svg_holder"><div id="' + myCanvasId + '" class="canvas_svg"></div></div>' +
+
             '<div class="anno_list"></div>',
             presentations: {
                 raphsvg: {
@@ -191,7 +192,7 @@
         /*
 		Creates an HTML div that acts as a button
 		*/
-        app.buttonFeature = function(grouping, action) {
+        app.buttonFeature = function(area, grouping, action) {
             /*
 			Check to make sure button isn't already present
 			*/
@@ -205,32 +206,53 @@
             buttons = $(".button"),
             groupEl,
             container = $("#sidebar" + myCanvasId),
-            buttonBinding;
+            buttonBinding,
+            insertButton,
+            insertSlider;
 
-            /*
-			Set the group element where this button should go in. If no group 
-			element is yet created, create that group element with name *grouping*
-			*/
-            if ($(container).find('#' + grouping).length === 0) {
-                $(container).append('<div id="' + grouping + '" class="buttongrouping"></div>');
+            if (area === 'buttongrouping') {
+                /*
+				Set the group element where this button should go in. If no group 
+				element is yet created, create that group element with name *grouping*
+				*/
+                if ($(container).find('#' + grouping).length === 0) {
+                    $(container).append('<div id="' + grouping + '" class="buttongrouping"></div>');
+                }
+
+                groupEl = $("#" + grouping);
+
+                /*
+				generate HTML for button, then attach the callback. action
+				refers to ID and also the title of the button
+				*/
+                item = '<div id="' + action + '" class="button">' + action + '</div>';
+
+                $(groupEl).append(item);
+
+                that.element = $("#" + action);
+
+                buttonBinding = app.controller.buttonActive.bind(that.element, {
+                    action: action
+                });
+            } else if (area === 'slidergrouping') {
+                if ($(container).find('#' + grouping).length === 0) {
+                    $(container).append('<div id="' + grouping + '" class="slidergrouping"></div>');
+                }
+
+                groupEl = $("#" + grouping);
+
+                /*
+				HTML for slider button
+				*/
+                item = '<div id="' + action + '"><div class="header">' + action + '</div>' +
+                '<div id="slider"></div><div class="timedisplay"></div></div>';
+                $(groupEl).append(item);
+                that.element = $("#" + action);
+
+                buttonBinding = app.controller.slider.bind(that.element, {
+                    action: action
+                });
             }
-
-            groupEl = $("#" + grouping);
-
-            /*
-			generate HTML for button, then attach the callback. action
-			refers to ID and also the title of the button
-			*/
-            item = '<div id="' + action + '" class="button">' + action + '</div>';
-
-            $(groupEl).append(item);
-
-            that.element = $("#" + action);
-
-            buttonBinding = app.controller.buttonActive.bind(that.element, {
-                action: action
-            });
-
             return that;
         };
 
@@ -288,7 +310,6 @@
             };
             $.extend(shapeItem, shape);
             app.dataStore.canvas.loadItems([shapeItem]);
-
         };
 
         app.ready(function() {
@@ -298,7 +319,6 @@
             app.events.onCurrentTimeChange.addListener(function(t) {
                 // five seconds on either side of the current time
                 app.dataView.currentAnnotations.setKeyRange(t - 5, t + 5);
-
             });
         });
 
@@ -309,7 +329,8 @@
             lensEllipse,
             rectButton,
             ellipseButton,
-            selectButton;
+            selectButton,
+            sliderButton;
 
             calcRectangle = function(coords) {
                 var attrs = {};
@@ -330,9 +351,9 @@
                 // fill and set opacity
                 c.attr({
                     fill: "red",
-                    opacity: 0.5
+                    opacity: item.opacity
                 });
-
+				$(c.node).attr('id',item.id[0]);
                 that.update = function(item) {
                     // receiving the Object passed through
                     // model.updateItems in move()
@@ -342,7 +363,8 @@
                                 x: item.x[0] - item.w[0] / 2,
                                 y: item.y[0] - item.h[0] / 2,
                                 width: item.w[0],
-                                height: item.h[0]
+                                height: item.h[0],
+								opacity: item.opacity
                             });
                         }
                     } catch(e) {
@@ -442,14 +464,50 @@
 			Adding in button features for annotation creation
 			*/
 
-            rectButton = app.buttonFeature('Shapes', 'Rectangle');
+            rectButton = app.buttonFeature('buttongrouping', 'Shapes', 'Rectangle');
 
-            ellipseButton = app.buttonFeature('Shapes', 'Ellipse');
+            ellipseButton = app.buttonFeature('buttongrouping', 'Shapes', 'Ellipse');
 
-            selectButton = app.buttonFeature('General', 'Select');
+            selectButton = app.buttonFeature('buttongrouping', 'General', 'Select');
 
+            sliderButton = app.buttonFeature('slidergrouping', 'Time', 'progress');
+
+
+            // Add some items to test
+            app.dataStore.canvas.loadItems([{
+                id: "anno0",
+                type: "Annotation",
+                bodyType: "text",
+                bodyContent: "Annotation here",
+                creator: "Grant Dickie",
+                x: 100,
+                y: 460,
+                w: 100,
+                h: 100,
+                shapeType: "Rectangle",
+                ntp_start: 6,
+                ntp_end: 45,
+                opacity: 0
+            }]);
+            app.dataStore.canvas.loadItems([{
+                id: "anno1",
+                type: "Annotation",
+                bodyType: "text",
+                bodyContent: "Annotation here",
+                creator: "Grant Dickie",
+                x: 340,
+                y: 220,
+                w: 20,
+                h: 100,
+                shapeType: "Rectangle",
+                ntp_start: 16,
+                ntp_end: 33,
+                opacity: 0
+            }]);
+
+			app.setCurrentTime(0);
         });
-
+		
         return app;
     };
 } (jQuery, MITHGrid, OAC));
