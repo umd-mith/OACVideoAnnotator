@@ -938,16 +938,38 @@
 		options = that.options;
 		
 		that.applyBindings = function(binding, opts) {
-			var sliderElement, displayElement, sliderStart, sliderMove;
+			var sliderElement, displayElement, sliderStart, sliderMove,
+			localTime;
 			displayElement = binding.locate('timedisplay');
+			positionCheck = function(t) {
+				/*
+				if time is not equal to internal time, then 
+				reset the slider
+				*/
+				if(localTime === undefined) {
+					localTime = t;
+					$(sliderElement).slider('value', localTime);
+				} 
+			};
+			
 			sliderStart = function(e, ui) {
 				options.application.setCurrentTime(ui.value);
 				$(displayElement).text('TIME: ' + ui.value);
+				localTime = ui.value;
 			};
 			
 			sliderMove = function(e, ui) {
+				if(e !== event){
+					localTime = e;
+					$(sliderElement).slider('value', e);
+				}
+				
+				if(localTime === ui.value) {
+					return;
+				}
 				options.application.setCurrentTime(ui.value);
 				$(displayElement).text('TIME: ' + ui.value);
+				localTime = ui.value;
 			};
 			sliderElement = binding.locate("slider");
 			
@@ -955,6 +977,7 @@
 				start: sliderStart,
 				slide: sliderMove
 			});
+			
 			
 		};
 		

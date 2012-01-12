@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Tue Jan 10 16:46:44 2012 -0500
+ *  Date: Wed Jan 11 14:04:42 2012 -0500
  *  
  * Educational Community License, Version 2.0
  * 
@@ -970,16 +970,33 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 		options = that.options;
 		
 		that.applyBindings = function(binding, opts) {
-			var sliderElement, displayElement, sliderStart, sliderMove;
+			var sliderElement, displayElement, sliderStart, sliderMove,
+			positionCheck, localTime;
 			displayElement = binding.locate('timedisplay');
+			positionCheck = function(t) {
+				/*
+				if time is not equal to internal time, then 
+				reset the slider
+				*/
+				if(localTime === undefined) {
+					localTime = t;
+					$(sliderElement).slider('value', localTime);
+				}
+			};
+			
 			sliderStart = function(e, ui) {
 				options.application.setCurrentTime(ui.value);
 				$(displayElement).text('TIME: ' + ui.value);
+				localTime = ui.value;
 			};
 			
 			sliderMove = function(e, ui) {
+				if(localTime === ui.value) {
+					return;
+				}
 				options.application.setCurrentTime(ui.value);
 				$(displayElement).text('TIME: ' + ui.value);
+				localTime = ui.value;
 			};
 			sliderElement = binding.locate("slider");
 			

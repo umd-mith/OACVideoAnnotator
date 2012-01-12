@@ -41,8 +41,6 @@ Presentations for canvas.js
 
         options = that.options;
 
-
-
         canvasController = options.controllers.canvas;
         keyBoardController = options.controllers.keyboard;
         editBoxController = options.controllers.shapeEditBox;
