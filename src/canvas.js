@@ -129,7 +129,6 @@
             annoEvents,
             bodyContentTextArea,
             bodyContent;
-
             itemEl =
             $('<div class="anno_item">' +
             '<p class="bodyContentInstructions">Double click here to open edit window.</p>' +
@@ -176,7 +175,7 @@
 
             annoEvents.events.onClick.addListener(app.setActiveAnnotation);
             annoEvents.events.onUpdate.addListener(that.eventUpdate);
-
+		
             that.update = function(item) {
                 $(itemEl).find(".bodyContent").text(item.bodyContent[0]);
                 $(itemEl).find(".bodyContentTextArea").text(item.bodyContent[0]);
@@ -477,7 +476,7 @@
             app.dataStore.canvas.loadItems([{
                 id: "anno0",
                 type: "Annotation",
-                bodyType: "text",
+                bodyType: "Text",
                 bodyContent: "Annotation here",
                 creator: "Grant Dickie",
                 x: 100,
@@ -492,7 +491,7 @@
             app.dataStore.canvas.loadItems([{
                 id: "anno1",
                 type: "Annotation",
-                bodyType: "text",
+                bodyType: "Text",
                 bodyContent: "Annotation here",
                 creator: "Grant Dickie",
                 x: 340,
