@@ -27,6 +27,32 @@ Converting: RDF -> JSON
 			rdfbase.prefix(ns, href);
 		});
 		
+		/**
+		Goals for importing:
+		
+		* Get the raw data from remote source (NodeJS)
+		* Use RDFQuery to create a databank from raw
+		* Query/aggregate data from databank
+		* Form JSON from datadump
+		* Troll datadump and create dataStore
+		
+		**/
+		
+		socket = io.connect(options.proxy);
+	      proxyRequests = {};
+	      socket.on('RESPONSE', function(data) {
+	        if (proxyRequests[data.id] != null) {
+	          if (data.content != null) {
+	            proxyRequests[data.id].success(data.content);
+	          } else {
+	            proxyRequests[data.id].error(data.error);
+	          }
+	          return delete proxyRequests[data.id];
+	        }
+	      });
+		
+		
+		
 		
 	};
 

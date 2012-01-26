@@ -292,7 +292,7 @@
             idSearch = app.dataStore.canvas.prepare(['!type']),
             idCount = idSearch.evaluate('Annotation'),
             ntp_start = app.getCurrentTime() - 1,
-            ntp_end = app.getCurrentTime() + 1,
+            ntp_end = app.getCurrentTime() + 20,
             curMode = app.getCurrentMode(),
             shape;
             shape = app.shapeTypes[curMode].calc(coords);
@@ -310,7 +310,21 @@
             $.extend(shapeItem, shape);
             app.dataStore.canvas.loadItems([shapeItem]);
         };
-
+		
+		/*
+		Exports all annotation data as JSON. All 
+		SVG data is converted to generic units
+		*/
+		app.exportShapes = function() {
+			var canvasWidth,
+			canvasHeight;
+			
+			canvasWidth = $('#' + myCanvasId).width();
+			canvasHeight = $('#' + myCanvasId).height();
+			
+			$.each([]);
+		};
+		
         app.ready(function() {
             annoActiveController = app.controller.annoActive;
             app.events.onActiveAnnotationChange.addListener(app.presentation.raphsvg.eventFocusChange);
@@ -339,6 +353,19 @@
                 attrs.h = coords.height;
                 return attrs;
             };
+			exportRectangle = function(item, w, h) {
+				var attrs = {}, itemCopy;
+				itemCopy = $.extend(true, {}, item);
+				
+				attrs.x = (itemCopy.x / w) * 100;
+				attrs.y = (itemCopy.y / h) * 100;
+				attrs.w = (itemCopy.w / w) * 100;
+				attrs.h = (itemCopy.h / h) * 100;
+				
+				$.extend(itemCopy, attrs);
+				
+				return itemCopy;
+			};
             lensRectangle = function(container, view, model, itemId) {
                 // Note: Rectangle measurements x,y start at CENTER
                 var that = app.initShapeLens(container, view, model, itemId),

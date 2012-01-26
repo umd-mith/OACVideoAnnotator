@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Thu Jan 12 12:27:56 2012 -0800
+ *  Date: Mon Jan 16 21:35:53 2012 -0500
  *  
  * Educational Community License, Version 2.0
  * 
@@ -1519,7 +1519,7 @@ Presentations for canvas.js
             idSearch = app.dataStore.canvas.prepare(['!type']),
             idCount = idSearch.evaluate('Annotation'),
             ntp_start = app.getCurrentTime() - 1,
-            ntp_end = app.getCurrentTime() + 1,
+            ntp_end = app.getCurrentTime() + 20,
             curMode = app.getCurrentMode(),
             shape;
             shape = app.shapeTypes[curMode].calc(coords);
