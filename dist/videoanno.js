@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Wed Jan 11 14:04:42 2012 -0500
+ *  Date: Mon Jan 16 21:35:53 2012 -0500
  *  
  * Educational Community License, Version 2.0
  * 
@@ -971,7 +971,7 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 		
 		that.applyBindings = function(binding, opts) {
 			var sliderElement, displayElement, sliderStart, sliderMove,
-			positionCheck, localTime;
+			localTime, positionCheck;
 			displayElement = binding.locate('timedisplay');
 			positionCheck = function(t) {
 				/*
@@ -981,7 +981,7 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 				if(localTime === undefined) {
 					localTime = t;
 					$(sliderElement).slider('value', localTime);
-				}
+				} 
 			};
 			
 			sliderStart = function(e, ui) {
@@ -991,6 +991,11 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 			};
 			
 			sliderMove = function(e, ui) {
+				if(ui === undefined){
+					localTime = e;
+					$(sliderElement).slider('value', e);
+				}
+				
 				if(localTime === ui.value) {
 					return;
 				}
@@ -1004,6 +1009,7 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 				start: sliderStart,
 				slide: sliderMove
 			});
+			
 			
 		};
 		
@@ -1024,8 +1030,32 @@ Presentations for canvas.js
 	*/
     MITHGrid.Presentation.namespace("AnnotationList");
     MITHGrid.Presentation.AnnotationList.initPresentation = function(container, options) {
-        var that = MITHGrid.Presentation.initPresentation("MITHGrid.Presentation.AnnotationList", container, options);
-
+        var that = MITHGrid.Presentation.initPresentation("MITHGrid.Presentation.AnnotationList", container, options),
+		eventCurrentTimeChange = function(t) {
+			var annoIds,
+            anno,
+			searchAnno,start,end;
+			
+			searchAnno = options.dataView.prepare(['!bodyType']);
+			annoIds = searchAnno.evaluate('text');
+			$.each(annoIds,
+            function(i, o) {
+                anno = options.application.dataStore.canvas.getItem(o);
+                start = parseInt(anno.ntp_start, 10);
+                end = parseInt(anno.ntp_end, 10);
+                if ((t >= start) && (t <= end)) {
+                    options.application.dataStore.canvas.updateItems([{
+                        id: anno.id
+                    }]);
+	                
+				}
+            });
+		};
+		
+		
+		
+		// options.application.events.onCurrentTimeChange.addListener(eventCurrentTimeChange);
+		
         return that;
     };
 
@@ -1052,8 +1082,6 @@ Presentations for canvas.js
         allAnnosModel;
 
         options = that.options;
-
-
 
         canvasController = options.controllers.canvas;
         keyBoardController = options.controllers.keyboard;
@@ -1328,7 +1356,6 @@ Presentations for canvas.js
             annoEvents,
             bodyContentTextArea,
             bodyContent;
-
             itemEl =
             $('<div class="anno_item">' +
             '<p class="bodyContentInstructions">Double click here to open edit window.</p>' +
@@ -1375,7 +1402,7 @@ Presentations for canvas.js
 
             annoEvents.events.onClick.addListener(app.setActiveAnnotation);
             annoEvents.events.onUpdate.addListener(that.eventUpdate);
-
+		
             that.update = function(item) {
                 $(itemEl).find(".bodyContent").text(item.bodyContent[0]);
                 $(itemEl).find(".bodyContentTextArea").text(item.bodyContent[0]);
@@ -1492,7 +1519,7 @@ Presentations for canvas.js
             idSearch = app.dataStore.canvas.prepare(['!type']),
             idCount = idSearch.evaluate('Annotation'),
             ntp_start = app.getCurrentTime() - 1,
-            ntp_end = app.getCurrentTime() + 1,
+            ntp_end = app.getCurrentTime() + 20,
             curMode = app.getCurrentMode(),
             shape;
             shape = app.shapeTypes[curMode].calc(coords);
@@ -1676,7 +1703,7 @@ Presentations for canvas.js
             app.dataStore.canvas.loadItems([{
                 id: "anno0",
                 type: "Annotation",
-                bodyType: "text",
+                bodyType: "Text",
                 bodyContent: "Annotation here",
                 creator: "Grant Dickie",
                 x: 100,
@@ -1691,7 +1718,7 @@ Presentations for canvas.js
             app.dataStore.canvas.loadItems([{
                 id: "anno1",
                 type: "Annotation",
-                bodyType: "text",
+                bodyType: "Text",
                 bodyContent: "Annotation here",
                 creator: "Grant Dickie",
                 x: 340,
