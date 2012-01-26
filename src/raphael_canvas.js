@@ -12,8 +12,32 @@ Presentations for canvas.js
 	*/
     MITHGrid.Presentation.namespace("AnnotationList");
     MITHGrid.Presentation.AnnotationList.initPresentation = function(container, options) {
-        var that = MITHGrid.Presentation.initPresentation("MITHGrid.Presentation.AnnotationList", container, options);
-
+        var that = MITHGrid.Presentation.initPresentation("MITHGrid.Presentation.AnnotationList", container, options),
+		eventCurrentTimeChange = function(t) {
+			var annoIds,
+            anno,
+			searchAnno,start,end;
+			
+			searchAnno = options.dataView.prepare(['!bodyType']);
+			annoIds = searchAnno.evaluate('text');
+			$.each(annoIds,
+            function(i, o) {
+                anno = options.application.dataStore.canvas.getItem(o);
+                start = parseInt(anno.ntp_start, 10);
+                end = parseInt(anno.ntp_end, 10);
+                if ((t >= start) && (t <= end)) {
+                    options.application.dataStore.canvas.updateItems([{
+                        id: anno.id
+                    }]);
+	                
+				}
+            });
+		};
+		
+		
+		
+		// options.application.events.onCurrentTimeChange.addListener(eventCurrentTimeChange);
+		
         return that;
     };
 

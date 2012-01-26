@@ -939,7 +939,7 @@
 		
 		that.applyBindings = function(binding, opts) {
 			var sliderElement, displayElement, sliderStart, sliderMove,
-			localTime;
+			localTime, positionCheck;
 			displayElement = binding.locate('timedisplay');
 			positionCheck = function(t) {
 				/*
@@ -959,7 +959,7 @@
 			};
 			
 			sliderMove = function(e, ui) {
-				if(e !== event){
+				if(ui === undefined){
 					localTime = e;
 					$(sliderElement).slider('value', e);
 				}

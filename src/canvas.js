@@ -129,7 +129,6 @@
             annoEvents,
             bodyContentTextArea,
             bodyContent;
-
             itemEl =
             $('<div class="anno_item">' +
             '<p class="bodyContentInstructions">Double click here to open edit window.</p>' +
@@ -176,7 +175,7 @@
 
             annoEvents.events.onClick.addListener(app.setActiveAnnotation);
             annoEvents.events.onUpdate.addListener(that.eventUpdate);
-
+		
             that.update = function(item) {
                 $(itemEl).find(".bodyContent").text(item.bodyContent[0]);
                 $(itemEl).find(".bodyContentTextArea").text(item.bodyContent[0]);
@@ -293,7 +292,7 @@
             idSearch = app.dataStore.canvas.prepare(['!type']),
             idCount = idSearch.evaluate('Annotation'),
             ntp_start = app.getCurrentTime() - 1,
-            ntp_end = app.getCurrentTime() + 1,
+            ntp_end = app.getCurrentTime() + 20,
             curMode = app.getCurrentMode(),
             shape;
             shape = app.shapeTypes[curMode].calc(coords);
@@ -311,7 +310,21 @@
             $.extend(shapeItem, shape);
             app.dataStore.canvas.loadItems([shapeItem]);
         };
-
+		
+		/*
+		Exports all annotation data as JSON. All 
+		SVG data is converted to generic units
+		*/
+		app.exportShapes = function() {
+			var canvasWidth,
+			canvasHeight;
+			
+			canvasWidth = $('#' + myCanvasId).width();
+			canvasHeight = $('#' + myCanvasId).height();
+			
+			$.each([]);
+		};
+		
         app.ready(function() {
             annoActiveController = app.controller.annoActive;
             app.events.onActiveAnnotationChange.addListener(app.presentation.raphsvg.eventFocusChange);
@@ -340,6 +353,19 @@
                 attrs.h = coords.height;
                 return attrs;
             };
+			exportRectangle = function(item, w, h) {
+				var attrs = {}, itemCopy;
+				itemCopy = $.extend(true, {}, item);
+				
+				attrs.x = (itemCopy.x / w) * 100;
+				attrs.y = (itemCopy.y / h) * 100;
+				attrs.w = (itemCopy.w / w) * 100;
+				attrs.h = (itemCopy.h / h) * 100;
+				
+				$.extend(itemCopy, attrs);
+				
+				return itemCopy;
+			};
             lensRectangle = function(container, view, model, itemId) {
                 // Note: Rectangle measurements x,y start at CENTER
                 var that = app.initShapeLens(container, view, model, itemId),
@@ -477,7 +503,7 @@
             app.dataStore.canvas.loadItems([{
                 id: "anno0",
                 type: "Annotation",
-                bodyType: "text",
+                bodyType: "Text",
                 bodyContent: "Annotation here",
                 creator: "Grant Dickie",
                 x: 100,
@@ -492,7 +518,7 @@
             app.dataStore.canvas.loadItems([{
                 id: "anno1",
                 type: "Annotation",
-                bodyType: "text",
+                bodyType: "Text",
                 bodyContent: "Annotation here",
                 creator: "Grant Dickie",
                 x: 340,
