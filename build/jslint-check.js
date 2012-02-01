@@ -1,5 +1,5 @@
 var JSLINT = require("./lib/jslint").check, //.JSLINT,
-	print = require("sys").print,
+	print = require("util").print,
 	src = require("fs").readFileSync("dist/videoanno.js", "utf8");
 
 JSLINT(src, { 

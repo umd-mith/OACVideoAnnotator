@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Mon Jan 16 21:35:53 2012 -0500
+ *  Date: Mon Jan 30 15:28:23 2012 -0500
  *  
  * Educational Community License, Version 2.0
  * 
@@ -1402,7 +1402,7 @@ Presentations for canvas.js
 
             annoEvents.events.onClick.addListener(app.setActiveAnnotation);
             annoEvents.events.onUpdate.addListener(that.eventUpdate);
-		
+
             that.update = function(item) {
                 $(itemEl).find(".bodyContent").text(item.bodyContent[0]);
                 $(itemEl).find(".bodyContentTextArea").text(item.bodyContent[0]);
@@ -1538,6 +1538,20 @@ Presentations for canvas.js
             app.dataStore.canvas.loadItems([shapeItem]);
         };
 
+        /*
+		Exports all annotation data as JSON. All 
+		SVG data is converted to generic units
+		*/
+        app.exportShapes = function() {
+            var canvasWidth,
+            canvasHeight;
+
+            canvasWidth = $('#' + myCanvasId).width();
+            canvasHeight = $('#' + myCanvasId).height();
+
+            $.each([]);
+        };
+
         app.ready(function() {
             annoActiveController = app.controller.annoActive;
             app.events.onActiveAnnotationChange.addListener(app.presentation.raphsvg.eventFocusChange);
@@ -1556,7 +1570,7 @@ Presentations for canvas.js
             rectButton,
             ellipseButton,
             selectButton,
-            sliderButton;
+            sliderButton, exportRectangle;
 
             calcRectangle = function(coords) {
                 var attrs = {};
@@ -1565,6 +1579,21 @@ Presentations for canvas.js
                 attrs.w = coords.width;
                 attrs.h = coords.height;
                 return attrs;
+            };
+            exportRectangle = function(item, w, h) {
+                var attrs = {},
+                itemCopy;
+                itemCopy = $.extend(true, {},
+                item);
+
+                attrs.x = (itemCopy.x / w) * 100;
+                attrs.y = (itemCopy.y / h) * 100;
+                attrs.w = (itemCopy.w / w) * 100;
+                attrs.h = (itemCopy.h / h) * 100;
+
+                $.extend(itemCopy, attrs);
+
+                return itemCopy;
             };
             lensRectangle = function(container, view, model, itemId) {
                 // Note: Rectangle measurements x,y start at CENTER
@@ -1579,7 +1608,7 @@ Presentations for canvas.js
                     fill: "red",
                     opacity: item.opacity
                 });
-				$(c.node).attr('id',item.id[0]);
+                $(c.node).attr('id', item.id[0]);
                 that.update = function(item) {
                     // receiving the Object passed through
                     // model.updateItems in move()
@@ -1590,7 +1619,7 @@ Presentations for canvas.js
                                 y: item.y[0] - item.h[0] / 2,
                                 width: item.w[0],
                                 height: item.h[0],
-								opacity: item.opacity
+                                opacity: item.opacity
                             });
                         }
                     } catch(e) {
@@ -1731,9 +1760,30 @@ Presentations for canvas.js
                 opacity: 0
             }]);
 
-			app.setCurrentTime(0);
+            app.setCurrentTime(0);
+
+
         });
-		
+
+        app.ready(function() {
+            var manifest;
+            /*
+			Set up the import - requires NodeJS 
+			to be activated 
+			*/
+			/*
+            manifest = OAC.initManifest({
+                proxy: 'http://localhost:8080',
+                dataStore: app.dataStore.canvas
+            });
+            manifest.base(options.base);
+            manifest.loadManifest(options.manifest,
+            function() {
+                
+            });
+			*/
+        });
+
         return app;
     };
 } (jQuery, MITHGrid, OAC));
