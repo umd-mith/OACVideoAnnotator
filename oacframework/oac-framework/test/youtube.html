@@ -1,0 +1,25 @@
+<html>
+<head>
+<title>dummy player test</title>
+<SCRIPT LANGUAGE="JavaScript" SRC="../js/jquery-1.6.4.min.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="../js/oac-framework-1.0.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="../js/oac-youtube-drv-1.0.js"></script>
+</head>
+
+<body>
+
+<h1>YOUTUBE with OAC</h1>
+<p>This is a Youtube player integrated in OAC framework</p>
+
+<div id="myplayer" class="youtubeplayer">
+<iframe width="560" height="315" src="http://www.youtube.com/embed/_Cbrmn4GTe0" frameborder="0" allowfullscreen></iframe>
+</div>
+
+<br>
+
+<input type="button" value="Play" onClick="OAC_Controller.player().play()" />&nbsp;&nbsp;
+<input type="button" value="Pause" onClick="OAC_Controller.player().pause()" />&nbsp;&nbsp;
+
+</body>
+
+</html>
