@@ -551,7 +551,7 @@
             manifest.base(options.base);
             manifest.loadManifest(options.manifest,
             function() {
-                console.log("manifest loading done");
+                
             });
 
         });

@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Thu Jan 26 16:26:31 2012 -0500
+ *  Date: Mon Jan 30 15:28:23 2012 -0500
  *  
  * Educational Community License, Version 2.0
  * 
@@ -1570,7 +1570,7 @@ Presentations for canvas.js
             rectButton,
             ellipseButton,
             selectButton,
-            sliderButton;
+            sliderButton, exportRectangle;
 
             calcRectangle = function(coords) {
                 var attrs = {};
@@ -1771,6 +1771,7 @@ Presentations for canvas.js
 			Set up the import - requires NodeJS 
 			to be activated 
 			*/
+			/*
             manifest = OAC.initManifest({
                 proxy: 'http://localhost:8080',
                 dataStore: app.dataStore.canvas
@@ -1778,9 +1779,9 @@ Presentations for canvas.js
             manifest.base(options.base);
             manifest.loadManifest(options.manifest,
             function() {
-                console.log("manifest loading done");
+                
             });
-
+			*/
         });
 
         return app;
