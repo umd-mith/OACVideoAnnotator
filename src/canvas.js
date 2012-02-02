@@ -55,11 +55,16 @@
         options)
         );
 
-        app.cWidth = 100;
-        app.cHeight = 100;
+        app.cWidth = options.width || 100;
+        app.cHeight = options.height || 100;
 
         app.shapeTypes = {};
-
+		
+		/*
+		DOM Object to be used in presentation for raphael canvas
+		*/
+		app.playerObject = options.playerDOM || null;
+		
         /*
 		svgLens builds an object with functionality common to all SVG shapes on the canvas.
 		The methods expect the SVG shape object to be in that.shape
@@ -498,44 +503,13 @@
 
             selectButton = app.buttonFeature('buttongrouping', 'General', 'Select');
 
-            sliderButton = app.buttonFeature('slidergrouping', 'Time', 'progress');
+            // sliderButton = app.buttonFeature('slidergrouping', 'Time', 'progress');
 
-
-            // Add some items to test
-            app.dataStore.canvas.loadItems([{
-                id: "anno0",
-                type: "Annotation",
-                bodyType: "Text",
-                bodyContent: "Annotation here",
-                creator: "Grant Dickie",
-                x: 100,
-                y: 460,
-                w: 100,
-                h: 100,
-                shapeType: "Rectangle",
-                ntp_start: 6,
-                ntp_end: 45,
-                opacity: 0
-            }]);
-            app.dataStore.canvas.loadItems([{
-                id: "anno1",
-                type: "Annotation",
-                bodyType: "Text",
-                bodyContent: "Annotation here",
-                creator: "Grant Dickie",
-                x: 340,
-                y: 220,
-                w: 20,
-                h: 100,
-                shapeType: "Rectangle",
-                ntp_start: 16,
-                ntp_end: 33,
-                opacity: 0
-            }]);
+			
 
             app.setCurrentTime(0);
 
-
+			
         });
 
         app.ready(function() {
@@ -544,6 +518,7 @@
 			Set up the import - requires NodeJS 
 			to be activated 
 			*/
+			/*
             manifest = OAC.initManifest({
                 proxy: 'http://localhost:8080',
                 dataStore: app.dataStore.canvas
@@ -553,7 +528,7 @@
             function() {
                 
             });
-
+			*/
         });
 
         return app;

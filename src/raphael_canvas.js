@@ -70,25 +70,32 @@ Presentations for canvas.js
         editBoxController = options.controllers.shapeEditBox;
         shapeCreateController = options.controllers.shapeCreateBox;
 
-        if (options.cWidth !== undefined) {
-            w = options.cWidth;
+        if (options.application.cWidth !== undefined) {
+            w = options.application.cWidth;
         } else {
             w = $(container).width();
         }
-        if (options.cHeight !== undefined) {
-            h = options.cHeight;
+        if (options.application.cHeight !== undefined) {
+            h = options.application.cHeight;
         } else {
             // measure the div space and make the canvas
             // to fit
             h = $(container).height();
         }
-
+		
+		
+		
         // init RaphaelJS canvas
         // Parameters for Raphael:
         // @id: element ID for container div
         // @w: Integer value for width of the SVG canvas
         // @h: Integer value for height of the SVG canvas
-        that.canvas = new Raphael(id, w, h);
+        
+		if(options.application.playerObject !== null) {
+			that.canvas = new Raphael(options.application.playerObject, w, h);
+		} else {
+			that.canvas = new Raphael(id, w, h);
+		}
 
         // attach binding
         canvasBinding = canvasController.bind($(container), {

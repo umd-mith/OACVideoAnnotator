@@ -5,12 +5,15 @@ SRC_DIR = src
 TEST_DIR = test
 BUILD_DIR = build
 
+
 PREFIX = .
 DIST_DIR = ${PREFIX}/dist
+OAC_FRAMEWORK_DIR = ${PREFIX}/oacframework/oac-framework/test/dummyplayer/js
 
 JS_ENGINE ?= `which node nodejs`
 COMPILER = ${JS_ENGINE} ${BUILD_DIR}/uglify.js --unsafe
 POST_COMPILER = ${JS_ENGINE} ${BUILD_DIR}/post-compile.js
+
 
 BASE_FILES = ${SRC_DIR}/controllers.js \
 	${SRC_DIR}/raphael_canvas.js \
@@ -18,6 +21,7 @@ BASE_FILES = ${SRC_DIR}/controllers.js \
 
 MG = ${DIST_DIR}/videoanno.js
 MG_MIN = ${DIST_DIR}/videoanno.min.js
+MG_OAC = ${OAC_FRAMEWORK_DIR}/videoanno.js
 
 MG_VER = $(shell cat version.txt)
 VER = sed "s/@VERSION/${MG_VER}/"
@@ -46,6 +50,8 @@ ${MG}: ${DIST_DIR} ${SRC_DIR}/intro.js ${BASE_FILES} ${SRC_DIR}/outro.js
 		@@cat ${SRC_DIR}/intro.js ${MG}.tmp ${SRC_DIR}/outro.js | \
 			sed 's/@DATE/'"${DATE}"'/' | \
 			${VER} > ${MG};
+		
+		@@cp ${MG} ${MG_OAC};
 		
 		@@rm -f ${MG}.tmp;
 		
