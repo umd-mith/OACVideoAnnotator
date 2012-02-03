@@ -61,7 +61,8 @@ Presentations for canvas.js
         editBoundingBoxBinding,
         eventCurrentTimeChange,
         searchAnnos,
-        allAnnosModel;
+        allAnnosModel,
+		initCanvas;
 
         options = that.options;
 
@@ -69,7 +70,10 @@ Presentations for canvas.js
         keyBoardController = options.controllers.keyboard;
         editBoxController = options.controllers.shapeEditBox;
         shapeCreateController = options.controllers.shapeCreateBox;
-
+		
+		x = options.application.cX || $(container).css('x');
+		y = options.application.cY || $(container).css('y');
+		
         if (options.application.cWidth !== undefined) {
             w = options.application.cWidth;
         } else {
@@ -84,35 +88,63 @@ Presentations for canvas.js
         }
 		
 		
+		initCanvas = function(rendering, args) {
+			// init RaphaelJS canvas
+		    // Parameters for Raphael:
+	        // @x: value for top left corner
+			// @y: value for top left corner
+	        // @w: Integer value for width of the SVG canvas
+	        // @h: Integer value for height of the SVG canvas
+			if(args !== undefined) {
+				that.canvas = new Raphael(args[0], args[1], args[2], args[3]);
+
+
+		        // attach binding
+		        canvasBinding = canvasController.bind($(container), {
+		            closeEnough: 5,
+		            paper: that.canvas
+		        });
+
+		        editBoundingBoxBinding = editBoxController.bind($(container), {
+		            paper: that.canvas
+		        });
+
+		        shapeCreateBinding = shapeCreateController.bind($(container), {
+		            paper: that.canvas
+		        });
+
+		        keyboardBinding = keyBoardController.bind($('body'), {});
 		
-        // init RaphaelJS canvas
-        // Parameters for Raphael:
-        // @id: element ID for container div
-        // @w: Integer value for width of the SVG canvas
-        // @h: Integer value for height of the SVG canvas
-        
-		if(options.application.playerObject !== null) {
-			that.canvas = new Raphael(options.application.playerObject, w, h);
-		} else {
-			that.canvas = new Raphael(id, w, h);
-		}
+				 that.events = that.events || {};
+			     for (x in keyboardBinding.events) {
+		            that.events[x] = keyboardBinding.events[e];
+		        }
+		
+				canvasBinding.registerRendering(rendering);
+				
+				/*
+				Registering canvas special events for start, drag, stop
+				*/
+		        canvasBinding.events.onShapeStart.addListener(function(coords) {
+		            shapeCreateBinding.createGuide(coords);
+		        });
 
-        // attach binding
-        canvasBinding = canvasController.bind($(container), {
-            closeEnough: 5,
-            paper: that.canvas
-        });
+		        canvasBinding.events.onShapeDrag.addListener(function(coords) {
+		            shapeCreateBinding.resizeGuide(coords);
+		        });
 
-        editBoundingBoxBinding = editBoxController.bind($(container), {
-            paper: that.canvas
-        });
-
-        shapeCreateBinding = shapeCreateController.bind($(container), {
-            paper: that.canvas
-        });
-
-        keyboardBinding = keyBoardController.bind($('body'), {});
-
+		        canvasBinding.events.onShapeDone.addListener(function(coords) {
+		            /*
+					Adjust x,y in order to fit data store 
+					model
+					*/
+		            var shape = shapeCreateBinding.completeShape(coords);
+		            options.application.insertShape(shape);
+		        });
+			}
+	
+		};
+		
 
         eventCurrentTimeChange = function(npt) {
             var annoIds,
@@ -157,20 +189,18 @@ Presentations for canvas.js
             });
         };
 
-        that.events = that.events || {};
-        for (e in keyboardBinding.events) {
-            that.events[e] = keyboardBinding.events[e];
-        }
+       
 
         superRender = that.render;
 
         options.application.events.onCurrentTimeChange.addListener(eventCurrentTimeChange);
+		
 
         that.render = function(c, m, i) {
             var rendering = superRender(c, m, i),
             tempStore;
             if (rendering !== undefined) {
-                canvasBinding.registerRendering(rendering);
+                
                 tempStore = m;
                 while (tempStore.dataStore) {
 
@@ -178,7 +208,10 @@ Presentations for canvas.js
                 }
                 allAnnosModel = tempStore;
                 searchAnnos = options.dataView.prepare(['!type']);
-
+				options.application.events.onPlayerChange.addListener(function(args) {
+					console.log('onplayerchange ' + args);
+					initCanvas(rendering, args);
+				});
             }
             return rendering;
         };
@@ -189,27 +222,7 @@ Presentations for canvas.js
             superEventFocusChange(id);
             editBoundingBoxBinding.attachRendering(that.renderingFor(id));
         };
-
-        /*
-		Registering canvas special events for start, drag, stop
-		*/
-        canvasBinding.events.onShapeStart.addListener(function(coords) {
-            shapeCreateBinding.createGuide(coords);
-        });
-
-        canvasBinding.events.onShapeDrag.addListener(function(coords) {
-            shapeCreateBinding.resizeGuide(coords);
-        });
-
-        canvasBinding.events.onShapeDone.addListener(function(coords) {
-            /*
-			Adjust x,y in order to fit data store 
-			model
-			*/
-            var shape = shapeCreateBinding.completeShape(coords);
-            options.application.insertShape(shape);
-        });
-
+		
         return that;
     };
 } (jQuery, MITHGrid, OAC));

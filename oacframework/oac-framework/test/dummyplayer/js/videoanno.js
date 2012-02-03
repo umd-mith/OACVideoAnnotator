@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Wed Feb 1 06:44:00 2012 -0800
+ *  Date: Thu Feb 2 16:30:31 2012 -0500
  *  
  * Educational Community License, Version 2.0
  * 
@@ -1079,7 +1079,8 @@ Presentations for canvas.js
         editBoundingBoxBinding,
         eventCurrentTimeChange,
         searchAnnos,
-        allAnnosModel;
+        allAnnosModel,
+		initCanvas;
 
         options = that.options;
 
@@ -1087,7 +1088,10 @@ Presentations for canvas.js
         keyBoardController = options.controllers.keyboard;
         editBoxController = options.controllers.shapeEditBox;
         shapeCreateController = options.controllers.shapeCreateBox;
-
+		
+		x = options.application.cX || $(container).css('x');
+		y = options.application.cY || $(container).css('y');
+		
         if (options.application.cWidth !== undefined) {
             w = options.application.cWidth;
         } else {
@@ -1102,35 +1106,63 @@ Presentations for canvas.js
         }
 		
 		
+		initCanvas = function(rendering, args) {
+			// init RaphaelJS canvas
+		    // Parameters for Raphael:
+	        // @x: value for top left corner
+			// @y: value for top left corner
+	        // @w: Integer value for width of the SVG canvas
+	        // @h: Integer value for height of the SVG canvas
+			if(args !== undefined) {
+				that.canvas = new Raphael(args[0], args[1], args[2], args[3]);
+
+
+		        // attach binding
+		        canvasBinding = canvasController.bind($(container), {
+		            closeEnough: 5,
+		            paper: that.canvas
+		        });
+
+		        editBoundingBoxBinding = editBoxController.bind($(container), {
+		            paper: that.canvas
+		        });
+
+		        shapeCreateBinding = shapeCreateController.bind($(container), {
+		            paper: that.canvas
+		        });
+
+		        keyboardBinding = keyBoardController.bind($('body'), {});
 		
-        // init RaphaelJS canvas
-        // Parameters for Raphael:
-        // @id: element ID for container div
-        // @w: Integer value for width of the SVG canvas
-        // @h: Integer value for height of the SVG canvas
-        
-		if(options.application.playerObject !== null) {
-			that.canvas = new Raphael(options.application.playerObject, w, h);
-		} else {
-			that.canvas = new Raphael(id, w, h);
-		}
+				 that.events = that.events || {};
+			     for (x in keyboardBinding.events) {
+		            that.events[x] = keyboardBinding.events[e];
+		        }
+		
+				canvasBinding.registerRendering(rendering);
+				
+				/*
+				Registering canvas special events for start, drag, stop
+				*/
+		        canvasBinding.events.onShapeStart.addListener(function(coords) {
+		            shapeCreateBinding.createGuide(coords);
+		        });
 
-        // attach binding
-        canvasBinding = canvasController.bind($(container), {
-            closeEnough: 5,
-            paper: that.canvas
-        });
+		        canvasBinding.events.onShapeDrag.addListener(function(coords) {
+		            shapeCreateBinding.resizeGuide(coords);
+		        });
 
-        editBoundingBoxBinding = editBoxController.bind($(container), {
-            paper: that.canvas
-        });
-
-        shapeCreateBinding = shapeCreateController.bind($(container), {
-            paper: that.canvas
-        });
-
-        keyboardBinding = keyBoardController.bind($('body'), {});
-
+		        canvasBinding.events.onShapeDone.addListener(function(coords) {
+		            /*
+					Adjust x,y in order to fit data store 
+					model
+					*/
+		            var shape = shapeCreateBinding.completeShape(coords);
+		            options.application.insertShape(shape);
+		        });
+			}
+	
+		};
+		
 
         eventCurrentTimeChange = function(npt) {
             var annoIds,
@@ -1175,20 +1207,18 @@ Presentations for canvas.js
             });
         };
 
-        that.events = that.events || {};
-        for (e in keyboardBinding.events) {
-            that.events[e] = keyboardBinding.events[e];
-        }
+       
 
         superRender = that.render;
 
         options.application.events.onCurrentTimeChange.addListener(eventCurrentTimeChange);
+		
 
         that.render = function(c, m, i) {
             var rendering = superRender(c, m, i),
             tempStore;
             if (rendering !== undefined) {
-                canvasBinding.registerRendering(rendering);
+                
                 tempStore = m;
                 while (tempStore.dataStore) {
 
@@ -1196,7 +1226,10 @@ Presentations for canvas.js
                 }
                 allAnnosModel = tempStore;
                 searchAnnos = options.dataView.prepare(['!type']);
-
+				options.application.events.onPlayerChange.addListener(function(args) {
+					console.log('onplayerchange ' + args);
+					initCanvas(rendering, args);
+				});
             }
             return rendering;
         };
@@ -1207,27 +1240,7 @@ Presentations for canvas.js
             superEventFocusChange(id);
             editBoundingBoxBinding.attachRendering(that.renderingFor(id));
         };
-
-        /*
-		Registering canvas special events for start, drag, stop
-		*/
-        canvasBinding.events.onShapeStart.addListener(function(coords) {
-            shapeCreateBinding.createGuide(coords);
-        });
-
-        canvasBinding.events.onShapeDrag.addListener(function(coords) {
-            shapeCreateBinding.resizeGuide(coords);
-        });
-
-        canvasBinding.events.onShapeDone.addListener(function(coords) {
-            /*
-			Adjust x,y in order to fit data store 
-			model
-			*/
-            var shape = shapeCreateBinding.completeShape(coords);
-            options.application.insertShape(shape);
-        });
-
+		
         return that;
     };
 } (jQuery, MITHGrid, OAC));
@@ -1288,16 +1301,15 @@ Presentations for canvas.js
         },
         options)
         );
-
-        app.cWidth = options.width || 100;
-        app.cHeight = options.height || 100;
+		// Set initial size for canvas window
+		app.cWidth = 100;
+		app.cHeight = 100;
+		app.cX = 0;
+		app.cY = 0;
 
         app.shapeTypes = {};
 		
-		/*
-		DOM Object to be used in presentation for raphael canvas
-		*/
-		app.playerObject = options.playerDOM || null;
+	
 		
         /*
 		svgLens builds an object with functionality common to all SVG shapes on the canvas.
@@ -1563,7 +1575,8 @@ Presentations for canvas.js
 
             $.each([]);
         };
-
+		
+		
         app.ready(function() {
             annoActiveController = app.controller.annoActive;
             app.events.onActiveAnnotationChange.addListener(app.presentation.raphsvg.eventFocusChange);
@@ -1737,12 +1750,6 @@ Presentations for canvas.js
 
             selectButton = app.buttonFeature('buttongrouping', 'General', 'Select');
 
-            // sliderButton = app.buttonFeature('slidergrouping', 'Time', 'progress');
-
-			
-
-            app.setCurrentTime(0);
-
 			
         });
 
@@ -1763,6 +1770,15 @@ Presentations for canvas.js
                 
             });
 			*/
+			if(options.playerobject !== undefined) {
+				xy = options.playerobj.getcoordinates();
+				wh = options.playerobj.getsize();
+				app.setPlayer([xy[0], xy[1], wh[0], wh[1]]);
+				
+				app.setCurrentTime(options.playerobject.getPlayhead());
+				
+			}
+
         });
 
         return app;
@@ -1884,6 +1900,9 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 			"default": 0
 		},
 		CurrentMode: {
+			is: 'rw'
+		},
+		Player: {
 			is: 'rw'
 		}
 	},

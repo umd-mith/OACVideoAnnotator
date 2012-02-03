@@ -113,6 +113,9 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 		},
 		CurrentMode: {
 			is: 'rw'
+		},
+		Player: {
+			is: 'rw'
 		}
 	},
 	dataViews: {

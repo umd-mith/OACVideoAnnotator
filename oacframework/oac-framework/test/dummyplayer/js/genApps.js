@@ -16,8 +16,10 @@ var initPlugin = function() {
 	// Video Annotator object to each player
 	setupAllPlayers = function() {
 		player = 0;
-		while(OAC_Controller.player(player) !== undefined) {
-			OACdrv = OAC_Controller.player(player);
+		
+		if(OAC_Controller.player() !== undefined) {
+			
+			OACdrv = OAC_Controller.player();
 			initStreamingVideoApp(OACdrv);
 			player++;
 		};
@@ -26,20 +28,22 @@ var initPlugin = function() {
 	
 	
 	initStreamingVideoApp = function(playerobj) {
-	
+		xy = playerobj.getcoordinates();
 		wh = playerobj.getsize();
-		
 		// Create Raphael canvas application controls
 		raphApp = OAC.Client.StreamingVideo.initApp("#main", {
-			playerDOM: playerobj.DOMObject,
-			width: wh[0], 
-			height: wh[1],
+			playerobject: playerobj,
 			base: "http://www.shared-canvas.org/impl/demo1/res/",
 			manifest: "http://www.shared-canvas.org/impl/demo1/res/Manifest.xml"
 		});
 	
 		// creating Raphael canvas application
 		raphApp.run();
+		
+		
+		raphApp.setPlayer([xy[0], xy[1], wh[0], wh[1], playerobj.getPlayhead()]);
+		
+		
 	};
 	
 	// Registering OAC Controller
@@ -49,7 +53,7 @@ var initPlugin = function() {
 };
 
 $(function() {
-	
+	console.log('coords: ' + OAC_Controller.player().getcoordinates());
 	
 	initPlugin();
 });

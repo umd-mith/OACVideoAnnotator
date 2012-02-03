@@ -54,16 +54,15 @@
         },
         options)
         );
-
-        app.cWidth = options.width || 100;
-        app.cHeight = options.height || 100;
+		// Set initial size for canvas window
+		app.cWidth = 100;
+		app.cHeight = 100;
+		app.cX = 0;
+		app.cY = 0;
 
         app.shapeTypes = {};
 		
-		/*
-		DOM Object to be used in presentation for raphael canvas
-		*/
-		app.playerObject = options.playerDOM || null;
+	
 		
         /*
 		svgLens builds an object with functionality common to all SVG shapes on the canvas.
@@ -329,7 +328,8 @@
 
             $.each([]);
         };
-
+		
+		
         app.ready(function() {
             annoActiveController = app.controller.annoActive;
             app.events.onActiveAnnotationChange.addListener(app.presentation.raphsvg.eventFocusChange);
@@ -503,12 +503,6 @@
 
             selectButton = app.buttonFeature('buttongrouping', 'General', 'Select');
 
-            // sliderButton = app.buttonFeature('slidergrouping', 'Time', 'progress');
-
-			
-
-            app.setCurrentTime(0);
-
 			
         });
 
@@ -529,6 +523,15 @@
                 
             });
 			*/
+			if(options.playerobject !== undefined) {
+				xy = options.playerobj.getcoordinates();
+				wh = options.playerobj.getsize();
+				app.setPlayer([xy[0], xy[1], wh[0], wh[1]]);
+				
+				app.setCurrentTime(options.playerobject.getPlayhead());
+				
+			}
+
         });
 
         return app;
