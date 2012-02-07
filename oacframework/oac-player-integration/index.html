@@ -1,0 +1,60 @@
+<html>
+<head>
+<title>dummy player test</title>
+<SCRIPT LANGUAGE="JavaScript" SRC="../js/jquery-1.6.4.min.js"></script>
+<SCRIPT language="JavaScript" SRC="../../../lib/mithgrid.js"></script>
+<SCRIPT language="JavaScript" SRC="../../../lib/raphael.js"></script>
+<SCRIPT language="JavaScript" SRC="dummyplayer/js/videoanno.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="dummyplayer/js/dummy-player.1.0.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="../js/oac-framework-1.0.js"></script>
+<SCRIPT LANGUAGE="JavaScript" SRC="../js/oac-dummyplayer-drv-1.0.js"></script>
+<SCRIPT language="JavaScript" SRC="dummyplayer/js/genApps.js"></script>
+
+<link rel="stylesheet" href="style.css" />
+
+</head>
+
+<body onload="init_values()">
+
+<h1>DUMMY PLAYER with OAC</h1>
+<p>This is a dummy player integrated in OAC framework.</p>
+<div id="main"><div id="myplayer" class="dummyplayer" style="width:300px; height:200px;"></div></div>
+
+<table width="300" border="1">
+	<tr>
+		<td>Coordinates</td>
+		<td id="info_coordinates"></td>
+	</tr>
+	<tr>
+		<td>Size</td>
+		<td id="info_size"></td>
+	</tr>
+	<tr>
+		<td>Position</td>
+		<td id="info_position"></td>
+	</tr>
+</table>
+<input type="button" value="Play" onClick="OAC_Controller.player().play()" />&nbsp;&nbsp;
+<input type="button" value="Pause" onClick="OAC_Controller.player().pause()" />&nbsp;&nbsp;
+
+<input type="button" value="Rewind" onClick="$('#info_position').html(OAC_Controller.player().setPlayhead(OAC_Controller.player().getPlayhead() - 5))" />&nbsp;&nbsp;
+<input type="button" value="Forward" onClick="$('#info_position').html(OAC_Controller.player().setPlayhead(OAC_Controller.player().getPlayhead() + 5))" />
+
+
+<script language="javascript">
+function init_values() { 
+	var coordinates = OAC_Controller.player().getcoordinates();
+	$('#info_coordinates').html( coordinates[0] + " x " + coordinates[1] );
+	var size = OAC_Controller.player().getsize();
+	$('#info_size').html( size[0] + " x " + size[1] );
+	
+	OAC_Controller.player().onPlayheadUpdate(function(){
+		var value = OAC_Controller.player().getPlayhead();
+		$('#info_position').html(value);
+	});
+} 
+</script>
+
+</body>
+
+</html>

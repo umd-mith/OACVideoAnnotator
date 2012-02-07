@@ -8,7 +8,7 @@ BUILD_DIR = build
 
 PREFIX = .
 DIST_DIR = ${PREFIX}/dist
-OAC_FRAMEWORK_DIR = ${PREFIX}/oacframework/oac-framework/test/dummyplayer/js
+OAC_FRAMEWORK_DIR = ${PREFIX}/oacframework/oac-player-integration/js
 
 JS_ENGINE ?= `which node nodejs`
 COMPILER = ${JS_ENGINE} ${BUILD_DIR}/uglify.js --unsafe
