@@ -13,6 +13,12 @@ var OAC_Controller = {
 		players: new Array(),
 		
 		/*
+        Variable: callbacks
+        	The callbacks array. Functions called when new players are configured are stored here.
+	    */
+		callbacks: new Array(),
+		
+		/*
         Function: player
         	Returns the DOM object for a certain player loaded on the page.
         Parameters:
@@ -31,6 +37,27 @@ var OAC_Controller = {
 		},
 		
 		/*
+		Function: on_new_player
+			Used by applications making use of the OAC_Controller to discover configured players
+		Parameters:
+			callback - A function to be called with the player object.
+		Returns:
+			Nothing.
+		Examples:
+			OAC_Controller.on_new_player(function(player) { 
+				# do something with player
+			});
+		*/
+		
+		on_new_player: function(callback) {
+			OAC_Controller.players.each(function() {
+				var player = this;
+				callback(player);
+			});
+			OAC_Controller.callbacks.push(player);
+		},
+		
+		/*
         Function: register
         	Used by drivers to let know to OAC what drivers are available and initialize them.
         Parameters:
@@ -45,9 +72,13 @@ var OAC_Controller = {
 			var driverObject = constructor();
 			var players = driverObject.getAvailablePlayers();
 			players.each(function() {
+				var player = this;
 				$(this).data('driver', driverObject);
 				driverObject.setDomObj(this);
 				OAC_Controller.players[OAC_Controller.players.length] = this;
+				OAC_Controller.callbacks.each(function() {
+					this.call({}, player);
+				});
 			});
 		},
 		
