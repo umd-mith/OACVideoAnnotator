@@ -13,14 +13,16 @@ Presentations for canvas.js
     MITHGrid.Presentation.namespace("AnnotationList");
     MITHGrid.Presentation.AnnotationList.initPresentation = function(container, options) {
         var that = MITHGrid.Presentation.initPresentation("MITHGrid.Presentation.AnnotationList", container, options),
-		eventCurrentTimeChange = function(t) {
-			var annoIds,
+        eventCurrentTimeChange = function(t) {
+            var annoIds,
             anno,
-			searchAnno,start,end;
-			
-			searchAnno = options.dataView.prepare(['!bodyType']);
-			annoIds = searchAnno.evaluate('text');
-			$.each(annoIds,
+            searchAnno,
+            start,
+            end;
+
+            searchAnno = options.dataView.prepare(['!bodyType']);
+            annoIds = searchAnno.evaluate('text');
+            $.each(annoIds,
             function(i, o) {
                 anno = options.application.dataStore.canvas.getItem(o);
                 start = parseInt(anno.ntp_start, 10);
@@ -29,15 +31,14 @@ Presentations for canvas.js
                     options.application.dataStore.canvas.updateItems([{
                         id: anno.id
                     }]);
-	                
-				}
+
+                }
             });
-		};
-		
-		
-		
-		// options.application.events.onCurrentTimeChange.addListener(eventCurrentTimeChange);
-		
+        };
+
+
+
+        // options.application.events.onCurrentTimeChange.addListener(eventCurrentTimeChange);
         return that;
     };
 
@@ -48,6 +49,8 @@ Presentations for canvas.js
         id = $(container).attr('id'),
         h,
         w,
+        x,
+        y,
         canvasController,
         keyBoardController,
         editBoxController,
@@ -62,7 +65,8 @@ Presentations for canvas.js
         eventCurrentTimeChange,
         searchAnnos,
         allAnnosModel,
-		initCanvas;
+        initCanvas,
+		cachedRendering;
 
         options = that.options;
 
@@ -70,10 +74,10 @@ Presentations for canvas.js
         keyBoardController = options.controllers.keyboard;
         editBoxController = options.controllers.shapeEditBox;
         shapeCreateController = options.controllers.shapeCreateBox;
-		
-		x = options.application.cX || $(container).css('x');
-		y = options.application.cY || $(container).css('y');
-		
+
+        x = options.application.cX || $(container).css('x');
+        y = options.application.cY || $(container).css('y');
+
         if (options.application.cWidth !== undefined) {
             w = options.application.cWidth;
         } else {
@@ -86,65 +90,72 @@ Presentations for canvas.js
             // to fit
             h = $(container).height();
         }
-		
-		
-		initCanvas = function(rendering, args) {
-			// init RaphaelJS canvas
-		    // Parameters for Raphael:
-	        // @x: value for top left corner
-			// @y: value for top left corner
-	        // @w: Integer value for width of the SVG canvas
-	        // @h: Integer value for height of the SVG canvas
-			if(args !== undefined) {
-				that.canvas = new Raphael(args[0], args[1], args[2], args[3]);
 
 
-		        // attach binding
-		        canvasBinding = canvasController.bind($(container), {
-		            closeEnough: 5,
-		            paper: that.canvas
-		        });
-
-		        editBoundingBoxBinding = editBoxController.bind($(container), {
-		            paper: that.canvas
-		        });
-
-		        shapeCreateBinding = shapeCreateController.bind($(container), {
-		            paper: that.canvas
-		        });
-
-		        keyboardBinding = keyBoardController.bind($('body'), {});
-		
-				 that.events = that.events || {};
-			     for (x in keyboardBinding.events) {
-		            that.events[x] = keyboardBinding.events[e];
-		        }
-		
-				canvasBinding.registerRendering(rendering);
+        initCanvas = function(args) {
+            // init RaphaelJS canvas
+            // Parameters for Raphael:
+            // @x: value for top left corner
+            // @y: value for top left corner
+            // @w: Integer value for width of the SVG canvas
+            // @h: Integer value for height of the SVG canvas
+            if (args !== undefined) {
+				// move container and change size
+				$(container).css({
+					left: (parseInt(args[0], 10) + 'px'),
+					top: (parseInt(args[1], 10) + 'px')
+				});
+				$(container).width(args[2]);
+				$(container).height(args[3]);
 				
-				/*
+				// Create canvas at xy and width height
+                that.canvas = new Raphael(args[0], args[1], args[2], args[3]);
+
+
+                // attach binding
+                canvasBinding = canvasController.bind($(container), {
+                    closeEnough: 5,
+                    paper: that.canvas
+                });
+
+                editBoundingBoxBinding = editBoxController.bind($(container), {
+                    paper: that.canvas
+                });
+
+                shapeCreateBinding = shapeCreateController.bind($(container), {
+                    paper: that.canvas
+                });
+
+                keyboardBinding = keyBoardController.bind($('body'), {});
+                
+                that.events = that.events || {};
+                for (e = 0; e < keyboardBinding.events.length; (e + 1)) {
+                    that.events[e] = keyboardBinding.events[e];
+                }
+
+                /*
 				Registering canvas special events for start, drag, stop
 				*/
-		        canvasBinding.events.onShapeStart.addListener(function(coords) {
-		            shapeCreateBinding.createGuide(coords);
-		        });
+                canvasBinding.events.onShapeStart.addListener(function(coords) {
+                    shapeCreateBinding.createGuide(coords);
+                });
 
-		        canvasBinding.events.onShapeDrag.addListener(function(coords) {
-		            shapeCreateBinding.resizeGuide(coords);
-		        });
+                canvasBinding.events.onShapeDrag.addListener(function(coords) {
+                    shapeCreateBinding.resizeGuide(coords);
+                });
 
-		        canvasBinding.events.onShapeDone.addListener(function(coords) {
-		            /*
+                canvasBinding.events.onShapeDone.addListener(function(coords) {
+                    /*
 					Adjust x,y in order to fit data store 
 					model
 					*/
-		            var shape = shapeCreateBinding.completeShape(coords);
-		            options.application.insertShape(shape);
-		        });
-			}
-	
-		};
-		
+                    var shape = shapeCreateBinding.completeShape(coords);
+                    options.application.insertShape(shape);
+                });
+            }
+
+        };
+
 
         eventCurrentTimeChange = function(npt) {
             var annoIds,
@@ -167,7 +178,7 @@ Presentations for canvas.js
                 }
                 return val;
             };
-			searchAnnos = options.dataView.prepare(['!type']);
+            searchAnnos = options.dataView.prepare(['!type']);
             annoIds = searchAnnos.evaluate('Annotation');
             $.each(annoIds,
             function(i, o) {
@@ -175,7 +186,7 @@ Presentations for canvas.js
                 fadeIn = parseInt(anno.ntp_start, 10) - options.fadeStart;
                 fadeOut = parseInt(anno.ntp_end, 10) + options.fadeStart;
                 fOpac = calcOpacity(npt, fadeIn, fadeOut, parseInt(anno.ntp_start, 10), parseInt(anno.ntp_end, 10));
-               
+
                 if (parseInt(anno.opacity, 10) !== fOpac) {
                     allAnnosModel.updateItems([{
                         id: anno.id,
@@ -189,18 +200,23 @@ Presentations for canvas.js
             });
         };
 
-       
+
 
         superRender = that.render;
 
         options.application.events.onCurrentTimeChange.addListener(eventCurrentTimeChange);
-		
+		options.application.events.onPlayerChange.addListener(function(args) {
+            console.log('onplayerchange ' + args);
+			
+            initCanvas(args);
+        });
 
         that.render = function(c, m, i) {
             var rendering = superRender(c, m, i),
             tempStore;
+			console.log('rendering raphael canvas ' );
             if (rendering !== undefined) {
-                
+
                 tempStore = m;
                 while (tempStore.dataStore) {
 
@@ -208,10 +224,8 @@ Presentations for canvas.js
                 }
                 allAnnosModel = tempStore;
                 searchAnnos = options.dataView.prepare(['!type']);
-				options.application.events.onPlayerChange.addListener(function(args) {
-					console.log('onplayerchange ' + args);
-					initCanvas(rendering, args);
-				});
+				console.log('loading rendering');
+				canvasBinding.registerRendering(rendering);
             }
             return rendering;
         };
@@ -222,7 +236,7 @@ Presentations for canvas.js
             superEventFocusChange(id);
             editBoundingBoxBinding.attachRendering(that.renderingFor(id));
         };
-		
+
         return that;
     };
 } (jQuery, MITHGrid, OAC));

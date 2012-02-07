@@ -13,7 +13,9 @@
         svgLens,
         textLens,
         fade,
-        myCanvasId = 'OAC-Client-StreamingVideo-SVG-Canvas-' + canvasId;
+        myCanvasId = 'OAC-Client-StreamingVideo-SVG-Canvas-' + canvasId,
+        xy = [],
+        wh = [];
 
         canvasId += 1;
 
@@ -24,8 +26,8 @@
         $.extend(true, {},
         {
             viewSetup: '<div id="sidebar' + myCanvasId + '" class="controlarea"></div>' +
-            '<div class="canvas_svg_holder"><div id="' + myCanvasId + '" class="canvas_svg"></div></div>' +
-
+			'<div id="' + myCanvasId +  '" class="canvas_svg_holder"></div>' +
+			'</div>' +
             '<div class="anno_list"></div>',
             presentations: {
                 raphsvg: {
@@ -54,16 +56,16 @@
         },
         options)
         );
-		// Set initial size for canvas window
-		app.cWidth = 100;
-		app.cHeight = 100;
-		app.cX = 0;
-		app.cY = 0;
+        // Set initial size for canvas window
+        app.cWidth = 100;
+        app.cHeight = 100;
+        app.cX = 0;
+        app.cY = 0;
 
         app.shapeTypes = {};
-		
-	
-		
+
+
+
         /*
 		svgLens builds an object with functionality common to all SVG shapes on the canvas.
 		The methods expect the SVG shape object to be in that.shape
@@ -328,8 +330,8 @@
 
             $.each([]);
         };
-		
-		
+
+
         app.ready(function() {
             annoActiveController = app.controller.annoActive;
             app.events.onActiveAnnotationChange.addListener(app.presentation.raphsvg.eventFocusChange);
@@ -348,7 +350,8 @@
             rectButton,
             ellipseButton,
             selectButton,
-            sliderButton, exportRectangle;
+            sliderButton,
+            exportRectangle;
 
             calcRectangle = function(coords) {
                 var attrs = {};
@@ -503,7 +506,7 @@
 
             selectButton = app.buttonFeature('buttongrouping', 'General', 'Select');
 
-			
+
         });
 
         app.ready(function() {
@@ -512,7 +515,7 @@
 			Set up the import - requires NodeJS 
 			to be activated 
 			*/
-			/*
+            /*
             manifest = OAC.initManifest({
                 proxy: 'http://localhost:8080',
                 dataStore: app.dataStore.canvas
@@ -520,17 +523,18 @@
             manifest.base(options.base);
             manifest.loadManifest(options.manifest,
             function() {
-                
+
             });
 			*/
-			if(options.playerobject !== undefined) {
-				xy = options.playerobj.getcoordinates();
-				wh = options.playerobj.getsize();
-				app.setPlayer([xy[0], xy[1], wh[0], wh[1]]);
-				
-				app.setCurrentTime(options.playerobject.getPlayhead());
-				
-			}
+			console.log('options.playerobject ' + options.playerobject);
+            if (options.playerobject !== undefined) {
+                xy = options.playerobject.getcoordinates();
+                wh = options.playerobject.getsize();
+                app.setPlayer([xy[0], xy[1], wh[0], wh[1]]);
+
+                app.setCurrentTime(options.playerobject.getPlayhead());
+
+            }
 
         });
 
