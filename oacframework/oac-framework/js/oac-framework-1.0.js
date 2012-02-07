@@ -54,7 +54,7 @@ var OAC_Controller = {
 				var player = this;
 				callback(player);
 			});
-			OAC_Controller.callbacks.push(player);
+			OAC_Controller.callbacks.push(callback);
 		},
 		
 		/*
