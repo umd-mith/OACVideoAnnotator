@@ -778,7 +778,7 @@
                     y = e.pageY - offset.top;
                     topLeft = [x, y];
                     mouseMode = 1;
-
+					console.log('mousedown - canvasClickController ' + topLeft);
                     binding.events.onShapeStart.fire(topLeft);
                 });
 
@@ -830,6 +830,8 @@
                             return;
                         }
                     }
+					console.log('mousedown for selection');
+					console.log('looping through renderings array: ' + renderings);
                     $.each(renderings,
                     function(i, o) {
                         extents = o.getExtents();

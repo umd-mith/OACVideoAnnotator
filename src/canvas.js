@@ -25,10 +25,18 @@
         app = MITHGrid.Application.initApp("OAC.Client.StreamingVideo", container,
         $.extend(true, {},
         {
-            viewSetup: '<div id="sidebar' + myCanvasId + '" class="controlarea"></div>' +
-			'<div id="' + myCanvasId +  '" class="canvas_svg_holder"></div>' +
-			'</div>' +
-            '<div class="anno_list"></div>',
+            viewSetup: 
+			// '<div class="mithgrid-toparea">' + 
+				'<div id="' + myCanvasId +  '" class="section-canvas"></div>' +
+			// '</div>' + 
+			'<div class="mithgrid-bottomarea">' + 
+				'<div id="sidebar' + myCanvasId + '" class="section-controls"></div>' +
+            	'<div class="section-annotations">' + 
+					'<div class="header">' +
+						'Annotations' +
+					'</div>' +
+				'</div>' +
+			'</div>',
             presentations: {
                 raphsvg: {
                     container: "#" + myCanvasId,
@@ -74,7 +82,7 @@
             var that = {
                 id: itemId
             };
-
+			console.log('initShapeLens ' + JSON.stringify(view.events));
             that.eventFocus = function() {
                 that.shape.attr({
                     opacity: 1
@@ -300,9 +308,10 @@
             ntp_start = app.getCurrentTime() - 1,
             ntp_end = app.getCurrentTime() + 20,
             curMode = app.getCurrentMode(),
-            shape;
-            shape = app.shapeTypes[curMode].calc(coords);
+            shape;	
 
+            shape = app.shapeTypes[curMode].calc(coords);
+			
             shapeItem = {
                 id: "anno" + idCount.length,
                 type: "Annotation",
@@ -313,7 +322,9 @@
                 ntp_start: ntp_start,
                 ntp_end: ntp_end
             };
+
             $.extend(shapeItem, shape);
+			console.log('loading shapeItem ' + JSON.stringify(shapeItem));
             app.dataStore.canvas.loadItems([shapeItem]);
         };
 
@@ -422,10 +433,10 @@
 
                 // register shape
                 that.shape = c;
-
+				console.log('lens function ran with that.shape = ' + JSON.stringify(that.shape[0]));
                 return that;
             };
-
+			
             app.addShapeType("Rectangle",
             {
                 calc: calcRectangle,

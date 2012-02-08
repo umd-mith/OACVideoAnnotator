@@ -103,14 +103,20 @@ Presentations for canvas.js
 				// move container and change size
 				$(container).css({
 					left: (parseInt(args[0], 10) + 'px'),
-					top: (parseInt(args[1], 10) + 'px')
+					top: (parseInt(args[1], 10) + 'px'),
+					width: args[2],
+					height: args[3]
 				});
-				$(container).width(args[2]);
-				$(container).height(args[3]);
-				
+				/*
+				$(container).parent().css({
+					left: (parseInt(args[0], 10) + 'px'),
+					top: (parseInt(args[1], 10) + 'px'),
+					width: args[2],
+					height: args[3]
+				});
+				*/
 				// Create canvas at xy and width height
                 that.canvas = new Raphael(args[0], args[1], args[2], args[3]);
-
 
                 // attach binding
                 canvasBinding = canvasController.bind($(container), {
@@ -155,7 +161,6 @@ Presentations for canvas.js
             }
 
         };
-
 
         eventCurrentTimeChange = function(npt) {
             var annoIds,
@@ -206,15 +211,12 @@ Presentations for canvas.js
 
         options.application.events.onCurrentTimeChange.addListener(eventCurrentTimeChange);
 		options.application.events.onPlayerChange.addListener(function(args) {
-            console.log('onplayerchange ' + args);
-			
             initCanvas(args);
         });
 
         that.render = function(c, m, i) {
             var rendering = superRender(c, m, i),
             tempStore;
-			console.log('rendering raphael canvas ' );
             if (rendering !== undefined) {
 
                 tempStore = m;
@@ -224,7 +226,6 @@ Presentations for canvas.js
                 }
                 allAnnosModel = tempStore;
                 searchAnnos = options.dataView.prepare(['!type']);
-				console.log('loading rendering');
 				canvasBinding.registerRendering(rendering);
             }
             return rendering;
@@ -234,6 +235,7 @@ Presentations for canvas.js
 
         that.eventFocusChange = function(id) {
             superEventFocusChange(id);
+			console.log('eventFocusChange searching for rendering in array: ' + that.renderingFor(id));
             editBoundingBoxBinding.attachRendering(that.renderingFor(id));
         };
 

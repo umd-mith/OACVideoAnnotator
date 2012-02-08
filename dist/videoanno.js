@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Tue Feb 7 11:15:05 2012 -0500
+ *  Date: Tue Feb 7 16:37:28 2012 -0500
  *  
  * Educational Community License, Version 2.0
  * 
@@ -810,7 +810,7 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
                     y = e.pageY - offset.top;
                     topLeft = [x, y];
                     mouseMode = 1;
-
+					console.log('mousedown - canvasClickController ' + topLeft);
                     binding.events.onShapeStart.fire(topLeft);
                 });
 
@@ -862,6 +862,8 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
                             return;
                         }
                     }
+					console.log('mousedown for selection');
+					console.log('looping through renderings array: ' + renderings);
                     $.each(renderings,
                     function(i, o) {
                         extents = o.getExtents();
@@ -1121,14 +1123,20 @@ Presentations for canvas.js
 				// move container and change size
 				$(container).css({
 					left: (parseInt(args[0], 10) + 'px'),
-					top: (parseInt(args[1], 10) + 'px')
+					top: (parseInt(args[1], 10) + 'px'),
+					width: args[2],
+					height: args[3]
 				});
-				$(container).width(args[2]);
-				$(container).height(args[3]);
-				
+				/*
+				$(container).parent().css({
+					left: (parseInt(args[0], 10) + 'px'),
+					top: (parseInt(args[1], 10) + 'px'),
+					width: args[2],
+					height: args[3]
+				});
+				*/
 				// Create canvas at xy and width height
                 that.canvas = new Raphael(args[0], args[1], args[2], args[3]);
-
 
                 // attach binding
                 canvasBinding = canvasController.bind($(container), {
@@ -1168,12 +1176,12 @@ Presentations for canvas.js
 					model
 					*/
                     var shape = shapeCreateBinding.completeShape(coords);
+console.log('shapeDone called ' + JSON.stringify(shape));
                     options.application.insertShape(shape);
                 });
             }
 
         };
-
 
         eventCurrentTimeChange = function(npt) {
             var annoIds,
@@ -1224,15 +1232,12 @@ Presentations for canvas.js
 
         options.application.events.onCurrentTimeChange.addListener(eventCurrentTimeChange);
 		options.application.events.onPlayerChange.addListener(function(args) {
-            console.log('onplayerchange ' + args);
-			
             initCanvas(args);
         });
 
         that.render = function(c, m, i) {
             var rendering = superRender(c, m, i),
             tempStore;
-			console.log('rendering raphael canvas ' );
             if (rendering !== undefined) {
 
                 tempStore = m;
@@ -1242,7 +1247,6 @@ Presentations for canvas.js
                 }
                 allAnnosModel = tempStore;
                 searchAnnos = options.dataView.prepare(['!type']);
-				console.log('loading rendering');
 				canvasBinding.registerRendering(rendering);
             }
             return rendering;
@@ -1252,6 +1256,7 @@ Presentations for canvas.js
 
         that.eventFocusChange = function(id) {
             superEventFocusChange(id);
+			console.log('eventFocusChange searching for rendering in array: ' + that.renderingFor(id));
             editBoundingBoxBinding.attachRendering(that.renderingFor(id));
         };
 
@@ -1286,10 +1291,18 @@ Presentations for canvas.js
         app = MITHGrid.Application.initApp("OAC.Client.StreamingVideo", container,
         $.extend(true, {},
         {
-            viewSetup: '<div id="sidebar' + myCanvasId + '" class="controlarea"></div>' +
-			'<div id="' + myCanvasId +  '" class="canvas_svg_holder"></div>' +
-			'</div>' +
-            '<div class="anno_list"></div>',
+            viewSetup: 
+			// '<div class="mithgrid-toparea">' + 
+				'<div id="' + myCanvasId +  '" class="section-canvas"></div>' +
+			// '</div>' + 
+			'<div class="mithgrid-bottomarea">' + 
+				'<div id="sidebar' + myCanvasId + '" class="section-controls"></div>' +
+            	'<div class="section-annotations">' + 
+					'<div class="header">' +
+						'Annotations' +
+					'</div>' +
+				'</div>' +
+			'</div>',
             presentations: {
                 raphsvg: {
                     container: "#" + myCanvasId,
@@ -1335,7 +1348,7 @@ Presentations for canvas.js
             var that = {
                 id: itemId
             };
-
+			console.log('initShapeLens ' + JSON.stringify(view.events));
             that.eventFocus = function() {
                 that.shape.attr({
                     opacity: 1
@@ -1561,9 +1574,10 @@ Presentations for canvas.js
             ntp_start = app.getCurrentTime() - 1,
             ntp_end = app.getCurrentTime() + 20,
             curMode = app.getCurrentMode(),
-            shape;
-            shape = app.shapeTypes[curMode].calc(coords);
+            shape;	
 
+            shape = app.shapeTypes[curMode].calc(coords);
+			
             shapeItem = {
                 id: "anno" + idCount.length,
                 type: "Annotation",
@@ -1574,7 +1588,9 @@ Presentations for canvas.js
                 ntp_start: ntp_start,
                 ntp_end: ntp_end
             };
+
             $.extend(shapeItem, shape);
+			console.log('loading shapeItem ' + JSON.stringify(shapeItem));
             app.dataStore.canvas.loadItems([shapeItem]);
         };
 
@@ -1683,10 +1699,10 @@ Presentations for canvas.js
 
                 // register shape
                 that.shape = c;
-
+				console.log('lens function ran with that.shape = ' + JSON.stringify(that.shape[0]));
                 return that;
             };
-
+			
             app.addShapeType("Rectangle",
             {
                 calc: calcRectangle,
