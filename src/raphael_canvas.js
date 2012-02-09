@@ -96,8 +96,6 @@ Presentations for canvas.js
 
         $.extend(true, that.events, keyboardBinding.events);
 
-		
-		console.log('that.events in raphael presentation ' + JSON.stringify(that.events));
 
         // init RaphaelJS canvas
         // Parameters for Raphael:
