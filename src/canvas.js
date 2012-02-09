@@ -72,8 +72,6 @@
 
         app.shapeTypes = {};
 
-
-
         /*
 		svgLens builds an object with functionality common to all SVG shapes on the canvas.
 		The methods expect the SVG shape object to be in that.shape
@@ -82,7 +80,6 @@
             var that = {
                 id: itemId
             };
-			console.log('initShapeLens ' + JSON.stringify(view.events));
             that.eventFocus = function() {
                 that.shape.attr({
                     opacity: 1
@@ -129,7 +126,9 @@
                 // getting the removeItems callback
                 that.shape.remove();
             };
-
+			
+			
+			
             return that;
         };
 
@@ -302,6 +301,7 @@
 		type it is
 		*/
         app.insertShape = function(coords) {
+	console.log('insertShape ' + coords + ' ' + app.getCurrentTime());
             var shapeItem,
             idSearch = app.dataStore.canvas.prepare(['!type']),
             idCount = idSearch.evaluate('Annotation'),
@@ -309,7 +309,7 @@
             ntp_end = app.getCurrentTime() + 20,
             curMode = app.getCurrentMode(),
             shape;	
-
+			
             shape = app.shapeTypes[curMode].calc(coords);
 			
             shapeItem = {
@@ -324,7 +324,6 @@
             };
 
             $.extend(shapeItem, shape);
-			console.log('loading shapeItem ' + JSON.stringify(shapeItem));
             app.dataStore.canvas.loadItems([shapeItem]);
         };
 
@@ -388,11 +387,13 @@
                 return itemCopy;
             };
             lensRectangle = function(container, view, model, itemId) {
+				console.log('lensRectangle  ' + container + '  ' + view + '  ' + model + '  ' + itemId);
                 // Note: Rectangle measurements x,y start at CENTER
                 var that = app.initShapeLens(container, view, model, itemId),
                 item = model.getItem(itemId),
                 c,
                 bbox;
+				console.log('canvas drawing rectangle :: lensRectangle');
                 // Accessing the view.canvas Object that was created in MITHGrid.Presentation.RaphSVG
                 c = view.canvas.rect(item.x[0] - (item.w[0] / 2), item.y[0] - (item.h[0] / 2), item.w[0], item.h[0]);
                 // fill and set opacity
@@ -433,7 +434,6 @@
 
                 // register shape
                 that.shape = c;
-				console.log('lens function ran with that.shape = ' + JSON.stringify(that.shape[0]));
                 return that;
             };
 			
@@ -516,7 +516,8 @@
             ellipseButton = app.buttonFeature('buttongrouping', 'Shapes', 'Ellipse');
 
             selectButton = app.buttonFeature('buttongrouping', 'General', 'Select');
-
+			
+			app.setCurrentTime(0);
 
         });
 
@@ -537,14 +538,15 @@
 
             });
 			*/
-			console.log('options.playerobject ' + options.playerobject);
             if (options.playerobject !== undefined) {
                 xy = options.playerobject.getcoordinates();
                 wh = options.playerobject.getsize();
                 app.setPlayer([xy[0], xy[1], wh[0], wh[1]]);
 
                 app.setCurrentTime(options.playerobject.getPlayhead());
-
+				options.playerobject.onPlayheadUpdate(function(t) {
+					app.setCurrentTime((app.getCurrentTime() + 1));
+				});
             }
 
         });

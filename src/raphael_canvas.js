@@ -66,7 +66,7 @@ Presentations for canvas.js
         searchAnnos,
         allAnnosModel,
         initCanvas,
-		cachedRendering;
+        cachedRendering;
 
         options = that.options;
 
@@ -90,76 +90,78 @@ Presentations for canvas.js
             // to fit
             h = $(container).height();
         }
+		that.events = that.events || {};	
+       
+ 		keyboardBinding = keyBoardController.bind($('body'), {});
 
+        $.extend(true, that.events, keyboardBinding.events);
+
+		
+		console.log('that.events in raphael presentation ' + JSON.stringify(that.events));
+
+        // init RaphaelJS canvas
+        // Parameters for Raphael:
+        // @x: value for top left corner
+        // @y: value for top left corner
+        // @w: Integer value for width of the SVG canvas
+        // @h: Integer value for height of the SVG canvas
+        // Create canvas at xy and width height
+        that.canvas = new Raphael($(container), w, h);
+
+        // attach binding
+        canvasBinding = canvasController.bind($('body'), {
+            closeEnough: 5,
+            paper: that.canvas
+        });
+
+        editBoundingBoxBinding = editBoxController.bind($(container), {
+            paper: that.canvas
+        });
+
+        shapeCreateBinding = shapeCreateController.bind($(container), {
+            paper: that.canvas
+        });
+
+        /*
+		Registering canvas special events for start, drag, stop
+		*/
+        canvasBinding.events.onShapeStart.addListener(function(coords) {
+            shapeCreateBinding.createGuide(coords);
+        });
+
+        canvasBinding.events.onShapeDrag.addListener(function(coords) {
+            shapeCreateBinding.resizeGuide(coords);
+        });
+
+        canvasBinding.events.onShapeDone.addListener(function(coords) {
+            /*
+			Adjust x,y in order to fit data store 
+			model
+			*/
+            var shape = shapeCreateBinding.completeShape(coords);
+            options.application.insertShape(shape);
+        });
 
         initCanvas = function(args) {
-            // init RaphaelJS canvas
-            // Parameters for Raphael:
-            // @x: value for top left corner
-            // @y: value for top left corner
-            // @w: Integer value for width of the SVG canvas
-            // @h: Integer value for height of the SVG canvas
             if (args !== undefined) {
-				// move container and change size
-				$(container).css({
-					left: (parseInt(args[0], 10) + 'px'),
-					top: (parseInt(args[1], 10) + 'px'),
-					width: args[2],
-					height: args[3]
-				});
-				/*
-				$(container).parent().css({
-					left: (parseInt(args[0], 10) + 'px'),
-					top: (parseInt(args[1], 10) + 'px'),
-					width: args[2],
-					height: args[3]
-				});
-				*/
-				// Create canvas at xy and width height
-                that.canvas = new Raphael(args[0], args[1], args[2], args[3]);
-
-                // attach binding
-                canvasBinding = canvasController.bind($(container), {
-                    closeEnough: 5,
-                    paper: that.canvas
+                // player passes args of x,y and width, height
+                // Move canvas SVG to this location
+                $('svg').css({
+                    left: (parseInt(args[0], 10) + 'px'),
+                    top: (parseInt(args[1], 10) + 'px'),
+                    width: args[2],
+                    height: args[3]
                 });
 
-                editBoundingBoxBinding = editBoxController.bind($(container), {
-                    paper: that.canvas
-                });
 
-                shapeCreateBinding = shapeCreateController.bind($(container), {
-                    paper: that.canvas
-                });
-
-                keyboardBinding = keyBoardController.bind($('body'), {});
-                
-                that.events = that.events || {};
-                for (e = 0; e < keyboardBinding.events.length; (e + 1)) {
-                    that.events[e] = keyboardBinding.events[e];
-                }
-
-                /*
-				Registering canvas special events for start, drag, stop
-				*/
-                canvasBinding.events.onShapeStart.addListener(function(coords) {
-                    shapeCreateBinding.createGuide(coords);
-                });
-
-                canvasBinding.events.onShapeDrag.addListener(function(coords) {
-                    shapeCreateBinding.resizeGuide(coords);
-                });
-
-                canvasBinding.events.onShapeDone.addListener(function(coords) {
-                    /*
-					Adjust x,y in order to fit data store 
-					model
-					*/
-                    var shape = shapeCreateBinding.completeShape(coords);
-                    options.application.insertShape(shape);
+                // move container and change size
+                $(container).css({
+                    left: (parseInt(args[0], 10) + 'px'),
+                    top: (parseInt(args[1], 10) + 'px'),
+                    width: args[2],
+                    height: args[3]
                 });
             }
-
         };
 
         eventCurrentTimeChange = function(npt) {
@@ -210,7 +212,7 @@ Presentations for canvas.js
         superRender = that.render;
 
         options.application.events.onCurrentTimeChange.addListener(eventCurrentTimeChange);
-		options.application.events.onPlayerChange.addListener(function(args) {
+        options.application.events.onPlayerChange.addListener(function(args) {
             initCanvas(args);
         });
 
@@ -226,7 +228,7 @@ Presentations for canvas.js
                 }
                 allAnnosModel = tempStore;
                 searchAnnos = options.dataView.prepare(['!type']);
-				canvasBinding.registerRendering(rendering);
+                canvasBinding.registerRendering(rendering);
             }
             return rendering;
         };
@@ -235,7 +237,6 @@ Presentations for canvas.js
 
         that.eventFocusChange = function(id) {
             superEventFocusChange(id);
-			console.log('eventFocusChange searching for rendering in array: ' + that.renderingFor(id));
             editBoundingBoxBinding.attachRendering(that.renderingFor(id));
         };
 

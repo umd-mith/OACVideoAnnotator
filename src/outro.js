@@ -72,7 +72,7 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 		canvas: {
 			type: OAC.Client.StreamingVideo.Controller.CanvasClickController,
 			selectors: {
-				svg: ''
+				svg: ' > svg'
 			}
 		},
 		annoActive: {

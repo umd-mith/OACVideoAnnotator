@@ -253,7 +253,7 @@
                                 y: shapeAttrs.y
                             };
 
-                            that.events.onMove.fire(activeRendering.id, pos);
+                            binding.events.onMove.fire(activeRendering.id, pos);
                             activeRendering.shape.attr({
                                 cursor: 'default'
                             });
@@ -778,7 +778,7 @@
                     y = e.pageY - offset.top;
                     topLeft = [x, y];
                     mouseMode = 1;
-					console.log('mousedown - canvasClickController ' + topLeft);
+                    console.log('mousedown - canvasClickController ' + topLeft);
                     binding.events.onShapeStart.fire(topLeft);
                 });
 
@@ -800,6 +800,7 @@
                     if (bottomRight === undefined) {
                         bottomRight = [x + 5, y + 5];
                     }
+                    console.log('onShapeDone being called ' + topLeft[0] + ', ' + topLeft[1] + ', ' + bottomRight[0] + ', ' + bottomRight[1]);
                     binding.events.onShapeDone.fire({
                         x: topLeft[0],
                         y: topLeft[1],
@@ -818,29 +819,31 @@
                 function(e) {
                     activeId = '';
                     offset = $(container).offset();
-
+                    console.log(offset);
                     ox = Math.abs(e.pageX - offset.left);
                     oy = Math.abs(e.pageY - offset.top);
                     if (curRendering !== undefined) {
                         extents = curRendering.getExtents();
                         dx = Math.abs(ox - extents.x);
                         dy = Math.abs(oy - extents.y);
-                        if (dx < extents.width / 2 + 4 && dy < extents.height / 2 + 4) {
+                        if (dx < extents.width + 4 && dy < extents.height + 4) {
                             // nothing has changed
                             return;
                         }
                     }
-					console.log('mousedown for selection');
-					console.log('looping through renderings array: ' + renderings);
+
                     $.each(renderings,
                     function(i, o) {
+						// if((rendering.npt_start < options.application.getCurrentTime()))
                         extents = o.getExtents();
-
                         dx = Math.abs(ox - extents.x);
                         dy = Math.abs(oy - extents.y);
+                        console.log('dx, dy: ' + dx + ', ' + dy);
+                        console.log('dwidth, dheight: ' + (extents.width) + ', ' + (extents.height));
                         // the '3' is for the drag boxes around the object
-                        if (dx < extents.width / 2 + 4 && dy < extents.height / 2 + 4) {
+                        if ((dx < (extents.width + 4)) && (dy < (extents.height + 4))) {
                             activeId = o.id;
+                            console.log('found active id: ' + o.id);
                             if ((curRendering === undefined) || (o.id !== curRendering.id)) {
                                 curRendering = o;
                                 options.application.setActiveAnnotation(o.id);
@@ -933,56 +936,60 @@
 
         return that;
     };
-	
-	Controller.namespace('sliderButton');
-	Controller.sliderButton.initController = function(options) {
-		var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.sliderButton", options);
-		options = that.options;
-		
-		that.applyBindings = function(binding, opts) {
-			var sliderElement, displayElement, sliderStart, sliderMove,
-			localTime, positionCheck;
-			displayElement = binding.locate('timedisplay');
-			positionCheck = function(t) {
-				/*
+
+    Controller.namespace('sliderButton');
+    Controller.sliderButton.initController = function(options) {
+        var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.sliderButton", options);
+        options = that.options;
+
+        that.applyBindings = function(binding, opts) {
+            var sliderElement,
+            displayElement,
+            sliderStart,
+            sliderMove,
+            localTime,
+            positionCheck;
+            displayElement = binding.locate('timedisplay');
+            positionCheck = function(t) {
+                /*
 				if time is not equal to internal time, then 
 				reset the slider
 				*/
-				if(localTime === undefined) {
-					localTime = t;
-					$(sliderElement).slider('value', localTime);
-				} 
-			};
-			
-			sliderStart = function(e, ui) {
-				options.application.setCurrentTime(ui.value);
-				$(displayElement).text('TIME: ' + ui.value);
-				localTime = ui.value;
-			};
-			
-			sliderMove = function(e, ui) {
-				if(ui === undefined){
-					localTime = e;
-					$(sliderElement).slider('value', e);
-				}
-				
-				if(localTime === ui.value) {
-					return;
-				}
-				options.application.setCurrentTime(ui.value);
-				$(displayElement).text('TIME: ' + ui.value);
-				localTime = ui.value;
-			};
-			sliderElement = binding.locate("slider");
-			
-			$(sliderElement).slider({
-				start: sliderStart,
-				slide: sliderMove
-			});
-			
-			
-		};
-		
-		return that;
-	};
+                if (localTime === undefined) {
+                    localTime = t;
+                    $(sliderElement).slider('value', localTime);
+                }
+            };
+
+            sliderStart = function(e, ui) {
+                options.application.setCurrentTime(ui.value);
+                $(displayElement).text('TIME: ' + ui.value);
+                localTime = ui.value;
+            };
+
+            sliderMove = function(e, ui) {
+                if (ui === undefined) {
+                    localTime = e;
+                    $(sliderElement).slider('value', e);
+                }
+
+                if (localTime === ui.value) {
+                    return;
+                }
+                options.application.setCurrentTime(ui.value);
+                $(displayElement).text('TIME: ' + ui.value);
+                localTime = ui.value;
+            };
+            sliderElement = binding.locate("slider");
+
+            $(sliderElement).slider({
+                start: sliderStart,
+                slide: sliderMove
+            });
+
+
+        };
+
+        return that;
+    };
 } (jQuery, MITHGrid, OAC));
