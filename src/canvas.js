@@ -52,6 +52,7 @@
                     lensKey: ['.shapeType']
                 },
                 annoItem: {
+					container: '.section-annotations',
                     lenses: {
                         //			Rectangle: textLens,
                         //			Ellipse: textLens
