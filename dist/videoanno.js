@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Wed Feb 8 15:26:21 2012 -0500
+ *  Date: Tue Feb 14 11:00:22 2012 -0500
  *  
  * Educational Community License, Version 2.0
  * 
@@ -851,13 +851,13 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
                 function(e) {
                     activeId = '';
                     offset = $(container).offset();
-                    console.log(offset);
-                    ox = Math.abs(e.pageX - offset.left);
-                    oy = Math.abs(e.pageY - offset.top);
+                    console.log(JSON.stringify(offset) + ' e.pageX ' + e.pageX +  '  ' + e.pageY);
+                    ox = Math.abs(offset.left - e.pageX);
+                    oy = Math.abs(offset.top - e.pageY);
                     if (curRendering !== undefined) {
                         extents = curRendering.getExtents();
-                        dx = Math.abs(ox - extents.x);
-                        dy = Math.abs(oy - extents.y);
+                        dx = Math.abs(offset.left - e.pageX);
+                        dy = Math.abs(offset.top - e.pageY);
                         if (dx < extents.width + 4 && dy < extents.height + 4) {
                             // nothing has changed
                             return;
@@ -868,9 +868,10 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
                     function(i, o) {
 						// if((rendering.npt_start < options.application.getCurrentTime()))
                         extents = o.getExtents();
-                        dx = Math.abs(ox - extents.x);
-                        dy = Math.abs(oy - extents.y);
+                        dx = Math.abs(offset.left - e.pageX);
+                        dy = Math.abs(offset.top - e.pageY);
                         console.log('dx, dy: ' + dx + ', ' + dy);
+						console.log('x, y of shape ' + extents.x + ' , ' + extents.y);
                         console.log('dwidth, dheight: ' + (extents.width) + ', ' + (extents.height));
                         // the '3' is for the drag boxes around the object
                         if ((dx < (extents.width + 4)) && (dy < (extents.height + 4))) {
@@ -882,7 +883,7 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
                             }
                             // stop running loop
                             return false;
-                        }
+                        } 
                     });
                     if ((activeId.length === 0) && (curRendering !== undefined)) {
                         // No shapes selected - de-activate current rendering and all other possible renderings
@@ -1123,8 +1124,6 @@ Presentations for canvas.js
 
         $.extend(true, that.events, keyboardBinding.events);
 
-		
-		console.log('that.events in raphael presentation ' + JSON.stringify(that.events));
 
         // init RaphaelJS canvas
         // Parameters for Raphael:
@@ -1325,6 +1324,7 @@ Presentations for canvas.js
                     lensKey: ['.shapeType']
                 },
                 annoItem: {
+					container: '.section-annotations',
                     lenses: {
                         //			Rectangle: textLens,
                         //			Ellipse: textLens
