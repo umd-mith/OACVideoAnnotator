@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Tue Feb 14 11:00:22 2012 -0500
+ *  Date: Tue Feb 14 11:23:23 2012 -0500
  *  
  * Educational Community License, Version 2.0
  * 
@@ -810,7 +810,6 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
                     y = e.pageY - offset.top;
                     topLeft = [x, y];
                     mouseMode = 1;
-                    console.log('mousedown - canvasClickController ' + topLeft);
                     binding.events.onShapeStart.fire(topLeft);
                 });
 
@@ -832,7 +831,6 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
                     if (bottomRight === undefined) {
                         bottomRight = [x + 5, y + 5];
                     }
-                    console.log('onShapeDone being called ' + topLeft[0] + ', ' + topLeft[1] + ', ' + bottomRight[0] + ', ' + bottomRight[1]);
                     binding.events.onShapeDone.fire({
                         x: topLeft[0],
                         y: topLeft[1],
@@ -851,7 +849,6 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
                 function(e) {
                     activeId = '';
                     offset = $(container).offset();
-                    console.log(JSON.stringify(offset) + ' e.pageX ' + e.pageX +  '  ' + e.pageY);
                     ox = Math.abs(offset.left - e.pageX);
                     oy = Math.abs(offset.top - e.pageY);
                     if (curRendering !== undefined) {
@@ -866,24 +863,21 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 
                     $.each(renderings,
                     function(i, o) {
-						// if((rendering.npt_start < options.application.getCurrentTime()))
+                        // if((rendering.npt_start < options.application.getCurrentTime()))
                         extents = o.getExtents();
                         dx = Math.abs(offset.left - e.pageX);
                         dy = Math.abs(offset.top - e.pageY);
-                        console.log('dx, dy: ' + dx + ', ' + dy);
-						console.log('x, y of shape ' + extents.x + ' , ' + extents.y);
-                        console.log('dwidth, dheight: ' + (extents.width) + ', ' + (extents.height));
+                        
                         // the '3' is for the drag boxes around the object
                         if ((dx < (extents.width + 4)) && (dy < (extents.height + 4))) {
                             activeId = o.id;
-                            console.log('found active id: ' + o.id);
                             if ((curRendering === undefined) || (o.id !== curRendering.id)) {
                                 curRendering = o;
                                 options.application.setActiveAnnotation(o.id);
                             }
                             // stop running loop
                             return false;
-                        } 
+                        }
                     });
                     if ((activeId.length === 0) && (curRendering !== undefined)) {
                         // No shapes selected - de-activate current rendering and all other possible renderings
@@ -1025,6 +1019,28 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 
         return that;
     };
+
+    Controller.namespace('PlayerControl');
+    Controller.PlayerControl.initController = function(options) {
+        var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.PlayerControl", options);
+        options = that.options;
+
+		that.applyBindings = function(binding, opts) {
+			
+		};
+		
+		that.start = function() {
+			options.player.play();
+		};
+		
+		that.pause = function() {
+			options.player.pause();
+		};
+		
+		return that;
+    };
+
+
 } (jQuery, MITHGrid, OAC));
 /*
 Presentations for canvas.js
@@ -1119,7 +1135,8 @@ Presentations for canvas.js
             h = $(container).height();
         }
 		that.events = that.events || {};	
-       
+       	that.events.onOpacityChange = MITHGrid.initEventFirer(false, false);
+		
  		keyboardBinding = keyBoardController.bind($('body'), {});
 
         $.extend(true, that.events, keyboardBinding.events);
@@ -1211,6 +1228,7 @@ Presentations for canvas.js
                 }
                 return val;
             };
+			
             searchAnnos = options.dataView.prepare(['!type']);
             annoIds = searchAnnos.evaluate('Annotation');
             $.each(annoIds,
@@ -1219,17 +1237,15 @@ Presentations for canvas.js
                 fadeIn = parseInt(anno.ntp_start, 10) - options.fadeStart;
                 fadeOut = parseInt(anno.ntp_end, 10) + options.fadeStart;
                 fOpac = calcOpacity(npt, fadeIn, fadeOut, parseInt(anno.ntp_start, 10), parseInt(anno.ntp_end, 10));
-
-                if (parseInt(anno.opacity, 10) !== fOpac) {
-                    allAnnosModel.updateItems([{
-                        id: anno.id,
-                        x: anno.x,
-                        y: anno.y,
-                        w: anno.w,
-                        h: anno.h,
-                        opacity: calcOpacity(npt, fadeIn, fadeOut, parseInt(anno.ntp_start, 10), parseInt(anno.ntp_end, 10))
-                    }]);
-                }
+                 options.application.dataStore.canvas.updateItems([{
+                     id: anno.id,
+                     x: anno.x,
+                     y: anno.y,
+                     w: anno.w,
+                     h: anno.h,
+                     opacity: fOpac
+                 }]);
+                // that.events.onOpacityChange.fire(fOpac);
             });
         };
 
@@ -1245,6 +1261,7 @@ Presentations for canvas.js
         that.render = function(c, m, i) {
             var rendering = superRender(c, m, i),
             tempStore;
+			console.log('rendering raphael item');
             if (rendering !== undefined) {
 
                 tempStore = m;
@@ -1258,7 +1275,11 @@ Presentations for canvas.js
             }
             return rendering;
         };
-
+		
+		that.renderItems = function() {
+			
+		};
+		
         superEventFocusChange = that.eventFocusChange;
 
         that.eventFocusChange = function(id) {
@@ -1574,12 +1595,11 @@ Presentations for canvas.js
 		type it is
 		*/
         app.insertShape = function(coords) {
-	console.log('insertShape ' + coords + ' ' + app.getCurrentTime());
             var shapeItem,
             idSearch = app.dataStore.canvas.prepare(['!type']),
             idCount = idSearch.evaluate('Annotation'),
-            ntp_start = app.getCurrentTime() - 1,
-            ntp_end = app.getCurrentTime() + 20,
+            ntp_start = app.getCurrentTime() - 5,
+            ntp_end = app.getCurrentTime() + 5,
             curMode = app.getCurrentMode(),
             shape;	
 			
@@ -1634,7 +1654,8 @@ Presentations for canvas.js
             ellipseButton,
             selectButton,
             sliderButton,
-            exportRectangle;
+            exportRectangle,
+			watchButton;
 
             calcRectangle = function(coords) {
                 var attrs = {};
@@ -1660,13 +1681,11 @@ Presentations for canvas.js
                 return itemCopy;
             };
             lensRectangle = function(container, view, model, itemId) {
-				console.log('lensRectangle  ' + container + '  ' + view + '  ' + model + '  ' + itemId);
                 // Note: Rectangle measurements x,y start at CENTER
                 var that = app.initShapeLens(container, view, model, itemId),
                 item = model.getItem(itemId),
                 c,
                 bbox;
-				console.log('canvas drawing rectangle :: lensRectangle');
                 // Accessing the view.canvas Object that was created in MITHGrid.Presentation.RaphSVG
                 c = view.canvas.rect(item.x[0] - (item.w[0] / 2), item.y[0] - (item.h[0] / 2), item.w[0], item.h[0]);
                 // fill and set opacity
@@ -1693,7 +1712,14 @@ Presentations for canvas.js
                     }
                     // Raphael object is updated
                 };
-
+				
+				
+				
+				// attach listener to opacity change event
+				view.events.onOpacityChange.addListener(function(n) {
+					$(c).attr('opacity', n);
+				});
+				
                 // calculate the extents (x, y, width, height)
                 // of this type of shape
                 that.getExtents = function() {
@@ -1704,7 +1730,7 @@ Presentations for canvas.js
                         height: c.attr("height")
                     };
                 };
-
+				
                 // register shape
                 that.shape = c;
                 return that;
@@ -1790,6 +1816,8 @@ Presentations for canvas.js
 
             selectButton = app.buttonFeature('buttongrouping', 'General', 'Select');
 			
+			watchButton = app.buttonFeature('buttongrouping', 'General', 'Watch');
+			
 			app.setCurrentTime(0);
 
         });
@@ -1819,6 +1847,17 @@ Presentations for canvas.js
                 app.setCurrentTime(options.playerobject.getPlayhead());
 				options.playerobject.onPlayheadUpdate(function(t) {
 					app.setCurrentTime((app.getCurrentTime() + 1));
+				});
+				
+				
+				// Stop player if drawing a shape
+				app.events.onCurrentModeChange.addListener(function(mode) {
+					console.log('mode: ' + mode);
+					if(mode !== 'Watch') {
+						options.playerobject.pause();
+					} else if(mode === 'Watch') {
+						options.playerobject.play();
+					}
 				});
             }
 

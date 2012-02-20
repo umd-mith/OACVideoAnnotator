@@ -302,12 +302,11 @@
 		type it is
 		*/
         app.insertShape = function(coords) {
-	console.log('insertShape ' + coords + ' ' + app.getCurrentTime());
             var shapeItem,
             idSearch = app.dataStore.canvas.prepare(['!type']),
             idCount = idSearch.evaluate('Annotation'),
-            ntp_start = app.getCurrentTime() - 1,
-            ntp_end = app.getCurrentTime() + 20,
+            ntp_start = app.getCurrentTime() - 5,
+            ntp_end = app.getCurrentTime() + 5,
             curMode = app.getCurrentMode(),
             shape;	
 			
@@ -362,7 +361,8 @@
             ellipseButton,
             selectButton,
             sliderButton,
-            exportRectangle;
+            exportRectangle,
+			watchButton;
 
             calcRectangle = function(coords) {
                 var attrs = {};
@@ -388,13 +388,11 @@
                 return itemCopy;
             };
             lensRectangle = function(container, view, model, itemId) {
-				console.log('lensRectangle  ' + container + '  ' + view + '  ' + model + '  ' + itemId);
                 // Note: Rectangle measurements x,y start at CENTER
                 var that = app.initShapeLens(container, view, model, itemId),
                 item = model.getItem(itemId),
                 c,
                 bbox;
-				console.log('canvas drawing rectangle :: lensRectangle');
                 // Accessing the view.canvas Object that was created in MITHGrid.Presentation.RaphSVG
                 c = view.canvas.rect(item.x[0] - (item.w[0] / 2), item.y[0] - (item.h[0] / 2), item.w[0], item.h[0]);
                 // fill and set opacity
@@ -421,7 +419,14 @@
                     }
                     // Raphael object is updated
                 };
-
+				
+				
+				
+				// attach listener to opacity change event
+				view.events.onOpacityChange.addListener(function(n) {
+					$(c).attr('opacity', n);
+				});
+				
                 // calculate the extents (x, y, width, height)
                 // of this type of shape
                 that.getExtents = function() {
@@ -432,7 +437,7 @@
                         height: c.attr("height")
                     };
                 };
-
+				
                 // register shape
                 that.shape = c;
                 return that;
@@ -518,6 +523,8 @@
 
             selectButton = app.buttonFeature('buttongrouping', 'General', 'Select');
 			
+			watchButton = app.buttonFeature('buttongrouping', 'General', 'Watch');
+			
 			app.setCurrentTime(0);
 
         });
@@ -547,6 +554,17 @@
                 app.setCurrentTime(options.playerobject.getPlayhead());
 				options.playerobject.onPlayheadUpdate(function(t) {
 					app.setCurrentTime((app.getCurrentTime() + 1));
+				});
+				
+				
+				// Stop player if drawing a shape
+				app.events.onCurrentModeChange.addListener(function(mode) {
+					console.log('mode: ' + mode);
+					if(mode !== 'Watch') {
+						options.playerobject.pause();
+					} else if(mode === 'Watch') {
+						options.playerobject.play();
+					}
 				});
             }
 

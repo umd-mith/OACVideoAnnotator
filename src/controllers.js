@@ -778,7 +778,6 @@
                     y = e.pageY - offset.top;
                     topLeft = [x, y];
                     mouseMode = 1;
-                    console.log('mousedown - canvasClickController ' + topLeft);
                     binding.events.onShapeStart.fire(topLeft);
                 });
 
@@ -800,7 +799,6 @@
                     if (bottomRight === undefined) {
                         bottomRight = [x + 5, y + 5];
                     }
-                    console.log('onShapeDone being called ' + topLeft[0] + ', ' + topLeft[1] + ', ' + bottomRight[0] + ', ' + bottomRight[1]);
                     binding.events.onShapeDone.fire({
                         x: topLeft[0],
                         y: topLeft[1],
@@ -819,7 +817,6 @@
                 function(e) {
                     activeId = '';
                     offset = $(container).offset();
-                    console.log(JSON.stringify(offset) + ' e.pageX ' + e.pageX +  '  ' + e.pageY);
                     ox = Math.abs(offset.left - e.pageX);
                     oy = Math.abs(offset.top - e.pageY);
                     if (curRendering !== undefined) {
@@ -834,24 +831,21 @@
 
                     $.each(renderings,
                     function(i, o) {
-						// if((rendering.npt_start < options.application.getCurrentTime()))
+                        // if((rendering.npt_start < options.application.getCurrentTime()))
                         extents = o.getExtents();
                         dx = Math.abs(offset.left - e.pageX);
                         dy = Math.abs(offset.top - e.pageY);
-                        console.log('dx, dy: ' + dx + ', ' + dy);
-						console.log('x, y of shape ' + extents.x + ' , ' + extents.y);
-                        console.log('dwidth, dheight: ' + (extents.width) + ', ' + (extents.height));
+                        
                         // the '3' is for the drag boxes around the object
                         if ((dx < (extents.width + 4)) && (dy < (extents.height + 4))) {
                             activeId = o.id;
-                            console.log('found active id: ' + o.id);
                             if ((curRendering === undefined) || (o.id !== curRendering.id)) {
                                 curRendering = o;
                                 options.application.setActiveAnnotation(o.id);
                             }
                             // stop running loop
                             return false;
-                        } 
+                        }
                     });
                     if ((activeId.length === 0) && (curRendering !== undefined)) {
                         // No shapes selected - de-activate current rendering and all other possible renderings
@@ -993,4 +987,26 @@
 
         return that;
     };
+
+    Controller.namespace('PlayerControl');
+    Controller.PlayerControl.initController = function(options) {
+        var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.PlayerControl", options);
+        options = that.options;
+
+		that.applyBindings = function(binding, opts) {
+			
+		};
+		
+		that.start = function() {
+			options.player.play();
+		};
+		
+		that.pause = function() {
+			options.player.pause();
+		};
+		
+		return that;
+    };
+
+
 } (jQuery, MITHGrid, OAC));
