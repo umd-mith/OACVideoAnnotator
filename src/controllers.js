@@ -264,7 +264,8 @@
                     // Attaching drag and resize handlers
                     handleSet.drag(
                     function(dx, dy) {
-                        // dragging here means that as element is dragged
+	console.log('resize');
+                        // dragging here means that the shape is being resized;
                         // the factorial determines in which direction the
                         // shape is pulled
                         shapeAttrs.w = Math.abs(extents.width + dx * factors.x);
