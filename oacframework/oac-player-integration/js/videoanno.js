@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Tue Feb 14 11:23:23 2012 -0500
+ *  Date: Sun Feb 26 10:58:53 2012 -0500
  *  
  * Educational Community License, Version 2.0
  * 
@@ -54,6 +54,7 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
             options.application.events.onActiveAnnotationChange.addListener(setActiveId);
 
             $(doc).keydown(function(e) {
+				if(options.application.getCurrentMode() === 'Editing') return;
                 if (activeId !== undefined || activeId !== '') {
                     // If backspace or delete is pressed,
                     // then it is interpreted as a
@@ -139,18 +140,21 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
             binding.events.onDelete.addListener(function(id) {
                 if (activeRendering !== undefined && activeRendering.eventDelete !== undefined) {
                     activeRendering.eventDelete(id);
+					binding.detachRendering();
                 }
             });
 
             // Function for applying a new shape to the bounding box
             binding.attachRendering = function(newRendering) {
-                binding.detachRendering();
+                
                 if (newRendering === undefined) {
-                    return;
-                }
+                    binding.detachRendering();
+					return;
+                } 
+				
+				if(handleSet.hide !== undefined) binding.detachRendering();
                 // register the rendering
                 activeRendering = newRendering;
-
                 calcFactors();
                 drawHandles();
             };
@@ -158,9 +162,6 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
             // Function to call in order to "de-activate" the edit box
             // (i.e. make it hidden)
             binding.detachRendering = function() {
-                if (typeof(activeRendering) === "undefined" || activeRendering === null) {
-                    return;
-                }
                 activeRendering = undefined;
                 handleSet.hide();
 
@@ -296,7 +297,9 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
                     // Attaching drag and resize handlers
                     handleSet.drag(
                     function(dx, dy) {
-                        // dragging here means that as element is dragged
+						// onmove function - handles dragging
+		
+                        // dragging here means that the shape is being resized;
                         // the factorial determines in which direction the
                         // shape is pulled
                         shapeAttrs.w = Math.abs(extents.width + dx * factors.x);
@@ -305,6 +308,7 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
                         handleAttrs.nh = shapeAttrs.h + (padding * 2);
                         handleAttrs.nx = (extents.x - (padding / 4)) - (handleAttrs.nw / 2);
                         handleAttrs.ny = (extents.y - (padding / 4)) - (handleAttrs.nh / 2);
+						
                         svgBBox.attr({
                             x: handleAttrs.nx,
                             y: handleAttrs.ny,
@@ -327,11 +331,15 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
                         }
                     },
                     function(x, y, e) {
+						// onstart function
                         var px,
                         py;
                         extents = activeRendering.getExtents();
                         ox = e.layerX;
                         oy = e.layerY;
+
+						// change mode
+						options.application.setCurrentMode('Drag');
                         // extents: x, y, width, height
                         px = (8 * (ox - extents.x) / extents.width) + 4;
                         py = (8 * (oy - extents.y) / extents.height) + 4;
@@ -356,14 +364,17 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
                         calcFactors();
                     },
                     function() {
+						// onend function
                         // update
                         var pos = {
                             width: shapeAttrs.w,
                             height: shapeAttrs.h
                         };
                         if (activeRendering !== undefined) {
-                            that.events.onResize.fire(activeRendering.id, pos);
+                            binding.events.onResize.fire(activeRendering.id, pos);
                         }
+						// change mode back
+						options.application.setCurrentMode('Select');
                     }
                     );
                 } else {
@@ -685,6 +696,7 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
                 $(bodyContent).hide();
                 bindingActive = true;
                 binding.events.onClick.fire(opts.itemId);
+				options.application.setCurrentMode('TextEdit');
             };
 
             editEnd = function() {
@@ -1261,7 +1273,6 @@ Presentations for canvas.js
         that.render = function(c, m, i) {
             var rendering = superRender(c, m, i),
             tempStore;
-			console.log('rendering raphael item');
             if (rendering !== undefined) {
 
                 tempStore = m;
@@ -1283,8 +1294,10 @@ Presentations for canvas.js
         superEventFocusChange = that.eventFocusChange;
 
         that.eventFocusChange = function(id) {
-            superEventFocusChange(id);
-            editBoundingBoxBinding.attachRendering(that.renderingFor(id));
+			if(options.application.getCurrentMode() === 'Select') {
+ 			   superEventFocusChange(id);
+			   editBoundingBoxBinding.attachRendering(that.renderingFor(id));
+			}
         };
 
         return that;
@@ -1698,7 +1711,7 @@ Presentations for canvas.js
                     // receiving the Object passed through
                     // model.updateItems in move()
                     try {
-                        if (item.x !== undefined && item.y !== undefined && item.w !== undefined && item.y !== undefined) {
+                        if (item.x !== undefined && item.y !== undefined && item.w !== undefined && item.h !== undefined) {
                             c.attr({
                                 x: item.x[0] - item.w[0] / 2,
                                 y: item.y[0] - item.h[0] / 2,
@@ -1852,7 +1865,6 @@ Presentations for canvas.js
 				
 				// Stop player if drawing a shape
 				app.events.onCurrentModeChange.addListener(function(mode) {
-					console.log('mode: ' + mode);
 					if(mode !== 'Watch') {
 						options.playerobject.pause();
 					} else if(mode === 'Watch') {
@@ -1896,7 +1908,8 @@ MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.AnnotationEditSelectionG
 	        onResize: null,
 	        onMove: null,
 	        onEdit: null,
-	        onDelete: null
+	        onDelete: null,
+			onCurrentModeChange: null
 	    }
 	}
 });

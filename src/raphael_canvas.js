@@ -217,7 +217,6 @@ Presentations for canvas.js
         that.render = function(c, m, i) {
             var rendering = superRender(c, m, i),
             tempStore;
-			console.log('rendering raphael item');
             if (rendering !== undefined) {
 
                 tempStore = m;
@@ -239,8 +238,10 @@ Presentations for canvas.js
         superEventFocusChange = that.eventFocusChange;
 
         that.eventFocusChange = function(id) {
-            superEventFocusChange(id);
-            editBoundingBoxBinding.attachRendering(that.renderingFor(id));
+			if(options.application.getCurrentMode() === 'Select') {
+ 			   superEventFocusChange(id);
+			   editBoundingBoxBinding.attachRendering(that.renderingFor(id));
+			}
         };
 
         return that;

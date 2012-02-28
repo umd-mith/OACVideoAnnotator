@@ -26,7 +26,8 @@ MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.AnnotationEditSelectionG
 	        onResize: null,
 	        onMove: null,
 	        onEdit: null,
-	        onDelete: null
+	        onDelete: null,
+			onCurrentModeChange: null
 	    }
 	}
 });

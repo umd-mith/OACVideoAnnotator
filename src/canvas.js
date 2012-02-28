@@ -405,7 +405,7 @@
                     // receiving the Object passed through
                     // model.updateItems in move()
                     try {
-                        if (item.x !== undefined && item.y !== undefined && item.w !== undefined && item.y !== undefined) {
+                        if (item.x !== undefined && item.y !== undefined && item.w !== undefined && item.h !== undefined) {
                             c.attr({
                                 x: item.x[0] - item.w[0] / 2,
                                 y: item.y[0] - item.h[0] / 2,
@@ -559,7 +559,6 @@
 				
 				// Stop player if drawing a shape
 				app.events.onCurrentModeChange.addListener(function(mode) {
-					console.log('mode: ' + mode);
 					if(mode !== 'Watch') {
 						options.playerobject.pause();
 					} else if(mode === 'Watch') {

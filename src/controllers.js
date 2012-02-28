@@ -22,6 +22,7 @@
             options.application.events.onActiveAnnotationChange.addListener(setActiveId);
 
             $(doc).keydown(function(e) {
+				if(options.application.getCurrentMode() === 'Editing') return;
                 if (activeId !== undefined || activeId !== '') {
                     // If backspace or delete is pressed,
                     // then it is interpreted as a
@@ -107,18 +108,21 @@
             binding.events.onDelete.addListener(function(id) {
                 if (activeRendering !== undefined && activeRendering.eventDelete !== undefined) {
                     activeRendering.eventDelete(id);
+					binding.detachRendering();
                 }
             });
 
             // Function for applying a new shape to the bounding box
             binding.attachRendering = function(newRendering) {
-                binding.detachRendering();
+                
                 if (newRendering === undefined) {
-                    return;
-                }
+                    binding.detachRendering();
+					return;
+                } 
+				
+				if(handleSet.hide !== undefined) binding.detachRendering();
                 // register the rendering
                 activeRendering = newRendering;
-
                 calcFactors();
                 drawHandles();
             };
@@ -126,9 +130,6 @@
             // Function to call in order to "de-activate" the edit box
             // (i.e. make it hidden)
             binding.detachRendering = function() {
-                if (typeof(activeRendering) === "undefined" || activeRendering === null) {
-                    return;
-                }
                 activeRendering = undefined;
                 handleSet.hide();
 
@@ -264,7 +265,8 @@
                     // Attaching drag and resize handlers
                     handleSet.drag(
                     function(dx, dy) {
-	console.log('resize');
+						// onmove function - handles dragging
+		
                         // dragging here means that the shape is being resized;
                         // the factorial determines in which direction the
                         // shape is pulled
@@ -274,6 +276,7 @@
                         handleAttrs.nh = shapeAttrs.h + (padding * 2);
                         handleAttrs.nx = (extents.x - (padding / 4)) - (handleAttrs.nw / 2);
                         handleAttrs.ny = (extents.y - (padding / 4)) - (handleAttrs.nh / 2);
+						
                         svgBBox.attr({
                             x: handleAttrs.nx,
                             y: handleAttrs.ny,
@@ -296,11 +299,15 @@
                         }
                     },
                     function(x, y, e) {
+						// onstart function
                         var px,
                         py;
                         extents = activeRendering.getExtents();
                         ox = e.layerX;
                         oy = e.layerY;
+
+						// change mode
+						options.application.setCurrentMode('Drag');
                         // extents: x, y, width, height
                         px = (8 * (ox - extents.x) / extents.width) + 4;
                         py = (8 * (oy - extents.y) / extents.height) + 4;
@@ -325,14 +332,17 @@
                         calcFactors();
                     },
                     function() {
+						// onend function
                         // update
                         var pos = {
                             width: shapeAttrs.w,
                             height: shapeAttrs.h
                         };
                         if (activeRendering !== undefined) {
-                            that.events.onResize.fire(activeRendering.id, pos);
+                            binding.events.onResize.fire(activeRendering.id, pos);
                         }
+						// change mode back
+						options.application.setCurrentMode('Select');
                     }
                     );
                 } else {
@@ -654,6 +664,7 @@
                 $(bodyContent).hide();
                 bindingActive = true;
                 binding.events.onClick.fire(opts.itemId);
+				options.application.setCurrentMode('TextEdit');
             };
 
             editEnd = function() {
