@@ -90,10 +90,10 @@ Presentations for canvas.js
             // to fit
             h = $(container).height();
         }
-		that.events = that.events || {};	
-       	that.events.onOpacityChange = MITHGrid.initEventFirer(false, false);
-		
- 		keyboardBinding = keyBoardController.bind($('body'), {});
+        that.events = that.events || {};
+        that.events.onOpacityChange = MITHGrid.initEventFirer(false, false);
+
+        keyboardBinding = keyBoardController.bind($('body'), {});
 
         $.extend(true, that.events, keyboardBinding.events);
 
@@ -184,7 +184,7 @@ Presentations for canvas.js
                 }
                 return val;
             };
-			
+
             searchAnnos = options.dataView.prepare(['!type']);
             annoIds = searchAnnos.evaluate('Annotation');
             $.each(annoIds,
@@ -193,14 +193,14 @@ Presentations for canvas.js
                 fadeIn = parseInt(anno.ntp_start, 10) - options.fadeStart;
                 fadeOut = parseInt(anno.ntp_end, 10) + options.fadeStart;
                 fOpac = calcOpacity(npt, fadeIn, fadeOut, parseInt(anno.ntp_start, 10), parseInt(anno.ntp_end, 10));
-                 options.application.dataStore.canvas.updateItems([{
-                     id: anno.id,
-                     x: anno.x,
-                     y: anno.y,
-                     w: anno.w,
-                     h: anno.h,
-                     opacity: fOpac
-                 }]);
+                options.application.dataStore.canvas.updateItems([{
+                    id: anno.id,
+                    x: anno.x,
+                    y: anno.y,
+                    w: anno.w,
+                    h: anno.h,
+                    opacity: fOpac
+                }]);
                 // that.events.onOpacityChange.fire(fOpac);
             });
         };
@@ -230,18 +230,18 @@ Presentations for canvas.js
             }
             return rendering;
         };
-		
-		that.renderItems = function() {
-			
-		};
-		
+
+        that.renderItems = function() {
+
+            };
+
         superEventFocusChange = that.eventFocusChange;
 
         that.eventFocusChange = function(id) {
-			if(options.application.getCurrentMode() === 'Select') {
- 			   superEventFocusChange(id);
-			   editBoundingBoxBinding.attachRendering(that.renderingFor(id));
-			}
+            if (options.application.getCurrentMode() === 'Select') {
+                superEventFocusChange(id);
+                editBoundingBoxBinding.attachRendering(that.renderingFor(id));
+            }
         };
 
         return that;

@@ -25,18 +25,18 @@
         app = MITHGrid.Application.initApp("OAC.Client.StreamingVideo", container,
         $.extend(true, {},
         {
-            viewSetup: 
-			// '<div class="mithgrid-toparea">' + 
-				'<div id="' + myCanvasId +  '" class="section-canvas"></div>' +
-			// '</div>' + 
-			'<div class="mithgrid-bottomarea">' + 
-				'<div id="sidebar' + myCanvasId + '" class="section-controls"></div>' +
-            	'<div class="section-annotations">' + 
-					'<div class="header">' +
-						'Annotations' +
-					'</div>' +
-				'</div>' +
-			'</div>',
+            viewSetup:
+            // '<div class="mithgrid-toparea">' +
+            '<div id="' + myCanvasId + '" class="section-canvas"></div>' +
+            // '</div>' +
+            '<div class="mithgrid-bottomarea">' +
+            '<div id="sidebar' + myCanvasId + '" class="section-controls"></div>' +
+            '<div class="section-annotations">' +
+            '<div class="header">' +
+            'Annotations' +
+            '</div>' +
+            '</div>' +
+            '</div>',
             presentations: {
                 raphsvg: {
                     container: "#" + myCanvasId,
@@ -52,7 +52,7 @@
                     lensKey: ['.shapeType']
                 },
                 annoItem: {
-					container: '.section-annotations',
+                    container: '.section-annotations',
                     lenses: {
                         //			Rectangle: textLens,
                         //			Ellipse: textLens
@@ -127,9 +127,9 @@
                 // getting the removeItems callback
                 that.shape.remove();
             };
-			
-			
-			
+
+
+
             return that;
         };
 
@@ -148,6 +148,8 @@
             '<p class="bodyContentInstructions">Double click here to open edit window.</p>' +
             '<div class="editArea">' +
             '<textarea class="bodyContentTextArea"></textarea>' +
+            '<div id="editUpdate" class="button update">Update</div>' +
+            '<div id="editDelete" class="button delete">Delete</div>' +
             '</div>' +
             '<div class="body">' +
             '<p class="bodyContent"></p>' +
@@ -308,10 +310,10 @@
             ntp_start = app.getCurrentTime() - 5,
             ntp_end = app.getCurrentTime() + 5,
             curMode = app.getCurrentMode(),
-            shape;	
-			
+            shape;
+
             shape = app.shapeTypes[curMode].calc(coords);
-			
+
             shapeItem = {
                 id: "anno" + idCount.length,
                 type: "Annotation",
@@ -362,7 +364,7 @@
             selectButton,
             sliderButton,
             exportRectangle,
-			watchButton;
+            watchButton;
 
             calcRectangle = function(coords) {
                 var attrs = {};
@@ -419,14 +421,14 @@
                     }
                     // Raphael object is updated
                 };
-				
-				
-				
-				// attach listener to opacity change event
-				view.events.onOpacityChange.addListener(function(n) {
-					$(c).attr('opacity', n);
-				});
-				
+
+
+
+                // attach listener to opacity change event
+                view.events.onOpacityChange.addListener(function(n) {
+                    $(c).attr('opacity', n);
+                });
+
                 // calculate the extents (x, y, width, height)
                 // of this type of shape
                 that.getExtents = function() {
@@ -437,12 +439,12 @@
                         height: c.attr("height")
                     };
                 };
-				
+
                 // register shape
                 that.shape = c;
                 return that;
             };
-			
+
             app.addShapeType("Rectangle",
             {
                 calc: calcRectangle,
@@ -522,10 +524,10 @@
             ellipseButton = app.buttonFeature('buttongrouping', 'Shapes', 'Ellipse');
 
             selectButton = app.buttonFeature('buttongrouping', 'General', 'Select');
-			
-			watchButton = app.buttonFeature('buttongrouping', 'General', 'Watch');
-			
-			app.setCurrentTime(0);
+
+            watchButton = app.buttonFeature('buttongrouping', 'General', 'Watch');
+
+            app.setCurrentTime(0);
 
         });
 
@@ -552,19 +554,19 @@
                 app.setPlayer([xy[0], xy[1], wh[0], wh[1]]);
 
                 app.setCurrentTime(options.playerobject.getPlayhead());
-				options.playerobject.onPlayheadUpdate(function(t) {
-					app.setCurrentTime((app.getCurrentTime() + 1));
-				});
-				
-				
-				// Stop player if drawing a shape
-				app.events.onCurrentModeChange.addListener(function(mode) {
-					if(mode !== 'Watch') {
-						options.playerobject.pause();
-					} else if(mode === 'Watch') {
-						options.playerobject.play();
-					}
-				});
+                options.playerobject.onPlayheadUpdate(function(t) {
+                    app.setCurrentTime((app.getCurrentTime() + 1));
+                });
+
+
+                // Stop player if drawing a shape
+                app.events.onCurrentModeChange.addListener(function(mode) {
+                    if (mode !== 'Watch') {
+                        options.playerobject.pause();
+                    } else if (mode === 'Watch') {
+                        options.playerobject.play();
+                    }
+                });
             }
 
         });

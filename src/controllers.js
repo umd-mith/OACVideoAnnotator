@@ -22,7 +22,7 @@
             options.application.events.onActiveAnnotationChange.addListener(setActiveId);
 
             $(doc).keydown(function(e) {
-				if(options.application.getCurrentMode() === 'Editing') return;
+                if (options.application.getCurrentMode() === 'Editing') return;
                 if (activeId !== undefined || activeId !== '') {
                     // If backspace or delete is pressed,
                     // then it is interpreted as a
@@ -108,19 +108,19 @@
             binding.events.onDelete.addListener(function(id) {
                 if (activeRendering !== undefined && activeRendering.eventDelete !== undefined) {
                     activeRendering.eventDelete(id);
-					binding.detachRendering();
+                    binding.detachRendering();
                 }
             });
 
             // Function for applying a new shape to the bounding box
             binding.attachRendering = function(newRendering) {
-                
+
                 if (newRendering === undefined) {
                     binding.detachRendering();
-					return;
-                } 
-				
-				if(handleSet.hide !== undefined) binding.detachRendering();
+                    return;
+                }
+
+                if (handleSet.hide !== undefined) binding.detachRendering();
                 // register the rendering
                 activeRendering = newRendering;
                 calcFactors();
@@ -265,8 +265,7 @@
                     // Attaching drag and resize handlers
                     handleSet.drag(
                     function(dx, dy) {
-						// onmove function - handles dragging
-		
+                        // onmove function - handles dragging
                         // dragging here means that the shape is being resized;
                         // the factorial determines in which direction the
                         // shape is pulled
@@ -276,7 +275,7 @@
                         handleAttrs.nh = shapeAttrs.h + (padding * 2);
                         handleAttrs.nx = (extents.x - (padding / 4)) - (handleAttrs.nw / 2);
                         handleAttrs.ny = (extents.y - (padding / 4)) - (handleAttrs.nh / 2);
-						
+
                         svgBBox.attr({
                             x: handleAttrs.nx,
                             y: handleAttrs.ny,
@@ -299,15 +298,15 @@
                         }
                     },
                     function(x, y, e) {
-						// onstart function
+                        // onstart function
                         var px,
                         py;
                         extents = activeRendering.getExtents();
                         ox = e.layerX;
                         oy = e.layerY;
 
-						// change mode
-						options.application.setCurrentMode('Drag');
+                        // change mode
+                        options.application.setCurrentMode('Drag');
                         // extents: x, y, width, height
                         px = (8 * (ox - extents.x) / extents.width) + 4;
                         py = (8 * (oy - extents.y) / extents.height) + 4;
@@ -332,7 +331,7 @@
                         calcFactors();
                     },
                     function() {
-						// onend function
+                        // onend function
                         // update
                         var pos = {
                             width: shapeAttrs.w,
@@ -341,8 +340,8 @@
                         if (activeRendering !== undefined) {
                             binding.events.onResize.fire(activeRendering.id, pos);
                         }
-						// change mode back
-						options.application.setCurrentMode('Select');
+                        // change mode back
+                        options.application.setCurrentMode('Select');
                     }
                     );
                 } else {
@@ -664,13 +663,14 @@
                 $(bodyContent).hide();
                 bindingActive = true;
                 binding.events.onClick.fire(opts.itemId);
-				options.application.setCurrentMode('TextEdit');
+                options.application.setCurrentMode('TextEdit');
             };
 
             editEnd = function() {
                 $(editArea).hide();
                 $(bodyContent).show();
                 bindingActive = false;
+                options.application.setCurrentMode('Watch');
             };
 
             editUpdate = function(e) {
@@ -694,6 +694,21 @@
             function(e) {
                 // binding.events.onClick.fire(opts.itemId);
                 options.application.setActiveAnnotation(opts.itemId);
+            });
+
+            $(updateButton).bind('click',
+            function(e) {
+                binding.events.onUpdate.fire(opts.itemId, $(textArea).val());
+                // close down the annotatione edit area
+                $(editArea).hide();
+                $(bodyContent).show();
+            });
+
+            $(deleteButton).bind('click',
+            function(e) {
+                binding.events.onDelete.fire(opts.itemId);
+                // remove DOM elements
+                $(annoEl).remove();
             });
 
             options.application.events.onActiveAnnotationChange.addListener(function(id) {
@@ -847,7 +862,7 @@
                         extents = o.getExtents();
                         dx = Math.abs(offset.left - e.pageX);
                         dy = Math.abs(offset.top - e.pageY);
-                        
+
                         // the '3' is for the drag boxes around the object
                         if ((dx < (extents.width + 4)) && (dy < (extents.height + 4))) {
                             activeId = o.id;
@@ -1005,19 +1020,19 @@
         var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.PlayerControl", options);
         options = that.options;
 
-		that.applyBindings = function(binding, opts) {
-			
-		};
-		
-		that.start = function() {
-			options.player.play();
-		};
-		
-		that.pause = function() {
-			options.player.pause();
-		};
-		
-		return that;
+        that.applyBindings = function(binding, opts) {
+
+            };
+
+        that.start = function() {
+            options.player.play();
+        };
+
+        that.pause = function() {
+            options.player.pause();
+        };
+
+        return that;
     };
 
 
