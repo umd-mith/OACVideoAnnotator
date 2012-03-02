@@ -22,7 +22,9 @@
             options.application.events.onActiveAnnotationChange.addListener(setActiveId);
 
             $(doc).keydown(function(e) {
-                if (options.application.getCurrentMode() === 'Editing') return;
+                if (options.application.getCurrentMode() === 'Editing') {
+                    return;
+                }
                 if (activeId !== undefined || activeId !== '') {
                     // If backspace or delete is pressed,
                     // then it is interpreted as a
@@ -112,15 +114,21 @@
                 }
             });
 
+            options.application.events.onCurrentModeChange.addListener(function(newMode) {
+                if (newMode !== 'Select' && newMode !== 'Drag') {
+					console.log('newMode ' + newMode + ' detachRendering');
+                    binding.detachRendering();
+                }
+            });
+
             // Function for applying a new shape to the bounding box
             binding.attachRendering = function(newRendering) {
+                binding.detachRendering();
 
                 if (newRendering === undefined) {
-                    binding.detachRendering();
                     return;
                 }
 
-                if (handleSet.hide !== undefined) binding.detachRendering();
                 // register the rendering
                 activeRendering = newRendering;
                 calcFactors();
@@ -130,6 +138,9 @@
             // Function to call in order to "de-activate" the edit box
             // (i.e. make it hidden)
             binding.detachRendering = function() {
+                if ($.isEmptyObject(handleSet)) {
+                    return;
+                }
                 activeRendering = undefined;
                 handleSet.hide();
 
@@ -656,21 +667,21 @@
             editButton = binding.locate('editbutton'),
             updateButton = binding.locate('updatebutton'),
             deleteButton = binding.locate('deletebutton'),
-            bindingActive = false;
+            bindingActive = false,
+            prevMode;
 
             editStart = function() {
                 $(editArea).show();
                 $(bodyContent).hide();
                 bindingActive = true;
                 binding.events.onClick.fire(opts.itemId);
-                options.application.setCurrentMode('TextEdit');
             };
 
             editEnd = function() {
                 $(editArea).hide();
                 $(bodyContent).show();
                 bindingActive = false;
-                options.application.setCurrentMode('Watch');
+				
             };
 
             editUpdate = function(e) {
@@ -685,8 +696,12 @@
                 e.preventDefault();
                 if (bindingActive) {
                     editEnd();
+
+	                options.application.setCurrentMode(prevMode || '');
                 } else {
                     editStart();
+					prevMode = options.application.getCurrentMode();
+	                options.application.setCurrentMode('TextEdit');
                 }
             });
 
@@ -699,9 +714,7 @@
             $(updateButton).bind('click',
             function(e) {
                 binding.events.onUpdate.fire(opts.itemId, $(textArea).val());
-                // close down the annotatione edit area
-                $(editArea).hide();
-                $(bodyContent).show();
+                editEnd();
             });
 
             $(deleteButton).bind('click',
@@ -720,6 +733,11 @@
                 }
             });
 
+            options.application.events.onCurrentModeChange.addListener(function(newMode) {
+                if (newMode !== 'TextEdit') {
+                    editEnd();
+                }
+            });
         };
         return that;
     };
@@ -858,11 +876,11 @@
 
                     $.each(renderings,
                     function(i, o) {
-                        // if((rendering.npt_start < options.application.getCurrentTime()))
+
                         extents = o.getExtents();
                         dx = Math.abs(offset.left - e.pageX);
                         dy = Math.abs(offset.top - e.pageY);
-
+                       
                         // the '3' is for the drag boxes around the object
                         if ((dx < (extents.width + 4)) && (dy < (extents.height + 4))) {
                             activeId = o.id;
@@ -925,7 +943,7 @@
 			onCurrentModeChange: if != id passed, deactivate, else do nothing
 			*/
             buttonEl = binding.locate('button');
-
+			console.log('opts.action: ' + opts.action);
             $(buttonEl).live('mousedown',
             function(e) {
                 if (active === false) {
@@ -940,11 +958,9 @@
             });
 
             onCurrentModeChangeHandle = function(action) {
-                if (id === '') {
-                    // set to nothing
-                    active = false;
-                    $(buttonEl).removeClass("active");
-                } else if (action === options.action) {
+		
+        		console.log('opts.action: ' + opts.action + '  action: ' + action);
+               	if (action === options.action) {
                     active = true;
                     $(buttonEl).addClass('active');
                 } else {

@@ -190,6 +190,12 @@
             };
 
             annoEvents.events.onClick.addListener(app.setActiveAnnotation);
+			annoEvents.events.onDelete.addListener(function(id) {
+				if(id === itemId) {
+					// delete entire annotation
+					app.dataStore.canvas.removeItems([itemId]);
+				}
+			});
             annoEvents.events.onUpdate.addListener(that.eventUpdate);
 
             that.update = function(item) {
@@ -421,8 +427,6 @@
                     }
                     // Raphael object is updated
                 };
-
-
 
                 // attach listener to opacity change event
                 view.events.onOpacityChange.addListener(function(n) {

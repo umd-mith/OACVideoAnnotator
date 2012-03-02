@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Tue Feb 28 16:28:35 2012 -0500
+ *  Date: Wed Feb 29 12:12:48 2012 -0500
  *  
  * Educational Community License, Version 2.0
  * 
@@ -54,7 +54,9 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
             options.application.events.onActiveAnnotationChange.addListener(setActiveId);
 
             $(doc).keydown(function(e) {
-                if (options.application.getCurrentMode() === 'Editing') return;
+                if (options.application.getCurrentMode() === 'Editing') {
+                    return;
+                }
                 if (activeId !== undefined || activeId !== '') {
                     // If backspace or delete is pressed,
                     // then it is interpreted as a
@@ -144,15 +146,21 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
                 }
             });
 
+            options.application.events.onCurrentModeChange.addListener(function(newMode) {
+                if (newMode !== 'Select' && newMode !== 'Drag') {
+					console.log('newMode ' + newMode + ' detachRendering');
+                    binding.detachRendering();
+                }
+            });
+
             // Function for applying a new shape to the bounding box
             binding.attachRendering = function(newRendering) {
+                binding.detachRendering();
 
                 if (newRendering === undefined) {
-                    binding.detachRendering();
                     return;
                 }
 
-                if (handleSet.hide !== undefined) binding.detachRendering();
                 // register the rendering
                 activeRendering = newRendering;
                 calcFactors();
@@ -162,6 +170,9 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
             // Function to call in order to "de-activate" the edit box
             // (i.e. make it hidden)
             binding.detachRendering = function() {
+                if ($.isEmptyObject(handleSet)) {
+                    return;
+                }
                 activeRendering = undefined;
                 handleSet.hide();
 
@@ -688,21 +699,21 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
             editButton = binding.locate('editbutton'),
             updateButton = binding.locate('updatebutton'),
             deleteButton = binding.locate('deletebutton'),
-            bindingActive = false;
+            bindingActive = false,
+            prevMode;
 
             editStart = function() {
                 $(editArea).show();
                 $(bodyContent).hide();
                 bindingActive = true;
                 binding.events.onClick.fire(opts.itemId);
-                options.application.setCurrentMode('TextEdit');
             };
 
             editEnd = function() {
                 $(editArea).hide();
                 $(bodyContent).show();
                 bindingActive = false;
-                options.application.setCurrentMode('Watch');
+				
             };
 
             editUpdate = function(e) {
@@ -717,8 +728,12 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
                 e.preventDefault();
                 if (bindingActive) {
                     editEnd();
+
+	                options.application.setCurrentMode(prevMode || '');
                 } else {
                     editStart();
+					prevMode = options.application.getCurrentMode();
+	                options.application.setCurrentMode('TextEdit');
                 }
             });
 
@@ -731,9 +746,7 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
             $(updateButton).bind('click',
             function(e) {
                 binding.events.onUpdate.fire(opts.itemId, $(textArea).val());
-                // close down the annotatione edit area
-                $(editArea).hide();
-                $(bodyContent).show();
+                editEnd();
             });
 
             $(deleteButton).bind('click',
@@ -752,6 +765,11 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
                 }
             });
 
+            options.application.events.onCurrentModeChange.addListener(function(newMode) {
+                if (newMode !== 'TextEdit') {
+                    editEnd();
+                }
+            });
         };
         return that;
     };
@@ -890,11 +908,11 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 
                     $.each(renderings,
                     function(i, o) {
-                        // if((rendering.npt_start < options.application.getCurrentTime()))
+
                         extents = o.getExtents();
                         dx = Math.abs(offset.left - e.pageX);
                         dy = Math.abs(offset.top - e.pageY);
-
+                       
                         // the '3' is for the drag boxes around the object
                         if ((dx < (extents.width + 4)) && (dy < (extents.height + 4))) {
                             activeId = o.id;
@@ -957,7 +975,7 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 			onCurrentModeChange: if != id passed, deactivate, else do nothing
 			*/
             buttonEl = binding.locate('button');
-
+			console.log('opts.action: ' + opts.action);
             $(buttonEl).live('mousedown',
             function(e) {
                 if (active === false) {
@@ -972,11 +990,9 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
             });
 
             onCurrentModeChangeHandle = function(action) {
-                if (id === '') {
-                    // set to nothing
-                    active = false;
-                    $(buttonEl).removeClass("active");
-                } else if (action === options.action) {
+		
+        		console.log('opts.action: ' + opts.action + '  action: ' + action);
+               	if (action === options.action) {
                     active = true;
                     $(buttonEl).addClass('active');
                 } else {
@@ -1272,7 +1288,6 @@ Presentations for canvas.js
                     h: anno.h,
                     opacity: fOpac
                 }]);
-                // that.events.onOpacityChange.fire(fOpac);
             });
         };
 
@@ -1284,7 +1299,10 @@ Presentations for canvas.js
         options.application.events.onPlayerChange.addListener(function(args) {
             initCanvas(args);
         });
-
+		options.application.dataStore.canvas.events.onModelChange.addListener(function() {
+			editBoundingBoxBinding.detachRendering();
+		});
+		
         that.render = function(c, m, i) {
             var rendering = superRender(c, m, i),
             tempStore;
@@ -1297,6 +1315,7 @@ Presentations for canvas.js
                 }
                 allAnnosModel = tempStore;
                 searchAnnos = options.dataView.prepare(['!type']);
+				
                 canvasBinding.registerRendering(rendering);
             }
             return rendering;
@@ -1511,6 +1530,12 @@ Presentations for canvas.js
             };
 
             annoEvents.events.onClick.addListener(app.setActiveAnnotation);
+			annoEvents.events.onDelete.addListener(function(id) {
+				if(id === itemId) {
+					// delete entire annotation
+					app.dataStore.canvas.removeItems([itemId]);
+				}
+			});
             annoEvents.events.onUpdate.addListener(that.eventUpdate);
 
             that.update = function(item) {
@@ -1742,8 +1767,6 @@ Presentations for canvas.js
                     }
                     // Raphael object is updated
                 };
-
-
 
                 // attach listener to opacity change event
                 view.events.onOpacityChange.addListener(function(n) {

@@ -201,7 +201,6 @@ Presentations for canvas.js
                     h: anno.h,
                     opacity: fOpac
                 }]);
-                // that.events.onOpacityChange.fire(fOpac);
             });
         };
 
@@ -213,7 +212,10 @@ Presentations for canvas.js
         options.application.events.onPlayerChange.addListener(function(args) {
             initCanvas(args);
         });
-
+		options.application.dataStore.canvas.events.onModelChange.addListener(function() {
+			editBoundingBoxBinding.detachRendering();
+		});
+		
         that.render = function(c, m, i) {
             var rendering = superRender(c, m, i),
             tempStore;
@@ -226,6 +228,7 @@ Presentations for canvas.js
                 }
                 allAnnosModel = tempStore;
                 searchAnnos = options.dataView.prepare(['!type']);
+				
                 canvasBinding.registerRendering(rendering);
             }
             return rendering;
