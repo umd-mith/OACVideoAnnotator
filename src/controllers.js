@@ -116,7 +116,6 @@
 
             options.application.events.onCurrentModeChange.addListener(function(newMode) {
                 if (newMode !== 'Select' && newMode !== 'Drag') {
-					console.log('newMode ' + newMode + ' detachRendering');
                     binding.detachRendering();
                 }
             });
@@ -715,6 +714,7 @@
             function(e) {
                 binding.events.onUpdate.fire(opts.itemId, $(textArea).val());
                 editEnd();
+				options.application.setCurrentMode(prevMode);
             });
 
             $(deleteButton).bind('click',
@@ -943,7 +943,7 @@
 			onCurrentModeChange: if != id passed, deactivate, else do nothing
 			*/
             buttonEl = binding.locate('button');
-			console.log('opts.action: ' + opts.action);
+			
             $(buttonEl).live('mousedown',
             function(e) {
                 if (active === false) {
@@ -959,7 +959,6 @@
 
             onCurrentModeChangeHandle = function(action) {
 		
-        		console.log('opts.action: ' + opts.action + '  action: ' + action);
                	if (action === options.action) {
                     active = true;
                     $(buttonEl).addClass('active');

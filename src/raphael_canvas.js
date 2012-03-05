@@ -66,7 +66,7 @@ Presentations for canvas.js
         searchAnnos,
         allAnnosModel,
         initCanvas,
-        cachedRendering;
+        cachedRendering, xy, wh;
 
         options = that.options;
 
@@ -106,7 +106,7 @@ Presentations for canvas.js
         // @h: Integer value for height of the SVG canvas
         // Create canvas at xy and width height
         that.canvas = new Raphael($(container), w, h);
-
+		
         // attach binding
         canvasBinding = canvasController.bind($('body'), {
             closeEnough: 5,
@@ -141,25 +141,26 @@ Presentations for canvas.js
             options.application.insertShape(shape);
         });
 
-        initCanvas = function(args) {
+        changeCanvasCoordinates = function(args) {
             if (args !== undefined) {
                 // player passes args of x,y and width, height
-                // Move canvas SVG to this location
-                $('svg').css({
-                    left: (parseInt(args[0], 10) + 'px'),
-                    top: (parseInt(args[1], 10) + 'px'),
-                    width: args[2],
-                    height: args[3]
-                });
-
-
+                xy = args.getcoordinates();
+	            wh = args.getsize();
                 // move container and change size
                 $(container).css({
-                    left: (parseInt(args[0], 10) + 'px'),
-                    top: (parseInt(args[1], 10) + 'px'),
-                    width: args[2],
-                    height: args[3]
+                    left: (parseInt(xy[0], 10) + 'px'),
+                    top: (parseInt(xy[1], 10) + 'px'),
+                    width: wh[0],
+                    height: wh[1]
                 });
+				// Move canvas SVG to this location
+				$('svg').css({
+                    left: (parseInt(xy[0], 10) + 'px'),
+                    top: (parseInt(xy[1], 10) + 'px'),
+                    width: wh[0],
+                    height: wh[1]
+                });
+
             }
         };
 
@@ -209,9 +210,7 @@ Presentations for canvas.js
         superRender = that.render;
 
         options.application.events.onCurrentTimeChange.addListener(eventCurrentTimeChange);
-        options.application.events.onPlayerChange.addListener(function(args) {
-            initCanvas(args);
-        });
+        options.application.events.onPlayerChange.addListener(changeCanvasCoordinates);
 		options.application.dataStore.canvas.events.onModelChange.addListener(function() {
 			editBoundingBoxBinding.detachRendering();
 		});

@@ -190,12 +190,12 @@
             };
 
             annoEvents.events.onClick.addListener(app.setActiveAnnotation);
-			annoEvents.events.onDelete.addListener(function(id) {
-				if(id === itemId) {
-					// delete entire annotation
-					app.dataStore.canvas.removeItems([itemId]);
-				}
-			});
+            annoEvents.events.onDelete.addListener(function(id) {
+                if (id === itemId) {
+                    // delete entire annotation
+                    app.dataStore.canvas.removeItems([itemId]);
+                }
+            });
             annoEvents.events.onUpdate.addListener(that.eventUpdate);
 
             that.update = function(item) {
@@ -336,6 +336,16 @@
         };
 
         /*
+		Function for adding video player controller
+		*/
+        app.addPlayerController = function(obj) {
+            if (obj !== undefined && obj.start !== undefined && obj.stop !== undefined && obj.getcoordinates !== undefined) {
+
+                }
+        };
+
+
+        /*
 		Exports all annotation data as JSON. All 
 		SVG data is converted to generic units
 		*/
@@ -357,6 +367,21 @@
             app.events.onCurrentTimeChange.addListener(function(t) {
                 // five seconds on either side of the current time
                 app.dataView.currentAnnotations.setKeyRange(t - 5, t + 5);
+            });
+            app.events.onPlayerChange.addListener(function(playerobject) {
+                app.setCurrentTime(playerobject.getPlayhead());
+                playerobject.onPlayheadUpdate(function(t) {
+                    app.setCurrentTime((app.getCurrentTime() + 1));
+                });
+
+                app.events.onCurrentModeChange.addListener(function(nmode) {
+                    if (nmode !== 'Watch') {
+                        playerobject.pause();
+                    } else if (nmode === 'Watch') {
+                        playerobject.play();
+                    }
+                });
+
             });
         });
 
@@ -552,26 +577,7 @@
 
             });
 			*/
-            if (options.playerobject !== undefined) {
-                xy = options.playerobject.getcoordinates();
-                wh = options.playerobject.getsize();
-                app.setPlayer([xy[0], xy[1], wh[0], wh[1]]);
 
-                app.setCurrentTime(options.playerobject.getPlayhead());
-                options.playerobject.onPlayheadUpdate(function(t) {
-                    app.setCurrentTime((app.getCurrentTime() + 1));
-                });
-
-
-                // Stop player if drawing a shape
-                app.events.onCurrentModeChange.addListener(function(mode) {
-                    if (mode !== 'Watch') {
-                        options.playerobject.pause();
-                    } else if (mode === 'Watch') {
-                        options.playerobject.play();
-                    }
-                });
-            }
 
         });
 

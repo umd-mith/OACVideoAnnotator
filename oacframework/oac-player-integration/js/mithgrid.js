@@ -3090,7 +3090,7 @@
           return _results;
         });
       }
-      that.run = function() {
+      that.run = function(_userfn) {
         return $(document).ready(function() {
           var fn, _i, _len;
           for (_i = 0, _len = onReady.length; _i < _len; _i++) {
@@ -3098,6 +3098,9 @@
             fn();
           }
           onReady = [];
+		  
+		  _userfn();  
+		
           return that.ready = function(fn) {
             return setTimeout(fn, 0);
           };

@@ -12,13 +12,15 @@ var initPlugin = function() {
 	initStreamingVideoApp = function(playerobj) {
 		// Create Raphael canvas application controls
 		raphApp = OAC.Client.StreamingVideo.initApp("#content-container", {
-			playerobject: playerobj,
 			base: "http://www.shared-canvas.org/impl/demo1/res/",
 			manifest: "http://www.shared-canvas.org/impl/demo1/res/Manifest.xml"
 		});
-	
+		
 		// creating Raphael canvas application
-		raphApp.run();
+		raphApp.run(function() {
+			console.log('runtime');
+			raphApp.setPlayer(playerobj);
+		});
 	};
 	
 	// setting up listener for when a new player is created

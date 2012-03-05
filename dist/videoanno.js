@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Wed Feb 29 12:12:48 2012 -0500
+ *  Date: Fri Mar 2 16:02:39 2012 -0500
  *  
  * Educational Community License, Version 2.0
  * 
@@ -148,7 +148,6 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 
             options.application.events.onCurrentModeChange.addListener(function(newMode) {
                 if (newMode !== 'Select' && newMode !== 'Drag') {
-					console.log('newMode ' + newMode + ' detachRendering');
                     binding.detachRendering();
                 }
             });
@@ -747,6 +746,7 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
             function(e) {
                 binding.events.onUpdate.fire(opts.itemId, $(textArea).val());
                 editEnd();
+				options.application.setCurrentMode(prevMode);
             });
 
             $(deleteButton).bind('click',
@@ -975,7 +975,7 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 			onCurrentModeChange: if != id passed, deactivate, else do nothing
 			*/
             buttonEl = binding.locate('button');
-			console.log('opts.action: ' + opts.action);
+			
             $(buttonEl).live('mousedown',
             function(e) {
                 if (active === false) {
@@ -991,7 +991,6 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 
             onCurrentModeChangeHandle = function(action) {
 		
-        		console.log('opts.action: ' + opts.action + '  action: ' + action);
                	if (action === options.action) {
                     active = true;
                     $(buttonEl).addClass('active');
@@ -1153,7 +1152,7 @@ Presentations for canvas.js
         searchAnnos,
         allAnnosModel,
         initCanvas,
-        cachedRendering;
+        cachedRendering, xy, wh;
 
         options = that.options;
 
@@ -1193,7 +1192,7 @@ Presentations for canvas.js
         // @h: Integer value for height of the SVG canvas
         // Create canvas at xy and width height
         that.canvas = new Raphael($(container), w, h);
-
+		
         // attach binding
         canvasBinding = canvasController.bind($('body'), {
             closeEnough: 5,
@@ -1228,25 +1227,26 @@ Presentations for canvas.js
             options.application.insertShape(shape);
         });
 
-        initCanvas = function(args) {
+        changeCanvasCoordinates = function(args) {
             if (args !== undefined) {
                 // player passes args of x,y and width, height
-                // Move canvas SVG to this location
-                $('svg').css({
-                    left: (parseInt(args[0], 10) + 'px'),
-                    top: (parseInt(args[1], 10) + 'px'),
-                    width: args[2],
-                    height: args[3]
-                });
-
-
+                xy = args.getcoordinates();
+	            wh = args.getsize();
                 // move container and change size
                 $(container).css({
-                    left: (parseInt(args[0], 10) + 'px'),
-                    top: (parseInt(args[1], 10) + 'px'),
-                    width: args[2],
-                    height: args[3]
+                    left: (parseInt(xy[0], 10) + 'px'),
+                    top: (parseInt(xy[1], 10) + 'px'),
+                    width: wh[0],
+                    height: wh[1]
                 });
+				// Move canvas SVG to this location
+				$('svg').css({
+                    left: (parseInt(xy[0], 10) + 'px'),
+                    top: (parseInt(xy[1], 10) + 'px'),
+                    width: wh[0],
+                    height: wh[1]
+                });
+
             }
         };
 
@@ -1296,9 +1296,7 @@ Presentations for canvas.js
         superRender = that.render;
 
         options.application.events.onCurrentTimeChange.addListener(eventCurrentTimeChange);
-        options.application.events.onPlayerChange.addListener(function(args) {
-            initCanvas(args);
-        });
+        options.application.events.onPlayerChange.addListener(changeCanvasCoordinates);
 		options.application.dataStore.canvas.events.onModelChange.addListener(function() {
 			editBoundingBoxBinding.detachRendering();
 		});
@@ -1530,12 +1528,12 @@ Presentations for canvas.js
             };
 
             annoEvents.events.onClick.addListener(app.setActiveAnnotation);
-			annoEvents.events.onDelete.addListener(function(id) {
-				if(id === itemId) {
-					// delete entire annotation
-					app.dataStore.canvas.removeItems([itemId]);
-				}
-			});
+            annoEvents.events.onDelete.addListener(function(id) {
+                if (id === itemId) {
+                    // delete entire annotation
+                    app.dataStore.canvas.removeItems([itemId]);
+                }
+            });
             annoEvents.events.onUpdate.addListener(that.eventUpdate);
 
             that.update = function(item) {
@@ -1676,6 +1674,16 @@ Presentations for canvas.js
         };
 
         /*
+		Function for adding video player controller
+		*/
+        app.addPlayerController = function(obj) {
+            if (obj !== undefined && obj.start !== undefined && obj.stop !== undefined && obj.getcoordinates !== undefined) {
+
+                }
+        };
+
+
+        /*
 		Exports all annotation data as JSON. All 
 		SVG data is converted to generic units
 		*/
@@ -1697,6 +1705,21 @@ Presentations for canvas.js
             app.events.onCurrentTimeChange.addListener(function(t) {
                 // five seconds on either side of the current time
                 app.dataView.currentAnnotations.setKeyRange(t - 5, t + 5);
+            });
+            app.events.onPlayerChange.addListener(function(playerobject) {
+                app.setCurrentTime(playerobject.getPlayhead());
+                playerobject.onPlayheadUpdate(function(t) {
+                    app.setCurrentTime((app.getCurrentTime() + 1));
+                });
+
+                app.events.onCurrentModeChange.addListener(function(nmode) {
+                    if (nmode !== 'Watch') {
+                        playerobject.pause();
+                    } else if (nmode === 'Watch') {
+                        playerobject.play();
+                    }
+                });
+
             });
         });
 
@@ -1892,26 +1915,7 @@ Presentations for canvas.js
 
             });
 			*/
-            if (options.playerobject !== undefined) {
-                xy = options.playerobject.getcoordinates();
-                wh = options.playerobject.getsize();
-                app.setPlayer([xy[0], xy[1], wh[0], wh[1]]);
 
-                app.setCurrentTime(options.playerobject.getPlayhead());
-                options.playerobject.onPlayheadUpdate(function(t) {
-                    app.setCurrentTime((app.getCurrentTime() + 1));
-                });
-
-
-                // Stop player if drawing a shape
-                app.events.onCurrentModeChange.addListener(function(mode) {
-                    if (mode !== 'Watch') {
-                        options.playerobject.pause();
-                    } else if (mode === 'Watch') {
-                        options.playerobject.play();
-                    }
-                });
-            }
 
         });
 
