@@ -41,13 +41,13 @@ function OACYoutubeDrv(){
                 var playerId = $(this.domObj).parent().attr("id");
 
                 this.playerObj = new YT.Player(playerId, {
-                        height: height,
-                        width: width,
-                        videoId: videoId,
-                        events: {
-                                'onReady': this.onPlayerReady,
-                                'onStateChange': this.onPlayerStateChange
-                        }
+                    height: height,
+                    width: width,
+                    videoId: videoId,
+                    events: {
+                       'onReady': this.onPlayerReady,
+                       'onStateChange': this.onPlayerStateChange
+                    }
                 });
         }
 
@@ -56,16 +56,13 @@ function OACYoutubeDrv(){
                 event.target.playVideo();
         }
 
-
         this.onPlayerStateChange = function(event) {
-                if (event.data == YT.PlayerState.PLAYING && !this.done) {
-                        setTimeout(this.stop, 6000);
-                        this.done = true;
-                }
+           if (event.data == YT.PlayerState.PLAYING && !this.done) {
+                   setTimeout(this.stop, 6000);
+                   this.done = true;
+           }
+		   return event;
         }
-
-
-
 
         /*
     Variable: playerObj
@@ -123,13 +120,4 @@ function OACYoutubeDrv(){
             this.getOACVersion= function(){
                     return this.oac_version;
             }
-
-
-
-
-
-
-
-
-
     }

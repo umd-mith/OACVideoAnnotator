@@ -30,6 +30,13 @@
             '<div id="' + myCanvasId + '" class="section-canvas"></div>' +
             // '</div>' +
             '<div class="mithgrid-bottomarea">' +
+			'<div class="timeselect">' +
+				'<p>Enter start time:</p>' +
+				'<input id="timestart" type="text" />' +
+				'<p>Enter end time:</p>' + 
+				'<input id="timeend" type="text" />' +
+				'<div id="submittime" class="button">Confirm time settings</div>' +
+			'</div>' +
             '<div id="sidebar' + myCanvasId + '" class="section-controls"></div>' +
             '<div class="section-annotations">' +
             '<div class="header">' +
@@ -336,16 +343,6 @@
         };
 
         /*
-		Function for adding video player controller
-		*/
-        app.addPlayerController = function(obj) {
-            if (obj !== undefined && obj.start !== undefined && obj.stop !== undefined && obj.getcoordinates !== undefined) {
-
-                }
-        };
-
-
-        /*
 		Exports all annotation data as JSON. All 
 		SVG data is converted to generic units
 		*/
@@ -543,7 +540,7 @@
             });
 
             app.addBody("Text", app.initTextLens);
-            // app.addBody("Ellipse", app.initTextLens);
+
             /*
 			Adding in button features for annotation creation
 			*/
@@ -557,28 +554,10 @@
             watchButton = app.buttonFeature('buttongrouping', 'General', 'Watch');
 
             app.setCurrentTime(0);
-
-        });
-
-        app.ready(function() {
-            var manifest;
-            /*
-			Set up the import - requires NodeJS 
-			to be activated 
-			*/
-            /*
-            manifest = OAC.initManifest({
-                proxy: 'http://localhost:8080',
-                dataStore: app.dataStore.canvas
-            });
-            manifest.base(options.base);
-            manifest.loadManifest(options.manifest,
-            function() {
-
-            });
-			*/
-
-
+			
+			// binding time controller to time DOM
+			app.controller.timecontrol.bind('.timeselect', {});
+			
         });
 
         return app;

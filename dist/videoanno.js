@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Fri Mar 2 16:02:39 2012 -0500
+ *  Date: Mon Mar 5 13:42:02 2012 -0500
  *  
  * Educational Community License, Version 2.0
  * 
@@ -712,7 +712,7 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
                 $(editArea).hide();
                 $(bodyContent).show();
                 bindingActive = false;
-				
+
             };
 
             editUpdate = function(e) {
@@ -728,11 +728,11 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
                 if (bindingActive) {
                     editEnd();
 
-	                options.application.setCurrentMode(prevMode || '');
+                    options.application.setCurrentMode(prevMode || '');
                 } else {
                     editStart();
-					prevMode = options.application.getCurrentMode();
-	                options.application.setCurrentMode('TextEdit');
+                    prevMode = options.application.getCurrentMode();
+                    options.application.setCurrentMode('TextEdit');
                 }
             });
 
@@ -746,7 +746,7 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
             function(e) {
                 binding.events.onUpdate.fire(opts.itemId, $(textArea).val());
                 editEnd();
-				options.application.setCurrentMode(prevMode);
+                options.application.setCurrentMode(prevMode);
             });
 
             $(deleteButton).bind('click',
@@ -912,7 +912,7 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
                         extents = o.getExtents();
                         dx = Math.abs(offset.left - e.pageX);
                         dy = Math.abs(offset.top - e.pageY);
-                       
+
                         // the '3' is for the drag boxes around the object
                         if ((dx < (extents.width + 4)) && (dy < (extents.height + 4))) {
                             activeId = o.id;
@@ -975,7 +975,7 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 			onCurrentModeChange: if != id passed, deactivate, else do nothing
 			*/
             buttonEl = binding.locate('button');
-			
+
             $(buttonEl).live('mousedown',
             function(e) {
                 if (active === false) {
@@ -990,8 +990,8 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
             });
 
             onCurrentModeChangeHandle = function(action) {
-		
-               	if (action === options.action) {
+
+                if (action === options.action) {
                     active = true;
                     $(buttonEl).addClass('active');
                 } else {
@@ -1062,26 +1062,54 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
         return that;
     };
 
-    Controller.namespace('PlayerControl');
-    Controller.PlayerControl.initController = function(options) {
-        var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.PlayerControl", options);
+    /*
+Controller for manipulating the time sequence for an annotation.
+Currently, just a text box for user to enter basic time data
+*/
+    Controller.namespace('timeControl');
+    Controller.timeControl.initController = function(options) {
+        var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.timeControl", options);
         options = that.options;
-
+        that.currentId = '';
         that.applyBindings = function(binding, opts) {
+            var timestart = binding.locate('timestart'),
+            timeend = binding.locate('timeend'),
+            submit = binding.locate('submit'),
+            menudiv = binding.locate('menudiv'),
+            start_time,
+            end_time;
 
-            };
+            $(menudiv).hide();
 
-        that.start = function() {
-            options.player.play();
-        };
+            $(submit).bind('click',
+            function() {
+                start_time = parseInt($(timestart).val(), 10);
+                end_time = parseInt($(timeend).val(), 10);
 
-        that.pause = function() {
-            options.player.pause();
+                if (binding.currentId !== undefined && start_time !== undefined && end_time.length !== undefined) {
+                    // update core data
+                    options.application.dataStore.canvas.updateItems([{
+                        id: binding.currentId,
+                        start_ntp: start_time,
+                        end_ntp: end_time
+                    }]);
+                }
+            });
+
+            options.application.events.onActiveAnnotationChange.addListener(function(id) {
+                if (id !== undefined) {
+                    $(menudiv).show();
+                    $(timestart).val('');
+                    $(timeend).val('');
+                    binding.currentId = id;
+                } else if (id === undefined) {
+                    $(menudiv).hide();
+                }
+            });
         };
 
         return that;
     };
-
 
 } (jQuery, MITHGrid, OAC));
 /*
@@ -1145,6 +1173,7 @@ Presentations for canvas.js
         keyboardBinding,
         shapeCreateController,
         shapeCreateBinding,
+		changeCanvasCoordinates,
         e,
         superEventFocusChange,
         editBoundingBoxBinding,
@@ -1368,6 +1397,13 @@ Presentations for canvas.js
             '<div id="' + myCanvasId + '" class="section-canvas"></div>' +
             // '</div>' +
             '<div class="mithgrid-bottomarea">' +
+			'<div class="timeselect">' +
+				'<p>Enter start time:</p>' +
+				'<input id="timestart" type="text" />' +
+				'<p>Enter end time:</p>' + 
+				'<input id="timeend" type="text" />' +
+				'<div id="submittime" class="button">Confirm time settings</div>' +
+			'</div>' +
             '<div id="sidebar' + myCanvasId + '" class="section-controls"></div>' +
             '<div class="section-annotations">' +
             '<div class="header">' +
@@ -1674,16 +1710,6 @@ Presentations for canvas.js
         };
 
         /*
-		Function for adding video player controller
-		*/
-        app.addPlayerController = function(obj) {
-            if (obj !== undefined && obj.start !== undefined && obj.stop !== undefined && obj.getcoordinates !== undefined) {
-
-                }
-        };
-
-
-        /*
 		Exports all annotation data as JSON. All 
 		SVG data is converted to generic units
 		*/
@@ -1881,7 +1907,7 @@ Presentations for canvas.js
             });
 
             app.addBody("Text", app.initTextLens);
-            // app.addBody("Ellipse", app.initTextLens);
+
             /*
 			Adding in button features for annotation creation
 			*/
@@ -1895,28 +1921,10 @@ Presentations for canvas.js
             watchButton = app.buttonFeature('buttongrouping', 'General', 'Watch');
 
             app.setCurrentTime(0);
-
-        });
-
-        app.ready(function() {
-            var manifest;
-            /*
-			Set up the import - requires NodeJS 
-			to be activated 
-			*/
-            /*
-            manifest = OAC.initManifest({
-                proxy: 'http://localhost:8080',
-                dataStore: app.dataStore.canvas
-            });
-            manifest.base(options.base);
-            manifest.loadManifest(options.manifest,
-            function() {
-
-            });
-			*/
-
-
+			
+			// binding time controller to time DOM
+			app.controller.timecontrol.bind('.timeselect', {});
+			
         });
 
         return app;
@@ -2027,6 +2035,15 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 			selectors: {
 				slider: '#slider',
 				timedisplay: '.timedisplay'
+			}
+		},
+		timecontrol: {
+			type: OAC.Client.StreamingVideo.Controller.timeControl,
+			selectors: {
+				timestart: '#timestart',
+				timeend: '#timeend',
+				submit: '#submittime',
+				menudiv: ''
 			}
 		}
 	},

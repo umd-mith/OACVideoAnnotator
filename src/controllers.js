@@ -680,7 +680,7 @@
                 $(editArea).hide();
                 $(bodyContent).show();
                 bindingActive = false;
-				
+
             };
 
             editUpdate = function(e) {
@@ -696,11 +696,11 @@
                 if (bindingActive) {
                     editEnd();
 
-	                options.application.setCurrentMode(prevMode || '');
+                    options.application.setCurrentMode(prevMode || '');
                 } else {
                     editStart();
-					prevMode = options.application.getCurrentMode();
-	                options.application.setCurrentMode('TextEdit');
+                    prevMode = options.application.getCurrentMode();
+                    options.application.setCurrentMode('TextEdit');
                 }
             });
 
@@ -714,7 +714,7 @@
             function(e) {
                 binding.events.onUpdate.fire(opts.itemId, $(textArea).val());
                 editEnd();
-				options.application.setCurrentMode(prevMode);
+                options.application.setCurrentMode(prevMode);
             });
 
             $(deleteButton).bind('click',
@@ -880,7 +880,7 @@
                         extents = o.getExtents();
                         dx = Math.abs(offset.left - e.pageX);
                         dy = Math.abs(offset.top - e.pageY);
-                       
+
                         // the '3' is for the drag boxes around the object
                         if ((dx < (extents.width + 4)) && (dy < (extents.height + 4))) {
                             activeId = o.id;
@@ -943,7 +943,7 @@
 			onCurrentModeChange: if != id passed, deactivate, else do nothing
 			*/
             buttonEl = binding.locate('button');
-			
+
             $(buttonEl).live('mousedown',
             function(e) {
                 if (active === false) {
@@ -958,8 +958,8 @@
             });
 
             onCurrentModeChangeHandle = function(action) {
-		
-               	if (action === options.action) {
+
+                if (action === options.action) {
                     active = true;
                     $(buttonEl).addClass('active');
                 } else {
@@ -1030,25 +1030,53 @@
         return that;
     };
 
-    Controller.namespace('PlayerControl');
-    Controller.PlayerControl.initController = function(options) {
-        var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.PlayerControl", options);
+    /*
+Controller for manipulating the time sequence for an annotation.
+Currently, just a text box for user to enter basic time data
+*/
+    Controller.namespace('timeControl');
+    Controller.timeControl.initController = function(options) {
+        var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.timeControl", options);
         options = that.options;
-
+        that.currentId = '';
         that.applyBindings = function(binding, opts) {
+            var timestart = binding.locate('timestart'),
+            timeend = binding.locate('timeend'),
+            submit = binding.locate('submit'),
+            menudiv = binding.locate('menudiv'),
+            start_time,
+            end_time;
 
-            };
+            $(menudiv).hide();
 
-        that.start = function() {
-            options.player.play();
-        };
+            $(submit).bind('click',
+            function() {
+                start_time = parseInt($(timestart).val(), 10);
+                end_time = parseInt($(timeend).val(), 10);
 
-        that.pause = function() {
-            options.player.pause();
+                if (binding.currentId !== undefined && start_time !== undefined && end_time.length !== undefined) {
+                    // update core data
+                    options.application.dataStore.canvas.updateItems([{
+                        id: binding.currentId,
+                        start_ntp: start_time,
+                        end_ntp: end_time
+                    }]);
+                }
+            });
+
+            options.application.events.onActiveAnnotationChange.addListener(function(id) {
+                if (id !== undefined) {
+                    $(menudiv).show();
+                    $(timestart).val('');
+                    $(timeend).val('');
+                    binding.currentId = id;
+                } else if (id === undefined) {
+                    $(menudiv).hide();
+                }
+            });
         };
 
         return that;
     };
-
 
 } (jQuery, MITHGrid, OAC));

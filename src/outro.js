@@ -102,6 +102,15 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 				slider: '#slider',
 				timedisplay: '.timedisplay'
 			}
+		},
+		timecontrol: {
+			type: OAC.Client.StreamingVideo.Controller.timeControl,
+			selectors: {
+				timestart: '#timestart',
+				timeend: '#timeend',
+				submit: '#submittime',
+				menudiv: ''
+			}
 		}
 	},
 	variables: {

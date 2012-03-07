@@ -59,6 +59,7 @@ Presentations for canvas.js
         keyboardBinding,
         shapeCreateController,
         shapeCreateBinding,
+		changeCanvasCoordinates,
         e,
         superEventFocusChange,
         editBoundingBoxBinding,

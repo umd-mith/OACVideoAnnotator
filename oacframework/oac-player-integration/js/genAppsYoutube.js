@@ -1,6 +1,7 @@
 /*
 * Create the MITHGrid applications that run the prototype 
-* example. 
+* example. This is an alternate test version that runs with 
+* embedded Youtube videos.
 *
 */ 
 
@@ -11,13 +12,32 @@ var initPlugin = function() {
 	
 	initStreamingVideoApp = function(playerobj) {
 		// Create Raphael canvas application controls
-		raphApp = OAC.Client.StreamingVideo.initApp("#content-container", {
+		raphApp = OAC.Client.StreamingVideo.initApp("#mplayer", {
 			base: "http://www.shared-canvas.org/impl/demo1/res/",
 			manifest: "http://www.shared-canvas.org/impl/demo1/res/Manifest.xml"
 		});
 		
+		var player = playerobj.getAvailablePlayers()[0];
+		console.log('playerobj: ' + JSON.stringify(playerobj));
+		return;
 		raphApp.ready(function() {
-			raphApp.setPlayer(playerobj);
+			raphApp.setPlayer({
+				getcoordinates: function() {
+					return [
+						$(player).offset().left,
+						$(player).offset().top
+					]
+				},
+				getsize: function() {
+					return [
+						$(player).width(),
+						$(player).height()
+					]
+				},
+				play: playerobj.play,
+				pause: playerobj.pause,
+				getPlayhead: playerobj.playerObj.getCurrentTime
+			});
 		});
 		
 		// creating Raphael canvas application
@@ -29,6 +49,5 @@ var initPlugin = function() {
 };
 
 $(function() {
-	
 	initPlugin();
 });
