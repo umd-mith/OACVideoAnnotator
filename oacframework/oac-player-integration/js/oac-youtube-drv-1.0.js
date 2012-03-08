@@ -12,9 +12,6 @@ function onYouTubePlayerAPIReady() {
         OAC_Controller.player().onYouTubePlayerAPIReady();
 }
 
-
-
-
 /*
 Class: OACYoutubeDrv
 
@@ -61,7 +58,6 @@ function OACYoutubeDrv(){
                    setTimeout(this.stop, 6000);
                    this.done = true;
            }
-		   return event;
         }
 
         /*
@@ -83,7 +79,7 @@ function OACYoutubeDrv(){
             An array of DOM objects.
              */
             this.getAvailablePlayers= function() {
-                    return $('.youtubeplayer iframe');
+                    return $('iframe.youtubeplayer');
             }
 
             /*
