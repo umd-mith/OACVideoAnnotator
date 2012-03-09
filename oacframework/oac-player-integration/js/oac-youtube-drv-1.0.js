@@ -15,6 +15,13 @@ function onYouTubePlayerAPIReady() {
 				
 		
 }
+// setting up listener for when a new player is created
+onytplayerStateChange = function (newState) {
+	console.log(newState);
+	if(newState === 5) {
+		initStreamingVideoApp();
+	}
+}
 
 /*
 Class: OACYoutubeDrv

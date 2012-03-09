@@ -59,8 +59,7 @@ var initPlugin = function() {
 		
 	};
 	
-	// setting up listener for when a new player is created
-	$('body').bind('onStateChange', initStreamingVideoApp);
+
 	// OAC_Controller.on_new_player(initStreamingVideoApp);
 };
 
