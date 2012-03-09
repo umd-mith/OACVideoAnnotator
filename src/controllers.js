@@ -22,6 +22,9 @@
             options.application.events.onActiveAnnotationChange.addListener(setActiveId);
 
             $(doc).keydown(function(e) {
+                if (options.application.getCurrentMode() === 'Editing') {
+                    return;
+                }
                 if (activeId !== undefined || activeId !== '') {
                     // If backspace or delete is pressed,
                     // then it is interpreted as a
@@ -107,18 +110,26 @@
             binding.events.onDelete.addListener(function(id) {
                 if (activeRendering !== undefined && activeRendering.eventDelete !== undefined) {
                     activeRendering.eventDelete(id);
+                    binding.detachRendering();
+                }
+            });
+
+            options.application.events.onCurrentModeChange.addListener(function(newMode) {
+                if (newMode !== 'Select' && newMode !== 'Drag') {
+                    binding.detachRendering();
                 }
             });
 
             // Function for applying a new shape to the bounding box
             binding.attachRendering = function(newRendering) {
                 binding.detachRendering();
+
                 if (newRendering === undefined) {
                     return;
                 }
+
                 // register the rendering
                 activeRendering = newRendering;
-
                 calcFactors();
                 drawHandles();
             };
@@ -126,7 +137,7 @@
             // Function to call in order to "de-activate" the edit box
             // (i.e. make it hidden)
             binding.detachRendering = function() {
-                if (typeof(activeRendering) === "undefined" || activeRendering === null) {
+                if ($.isEmptyObject(handleSet)) {
                     return;
                 }
                 activeRendering = undefined;
@@ -253,7 +264,7 @@
                                 y: shapeAttrs.y
                             };
 
-                            that.events.onMove.fire(activeRendering.id, pos);
+                            binding.events.onMove.fire(activeRendering.id, pos);
                             activeRendering.shape.attr({
                                 cursor: 'default'
                             });
@@ -264,7 +275,8 @@
                     // Attaching drag and resize handlers
                     handleSet.drag(
                     function(dx, dy) {
-                        // dragging here means that as element is dragged
+                        // onmove function - handles dragging
+                        // dragging here means that the shape is being resized;
                         // the factorial determines in which direction the
                         // shape is pulled
                         shapeAttrs.w = Math.abs(extents.width + dx * factors.x);
@@ -273,6 +285,7 @@
                         handleAttrs.nh = shapeAttrs.h + (padding * 2);
                         handleAttrs.nx = (extents.x - (padding / 4)) - (handleAttrs.nw / 2);
                         handleAttrs.ny = (extents.y - (padding / 4)) - (handleAttrs.nh / 2);
+
                         svgBBox.attr({
                             x: handleAttrs.nx,
                             y: handleAttrs.ny,
@@ -295,11 +308,15 @@
                         }
                     },
                     function(x, y, e) {
+                        // onstart function
                         var px,
                         py;
                         extents = activeRendering.getExtents();
                         ox = e.layerX;
                         oy = e.layerY;
+
+                        // change mode
+                        options.application.setCurrentMode('Drag');
                         // extents: x, y, width, height
                         px = (8 * (ox - extents.x) / extents.width) + 4;
                         py = (8 * (oy - extents.y) / extents.height) + 4;
@@ -324,14 +341,17 @@
                         calcFactors();
                     },
                     function() {
+                        // onend function
                         // update
                         var pos = {
                             width: shapeAttrs.w,
                             height: shapeAttrs.h
                         };
                         if (activeRendering !== undefined) {
-                            that.events.onResize.fire(activeRendering.id, pos);
+                            binding.events.onResize.fire(activeRendering.id, pos);
                         }
+                        // change mode back
+                        options.application.setCurrentMode('Select');
                     }
                     );
                 } else {
@@ -646,7 +666,8 @@
             editButton = binding.locate('editbutton'),
             updateButton = binding.locate('updatebutton'),
             deleteButton = binding.locate('deletebutton'),
-            bindingActive = false;
+            bindingActive = false,
+            prevMode;
 
             editStart = function() {
                 $(editArea).show();
@@ -659,6 +680,7 @@
                 $(editArea).hide();
                 $(bodyContent).show();
                 bindingActive = false;
+
             };
 
             editUpdate = function(e) {
@@ -673,8 +695,12 @@
                 e.preventDefault();
                 if (bindingActive) {
                     editEnd();
+
+                    options.application.setCurrentMode(prevMode || '');
                 } else {
                     editStart();
+                    prevMode = options.application.getCurrentMode();
+                    options.application.setCurrentMode('TextEdit');
                 }
             });
 
@@ -682,6 +708,20 @@
             function(e) {
                 // binding.events.onClick.fire(opts.itemId);
                 options.application.setActiveAnnotation(opts.itemId);
+            });
+
+            $(updateButton).bind('click',
+            function(e) {
+                binding.events.onUpdate.fire(opts.itemId, $(textArea).val());
+                editEnd();
+                options.application.setCurrentMode(prevMode);
+            });
+
+            $(deleteButton).bind('click',
+            function(e) {
+                binding.events.onDelete.fire(opts.itemId);
+                // remove DOM elements
+                $(annoEl).remove();
             });
 
             options.application.events.onActiveAnnotationChange.addListener(function(id) {
@@ -693,6 +733,11 @@
                 }
             });
 
+            options.application.events.onCurrentModeChange.addListener(function(newMode) {
+                if (newMode !== 'TextEdit') {
+                    editEnd();
+                }
+            });
         };
         return that;
     };
@@ -778,7 +823,6 @@
                     y = e.pageY - offset.top;
                     topLeft = [x, y];
                     mouseMode = 1;
-
                     binding.events.onShapeStart.fire(topLeft);
                 });
 
@@ -818,26 +862,27 @@
                 function(e) {
                     activeId = '';
                     offset = $(container).offset();
-
-                    ox = Math.abs(e.pageX - offset.left);
-                    oy = Math.abs(e.pageY - offset.top);
+                    ox = Math.abs(offset.left - e.pageX);
+                    oy = Math.abs(offset.top - e.pageY);
                     if (curRendering !== undefined) {
                         extents = curRendering.getExtents();
-                        dx = Math.abs(ox - extents.x);
-                        dy = Math.abs(oy - extents.y);
-                        if (dx < extents.width / 2 + 4 && dy < extents.height / 2 + 4) {
+                        dx = Math.abs(offset.left - e.pageX);
+                        dy = Math.abs(offset.top - e.pageY);
+                        if (dx < extents.width + 4 && dy < extents.height + 4) {
                             // nothing has changed
                             return;
                         }
                     }
+
                     $.each(renderings,
                     function(i, o) {
-                        extents = o.getExtents();
 
-                        dx = Math.abs(ox - extents.x);
-                        dy = Math.abs(oy - extents.y);
+                        extents = o.getExtents();
+                        dx = Math.abs(offset.left - e.pageX);
+                        dy = Math.abs(offset.top - e.pageY);
+
                         // the '3' is for the drag boxes around the object
-                        if (dx < extents.width / 2 + 4 && dy < extents.height / 2 + 4) {
+                        if ((dx < (extents.width + 4)) && (dy < (extents.height + 4))) {
                             activeId = o.id;
                             if ((curRendering === undefined) || (o.id !== curRendering.id)) {
                                 curRendering = o;
@@ -913,11 +958,8 @@
             });
 
             onCurrentModeChangeHandle = function(action) {
-                if (id === '') {
-                    // set to nothing
-                    active = false;
-                    $(buttonEl).removeClass("active");
-                } else if (action === options.action) {
+
+                if (action === options.action) {
                     active = true;
                     $(buttonEl).addClass('active');
                 } else {
@@ -931,56 +973,110 @@
 
         return that;
     };
-	
-	Controller.namespace('sliderButton');
-	Controller.sliderButton.initController = function(options) {
-		var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.sliderButton", options);
-		options = that.options;
-		
-		that.applyBindings = function(binding, opts) {
-			var sliderElement, displayElement, sliderStart, sliderMove,
-			localTime, positionCheck;
-			displayElement = binding.locate('timedisplay');
-			positionCheck = function(t) {
-				/*
+
+    Controller.namespace('sliderButton');
+    Controller.sliderButton.initController = function(options) {
+        var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.sliderButton", options);
+        options = that.options;
+
+        that.applyBindings = function(binding, opts) {
+            var sliderElement,
+            displayElement,
+            sliderStart,
+            sliderMove,
+            localTime,
+            positionCheck;
+            displayElement = binding.locate('timedisplay');
+            positionCheck = function(t) {
+                /*
 				if time is not equal to internal time, then 
 				reset the slider
 				*/
-				if(localTime === undefined) {
-					localTime = t;
-					$(sliderElement).slider('value', localTime);
-				} 
-			};
-			
-			sliderStart = function(e, ui) {
-				options.application.setCurrentTime(ui.value);
-				$(displayElement).text('TIME: ' + ui.value);
-				localTime = ui.value;
-			};
-			
-			sliderMove = function(e, ui) {
-				if(ui === undefined){
-					localTime = e;
-					$(sliderElement).slider('value', e);
-				}
-				
-				if(localTime === ui.value) {
-					return;
-				}
-				options.application.setCurrentTime(ui.value);
-				$(displayElement).text('TIME: ' + ui.value);
-				localTime = ui.value;
-			};
-			sliderElement = binding.locate("slider");
-			
-			$(sliderElement).slider({
-				start: sliderStart,
-				slide: sliderMove
-			});
-			
-			
-		};
-		
-		return that;
-	};
+                if (localTime === undefined) {
+                    localTime = t;
+                    $(sliderElement).slider('value', localTime);
+                }
+            };
+
+            sliderStart = function(e, ui) {
+                options.application.setCurrentTime(ui.value);
+                $(displayElement).text('TIME: ' + ui.value);
+                localTime = ui.value;
+            };
+
+            sliderMove = function(e, ui) {
+                if (ui === undefined) {
+                    localTime = e;
+                    $(sliderElement).slider('value', e);
+                }
+
+                if (localTime === ui.value) {
+                    return;
+                }
+                options.application.setCurrentTime(ui.value);
+                $(displayElement).text('TIME: ' + ui.value);
+                localTime = ui.value;
+            };
+            sliderElement = binding.locate("slider");
+
+            $(sliderElement).slider({
+                start: sliderStart,
+                slide: sliderMove
+            });
+
+
+        };
+
+        return that;
+    };
+
+    /*
+Controller for manipulating the time sequence for an annotation.
+Currently, just a text box for user to enter basic time data
+*/
+    Controller.namespace('timeControl');
+    Controller.timeControl.initController = function(options) {
+        var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.timeControl", options);
+        options = that.options;
+        that.currentId = '';
+        that.applyBindings = function(binding, opts) {
+            var timestart = binding.locate('timestart'),
+            timeend = binding.locate('timeend'),
+            submit = binding.locate('submit'),
+            menudiv = binding.locate('menudiv'),
+            start_time,
+            end_time;
+
+            $(menudiv).hide();
+
+            $(submit).bind('click',
+            function() {
+                start_time = parseInt($(timestart).val(), 10);
+                end_time = parseInt($(timeend).val(), 10);
+
+                if (binding.currentId !== undefined && start_time !== undefined && end_time.length !== undefined) {
+                    // update core data
+                    options.application.dataStore.canvas.updateItems([{
+                        id: binding.currentId,
+                        start_ntp: start_time,
+                        end_ntp: end_time
+                    }]);
+                }
+            });
+
+            options.application.events.onActiveAnnotationChange.addListener(function(id) {
+                if (id !== undefined) {
+                    $(menudiv).show();
+                    $(timestart).val('');
+                    $(timeend).val('');
+                    binding.currentId = id;
+                } else if (id === undefined) {
+                    $(menudiv).hide();
+                }
+            });
+        };
+
+        return that;
+    };
+
 } (jQuery, MITHGrid, OAC));

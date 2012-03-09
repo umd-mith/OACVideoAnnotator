@@ -26,7 +26,8 @@ MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.AnnotationEditSelectionG
 	        onResize: null,
 	        onMove: null,
 	        onEdit: null,
-	        onDelete: null
+	        onDelete: null,
+			onCurrentModeChange: null
 	    }
 	}
 });
@@ -72,7 +73,7 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 		canvas: {
 			type: OAC.Client.StreamingVideo.Controller.CanvasClickController,
 			selectors: {
-				svg: ''
+				svg: ' > svg'
 			}
 		},
 		annoActive: {
@@ -101,6 +102,15 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 				slider: '#slider',
 				timedisplay: '.timedisplay'
 			}
+		},
+		timecontrol: {
+			type: OAC.Client.StreamingVideo.Controller.timeControl,
+			selectors: {
+				timestart: '#timestart',
+				timeend: '#timeend',
+				submit: '#submittime',
+				menudiv: ''
+			}
 		}
 	},
 	variables: {
@@ -112,6 +122,9 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 			"default": 0
 		},
 		CurrentMode: {
+			is: 'rw'
+		},
+		Player: {
 			is: 'rw'
 		}
 	},

@@ -1223,6 +1223,7 @@
       };
       that.setKeyRange = function(l, r) {
         var i, itemId;
+		console.log('start setKeyRange');
         if (l < r) {
           itemListStart = l;
           itemListStop = r;
@@ -1238,7 +1239,8 @@
         if (itemListStart < itemListStop) {
           for (i = itemListStart; itemListStart <= itemListStop ? i <= itemListStop : i >= itemListStop; itemListStart <= itemListStop ? i++ : i--) {
             itemId = itemList[i];
-			if (!oldSet.contains(itemId)) {
+			console.log('oldSet contains ' + itemId + '?');
+            if (!oldSet.contains(itemId)) {
               changedItems.add(itemId);
             }
             set.add(itemId);
@@ -1250,6 +1252,7 @@
           }
         });
         if (changedItems.size() > 0) {
+			console.log('setKeyRange results changedItems ' + changedItems.size());
           return that.events.onModelChange.fire(that, changedItems.items());
         }
       };
@@ -1433,6 +1436,7 @@
           for (i = itemListStart; itemListStart <= itemListStop ? i <= itemListStop : i >= itemListStop; itemListStart <= itemListStop ? i++ : i--) {
             itemId = itemList[i][1];
             if (!oldSet.contains(itemId)) {
+	
               changedItems.add(itemId);
             }
             set.add(itemId);
@@ -3094,6 +3098,7 @@
             fn();
           }
           onReady = [];
+		  
           return that.ready = function(fn) {
             return setTimeout(fn, 0);
           };

@@ -103,6 +103,8 @@ $(document).ready(function() {
 		}]);
 		
 		
+		ok();
+		
 	});
 	
 	
