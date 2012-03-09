@@ -9,7 +9,11 @@ $(document).ready(function() {
 
 
 function onYouTubePlayerAPIReady() {
-        OAC_Controller.player().onYouTubePlayerAPIReady();
+		console.log('ontubeplayerready called ');
+		
+				OAC_Controller.player().onYouTubePlayerAPIReady();
+				
+		
 }
 
 /*
@@ -18,16 +22,12 @@ Class: OACYoutubeDrv
         OAC driver for Dummy Player.
 */
 function OACYoutubeDrv(){
-
-
         var tag = document.createElement('script');
         tag.src = "http://www.youtube.com/player_api";
         var firstScriptTag = document.getElementsByTagName('script')[0];
         firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-
         this.done = false;
-
 
         this.onYouTubePlayerAPIReady = function() {
                 var height = this.domObj.getAttribute("height");
@@ -46,6 +46,7 @@ function OACYoutubeDrv(){
                        'onStateChange': this.onPlayerStateChange
                     }
                 });
+				$('body:first').trigger('YTReady', [this.playerObj]);
         }
 
 
@@ -79,7 +80,7 @@ function OACYoutubeDrv(){
             An array of DOM objects.
              */
             this.getAvailablePlayers= function() {
-                    return $('iframe.youtubeplayer');
+                    return $('.youtubeplayer iframe');
             }
 
             /*

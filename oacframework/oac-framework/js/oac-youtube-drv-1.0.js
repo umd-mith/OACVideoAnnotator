@@ -12,17 +12,12 @@ function onYouTubePlayerAPIReady() {
         OAC_Controller.player().onYouTubePlayerAPIReady();
 }
 
-
-
-
 /*
 Class: OACYoutubeDrv
 
         OAC driver for Dummy Player.
 */
 function OACYoutubeDrv(){
-
-
         var tag = document.createElement('script');
         tag.src = "http://www.youtube.com/player_api";
         var firstScriptTag = document.getElementsByTagName('script')[0];
@@ -33,22 +28,24 @@ function OACYoutubeDrv(){
 
 
         this.onYouTubePlayerAPIReady = function() {
-                var height = this.domObj.getAttribute("height");
-                var width = this.domObj.getAttribute("width");
-                var src = this.domObj.getAttribute("src");
-                var srcArray = src.split("/");
-                var videoId = srcArray[srcArray.length - 1];
-                var playerId = $(this.domObj).parent().attr("id");
+			console.log('onAPIReady closure ');
+           var height = this.domObj.getAttribute("height");
+           var width = this.domObj.getAttribute("width");
+           var src = this.domObj.getAttribute("src");
+           var srcArray = src.split("/");
+           var videoId = srcArray[srcArray.length - 1];
+           var playerId = $(this.domObj).parent().attr("id");
 
-                this.playerObj = new YT.Player(playerId, {
-                        height: height,
-                        width: width,
-                        videoId: videoId,
-                        events: {
-                                'onReady': this.onPlayerReady,
-                                'onStateChange': this.onPlayerStateChange
-                        }
-                });
+           this.playerObj = new YT.Player(playerId, {
+                   height: height,
+                   width: width,
+                   videoId: videoId,
+                   events: {
+                       'onReady': this.onPlayerReady,
+                       'onStateChange': this.onPlayerStateChange
+                   }
+           });
+			
         }
 
 
@@ -94,6 +91,7 @@ function OACYoutubeDrv(){
             Set a DOM Object for a certain player. This relates driver and player.
              */
             this.setDomObj= function(DOMObject) {
+					console.log('setDomObj called');
                     this.domObj = DOMObject;
                     this.playerObj = $(DOMObject).data('player');
             }

@@ -10,24 +10,26 @@ var initPlugin = function() {
 	var raphApp, setupAllPlayers, player, OACdrv, wh = [], xy = [],
 	OACVideoController, readyAnnotationClient;
 	
-	readyAnnotationClient = function(playerobj) {
+	readyAnnotationClient = function(player) {
+		console.log('player received: ' + JSON.stringify(player));
+		
 		raphApp.ready(function() {
 			raphApp.setPlayer({
 				getcoordinates: function() {
 					return [
-						$(player).offset().left,
-						$(player).offset().top
+						$(player.domObj).offset().left,
+						$(player.domObj).offset().top
 					]
 				},
 				getsize: function() {
 					return [
-						$(player).width(),
-						$(player).height()
+						$(player.domObj).width(),
+						$(player.domObj).height()
 					]
 				},
-				play: playerobj.play,
-				pause: playerobj.pause,
-				getPlayhead: playerobj.playerObj.getCurrentTime
+				play: player.play,
+				pause: player.pause,
+				getPlayhead: player.playerObj.getCurrentTime
 			});
 		});
 
@@ -35,27 +37,31 @@ var initPlugin = function() {
 		raphApp.run();
 	};
 	
-	initStreamingVideoApp = function(playerobj) {
-		// Create Raphael canvas application controls
-		raphApp = OAC.Client.StreamingVideo.initApp("#mplayer", {
-			base: "http://www.shared-canvas.org/impl/demo1/res/",
-			manifest: "http://www.shared-canvas.org/impl/demo1/res/Manifest.xml"
-		});
+	initStreamingVideoApp = function(e, state) {
+		console.log('state ' + state);
+			if(state === 5) {
+				console.log('ready');
+			} else {
+				return;
+			}
+			console.log('initStreamingApp');
+			// Create Raphael canvas application controls
+			raphApp = OAC.Client.StreamingVideo.initApp("#mplayer", {
+				base: "http://www.shared-canvas.org/impl/demo1/res/",
+				manifest: "http://www.shared-canvas.org/impl/demo1/res/Manifest.xml"
+			});
 		
-		var player = playerobj.getAvailablePlayers()[0];
+			var player = OAC_Controller.player();
+			
+			setTimeout(function() {
+				readyAnnotationClient(player);
+			}, 1000);
 		
-		if (player.done !== true) {
-			setTimeout(readyAnnotationClient, 2000, playerobj);
-		} else {
-			readyAnnotationClient(playerobj);
-		}
-		
-		return;
-	
 	};
 	
 	// setting up listener for when a new player is created
-	OAC_Controller.on_new_player(initStreamingVideoApp);
+	$('body').bind('onStateChange', initStreamingVideoApp);
+	// OAC_Controller.on_new_player(initStreamingVideoApp);
 };
 
 $(function() {
