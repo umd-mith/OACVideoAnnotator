@@ -2,16 +2,18 @@
 <head>
 <title>dummy player test</title>
 <SCRIPT LANGUAGE="JavaScript" SRC="../js/jquery-1.6.4.min.js"></script>
+<SCRIPT language="JavaScript" SRC="dummyplayer/js/videoanno.js"></script>
 <SCRIPT LANGUAGE="JavaScript" SRC="dummyplayer/js/dummy-player.1.0.js"></script>
 <SCRIPT LANGUAGE="JavaScript" SRC="../js/oac-framework-1.0.js"></script>
 <SCRIPT LANGUAGE="JavaScript" SRC="../js/oac-dummyplayer-drv-1.0.js"></script>
+
+
 </head>
 
 <body onload="init_values()">
 
 <h1>DUMMY PLAYER with OAC</h1>
 <p>This is a dummy player integrated in OAC framework.</p>
-
 <div id="myplayer" class="dummyplayer" style="width:300px; height:200px;"></div>
 
 <table width="300" border="1">
@@ -43,7 +45,7 @@ function init_values() {
 	$('#info_size').html( size[0] + " x " + size[1] );
 	
 	OAC_Controller.player().onPlayheadUpdate(function(){
-		var value = OAC_Controller.player().getPlayhead()
+		var value = OAC_Controller.player().getPlayhead();
 		$('#info_position').html(value);
 	});
 } 

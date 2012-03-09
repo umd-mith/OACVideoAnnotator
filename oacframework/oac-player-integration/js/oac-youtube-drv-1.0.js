@@ -9,7 +9,18 @@ $(document).ready(function() {
 
 
 function onYouTubePlayerAPIReady() {
-        OAC_Controller.player().onYouTubePlayerAPIReady();
+		console.log('ontubeplayerready called ');
+		
+				OAC_Controller.player().onYouTubePlayerAPIReady();
+				
+		
+}
+// setting up listener for when a new player is created
+onytplayerStateChange = function (newState) {
+	console.log(newState);
+	if(newState === 5) {
+		initStreamingVideoApp();
+	}
 }
 
 /*
@@ -23,29 +34,26 @@ function OACYoutubeDrv(){
         var firstScriptTag = document.getElementsByTagName('script')[0];
         firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-
         this.done = false;
 
-
         this.onYouTubePlayerAPIReady = function() {
-			console.log('onAPIReady closure ');
-           var height = this.domObj.getAttribute("height");
-           var width = this.domObj.getAttribute("width");
-           var src = this.domObj.getAttribute("src");
-           var srcArray = src.split("/");
-           var videoId = srcArray[srcArray.length - 1];
-           var playerId = $(this.domObj).parent().attr("id");
+                var height = this.domObj.getAttribute("height");
+                var width = this.domObj.getAttribute("width");
+                var src = this.domObj.getAttribute("src");
+                var srcArray = src.split("/");
+                var videoId = srcArray[srcArray.length - 1];
+                var playerId = $(this.domObj).parent().attr("id");
 
-           this.playerObj = new YT.Player(playerId, {
-                   height: height,
-                   width: width,
-                   videoId: videoId,
-                   events: {
+                this.playerObj = new YT.Player(playerId, {
+                    height: height,
+                    width: width,
+                    videoId: videoId,
+                    events: {
                        'onReady': this.onPlayerReady,
                        'onStateChange': this.onPlayerStateChange
-                   }
-           });
-			
+                    }
+                });
+				$('body:first').trigger('YTReady', [this.playerObj]);
         }
 
 
@@ -53,16 +61,12 @@ function OACYoutubeDrv(){
                 event.target.playVideo();
         }
 
-
         this.onPlayerStateChange = function(event) {
-                if (event.data == YT.PlayerState.PLAYING && !this.done) {
-                        setTimeout(this.stop, 6000);
-                        this.done = true;
-                }
+           if (event.data == YT.PlayerState.PLAYING && !this.done) {
+                   setTimeout(this.stop, 6000);
+                   this.done = true;
+           }
         }
-
-
-
 
         /*
     Variable: playerObj
@@ -91,7 +95,6 @@ function OACYoutubeDrv(){
             Set a DOM Object for a certain player. This relates driver and player.
              */
             this.setDomObj= function(DOMObject) {
-					console.log('setDomObj called');
                     this.domObj = DOMObject;
                     this.playerObj = $(DOMObject).data('player');
             }
@@ -121,13 +124,4 @@ function OACYoutubeDrv(){
             this.getOACVersion= function(){
                     return this.oac_version;
             }
-
-
-
-
-
-
-
-
-
     }

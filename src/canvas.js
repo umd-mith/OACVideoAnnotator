@@ -13,7 +13,9 @@
         svgLens,
         textLens,
         fade,
-        myCanvasId = 'OAC-Client-StreamingVideo-SVG-Canvas-' + canvasId;
+        myCanvasId = 'OAC-Client-StreamingVideo-SVG-Canvas-' + canvasId,
+        xy = [],
+        wh = [];
 
         canvasId += 1;
 
@@ -23,10 +25,25 @@
         app = MITHGrid.Application.initApp("OAC.Client.StreamingVideo", container,
         $.extend(true, {},
         {
-            viewSetup: '<div id="sidebar' + myCanvasId + '" class="controlarea"></div>' +
-            '<div class="canvas_svg_holder"><div id="' + myCanvasId + '" class="canvas_svg"></div></div>' +
-
-            '<div class="anno_list"></div>',
+            viewSetup:
+            // '<div class="mithgrid-toparea">' +
+            '<div id="' + myCanvasId + '" class="section-canvas"></div>' +
+            // '</div>' +
+            '<div class="mithgrid-bottomarea">' +
+			'<div class="timeselect">' +
+				'<p>Enter start time:</p>' +
+				'<input id="timestart" type="text" />' +
+				'<p>Enter end time:</p>' + 
+				'<input id="timeend" type="text" />' +
+				'<div id="submittime" class="button">Confirm time settings</div>' +
+			'</div>' +
+            '<div id="sidebar' + myCanvasId + '" class="section-controls"></div>' +
+            '<div class="section-annotations">' +
+            '<div class="header">' +
+            'Annotations' +
+            '</div>' +
+            '</div>' +
+            '</div>',
             presentations: {
                 raphsvg: {
                     container: "#" + myCanvasId,
@@ -42,6 +59,7 @@
                     lensKey: ['.shapeType']
                 },
                 annoItem: {
+                    container: '.section-annotations',
                     lenses: {
                         //			Rectangle: textLens,
                         //			Ellipse: textLens
@@ -54,9 +72,11 @@
         },
         options)
         );
-
+        // Set initial size for canvas window
         app.cWidth = 100;
         app.cHeight = 100;
+        app.cX = 0;
+        app.cY = 0;
 
         app.shapeTypes = {};
 
@@ -68,7 +88,6 @@
             var that = {
                 id: itemId
             };
-
             that.eventFocus = function() {
                 that.shape.attr({
                     opacity: 1
@@ -116,6 +135,8 @@
                 that.shape.remove();
             };
 
+
+
             return that;
         };
 
@@ -134,6 +155,8 @@
             '<p class="bodyContentInstructions">Double click here to open edit window.</p>' +
             '<div class="editArea">' +
             '<textarea class="bodyContentTextArea"></textarea>' +
+            '<div id="editUpdate" class="button update">Update</div>' +
+            '<div id="editDelete" class="button delete">Delete</div>' +
             '</div>' +
             '<div class="body">' +
             '<p class="bodyContent"></p>' +
@@ -174,6 +197,12 @@
             };
 
             annoEvents.events.onClick.addListener(app.setActiveAnnotation);
+            annoEvents.events.onDelete.addListener(function(id) {
+                if (id === itemId) {
+                    // delete entire annotation
+                    app.dataStore.canvas.removeItems([itemId]);
+                }
+            });
             annoEvents.events.onUpdate.addListener(that.eventUpdate);
 
             that.update = function(item) {
@@ -291,10 +320,11 @@
             var shapeItem,
             idSearch = app.dataStore.canvas.prepare(['!type']),
             idCount = idSearch.evaluate('Annotation'),
-            ntp_start = app.getCurrentTime() - 1,
-            ntp_end = app.getCurrentTime() + 20,
+            ntp_start = app.getCurrentTime() - 5,
+            ntp_end = app.getCurrentTime() + 5,
             curMode = app.getCurrentMode(),
             shape;
+
             shape = app.shapeTypes[curMode].calc(coords);
 
             shapeItem = {
@@ -307,6 +337,7 @@
                 ntp_start: ntp_start,
                 ntp_end: ntp_end
             };
+
             $.extend(shapeItem, shape);
             app.dataStore.canvas.loadItems([shapeItem]);
         };
@@ -325,6 +356,7 @@
             $.each([]);
         };
 
+
         app.ready(function() {
             annoActiveController = app.controller.annoActive;
             app.events.onActiveAnnotationChange.addListener(app.presentation.raphsvg.eventFocusChange);
@@ -332,6 +364,21 @@
             app.events.onCurrentTimeChange.addListener(function(t) {
                 // five seconds on either side of the current time
                 app.dataView.currentAnnotations.setKeyRange(t - 5, t + 5);
+            });
+            app.events.onPlayerChange.addListener(function(playerobject) {
+                app.setCurrentTime(playerobject.getPlayhead());
+                playerobject.onPlayheadUpdate(function(t) {
+                    app.setCurrentTime((app.getCurrentTime() + 1));
+                });
+
+                app.events.onCurrentModeChange.addListener(function(nmode) {
+                    if (nmode !== 'Watch') {
+                        playerobject.pause();
+                    } else if (nmode === 'Watch') {
+                        playerobject.play();
+                    }
+                });
+
             });
         });
 
@@ -343,7 +390,9 @@
             rectButton,
             ellipseButton,
             selectButton,
-            sliderButton, exportRectangle;
+            sliderButton,
+            exportRectangle,
+            watchButton;
 
             calcRectangle = function(coords) {
                 var attrs = {};
@@ -386,7 +435,7 @@
                     // receiving the Object passed through
                     // model.updateItems in move()
                     try {
-                        if (item.x !== undefined && item.y !== undefined && item.w !== undefined && item.y !== undefined) {
+                        if (item.x !== undefined && item.y !== undefined && item.w !== undefined && item.h !== undefined) {
                             c.attr({
                                 x: item.x[0] - item.w[0] / 2,
                                 y: item.y[0] - item.h[0] / 2,
@@ -401,6 +450,11 @@
                     // Raphael object is updated
                 };
 
+                // attach listener to opacity change event
+                view.events.onOpacityChange.addListener(function(n) {
+                    $(c).attr('opacity', n);
+                });
+
                 // calculate the extents (x, y, width, height)
                 // of this type of shape
                 that.getExtents = function() {
@@ -414,7 +468,6 @@
 
                 // register shape
                 that.shape = c;
-
                 return that;
             };
 
@@ -487,7 +540,7 @@
             });
 
             app.addBody("Text", app.initTextLens);
-            // app.addBody("Ellipse", app.initTextLens);
+
             /*
 			Adding in button features for annotation creation
 			*/
@@ -498,62 +551,13 @@
 
             selectButton = app.buttonFeature('buttongrouping', 'General', 'Select');
 
-            sliderButton = app.buttonFeature('slidergrouping', 'Time', 'progress');
-
-
-            // Add some items to test
-            app.dataStore.canvas.loadItems([{
-                id: "anno0",
-                type: "Annotation",
-                bodyType: "Text",
-                bodyContent: "Annotation here",
-                creator: "Grant Dickie",
-                x: 100,
-                y: 460,
-                w: 100,
-                h: 100,
-                shapeType: "Rectangle",
-                ntp_start: 6,
-                ntp_end: 45,
-                opacity: 0
-            }]);
-            app.dataStore.canvas.loadItems([{
-                id: "anno1",
-                type: "Annotation",
-                bodyType: "Text",
-                bodyContent: "Annotation here",
-                creator: "Grant Dickie",
-                x: 340,
-                y: 220,
-                w: 20,
-                h: 100,
-                shapeType: "Rectangle",
-                ntp_start: 16,
-                ntp_end: 33,
-                opacity: 0
-            }]);
+            watchButton = app.buttonFeature('buttongrouping', 'General', 'Watch');
 
             app.setCurrentTime(0);
-
-
-        });
-
-        app.ready(function() {
-            var manifest;
-            /*
-			Set up the import - requires NodeJS 
-			to be activated 
-			*/
-            manifest = OAC.initManifest({
-                proxy: 'http://localhost:8080',
-                dataStore: app.dataStore.canvas
-            });
-            manifest.base(options.base);
-            manifest.loadManifest(options.manifest,
-            function() {
-                
-            });
-
+			
+			// binding time controller to time DOM
+			app.controller.timecontrol.bind('.timeselect', {});
+			
         });
 
         return app;
