@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Fri Mar 9 16:43:13 2012 -0500
+ *  Date: Sun Mar 11 22:09:49 2012 -0400
  *  
  * Educational Community License, Version 2.0
  * 
@@ -1085,14 +1085,12 @@ Currently, just a text box for user to enter basic time data
             function() {
                 start_time = parseInt($(timestart).val(), 10);
                 end_time = parseInt($(timeend).val(), 10);
-
-                if (binding.currentId !== undefined && start_time !== undefined && end_time.length !== undefined) {
+                if (binding.currentId !== undefined && start_time !== undefined && end_time !== undefined) {
                     // update core data
-                    options.application.dataStore.canvas.updateItems([{
-                        id: binding.currentId,
-                        start_ntp: start_time,
-                        end_ntp: end_time
-                    }]);
+                   
+					binding.events.onUpdate.fire(binding.currentId, start_time, end_time);
+					
+					$(menudiv).hide();
                 }
             });
 
@@ -1257,7 +1255,6 @@ Presentations for canvas.js
         });
 
         changeCanvasCoordinates = function(args) {
-            console.log('changecanvascoords ' + JSON.stringify(args));
 			if (args !== undefined) {
 				
                 // player passes args of x,y and width, height
@@ -1399,13 +1396,13 @@ Presentations for canvas.js
             '<div id="' + myCanvasId + '" class="section-canvas"></div>' +
             // '</div>' +
             '<div class="mithgrid-bottomarea">' +
-			'<div class="timeselect">' +
-				'<p>Enter start time:</p>' +
-				'<input id="timestart" type="text" />' +
-				'<p>Enter end time:</p>' + 
-				'<input id="timeend" type="text" />' +
-				'<div id="submittime" class="button">Confirm time settings</div>' +
-			'</div>' +
+            '<div class="timeselect">' +
+            '<p>Enter start time:</p>' +
+            '<input id="timestart" type="text" />' +
+            '<p>Enter end time:</p>' +
+            '<input id="timeend" type="text" />' +
+            '<div id="submittime" class="button">Confirm time settings</div>' +
+            '</div>' +
             '<div id="sidebar' + myCanvasId + '" class="section-controls"></div>' +
             '<div class="section-annotations">' +
             '<div class="header">' +
@@ -1703,8 +1700,8 @@ Presentations for canvas.js
                 bodyContent: "This is an annotation for " + curMode,
                 shapeType: curMode,
                 opacity: 1,
-                ntp_start: ntp_start,
-                ntp_end: ntp_end
+                ntp_start: parseInt(ntp_start, 10),
+                ntp_end: parseInt(ntp_end, 10)
             };
 
             $.extend(shapeItem, shape);
@@ -1734,12 +1731,13 @@ Presentations for canvas.js
                 // five seconds on either side of the current time
                 app.dataView.currentAnnotations.setKeyRange(t - 5, t + 5);
             });
+
+
             app.events.onPlayerChange.addListener(function(playerobject) {
                 app.setCurrentTime(playerobject.getPlayhead());
                 playerobject.onPlayheadUpdate(function(t) {
                     app.setCurrentTime((app.getCurrentTime() + 1));
                 });
-
                 app.events.onCurrentModeChange.addListener(function(nmode) {
                     if (nmode !== 'Watch') {
                         playerobject.pause();
@@ -1761,7 +1759,8 @@ Presentations for canvas.js
             selectButton,
             sliderButton,
             exportRectangle,
-            watchButton;
+            watchButton,
+            timeControlBinding;
 
             calcRectangle = function(coords) {
                 var attrs = {};
@@ -1923,10 +1922,17 @@ Presentations for canvas.js
             watchButton = app.buttonFeature('buttongrouping', 'General', 'Watch');
 
             app.setCurrentTime(0);
-			
-			// binding time controller to time DOM
-			app.controller.timecontrol.bind('.timeselect', {});
-			
+
+            // binding time controller to time DOM
+            timeControlBinding = app.controller.timecontrol.bind('.timeselect', {});
+            timeControlBinding.events.onUpdate.addListener(function(id, start, end) {
+                app.dataStore.canvas.updateItems([{
+                    id: id,
+                    ntp_start: start,
+                    ntp_end: end
+                }]);
+            });
+
         });
 
         return app;
@@ -1988,6 +1994,14 @@ MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.ShapeCreateBox", {
 	bind: {
 		events: {
 			
+		}
+	}
+});
+
+MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.timeControl", {
+	bind: {
+		events: {
+			onUpdate: null
 		}
 	}
 });
@@ -2104,10 +2118,10 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 				opacity: {
 					valueType: 'numeric'
 				},
-				start_ntp: {
+				ntp_start: {
 					valueType: "numeric"
 				},
-				end_ntp: {
+				ntp_end: {
 					valueType: "numeric"
 				}
 			}

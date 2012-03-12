@@ -56,6 +56,14 @@ MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.ShapeCreateBox", {
 	}
 });
 
+MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.timeControl", {
+	bind: {
+		events: {
+			onUpdate: null
+		}
+	}
+});
+
 MITHGrid.defaults("OAC.Client.StreamingVideo", {
 	controllers: {
 		keyboard: {
@@ -168,10 +176,10 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 				opacity: {
 					valueType: 'numeric'
 				},
-				start_ntp: {
+				ntp_start: {
 					valueType: "numeric"
 				},
-				end_ntp: {
+				ntp_end: {
 					valueType: "numeric"
 				}
 			}

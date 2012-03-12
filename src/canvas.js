@@ -30,13 +30,13 @@
             '<div id="' + myCanvasId + '" class="section-canvas"></div>' +
             // '</div>' +
             '<div class="mithgrid-bottomarea">' +
-			'<div class="timeselect">' +
-				'<p>Enter start time:</p>' +
-				'<input id="timestart" type="text" />' +
-				'<p>Enter end time:</p>' + 
-				'<input id="timeend" type="text" />' +
-				'<div id="submittime" class="button">Confirm time settings</div>' +
-			'</div>' +
+            '<div class="timeselect">' +
+            '<p>Enter start time:</p>' +
+            '<input id="timestart" type="text" />' +
+            '<p>Enter end time:</p>' +
+            '<input id="timeend" type="text" />' +
+            '<div id="submittime" class="button">Confirm time settings</div>' +
+            '</div>' +
             '<div id="sidebar' + myCanvasId + '" class="section-controls"></div>' +
             '<div class="section-annotations">' +
             '<div class="header">' +
@@ -334,8 +334,8 @@
                 bodyContent: "This is an annotation for " + curMode,
                 shapeType: curMode,
                 opacity: 1,
-                ntp_start: ntp_start,
-                ntp_end: ntp_end
+                ntp_start: parseInt(ntp_start, 10),
+                ntp_end: parseInt(ntp_end, 10)
             };
 
             $.extend(shapeItem, shape);
@@ -365,12 +365,13 @@
                 // five seconds on either side of the current time
                 app.dataView.currentAnnotations.setKeyRange(t - 5, t + 5);
             });
+
+
             app.events.onPlayerChange.addListener(function(playerobject) {
                 app.setCurrentTime(playerobject.getPlayhead());
                 playerobject.onPlayheadUpdate(function(t) {
                     app.setCurrentTime((app.getCurrentTime() + 1));
                 });
-
                 app.events.onCurrentModeChange.addListener(function(nmode) {
                     if (nmode !== 'Watch') {
                         playerobject.pause();
@@ -392,7 +393,8 @@
             selectButton,
             sliderButton,
             exportRectangle,
-            watchButton;
+            watchButton,
+            timeControlBinding;
 
             calcRectangle = function(coords) {
                 var attrs = {};
@@ -554,10 +556,17 @@
             watchButton = app.buttonFeature('buttongrouping', 'General', 'Watch');
 
             app.setCurrentTime(0);
-			
-			// binding time controller to time DOM
-			app.controller.timecontrol.bind('.timeselect', {});
-			
+
+            // binding time controller to time DOM
+            timeControlBinding = app.controller.timecontrol.bind('.timeselect', {});
+            timeControlBinding.events.onUpdate.addListener(function(id, start, end) {
+                app.dataStore.canvas.updateItems([{
+                    id: id,
+                    ntp_start: start,
+                    ntp_end: end
+                }]);
+            });
+
         });
 
         return app;

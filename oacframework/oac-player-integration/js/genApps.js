@@ -17,11 +17,15 @@ var initPlugin = function() {
 		});
 		
 		raphApp.ready(function() {
-			raphApp.setPlayer(playerobj);
+			setTimeout(function() {
+				raphApp.setPlayer(playerobj);
+			},1);
 		});
 		
 		// creating Raphael canvas application
-		raphApp.run();
+		setTimeout(function() {
+			raphApp.run();
+		}, 10); 
 	};
 	
 	// setting up listener for when a new player is created

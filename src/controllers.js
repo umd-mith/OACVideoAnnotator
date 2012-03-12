@@ -1053,14 +1053,12 @@ Currently, just a text box for user to enter basic time data
             function() {
                 start_time = parseInt($(timestart).val(), 10);
                 end_time = parseInt($(timeend).val(), 10);
-
-                if (binding.currentId !== undefined && start_time !== undefined && end_time.length !== undefined) {
+                if (binding.currentId !== undefined && start_time !== undefined && end_time !== undefined) {
                     // update core data
-                    options.application.dataStore.canvas.updateItems([{
-                        id: binding.currentId,
-                        start_ntp: start_time,
-                        end_ntp: end_time
-                    }]);
+                   
+					binding.events.onUpdate.fire(binding.currentId, start_time, end_time);
+					
+					$(menudiv).hide();
                 }
             });
 
