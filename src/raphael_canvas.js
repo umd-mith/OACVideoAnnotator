@@ -143,7 +143,9 @@ Presentations for canvas.js
         });
 
         changeCanvasCoordinates = function(args) {
-            if (args !== undefined) {
+            console.log('changecanvascoords ' + JSON.stringify(args));
+			if (args !== undefined) {
+				
                 // player passes args of x,y and width, height
                 xy = args.getcoordinates();
 	            wh = args.getsize();

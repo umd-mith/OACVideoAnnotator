@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Mon Mar 5 13:42:02 2012 -0500
+ *  Date: Fri Mar 9 16:43:13 2012 -0500
  *  
  * Educational Community License, Version 2.0
  * 
@@ -1257,7 +1257,9 @@ Presentations for canvas.js
         });
 
         changeCanvasCoordinates = function(args) {
-            if (args !== undefined) {
+            console.log('changecanvascoords ' + JSON.stringify(args));
+			if (args !== undefined) {
+				
                 // player passes args of x,y and width, height
                 xy = args.getcoordinates();
 	            wh = args.getsize();
