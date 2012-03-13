@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Sun Mar 11 22:09:49 2012 -0400
+ *  Date: Mon Mar 12 16:02:46 2012 -0400
  *  
  * Educational Community License, Version 2.0
  * 
@@ -681,9 +681,9 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 	Annotation Active Controller 
 	Handles HTML annotation lens 
 	*/
-    Controller.namespace("AnnoActiveController");
-    Controller.AnnoActiveController.initController = function(options) {
-        var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.AnnoActiveController", options);
+    Controller.namespace("TextBodyEditor");
+    Controller.TextBodyEditor.initController = function(options) {
+        var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.TextBodyEditor", options);
         options = that.options;
 
         that.applyBindings = function(binding, opts) {
@@ -908,7 +908,6 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 
                     $.each(renderings,
                     function(i, o) {
-
                         extents = o.getExtents();
                         dx = Math.abs(offset.left - e.pageX);
                         dy = Math.abs(offset.top - e.pageY);
@@ -1108,7 +1107,50 @@ Currently, just a text box for user to enter basic time data
 
         return that;
     };
+	
+	/* Handles instances where screen has moved and canvas needs to be re-sized */
+	Controller.namespace('screenMove'); 
+	Controller.screenMove.initController = function(options) {
+		var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.screenMove", options);
+        options = that.options;
+		
+		that.applyBindings = function(binding, opts) {
+			var canvasEl = binding.locate('canvas'),
+			containerEl = binding.locate('container'),
+			htmlWrapper = binding.locate('htmlCanvasWrapper'),
+			w, h, x, y;
+			
+			$(window).resize(function() {
+				setTimeout(function() {
+					// place svg canvas to new area
+					x = parseInt($(containerEl).offset().left, 10);
+					y = parseInt($(containerEl).offset().top, 10);
+					w = parseInt($(containerEl).width(), 10);
+					h = parseInt($(containerEl).height(), 10);
 
+					$(canvasEl).css({
+						left: x + 'px',
+						top: y + 'px',
+						width: w + 'px',
+						height: h + 'px'
+					});
+					
+					$(htmlWrapper).css({
+						left: x + 'px',
+						top: y + 'px',
+						width: w + 'px',
+						height: h + 'px'
+					});
+					
+				}, 10);
+				
+				
+			});
+		};
+		
+		return that;
+		
+	};
 } (jQuery, MITHGrid, OAC));
 /*
 Presentations for canvas.js
@@ -1171,6 +1213,8 @@ Presentations for canvas.js
         keyboardBinding,
         shapeCreateController,
         shapeCreateBinding,
+		screenMoveController,
+		screenMoveBinding,
 		changeCanvasCoordinates,
         e,
         superEventFocusChange,
@@ -1187,7 +1231,8 @@ Presentations for canvas.js
         keyBoardController = options.controllers.keyboard;
         editBoxController = options.controllers.shapeEditBox;
         shapeCreateController = options.controllers.shapeCreateBox;
-
+		screenMoveController = options.controllers.screenmove;
+		
         x = options.application.cX || $(container).css('x');
         y = options.application.cY || $(container).css('y');
 
@@ -1233,7 +1278,11 @@ Presentations for canvas.js
         shapeCreateBinding = shapeCreateController.bind($(container), {
             paper: that.canvas
         });
-
+		
+		screenMoveBinding = screenMoveController.bind($('body'), {
+			
+		});
+		
         /*
 		Registering canvas special events for start, drag, stop
 		*/
@@ -1952,7 +2001,7 @@ MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.CanvasClickController", 
     }
 });
 
-MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.AnnoActiveController", {
+MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.TextBodyEditor", {
     bind: {
         events: {
             onClick: null,
@@ -2027,7 +2076,7 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 			}
 		},
 		annoActive: {
-			type: OAC.Client.StreamingVideo.Controller.AnnoActiveController,
+			type: OAC.Client.StreamingVideo.Controller.TextBodyEditor,
 			selectors: {
 				annotation: '',
 				annotationlist: ':parent',
@@ -2060,6 +2109,14 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 				timeend: '#timeend',
 				submit: '#submittime',
 				menudiv: ''
+			}
+		},
+		screenmove: {
+			type: OAC.Client.StreamingVideo.Controller.screenMove,
+			selectors: {
+				canvas: 'svg',
+				container: '#myplayer',
+				htmlCanvasWrapper: '.section-canvas'
 			}
 		}
 	},
@@ -2136,7 +2193,8 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 				editBox: "editBox",
 				canvas: "canvas",
 				shapeCreateBox: "shapeCreateBox",
-				shapeEditBox: "shapeEditBox"
+				shapeEditBox: "shapeEditBox",
+				screenmove: "screenmove"
 			},
 			fadeStart: 5
 		},

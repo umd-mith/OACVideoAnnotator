@@ -62,7 +62,7 @@ function OACYoutubeDrv(){
 
         this.onPlayerStateChange = function(event) {
            if (event.data == YT.PlayerState.PLAYING && !this.done) {
-                   setTimeout(this.stop, 6000);
+                   this.stop();
                    this.done = true;
 				   $("body:first").trigger('YTReady', [this.playerObj]);
            }

@@ -649,9 +649,9 @@
 	Annotation Active Controller 
 	Handles HTML annotation lens 
 	*/
-    Controller.namespace("AnnoActiveController");
-    Controller.AnnoActiveController.initController = function(options) {
-        var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.AnnoActiveController", options);
+    Controller.namespace("TextBodyEditor");
+    Controller.TextBodyEditor.initController = function(options) {
+        var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.TextBodyEditor", options);
         options = that.options;
 
         that.applyBindings = function(binding, opts) {
@@ -876,7 +876,6 @@
 
                     $.each(renderings,
                     function(i, o) {
-
                         extents = o.getExtents();
                         dx = Math.abs(offset.left - e.pageX);
                         dy = Math.abs(offset.top - e.pageY);
@@ -1076,5 +1075,48 @@ Currently, just a text box for user to enter basic time data
 
         return that;
     };
+	
+	/* Handles instances where screen has moved and canvas needs to be re-sized */
+	Controller.namespace('screenMove'); 
+	Controller.screenMove.initController = function(options) {
+		var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.screenMove", options);
+        options = that.options;
+		
+		that.applyBindings = function(binding, opts) {
+			var canvasEl = binding.locate('canvas'),
+			containerEl = binding.locate('container'),
+			htmlWrapper = binding.locate('htmlCanvasWrapper'),
+			w, h, x, y;
+			
+			$(window).resize(function() {
+				setTimeout(function() {
+					// place svg canvas to new area
+					x = parseInt($(containerEl).offset().left, 10);
+					y = parseInt($(containerEl).offset().top, 10);
+					w = parseInt($(containerEl).width(), 10);
+					h = parseInt($(containerEl).height(), 10);
 
+					$(canvasEl).css({
+						left: x + 'px',
+						top: y + 'px',
+						width: w + 'px',
+						height: h + 'px'
+					});
+					
+					$(htmlWrapper).css({
+						left: x + 'px',
+						top: y + 'px',
+						width: w + 'px',
+						height: h + 'px'
+					});
+					
+				}, 10);
+				
+				
+			});
+		};
+		
+		return that;
+		
+	};
 } (jQuery, MITHGrid, OAC));

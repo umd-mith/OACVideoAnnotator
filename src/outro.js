@@ -10,7 +10,7 @@ MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.CanvasClickController", 
     }
 });
 
-MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.AnnoActiveController", {
+MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.TextBodyEditor", {
     bind: {
         events: {
             onClick: null,
@@ -85,7 +85,7 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 			}
 		},
 		annoActive: {
-			type: OAC.Client.StreamingVideo.Controller.AnnoActiveController,
+			type: OAC.Client.StreamingVideo.Controller.TextBodyEditor,
 			selectors: {
 				annotation: '',
 				annotationlist: ':parent',
@@ -118,6 +118,14 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 				timeend: '#timeend',
 				submit: '#submittime',
 				menudiv: ''
+			}
+		},
+		screenmove: {
+			type: OAC.Client.StreamingVideo.Controller.screenMove,
+			selectors: {
+				canvas: 'svg',
+				container: '#myplayer',
+				htmlCanvasWrapper: '.section-canvas'
 			}
 		}
 	},
@@ -194,7 +202,8 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 				editBox: "editBox",
 				canvas: "canvas",
 				shapeCreateBox: "shapeCreateBox",
-				shapeEditBox: "shapeEditBox"
+				shapeEditBox: "shapeEditBox",
+				screenmove: "screenmove"
 			},
 			fadeStart: 5
 		},

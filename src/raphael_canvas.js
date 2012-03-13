@@ -59,6 +59,8 @@ Presentations for canvas.js
         keyboardBinding,
         shapeCreateController,
         shapeCreateBinding,
+		screenMoveController,
+		screenMoveBinding,
 		changeCanvasCoordinates,
         e,
         superEventFocusChange,
@@ -75,7 +77,8 @@ Presentations for canvas.js
         keyBoardController = options.controllers.keyboard;
         editBoxController = options.controllers.shapeEditBox;
         shapeCreateController = options.controllers.shapeCreateBox;
-
+		screenMoveController = options.controllers.screenmove;
+		
         x = options.application.cX || $(container).css('x');
         y = options.application.cY || $(container).css('y');
 
@@ -121,7 +124,11 @@ Presentations for canvas.js
         shapeCreateBinding = shapeCreateController.bind($(container), {
             paper: that.canvas
         });
-
+		
+		screenMoveBinding = screenMoveController.bind($('body'), {
+			
+		});
+		
         /*
 		Registering canvas special events for start, drag, stop
 		*/
