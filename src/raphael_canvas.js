@@ -148,7 +148,13 @@ Presentations for canvas.js
             var shape = shapeCreateBinding.completeShape(coords);
             options.application.insertShape(shape);
         });
-
+		
+		
+		/*
+		Called whenever a player is set by the Application. 
+		Assumes that said player object has getcoordinates() and 
+		getsize() as valid methods that return arrays.
+		*/
         changeCanvasCoordinates = function(args) {
 			if (args !== undefined) {
 				
@@ -173,6 +179,12 @@ Presentations for canvas.js
             }
         };
 
+		/*
+		Called when the time change event is fired. Makes sure
+		that the present annotations are qued and have the correct
+		opacity (Fades as it comes into play and fades as it goes out
+		of play)
+		*/
         eventCurrentTimeChange = function(npt) {
             var annoIds,
             anno,

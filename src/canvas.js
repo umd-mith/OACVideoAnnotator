@@ -463,7 +463,7 @@
                     return {
                         x: c.attr("x") + (c.attr("width") / 2),
                         y: c.attr("y") + (c.attr("height") / 2),
-                        width: c.attr("width"),
+						width: c.attr("width"),
                         height: c.attr("height")
                     };
                 };

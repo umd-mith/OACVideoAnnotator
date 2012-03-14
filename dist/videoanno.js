@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Mon Mar 12 16:02:46 2012 -0400
+ *  Date: Tue Mar 13 16:08:55 2012 -0400
  *  
  * Educational Community License, Version 2.0
  * 
@@ -846,11 +846,14 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 				*/
                 // remove all previous bindings
                 $(container).unbind();
-
+				console.log('drawShape offset: ' + JSON.stringify(offset));
+				
                 $(container).mousedown(function(e) {
+					console.log('mousemode: ' + mouseMode);
                     if (mouseMode > 0) {
                         return;
                     }
+					console.log('e.pageX: ' + e.pageX);
                     x = e.pageX - offset.left;
                     y = e.pageY - offset.top;
                     topLeft = [x, y];
@@ -891,15 +894,18 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 				*/
                 $(container).unbind();
                 $(container).bind('mousedown',
-                function(e) {
+				function(e) {
+					options.application.setActiveAnnotation(undefined);
+					activeId = '';
+					
+					/*
                     activeId = '';
                     offset = $(container).offset();
-                    ox = Math.abs(offset.left - e.pageX);
-                    oy = Math.abs(offset.top - e.pageY);
+                    
                     if (curRendering !== undefined) {
                         extents = curRendering.getExtents();
-                        dx = Math.abs(offset.left - e.pageX);
-                        dy = Math.abs(offset.top - e.pageY);
+                        dx = e.pageX - offset.left;
+                        dy = e.pageY - offset.top; 
                         if (dx < extents.width + 4 && dy < extents.height + 4) {
                             // nothing has changed
                             return;
@@ -909,11 +915,14 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
                     $.each(renderings,
                     function(i, o) {
                         extents = o.getExtents();
-                        dx = Math.abs(offset.left - e.pageX);
-                        dy = Math.abs(offset.top - e.pageY);
-
-                        // the '3' is for the drag boxes around the object
-                        if ((dx < (extents.width + 4)) && (dy < (extents.height + 4))) {
+                        dx = e.pageX - offset.left;
+                        dy = e.pageY - offset.top;
+						
+						console.log('offset: ' + JSON.stringify(offset) + 'dx: ' + dx + '  extents.x: ' + extents.x + '  dy: ' + dy + ' extents.y: ' + extents.y);
+                        // the '5' is for increasing the space where the user can click
+						// to activate a shape
+                        if ((dx < (extents.x + 5)) && (dy < (extents.y + 5)) && 
+							(dx > (extents.x - 5)) && (dy > (extents.y - 5))) {
                             activeId = o.id;
                             if ((curRendering === undefined) || (o.id !== curRendering.id)) {
                                 curRendering = o;
@@ -928,22 +937,34 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
                         options.application.setActiveAnnotation(undefined);
                         curRendering = undefined;
                     }
-                });
-
+                
+					*/
+				});
+				
             };
 
             options.application.events.onActiveAnnotationChange.addListener(attachDragResize);
             options.application.events.onCurrentModeChange.addListener(function(mode) {
                 if (mode === 'Rectangle' || mode === 'Ellipse') {
-                    drawShape(binding.locate('svg'));
+                    drawShape(binding.locate('svgwrapper'));
                 } else if (mode === 'Select') {
                     selectShape(binding.locate('svg'));
-                }
+					
+                } else {
+					$(binding.locate('svg')).unbind();
+				}
             });
 
             // Add to events
             binding.registerRendering = function(newRendering) {
                 renderings[newRendering.id] = newRendering;
+				// add a click event to the SVG shape
+				newRendering.shape.click(function(el) {
+					if(options.application.getCurrentMode() === 'Select') {
+						activeId = newRendering.id;
+						options.application.setActiveAnnotation(newRendering.id);
+					}
+				});
             };
 
             binding.removeRendering = function(oldRendering) {
@@ -1878,7 +1899,7 @@ Presentations for canvas.js
                     return {
                         x: c.attr("x") + (c.attr("width") / 2),
                         y: c.attr("y") + (c.attr("height") / 2),
-                        width: c.attr("width"),
+						width: c.attr("width"),
                         height: c.attr("height")
                     };
                 };
@@ -2072,7 +2093,8 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 		canvas: {
 			type: OAC.Client.StreamingVideo.Controller.CanvasClickController,
 			selectors: {
-				svg: ' > svg'
+				svg: ' > svg',
+				svgwrapper: '.section-canvas'
 			}
 		},
 		annoActive: {
