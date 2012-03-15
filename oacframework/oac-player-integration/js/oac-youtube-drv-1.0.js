@@ -8,10 +8,10 @@ $(document).ready(function() {
 });
 
 
-function onYouTubePlayerAPIReady() {
+function onYouTubePlayerAPIReady(id) {
 		console.log('ontubeplayerready called ');
 		
-				OAC_Controller.player().onYouTubePlayerAPIReady();
+				OAC_Controller.player().onYouTubePlayerAPIReady(id);
 				
 		
 }
@@ -36,7 +36,7 @@ function OACYoutubeDrv(){
 
         this.done = false;
 
-        this.onYouTubePlayerAPIReady = function() {
+        this.onYouTubePlayerAPIReady = function(id) {
                 var height = this.domObj.getAttribute("height");
                 var width = this.domObj.getAttribute("width");
                 var src = this.domObj.getAttribute("src");
@@ -53,7 +53,6 @@ function OACYoutubeDrv(){
                        'onStateChange': this.onPlayerStateChange
                     }
                 });
-				$('body:first').trigger('YTReady', [this.playerObj]);
         }
 
 
@@ -63,8 +62,9 @@ function OACYoutubeDrv(){
 
         this.onPlayerStateChange = function(event) {
            if (event.data == YT.PlayerState.PLAYING && !this.done) {
-                   setTimeout(this.stop, 6000);
+                   this.stop();
                    this.done = true;
+				   $("body:first").trigger('YTReady', [this.playerObj]);
            }
         }
 

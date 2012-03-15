@@ -149,7 +149,11 @@
                     itemMenu.hide();
                 }
             };
-
+			
+			/* Calcfactors
+				Measures where the handles should be on 
+				mousemove
+			*/
             calcFactors = function() {
                 extents = activeRendering.getExtents();
 
@@ -384,7 +388,8 @@
                     menuAttrs.y = args.y - (padding * 4) - 2;
                     menuAttrs.w = 100;
                     menuAttrs.h = 20;
-
+					// Create separate attribute objects
+					// for each menu button/container
                     eAttrs = {
                         x: menuAttrs.x + 2,
                         y: menuAttrs.y + 2,
@@ -504,6 +509,10 @@
                 mid: ['pointer', 1, 0, 1, 0]
             };
 
+			/*
+			Goes through handle object array and 
+			sets each handle box coordinate
+			*/
             calcHandles = function(args) {
                 // calculate where the resize handles
                 // will be located
@@ -646,12 +655,13 @@
     };
 
     /** 
-	Annotation Active Controller 
-	Handles HTML annotation lens 
+	Text Body Editor
+	Handles HTML annotation lens for editing the
+	bodyContent text
 	*/
-    Controller.namespace("AnnoActiveController");
-    Controller.AnnoActiveController.initController = function(options) {
-        var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.AnnoActiveController", options);
+    Controller.namespace("TextBodyEditor");
+    Controller.TextBodyEditor.initController = function(options) {
+        var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.TextBodyEditor", options);
         options = that.options;
 
         that.applyBindings = function(binding, opts) {
@@ -792,7 +802,12 @@
                 }
                 var o = renderings[id];
             },
-            drawShape = function(container) {
+            /*
+			Using two html elements: container is for 
+			registering the offset of the screen (.section-canvas) and 
+			the svgEl is for registering mouse clicks on the svg element (svg)
+            */
+            drawShape = function(container, svgEl) {
                 /*
 				Sets mousedown, mouseup, mousemove to draw a 
 				shape on the canvas.
@@ -814,8 +829,8 @@
 				*/
                 // remove all previous bindings
                 $(container).unbind();
-
-                $(container).mousedown(function(e) {
+				
+                $(svgEl).mousedown(function(e) {
                     if (mouseMode > 0) {
                         return;
                     }
@@ -826,7 +841,7 @@
                     binding.events.onShapeStart.fire(topLeft);
                 });
 
-                $(container).mousemove(function(e) {
+                $(svgEl).mousemove(function(e) {
                     if (mouseMode === 2 || mouseMode === 0) {
                         return;
                     }
@@ -836,7 +851,7 @@
                     binding.events.onShapeDrag.fire(bottomRight);
                 });
 
-                $(container).mouseup(function(e) {
+                $(svgEl).mouseup(function(e) {
                     if (mouseMode < 1) {
                         return;
                     }
@@ -859,15 +874,18 @@
 				*/
                 $(container).unbind();
                 $(container).bind('mousedown',
-                function(e) {
+				function(e) {
+					// By default, nullifies all selections
+					options.application.setActiveAnnotation(undefined);
+					activeId = '';
+					/*
                     activeId = '';
                     offset = $(container).offset();
-                    ox = Math.abs(offset.left - e.pageX);
-                    oy = Math.abs(offset.top - e.pageY);
+                    
                     if (curRendering !== undefined) {
                         extents = curRendering.getExtents();
-                        dx = Math.abs(offset.left - e.pageX);
-                        dy = Math.abs(offset.top - e.pageY);
+                        dx = e.pageX - offset.left;
+                        dy = e.pageY - offset.top; 
                         if (dx < extents.width + 4 && dy < extents.height + 4) {
                             // nothing has changed
                             return;
@@ -876,13 +894,15 @@
 
                     $.each(renderings,
                     function(i, o) {
-
                         extents = o.getExtents();
-                        dx = Math.abs(offset.left - e.pageX);
-                        dy = Math.abs(offset.top - e.pageY);
-
-                        // the '3' is for the drag boxes around the object
-                        if ((dx < (extents.width + 4)) && (dy < (extents.height + 4))) {
+                        dx = e.pageX - offset.left;
+                        dy = e.pageY - offset.top;
+						
+						console.log('offset: ' + JSON.stringify(offset) + 'dx: ' + dx + '  extents.x: ' + extents.x + '  dy: ' + dy + ' extents.y: ' + extents.y);
+                        // the '5' is for increasing the space where the user can click
+						// to activate a shape
+                        if ((dx < (extents.x + 5)) && (dy < (extents.y + 5)) && 
+							(dx > (extents.x - 5)) && (dy > (extents.y - 5))) {
                             activeId = o.id;
                             if ((curRendering === undefined) || (o.id !== curRendering.id)) {
                                 curRendering = o;
@@ -897,22 +917,36 @@
                         options.application.setActiveAnnotation(undefined);
                         curRendering = undefined;
                     }
-                });
-
+                
+					*/
+				});
+				
             };
 
             options.application.events.onActiveAnnotationChange.addListener(attachDragResize);
+			// Change the mouse actions depending on what Mode the application is currently
+			// in
             options.application.events.onCurrentModeChange.addListener(function(mode) {
                 if (mode === 'Rectangle' || mode === 'Ellipse') {
-                    drawShape(binding.locate('svg'));
+                    drawShape(binding.locate('svgwrapper'), binding.locate('svg'));
                 } else if (mode === 'Select') {
                     selectShape(binding.locate('svg'));
-                }
+					
+                } else {
+					$(binding.locate('svg')).unbind();
+				}
             });
 
             // Add to events
             binding.registerRendering = function(newRendering) {
                 renderings[newRendering.id] = newRendering;
+				// add a click event to the SVG shape
+				newRendering.shape.click(function(el) {
+					if(options.application.getCurrentMode() === 'Select') {
+						activeId = newRendering.id;
+						options.application.setActiveAnnotation(newRendering.id);
+					}
+				});
             };
 
             binding.removeRendering = function(oldRendering) {
@@ -1053,14 +1087,12 @@ Currently, just a text box for user to enter basic time data
             function() {
                 start_time = parseInt($(timestart).val(), 10);
                 end_time = parseInt($(timeend).val(), 10);
-
-                if (binding.currentId !== undefined && start_time !== undefined && end_time.length !== undefined) {
+                if (binding.currentId !== undefined && start_time !== undefined && end_time !== undefined) {
                     // update core data
-                    options.application.dataStore.canvas.updateItems([{
-                        id: binding.currentId,
-                        start_ntp: start_time,
-                        end_ntp: end_time
-                    }]);
+                   
+					binding.events.onUpdate.fire(binding.currentId, start_time, end_time);
+					
+					$(menudiv).hide();
                 }
             });
 
@@ -1078,5 +1110,48 @@ Currently, just a text box for user to enter basic time data
 
         return that;
     };
+	
+	/* Handles instances where screen has moved and canvas needs to be re-sized */
+	Controller.namespace('screenMove'); 
+	Controller.screenMove.initController = function(options) {
+		var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.screenMove", options);
+        options = that.options;
+		
+		that.applyBindings = function(binding, opts) {
+			var canvasEl = binding.locate('canvas'),
+			containerEl = binding.locate('container'),
+			htmlWrapper = binding.locate('htmlCanvasWrapper'),
+			w, h, x, y;
+			
+			$(window).resize(function() {
+				setTimeout(function() {
+					// place svg canvas to new area
+					x = parseInt($(containerEl).offset().left, 10);
+					y = parseInt($(containerEl).offset().top, 10);
+					w = parseInt($(containerEl).width(), 10);
+					h = parseInt($(containerEl).height(), 10);
 
+					$(canvasEl).css({
+						left: x + 'px',
+						top: y + 'px',
+						width: w + 'px',
+						height: h + 'px'
+					});
+					
+					$(htmlWrapper).css({
+						left: x + 'px',
+						top: y + 'px',
+						width: w + 'px',
+						height: h + 'px'
+					});
+					
+				}, 10);
+				
+				
+			});
+		};
+		
+		return that;
+		
+	};
 } (jQuery, MITHGrid, OAC));

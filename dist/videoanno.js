@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Mon Mar 5 13:42:02 2012 -0500
+ *  Date: Wed Mar 14 16:45:28 2012 -0400
  *  
  * Educational Community License, Version 2.0
  * 
@@ -681,9 +681,9 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 	Annotation Active Controller 
 	Handles HTML annotation lens 
 	*/
-    Controller.namespace("AnnoActiveController");
-    Controller.AnnoActiveController.initController = function(options) {
-        var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.AnnoActiveController", options);
+    Controller.namespace("TextBodyEditor");
+    Controller.TextBodyEditor.initController = function(options) {
+        var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.TextBodyEditor", options);
         options = that.options;
 
         that.applyBindings = function(binding, opts) {
@@ -824,7 +824,7 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
                 }
                 var o = renderings[id];
             },
-            drawShape = function(container) {
+            drawShape = function(container, svgEl) {
                 /*
 				Sets mousedown, mouseup, mousemove to draw a 
 				shape on the canvas.
@@ -846,11 +846,12 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 				*/
                 // remove all previous bindings
                 $(container).unbind();
-
-                $(container).mousedown(function(e) {
+				
+                $(svgEl).mousedown(function(e) {
                     if (mouseMode > 0) {
                         return;
                     }
+					console.log('e.pageX: ' + e.pageX);
                     x = e.pageX - offset.left;
                     y = e.pageY - offset.top;
                     topLeft = [x, y];
@@ -858,7 +859,7 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
                     binding.events.onShapeStart.fire(topLeft);
                 });
 
-                $(container).mousemove(function(e) {
+                $(svgEl).mousemove(function(e) {
                     if (mouseMode === 2 || mouseMode === 0) {
                         return;
                     }
@@ -868,7 +869,7 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
                     binding.events.onShapeDrag.fire(bottomRight);
                 });
 
-                $(container).mouseup(function(e) {
+                $(svgEl).mouseup(function(e) {
                     if (mouseMode < 1) {
                         return;
                     }
@@ -891,15 +892,17 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 				*/
                 $(container).unbind();
                 $(container).bind('mousedown',
-                function(e) {
+				function(e) {
+					options.application.setActiveAnnotation(undefined);
+					activeId = '';
+					/*
                     activeId = '';
                     offset = $(container).offset();
-                    ox = Math.abs(offset.left - e.pageX);
-                    oy = Math.abs(offset.top - e.pageY);
+                    
                     if (curRendering !== undefined) {
                         extents = curRendering.getExtents();
-                        dx = Math.abs(offset.left - e.pageX);
-                        dy = Math.abs(offset.top - e.pageY);
+                        dx = e.pageX - offset.left;
+                        dy = e.pageY - offset.top; 
                         if (dx < extents.width + 4 && dy < extents.height + 4) {
                             // nothing has changed
                             return;
@@ -908,13 +911,15 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 
                     $.each(renderings,
                     function(i, o) {
-
                         extents = o.getExtents();
-                        dx = Math.abs(offset.left - e.pageX);
-                        dy = Math.abs(offset.top - e.pageY);
-
-                        // the '3' is for the drag boxes around the object
-                        if ((dx < (extents.width + 4)) && (dy < (extents.height + 4))) {
+                        dx = e.pageX - offset.left;
+                        dy = e.pageY - offset.top;
+						
+						console.log('offset: ' + JSON.stringify(offset) + 'dx: ' + dx + '  extents.x: ' + extents.x + '  dy: ' + dy + ' extents.y: ' + extents.y);
+                        // the '5' is for increasing the space where the user can click
+						// to activate a shape
+                        if ((dx < (extents.x + 5)) && (dy < (extents.y + 5)) && 
+							(dx > (extents.x - 5)) && (dy > (extents.y - 5))) {
                             activeId = o.id;
                             if ((curRendering === undefined) || (o.id !== curRendering.id)) {
                                 curRendering = o;
@@ -929,22 +934,34 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
                         options.application.setActiveAnnotation(undefined);
                         curRendering = undefined;
                     }
-                });
-
+                
+					*/
+				});
+				
             };
 
             options.application.events.onActiveAnnotationChange.addListener(attachDragResize);
             options.application.events.onCurrentModeChange.addListener(function(mode) {
                 if (mode === 'Rectangle' || mode === 'Ellipse') {
-                    drawShape(binding.locate('svg'));
+                    drawShape(binding.locate('svgwrapper'), binding.locate('svg'));
                 } else if (mode === 'Select') {
                     selectShape(binding.locate('svg'));
-                }
+					
+                } else {
+					$(binding.locate('svg')).unbind();
+				}
             });
 
             // Add to events
             binding.registerRendering = function(newRendering) {
                 renderings[newRendering.id] = newRendering;
+				// add a click event to the SVG shape
+				newRendering.shape.click(function(el) {
+					if(options.application.getCurrentMode() === 'Select') {
+						activeId = newRendering.id;
+						options.application.setActiveAnnotation(newRendering.id);
+					}
+				});
             };
 
             binding.removeRendering = function(oldRendering) {
@@ -1085,14 +1102,12 @@ Currently, just a text box for user to enter basic time data
             function() {
                 start_time = parseInt($(timestart).val(), 10);
                 end_time = parseInt($(timeend).val(), 10);
-
-                if (binding.currentId !== undefined && start_time !== undefined && end_time.length !== undefined) {
+                if (binding.currentId !== undefined && start_time !== undefined && end_time !== undefined) {
                     // update core data
-                    options.application.dataStore.canvas.updateItems([{
-                        id: binding.currentId,
-                        start_ntp: start_time,
-                        end_ntp: end_time
-                    }]);
+                   
+					binding.events.onUpdate.fire(binding.currentId, start_time, end_time);
+					
+					$(menudiv).hide();
                 }
             });
 
@@ -1110,7 +1125,50 @@ Currently, just a text box for user to enter basic time data
 
         return that;
     };
+	
+	/* Handles instances where screen has moved and canvas needs to be re-sized */
+	Controller.namespace('screenMove'); 
+	Controller.screenMove.initController = function(options) {
+		var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.screenMove", options);
+        options = that.options;
+		
+		that.applyBindings = function(binding, opts) {
+			var canvasEl = binding.locate('canvas'),
+			containerEl = binding.locate('container'),
+			htmlWrapper = binding.locate('htmlCanvasWrapper'),
+			w, h, x, y;
+			
+			$(window).resize(function() {
+				setTimeout(function() {
+					// place svg canvas to new area
+					x = parseInt($(containerEl).offset().left, 10);
+					y = parseInt($(containerEl).offset().top, 10);
+					w = parseInt($(containerEl).width(), 10);
+					h = parseInt($(containerEl).height(), 10);
 
+					$(canvasEl).css({
+						left: x + 'px',
+						top: y + 'px',
+						width: w + 'px',
+						height: h + 'px'
+					});
+					
+					$(htmlWrapper).css({
+						left: x + 'px',
+						top: y + 'px',
+						width: w + 'px',
+						height: h + 'px'
+					});
+					
+				}, 10);
+				
+				
+			});
+		};
+		
+		return that;
+		
+	};
 } (jQuery, MITHGrid, OAC));
 /*
 Presentations for canvas.js
@@ -1173,6 +1231,8 @@ Presentations for canvas.js
         keyboardBinding,
         shapeCreateController,
         shapeCreateBinding,
+		screenMoveController,
+		screenMoveBinding,
 		changeCanvasCoordinates,
         e,
         superEventFocusChange,
@@ -1189,7 +1249,8 @@ Presentations for canvas.js
         keyBoardController = options.controllers.keyboard;
         editBoxController = options.controllers.shapeEditBox;
         shapeCreateController = options.controllers.shapeCreateBox;
-
+		screenMoveController = options.controllers.screenmove;
+		
         x = options.application.cX || $(container).css('x');
         y = options.application.cY || $(container).css('y');
 
@@ -1235,7 +1296,11 @@ Presentations for canvas.js
         shapeCreateBinding = shapeCreateController.bind($(container), {
             paper: that.canvas
         });
-
+		
+		screenMoveBinding = screenMoveController.bind($('body'), {
+			
+		});
+		
         /*
 		Registering canvas special events for start, drag, stop
 		*/
@@ -1255,9 +1320,16 @@ Presentations for canvas.js
             var shape = shapeCreateBinding.completeShape(coords);
             options.application.insertShape(shape);
         });
-
+		
+		
+		/*
+		Called whenever a player is set by the Application. 
+		Assumes that said player object has getcoordinates() and 
+		getsize() as valid methods that return arrays.
+		*/
         changeCanvasCoordinates = function(args) {
-            if (args !== undefined) {
+			if (args !== undefined) {
+				
                 // player passes args of x,y and width, height
                 xy = args.getcoordinates();
 	            wh = args.getsize();
@@ -1279,6 +1351,12 @@ Presentations for canvas.js
             }
         };
 
+		/*
+		Called when the time change event is fired. Makes sure
+		that the present annotations are qued and have the correct
+		opacity (Fades as it comes into play and fades as it goes out
+		of play)
+		*/
         eventCurrentTimeChange = function(npt) {
             var annoIds,
             anno,
@@ -1397,13 +1475,13 @@ Presentations for canvas.js
             '<div id="' + myCanvasId + '" class="section-canvas"></div>' +
             // '</div>' +
             '<div class="mithgrid-bottomarea">' +
-			'<div class="timeselect">' +
-				'<p>Enter start time:</p>' +
-				'<input id="timestart" type="text" />' +
-				'<p>Enter end time:</p>' + 
-				'<input id="timeend" type="text" />' +
-				'<div id="submittime" class="button">Confirm time settings</div>' +
-			'</div>' +
+            '<div class="timeselect">' +
+            '<p>Enter start time:</p>' +
+            '<input id="timestart" type="text" />' +
+            '<p>Enter end time:</p>' +
+            '<input id="timeend" type="text" />' +
+            '<div id="submittime" class="button">Confirm time settings</div>' +
+            '</div>' +
             '<div id="sidebar' + myCanvasId + '" class="section-controls"></div>' +
             '<div class="section-annotations">' +
             '<div class="header">' +
@@ -1701,8 +1779,8 @@ Presentations for canvas.js
                 bodyContent: "This is an annotation for " + curMode,
                 shapeType: curMode,
                 opacity: 1,
-                ntp_start: ntp_start,
-                ntp_end: ntp_end
+                ntp_start: parseInt(ntp_start, 10),
+                ntp_end: parseInt(ntp_end, 10)
             };
 
             $.extend(shapeItem, shape);
@@ -1732,12 +1810,13 @@ Presentations for canvas.js
                 // five seconds on either side of the current time
                 app.dataView.currentAnnotations.setKeyRange(t - 5, t + 5);
             });
+
+
             app.events.onPlayerChange.addListener(function(playerobject) {
                 app.setCurrentTime(playerobject.getPlayhead());
                 playerobject.onPlayheadUpdate(function(t) {
                     app.setCurrentTime((app.getCurrentTime() + 1));
                 });
-
                 app.events.onCurrentModeChange.addListener(function(nmode) {
                     if (nmode !== 'Watch') {
                         playerobject.pause();
@@ -1759,7 +1838,8 @@ Presentations for canvas.js
             selectButton,
             sliderButton,
             exportRectangle,
-            watchButton;
+            watchButton,
+            timeControlBinding;
 
             calcRectangle = function(coords) {
                 var attrs = {};
@@ -1828,7 +1908,7 @@ Presentations for canvas.js
                     return {
                         x: c.attr("x") + (c.attr("width") / 2),
                         y: c.attr("y") + (c.attr("height") / 2),
-                        width: c.attr("width"),
+						width: c.attr("width"),
                         height: c.attr("height")
                     };
                 };
@@ -1921,10 +2001,17 @@ Presentations for canvas.js
             watchButton = app.buttonFeature('buttongrouping', 'General', 'Watch');
 
             app.setCurrentTime(0);
-			
-			// binding time controller to time DOM
-			app.controller.timecontrol.bind('.timeselect', {});
-			
+
+            // binding time controller to time DOM
+            timeControlBinding = app.controller.timecontrol.bind('.timeselect', {});
+            timeControlBinding.events.onUpdate.addListener(function(id, start, end) {
+                app.dataStore.canvas.updateItems([{
+                    id: id,
+                    ntp_start: start,
+                    ntp_end: end
+                }]);
+            });
+
         });
 
         return app;
@@ -1944,7 +2031,7 @@ MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.CanvasClickController", 
     }
 });
 
-MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.AnnoActiveController", {
+MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.TextBodyEditor", {
     bind: {
         events: {
             onClick: null,
@@ -1990,6 +2077,14 @@ MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.ShapeCreateBox", {
 	}
 });
 
+MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.timeControl", {
+	bind: {
+		events: {
+			onUpdate: null
+		}
+	}
+});
+
 MITHGrid.defaults("OAC.Client.StreamingVideo", {
 	controllers: {
 		keyboard: {
@@ -2007,11 +2102,12 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 		canvas: {
 			type: OAC.Client.StreamingVideo.Controller.CanvasClickController,
 			selectors: {
-				svg: ' > svg'
+				svg: ' > svg',
+				svgwrapper: '.section-canvas'
 			}
 		},
 		annoActive: {
-			type: OAC.Client.StreamingVideo.Controller.AnnoActiveController,
+			type: OAC.Client.StreamingVideo.Controller.TextBodyEditor,
 			selectors: {
 				annotation: '',
 				annotationlist: ':parent',
@@ -2044,6 +2140,14 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 				timeend: '#timeend',
 				submit: '#submittime',
 				menudiv: ''
+			}
+		},
+		screenmove: {
+			type: OAC.Client.StreamingVideo.Controller.screenMove,
+			selectors: {
+				canvas: 'svg',
+				container: '#myplayer',
+				htmlCanvasWrapper: '.section-canvas'
 			}
 		}
 	},
@@ -2102,10 +2206,10 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 				opacity: {
 					valueType: 'numeric'
 				},
-				start_ntp: {
+				ntp_start: {
 					valueType: "numeric"
 				},
-				end_ntp: {
+				ntp_end: {
 					valueType: "numeric"
 				}
 			}
@@ -2120,7 +2224,8 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 				editBox: "editBox",
 				canvas: "canvas",
 				shapeCreateBox: "shapeCreateBox",
-				shapeEditBox: "shapeEditBox"
+				shapeEditBox: "shapeEditBox",
+				screenmove: "screenmove"
 			},
 			fadeStart: 5
 		},
