@@ -792,7 +792,7 @@
                 }
                 var o = renderings[id];
             },
-            drawShape = function(container) {
+            drawShape = function(container, svgEl) {
                 /*
 				Sets mousedown, mouseup, mousemove to draw a 
 				shape on the canvas.
@@ -815,11 +815,10 @@
                 // remove all previous bindings
                 $(container).unbind();
 				
-                $(container).mousedown(function(e) {
+                $(svgEl).mousedown(function(e) {
                     if (mouseMode > 0) {
                         return;
                     }
-					console.log('e.pageX: ' + e.pageX);
                     x = e.pageX - offset.left;
                     y = e.pageY - offset.top;
                     topLeft = [x, y];
@@ -827,7 +826,7 @@
                     binding.events.onShapeStart.fire(topLeft);
                 });
 
-                $(container).mousemove(function(e) {
+                $(svgEl).mousemove(function(e) {
                     if (mouseMode === 2 || mouseMode === 0) {
                         return;
                     }
@@ -837,7 +836,7 @@
                     binding.events.onShapeDrag.fire(bottomRight);
                 });
 
-                $(container).mouseup(function(e) {
+                $(svgEl).mouseup(function(e) {
                     if (mouseMode < 1) {
                         return;
                     }
@@ -911,7 +910,7 @@
             options.application.events.onActiveAnnotationChange.addListener(attachDragResize);
             options.application.events.onCurrentModeChange.addListener(function(mode) {
                 if (mode === 'Rectangle' || mode === 'Ellipse') {
-                    drawShape(binding.locate('svgwrapper'));
+                    drawShape(binding.locate('svgwrapper'), binding.locate('svg'));
                 } else if (mode === 'Select') {
                     selectShape(binding.locate('svg'));
 					

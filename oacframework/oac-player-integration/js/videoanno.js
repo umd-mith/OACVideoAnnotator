@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Tue Mar 13 16:08:55 2012 -0400
+ *  Date: Wed Mar 14 16:45:28 2012 -0400
  *  
  * Educational Community License, Version 2.0
  * 
@@ -824,7 +824,7 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
                 }
                 var o = renderings[id];
             },
-            drawShape = function(container) {
+            drawShape = function(container, svgEl) {
                 /*
 				Sets mousedown, mouseup, mousemove to draw a 
 				shape on the canvas.
@@ -846,10 +846,8 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 				*/
                 // remove all previous bindings
                 $(container).unbind();
-				console.log('drawShape offset: ' + JSON.stringify(offset));
 				
-                $(container).mousedown(function(e) {
-					console.log('mousemode: ' + mouseMode);
+                $(svgEl).mousedown(function(e) {
                     if (mouseMode > 0) {
                         return;
                     }
@@ -861,7 +859,7 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
                     binding.events.onShapeStart.fire(topLeft);
                 });
 
-                $(container).mousemove(function(e) {
+                $(svgEl).mousemove(function(e) {
                     if (mouseMode === 2 || mouseMode === 0) {
                         return;
                     }
@@ -871,7 +869,7 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
                     binding.events.onShapeDrag.fire(bottomRight);
                 });
 
-                $(container).mouseup(function(e) {
+                $(svgEl).mouseup(function(e) {
                     if (mouseMode < 1) {
                         return;
                     }
@@ -897,7 +895,6 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
 				function(e) {
 					options.application.setActiveAnnotation(undefined);
 					activeId = '';
-					
 					/*
                     activeId = '';
                     offset = $(container).offset();
@@ -946,7 +943,7 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
             options.application.events.onActiveAnnotationChange.addListener(attachDragResize);
             options.application.events.onCurrentModeChange.addListener(function(mode) {
                 if (mode === 'Rectangle' || mode === 'Ellipse') {
-                    drawShape(binding.locate('svgwrapper'));
+                    drawShape(binding.locate('svgwrapper'), binding.locate('svg'));
                 } else if (mode === 'Select') {
                     selectShape(binding.locate('svg'));
 					
@@ -1323,7 +1320,13 @@ Presentations for canvas.js
             var shape = shapeCreateBinding.completeShape(coords);
             options.application.insertShape(shape);
         });
-
+		
+		
+		/*
+		Called whenever a player is set by the Application. 
+		Assumes that said player object has getcoordinates() and 
+		getsize() as valid methods that return arrays.
+		*/
         changeCanvasCoordinates = function(args) {
 			if (args !== undefined) {
 				
@@ -1348,6 +1351,12 @@ Presentations for canvas.js
             }
         };
 
+		/*
+		Called when the time change event is fired. Makes sure
+		that the present annotations are qued and have the correct
+		opacity (Fades as it comes into play and fades as it goes out
+		of play)
+		*/
         eventCurrentTimeChange = function(npt) {
             var annoIds,
             anno,
