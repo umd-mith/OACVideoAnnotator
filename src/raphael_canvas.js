@@ -59,6 +59,8 @@ Presentations for canvas.js
         keyboardBinding,
         shapeCreateController,
         shapeCreateBinding,
+		screenMoveController,
+		screenMoveBinding,
 		changeCanvasCoordinates,
         e,
         superEventFocusChange,
@@ -75,7 +77,8 @@ Presentations for canvas.js
         keyBoardController = options.controllers.keyboard;
         editBoxController = options.controllers.shapeEditBox;
         shapeCreateController = options.controllers.shapeCreateBox;
-
+		screenMoveController = options.controllers.screenmove;
+		
         x = options.application.cX || $(container).css('x');
         y = options.application.cY || $(container).css('y');
 
@@ -121,7 +124,11 @@ Presentations for canvas.js
         shapeCreateBinding = shapeCreateController.bind($(container), {
             paper: that.canvas
         });
-
+		
+		screenMoveBinding = screenMoveController.bind($('body'), {
+			
+		});
+		
         /*
 		Registering canvas special events for start, drag, stop
 		*/
@@ -141,9 +148,16 @@ Presentations for canvas.js
             var shape = shapeCreateBinding.completeShape(coords);
             options.application.insertShape(shape);
         });
-
+		
+		
+		/*
+		Called whenever a player is set by the Application. 
+		Assumes that said player object has getcoordinates() and 
+		getsize() as valid methods that return arrays.
+		*/
         changeCanvasCoordinates = function(args) {
-            if (args !== undefined) {
+			if (args !== undefined) {
+				
                 // player passes args of x,y and width, height
                 xy = args.getcoordinates();
 	            wh = args.getsize();
@@ -165,6 +179,12 @@ Presentations for canvas.js
             }
         };
 
+		/*
+		Called when the time change event is fired. Makes sure
+		that the present annotations are qued and have the correct
+		opacity (Fades as it comes into play and fades as it goes out
+		of play)
+		*/
         eventCurrentTimeChange = function(npt) {
             var annoIds,
             anno,
