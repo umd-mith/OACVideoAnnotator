@@ -149,7 +149,11 @@
                     itemMenu.hide();
                 }
             };
-
+			
+			/* Calcfactors
+				Measures where the handles should be on 
+				mousemove
+			*/
             calcFactors = function() {
                 extents = activeRendering.getExtents();
 
@@ -384,7 +388,8 @@
                     menuAttrs.y = args.y - (padding * 4) - 2;
                     menuAttrs.w = 100;
                     menuAttrs.h = 20;
-
+					// Create separate attribute objects
+					// for each menu button/container
                     eAttrs = {
                         x: menuAttrs.x + 2,
                         y: menuAttrs.y + 2,
@@ -504,6 +509,10 @@
                 mid: ['pointer', 1, 0, 1, 0]
             };
 
+			/*
+			Goes through handle object array and 
+			sets each handle box coordinate
+			*/
             calcHandles = function(args) {
                 // calculate where the resize handles
                 // will be located
@@ -646,8 +655,9 @@
     };
 
     /** 
-	Annotation Active Controller 
-	Handles HTML annotation lens 
+	Text Body Editor
+	Handles HTML annotation lens for editing the
+	bodyContent text
 	*/
     Controller.namespace("TextBodyEditor");
     Controller.TextBodyEditor.initController = function(options) {
@@ -792,6 +802,11 @@
                 }
                 var o = renderings[id];
             },
+            /*
+			Using two html elements: container is for 
+			registering the offset of the screen (.section-canvas) and 
+			the svgEl is for registering mouse clicks on the svg element (svg)
+            */
             drawShape = function(container, svgEl) {
                 /*
 				Sets mousedown, mouseup, mousemove to draw a 
@@ -860,6 +875,7 @@
                 $(container).unbind();
                 $(container).bind('mousedown',
 				function(e) {
+					// By default, nullifies all selections
 					options.application.setActiveAnnotation(undefined);
 					activeId = '';
 					/*
@@ -908,6 +924,8 @@
             };
 
             options.application.events.onActiveAnnotationChange.addListener(attachDragResize);
+			// Change the mouse actions depending on what Mode the application is currently
+			// in
             options.application.events.onCurrentModeChange.addListener(function(mode) {
                 if (mode === 'Rectangle' || mode === 'Ellipse') {
                     drawShape(binding.locate('svgwrapper'), binding.locate('svg'));
