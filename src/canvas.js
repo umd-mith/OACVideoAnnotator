@@ -332,6 +332,7 @@
                 type: "Annotation",
                 bodyType: "Text",
                 bodyContent: "This is an annotation for " + curMode,
+				targetURI: 'videoURI',
                 shapeType: curMode,
                 opacity: 1,
                 ntp_start: parseInt(ntp_start, 10),
