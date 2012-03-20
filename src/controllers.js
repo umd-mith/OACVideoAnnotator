@@ -878,47 +878,7 @@
 					// By default, nullifies all selections
 					options.application.setActiveAnnotation(undefined);
 					activeId = '';
-					/*
-                    activeId = '';
-                    offset = $(container).offset();
-                    
-                    if (curRendering !== undefined) {
-                        extents = curRendering.getExtents();
-                        dx = e.pageX - offset.left;
-                        dy = e.pageY - offset.top; 
-                        if (dx < extents.width + 4 && dy < extents.height + 4) {
-                            // nothing has changed
-                            return;
-                        }
-                    }
-
-                    $.each(renderings,
-                    function(i, o) {
-                        extents = o.getExtents();
-                        dx = e.pageX - offset.left;
-                        dy = e.pageY - offset.top;
-						
-						console.log('offset: ' + JSON.stringify(offset) + 'dx: ' + dx + '  extents.x: ' + extents.x + '  dy: ' + dy + ' extents.y: ' + extents.y);
-                        // the '5' is for increasing the space where the user can click
-						// to activate a shape
-                        if ((dx < (extents.x + 5)) && (dy < (extents.y + 5)) && 
-							(dx > (extents.x - 5)) && (dy > (extents.y - 5))) {
-                            activeId = o.id;
-                            if ((curRendering === undefined) || (o.id !== curRendering.id)) {
-                                curRendering = o;
-                                options.application.setActiveAnnotation(o.id);
-                            }
-                            // stop running loop
-                            return false;
-                        }
-                    });
-                    if ((activeId.length === 0) && (curRendering !== undefined)) {
-                        // No shapes selected - de-activate current rendering and all other possible renderings
-                        options.application.setActiveAnnotation(undefined);
-                        curRendering = undefined;
-                    }
-                
-					*/
+					
 				});
 				
             };
@@ -983,6 +943,7 @@
                 if (active === false) {
                     active = true;
                     options.application.setCurrentMode(opts.action);
+
                     $(buttonEl).addClass("active");
                 } else if (active === true) {
                     active = false;

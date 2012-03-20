@@ -3,7 +3,7 @@
  * 
  *  Developed as a plugin for the MITHGrid framework. 
  *  
- *  Date: Wed Mar 14 16:45:28 2012 -0400
+ *  Date: Sun Mar 18 08:55:41 2012 -0400
  *  
  * Educational Community License, Version 2.0
  * 
@@ -30,7 +30,8 @@ var app = {};
 // Set the namespace for the StreamingVideo Annotation application
 MITHGrid.globalNamespace("OAC");
 OAC.namespace("Client");
-OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
+OAC.Client.namespace("StreamingVideo");
+(function($, MITHGrid, OAC) {
     var Controller = OAC.Client.StreamingVideo.namespace('Controller');
     Controller.namespace("KeyboardListener");
 
@@ -181,7 +182,11 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
                     itemMenu.hide();
                 }
             };
-
+			
+			/* Calcfactors
+				Measures where the handles should be on 
+				mousemove
+			*/
             calcFactors = function() {
                 extents = activeRendering.getExtents();
 
@@ -416,7 +421,8 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
                     menuAttrs.y = args.y - (padding * 4) - 2;
                     menuAttrs.w = 100;
                     menuAttrs.h = 20;
-
+					// Create separate attribute objects
+					// for each menu button/container
                     eAttrs = {
                         x: menuAttrs.x + 2,
                         y: menuAttrs.y + 2,
@@ -536,6 +542,10 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
                 mid: ['pointer', 1, 0, 1, 0]
             };
 
+			/*
+			Goes through handle object array and 
+			sets each handle box coordinate
+			*/
             calcHandles = function(args) {
                 // calculate where the resize handles
                 // will be located
@@ -678,8 +688,9 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
     };
 
     /** 
-	Annotation Active Controller 
-	Handles HTML annotation lens 
+	Text Body Editor
+	Handles HTML annotation lens for editing the
+	bodyContent text
 	*/
     Controller.namespace("TextBodyEditor");
     Controller.TextBodyEditor.initController = function(options) {
@@ -824,6 +835,11 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
                 }
                 var o = renderings[id];
             },
+            /*
+			Using two html elements: container is for 
+			registering the offset of the screen (.section-canvas) and 
+			the svgEl is for registering mouse clicks on the svg element (svg)
+            */
             drawShape = function(container, svgEl) {
                 /*
 				Sets mousedown, mouseup, mousemove to draw a 
@@ -851,7 +867,6 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
                     if (mouseMode > 0) {
                         return;
                     }
-					console.log('e.pageX: ' + e.pageX);
                     x = e.pageX - offset.left;
                     y = e.pageY - offset.top;
                     topLeft = [x, y];
@@ -893,54 +908,17 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
                 $(container).unbind();
                 $(container).bind('mousedown',
 				function(e) {
+					// By default, nullifies all selections
 					options.application.setActiveAnnotation(undefined);
 					activeId = '';
-					/*
-                    activeId = '';
-                    offset = $(container).offset();
-                    
-                    if (curRendering !== undefined) {
-                        extents = curRendering.getExtents();
-                        dx = e.pageX - offset.left;
-                        dy = e.pageY - offset.top; 
-                        if (dx < extents.width + 4 && dy < extents.height + 4) {
-                            // nothing has changed
-                            return;
-                        }
-                    }
-
-                    $.each(renderings,
-                    function(i, o) {
-                        extents = o.getExtents();
-                        dx = e.pageX - offset.left;
-                        dy = e.pageY - offset.top;
-						
-						console.log('offset: ' + JSON.stringify(offset) + 'dx: ' + dx + '  extents.x: ' + extents.x + '  dy: ' + dy + ' extents.y: ' + extents.y);
-                        // the '5' is for increasing the space where the user can click
-						// to activate a shape
-                        if ((dx < (extents.x + 5)) && (dy < (extents.y + 5)) && 
-							(dx > (extents.x - 5)) && (dy > (extents.y - 5))) {
-                            activeId = o.id;
-                            if ((curRendering === undefined) || (o.id !== curRendering.id)) {
-                                curRendering = o;
-                                options.application.setActiveAnnotation(o.id);
-                            }
-                            // stop running loop
-                            return false;
-                        }
-                    });
-                    if ((activeId.length === 0) && (curRendering !== undefined)) {
-                        // No shapes selected - de-activate current rendering and all other possible renderings
-                        options.application.setActiveAnnotation(undefined);
-                        curRendering = undefined;
-                    }
-                
-					*/
+					
 				});
 				
             };
 
             options.application.events.onActiveAnnotationChange.addListener(attachDragResize);
+			// Change the mouse actions depending on what Mode the application is currently
+			// in
             options.application.events.onCurrentModeChange.addListener(function(mode) {
                 if (mode === 'Rectangle' || mode === 'Ellipse') {
                     drawShape(binding.locate('svgwrapper'), binding.locate('svg'));
@@ -998,6 +976,7 @@ OAC.Client.namespace("StreamingVideo");(function($, MITHGrid, OAC) {
                 if (active === false) {
                     active = true;
                     options.application.setCurrentMode(opts.action);
+
                     $(buttonEl).addClass("active");
                 } else if (active === true) {
                     active = false;
@@ -1347,7 +1326,16 @@ Presentations for canvas.js
                     width: wh[0],
                     height: wh[1]
                 });
-
+				
+				$('.section-controls').css({
+					left: ((parseInt(xy[0], 10) + wh[0] + 10) + 'px'),
+					top: (parseInt(xy[1], 10) + 'px')
+				});
+				
+				$('.section-annotations').css({
+					left: ((parseInt(xy[0], 10) + wh[0] + wh[0]) + 'px'),
+					top: (parseInt(xy[1], 10) + 'px')
+				});
             }
         };
 
@@ -1460,7 +1448,17 @@ Presentations for canvas.js
         fade,
         myCanvasId = 'OAC-Client-StreamingVideo-SVG-Canvas-' + canvasId,
         xy = [],
-        wh = [];
+        wh = [],
+		ingestJSON,
+		convertJSONtoRDF,
+		exportRDF,
+		JSONdump = [],
+		RDF,
+		idcount = 0,
+		NSArray = {
+			annotation: 'http://www.openannotation.org/ns/Annotation',
+			textanno: 'http://dms.stanford.edu/ns/TextAnnotation'
+		};
 
         canvasId += 1;
 
@@ -1488,6 +1486,9 @@ Presentations for canvas.js
             'Annotations' +
             '</div>' +
             '</div>' +
+			'<iframe src="" width="1000px" height="400px" />' +
+			'<textarea id="rdfoutput" cols="1000" rows="800" />' +
+			
             '</div>',
             presentations: {
                 raphsvg: {
@@ -1522,6 +1523,7 @@ Presentations for canvas.js
         app.cHeight = 100;
         app.cX = 0;
         app.cY = 0;
+
 
         app.shapeTypes = {};
 
@@ -1665,7 +1667,7 @@ Presentations for canvas.js
         /*
 		Creates an HTML div that acts as a button
 		*/
-        app.buttonFeature = function(area, grouping, action) {
+        app.buttonFeature = function(area, grouping, action, callback) {
             /*
 			Check to make sure button isn't already present
 			*/
@@ -1705,7 +1707,8 @@ Presentations for canvas.js
                 that.element = $("#" + action);
 
                 buttonBinding = app.controller.buttonActive.bind(that.element, {
-                    action: action
+                    action: action,
+					callback: callback || null
                 });
             } else if (area === 'slidergrouping') {
                 if ($(container).find('#' + grouping).length === 0) {
@@ -1777,6 +1780,7 @@ Presentations for canvas.js
                 type: "Annotation",
                 bodyType: "Text",
                 bodyContent: "This is an annotation for " + curMode,
+				targetURI: 'videoURI',
                 shapeType: curMode,
                 opacity: 1,
                 ntp_start: parseInt(ntp_start, 10),
@@ -1787,21 +1791,74 @@ Presentations for canvas.js
             app.dataStore.canvas.loadItems([shapeItem]);
         };
 
-        /*
-		Exports all annotation data as JSON. All 
-		SVG data is converted to generic units
+	
+
+		/* 
+		Takes in JSON from MITHGrid data store -- is passed
+		data store array of items
+
+		populates: @JSONdump
 		*/
-        app.exportShapes = function() {
-            var canvasWidth,
-            canvasHeight;
-
-            canvasWidth = $('#' + myCanvasId).width();
-            canvasHeight = $('#' + myCanvasId).height();
-
-            $.each([]);
-        };
+		app.ingestJSON = function(data) {
+			var t;
+			console.log(data);
+			$.each(data, function(i, o) {
+				JSONdump.push($.extend(true, {}, app.dataStore.canvas.getItem(o)));
+			});
+		};
 
 
+		/*
+		Converts JSONdump data out into RDF format,
+		saves as jQuery DOMDocument
+
+		populates: @RDF
+		*/ 
+		app.convertJSONtoRDF = function() {
+			RDF = '<?xml version="1.0" ?>\n<rdf:RDF xmlns:cnt="http://www.w3.org/2008/content#" ' +
+			 'xmlns:dc="http://purl.org/dc/elements/1.1/" \n' +
+			 'xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dms="http://dms.stanford.edu/ns/" \n' + 
+			 'xmlns:exif="http://www.w3.org/2003/12/exif/ns#" xmlns:foaf="http://xmlns.com/foaf/0.1/" \n' +
+			 'xmlns:oac="http://www.openannotation.org/ns/" xmlns:ore="http://www.openarchives.org/ore/terms/" \n' +
+			 'xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">\n';
+			$.each(JSONdump, function(i, o) {
+				console.log('i: ' + i + ' o: ' + o);
+				if(o.type[0] === 'Annotation') {
+					RDF += '<rdf:Description rdf:about="' + idcount + '">\n' + 
+							'\t<rdf:hasBody rdf:resource="' + window.encodeURI(window.location) + 'body' + idcount + '">' + o.bodyContent[0] + '</rdf:hasBody>\n' + 
+							'\t<rdf:type rdf:resource="' + NSArray.annotation + '"></rdf:type>\n';
+					if(o.bodyType === 'text') {
+						RDF += '\t<rdf:type rdf:resource="' + NSArray.textanno + '" />';
+					}
+
+					RDF += '\t<rdf:hasTarget rdf:resource="' + o.targetURI[0] + '" />\n' +
+					'</rdf:Description>\n';
+				}
+				idcount += 1;
+			});
+
+			RDF += '</rdf:RDF>';
+
+			return RDF;
+		};
+
+
+		/*
+		Export using socket.io/other method
+		*/
+		app.exportRDF = function() {
+			var searchIds = app.dataStore.canvas.prepare(['!bodyType']), json;
+			app.ingestJSON(searchIds.evaluate('Text'));
+			app.convertJSONtoRDF();
+			socket = io.connect('http://localhost:8080');
+			socket.on('sendrdf', function() {
+				socket.emit('saverdf', {data: RDF});
+				$('iframe').attr('src', 'http://localhost:8080');
+			});
+			
+		
+		};
+		
         app.ready(function() {
             annoActiveController = app.controller.annoActive;
             app.events.onActiveAnnotationChange.addListener(app.presentation.raphsvg.eventFocusChange);
@@ -1811,20 +1868,24 @@ Presentations for canvas.js
                 app.dataView.currentAnnotations.setKeyRange(t - 5, t + 5);
             });
 
-
+			
             app.events.onPlayerChange.addListener(function(playerobject) {
+				
                 app.setCurrentTime(playerobject.getPlayhead());
-                playerobject.onPlayheadUpdate(function(t) {
-                    app.setCurrentTime((app.getCurrentTime() + 1));
-                });
-                app.events.onCurrentModeChange.addListener(function(nmode) {
-                    if (nmode !== 'Watch') {
-                        playerobject.pause();
-                    } else if (nmode === 'Watch') {
-                        playerobject.play();
-                    }
-                });
-
+                if(playerobject.onPlayheadUpdate !== null  && playerobject.pause !== null &&
+				playerobject.play !== null){
+					playerobject.onPlayheadUpdate(function(t) {
+	                    app.setCurrentTime((app.getCurrentTime() + 1));
+	                });
+				
+             	   app.events.onCurrentModeChange.addListener(function(nmode) {
+	                    if (nmode !== 'Watch') {
+	                        playerobject.pause();
+	                    } else if (nmode === 'Watch') {
+	                        playerobject.play();
+	                    }
+	                });
+				}
             });
         });
 
@@ -1837,6 +1898,7 @@ Presentations for canvas.js
             ellipseButton,
             selectButton,
             sliderButton,
+			exportButton,
             exportRectangle,
             watchButton,
             timeControlBinding;
@@ -1999,7 +2061,15 @@ Presentations for canvas.js
             selectButton = app.buttonFeature('buttongrouping', 'General', 'Select');
 
             watchButton = app.buttonFeature('buttongrouping', 'General', 'Watch');
-
+			
+			exportButton = app.buttonFeature('buttongrouping', 'General', 'Export');
+			
+			$("#Export").mousedown(function(e) {
+				app.exportRDF();
+				
+				$('#rdfoutput').html($(RDF));
+			});
+			
             app.setCurrentTime(0);
 
             // binding time controller to time DOM
@@ -2146,7 +2216,7 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 			type: OAC.Client.StreamingVideo.Controller.screenMove,
 			selectors: {
 				canvas: 'svg',
-				container: '#myplayer',
+				container: '.section-canvas',
 				htmlCanvasWrapper: '.section-canvas'
 			}
 		}

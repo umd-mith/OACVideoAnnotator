@@ -125,7 +125,7 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 			type: OAC.Client.StreamingVideo.Controller.screenMove,
 			selectors: {
 				canvas: 'svg',
-				container: '#myplayer',
+				container: '.section-canvas',
 				htmlCanvasWrapper: '.section-canvas'
 			}
 		}

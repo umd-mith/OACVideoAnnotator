@@ -41,6 +41,7 @@ MITHGrid
 	display: inline;
 	background: #777;
 	color: #000066;
+	position: absolute;
 }
 .section-canvas {
 	background: transparent;
@@ -54,6 +55,7 @@ MITHGrid
 	padding: 20px 0;
 	width: 200px;
 	display: inline;
+	position: absolute;
 }
 .section-annotations .header {
 	background: #777;

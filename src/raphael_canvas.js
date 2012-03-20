@@ -175,7 +175,16 @@ Presentations for canvas.js
                     width: wh[0],
                     height: wh[1]
                 });
-
+				
+				$('.section-controls').css({
+					left: ((parseInt(xy[0], 10) + wh[0] + 10) + 'px'),
+					top: (parseInt(xy[1], 10) + 'px')
+				});
+				
+				$('.section-annotations').css({
+					left: ((parseInt(xy[0], 10) + wh[0] + wh[0]) + 'px'),
+					top: (parseInt(xy[1], 10) + 'px')
+				});
             }
         };
 

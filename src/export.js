@@ -74,6 +74,8 @@ Den Haag
 	*/
 	exportRDF = function() {
 		
+		
+		
 	};
 	
 })(jQuery);
