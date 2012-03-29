@@ -13,7 +13,7 @@ OAC_FRAMEWORK_DIR = ${PREFIX}/oacframework/oac-player-integration/js
 JS_ENGINE ?= `which node nodejs`
 COMPILER = ${JS_ENGINE} ${BUILD_DIR}/uglify.js --unsafe
 POST_COMPILER = ${JS_ENGINE} ${BUILD_DIR}/post-compile.js
-
+DOCCO ?= `which docco`
 
 BASE_FILES = ${SRC_DIR}/controllers.js \
 	${SRC_DIR}/raphael_canvas.js \
@@ -28,13 +28,16 @@ VER = sed "s/@VERSION/${MG_VER}/"
 
 DATE=$(shell git log --pretty=format:%ad | head -1)
 
-all: core
+all: core docs
 
 core: videoanno min lint
 		@@echo "videoanno build complete"
 
 ${DIST_DIR}:
 		@@mkdir -p ${DIST_DIR}
+
+docs: ${MG}
+		@@${DOCCO} ${MG}
 
 videoanno: ${MG}
 
