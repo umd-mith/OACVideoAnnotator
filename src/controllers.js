@@ -83,7 +83,7 @@
 	//
 	// The initialized controller object.
 	//
-	// FIXME:
+	// **FIXME:**
 	//
 	// The controller needs to be broken up a bit. The idea of providing a bounding box for renderings is something that
 	// should be handled in the presentation, not here. The controller should just generate events based on user interactions.
@@ -201,7 +201,7 @@
 			//
 			// Returns: Nothing.
 			//
-			// FIXME: activeRendering management needs to be in the presentation hosting the bounding box rendering.
+			// **FIXME:** activeRendering management needs to be in the presentation hosting the bounding box rendering.
 			//
 			calcFactors = function() {
 				extents = activeRendering.getExtents();
@@ -309,6 +309,8 @@
 						},
 						function(x, y, e) {
 							// start
+							//
+							// **FIXME:** layerX and layerY are deprecated in WebKit
 							ox = e.layerX;
 							oy = e.layerY;
 							calcFactors();
@@ -371,6 +373,8 @@
 						var px,
 						py;
 						extents = activeRendering.getExtents();
+						//
+						// **FIXME:** layerX and layerY are deprecated in WebKit
 						ox = e.layerX;
 						oy = e.layerY;
 
@@ -1109,6 +1113,7 @@
 
 			$(submit).bind('click',
 			function() {
+				// **FIXME:** times can be in parts of seconds
 				start_time = parseInt($(timestart).val(), 10);
 				end_time = parseInt($(timeend).val(), 10);
 				if (binding.currentId !== undefined && start_time !== undefined && end_time !== undefined) {

@@ -4,7 +4,7 @@
 // The **OAC Video Annotation Tool** is a MITHGrid application providing annotation capabilities for streaming
 // video embedded in a web page. 
 //  
-// Date: Thu Mar 29 13:15:17 2012 -0400
+// Date: Fri Mar 30 10:14:44 2012 -0400
 //  
 // Educational Community License, Version 2.0
 // 
@@ -119,7 +119,7 @@ OAC.Client.namespace("StreamingVideo");
 	//
 	// The initialized controller object.
 	//
-	// FIXME:
+	// **FIXME:**
 	//
 	// The controller needs to be broken up a bit. The idea of providing a bounding box for renderings is something that
 	// should be handled in the presentation, not here. The controller should just generate events based on user interactions.
@@ -237,7 +237,7 @@ OAC.Client.namespace("StreamingVideo");
 			//
 			// Returns: Nothing.
 			//
-			// FIXME: activeRendering management needs to be in the presentation hosting the bounding box rendering.
+			// **FIXME:** activeRendering management needs to be in the presentation hosting the bounding box rendering.
 			//
 			calcFactors = function() {
 				extents = activeRendering.getExtents();
@@ -345,6 +345,8 @@ OAC.Client.namespace("StreamingVideo");
 						},
 						function(x, y, e) {
 							// start
+							//
+							// **FIXME:** layerX and layerY are deprecated in WebKit
 							ox = e.layerX;
 							oy = e.layerY;
 							calcFactors();
@@ -407,6 +409,8 @@ OAC.Client.namespace("StreamingVideo");
 						var px,
 						py;
 						extents = activeRendering.getExtents();
+						//
+						// **FIXME:** layerX and layerY are deprecated in WebKit
 						ox = e.layerX;
 						oy = e.layerY;
 
@@ -1145,6 +1149,7 @@ OAC.Client.namespace("StreamingVideo");
 
 			$(submit).bind('click',
 			function() {
+				// **FIXME:** times can be in parts of seconds
 				start_time = parseInt($(timestart).val(), 10);
 				end_time = parseInt($(timeend).val(), 10);
 				if (binding.currentId !== undefined && start_time !== undefined && end_time !== undefined) {
@@ -1264,7 +1269,7 @@ OAC.Client.namespace("StreamingVideo");
 		// to fit
 		h = $(container).height();
 
-		// FIXME: We need to change this. If we have multiple videos on a page, this will break.
+		// **FIXME:** We need to change this. If we have multiple videos on a page, this will break.
 		keyboardBinding = keyBoardController.bind($('body'), {});
 
 		that.events = $.extend(true, that.events, keyboardBinding.events);
@@ -1280,7 +1285,7 @@ OAC.Client.namespace("StreamingVideo");
 		that.canvas = new Raphael($(container), w, h);
 	
 		// attach binding
-		// FIXME: We need to change this. If we have multiple videos on a page, this will break.
+		// **FIXME:** We need to change this. If we have multiple videos on a page, this will break.
 		canvasBinding = canvasController.bind($('body'), {
 			closeEnough: 5,
 			paper: that.canvas
@@ -1294,7 +1299,7 @@ OAC.Client.namespace("StreamingVideo");
 			paper: that.canvas
 		});
 		
-		// FIXME: We need to change this. If we have multiple videos on a page, this will break.
+		// **FIXME:** We need to change this. If we have multiple videos on a page, this will break.
 		windowResizeBinding = windowResizeController.bind(window);
 	
 		windowResizeBinding.events.onResize.addListener(function() {
@@ -1322,6 +1327,8 @@ OAC.Client.namespace("StreamingVideo");
 				height: h + 'px'
 			});
 		});
+		
+		windowResizeBinding.events.onResize.fire(); // to make sure we get things set up right
 		
 		//
 		// Registering canvas special events for start, drag, stop
@@ -1379,23 +1386,29 @@ OAC.Client.namespace("StreamingVideo");
 		// opacity (Fades as it comes into play and fades as it goes out
 		// of play)
 		//
+		/*
 		eventCurrentTimeChange = function(npt) {
 			that.visitRenderings(function(id, rendering) {
 				if(rendering.eventCurrentTimeChange !== undefined) {
 					rendering.eventCurrentTimeChange(npt);
 				}
 			});
-		};
+		};*/
 
-		eventTimeEasementChange = function(te) {
+		options.application.events.onCurrentTimeChange.addListener(function(npt) {
+			that.visitRenderings(function(id, rendering) {
+				if(rendering.eventCurrentTimeChange !== undefined) {
+					rendering.eventCurrentTimeChange(npt);
+				}
+			});
+		});
+		options.application.events.onTimeEasementChange.addListener(function(te) {
 			that.visitRenderings(function(id, rendering) {
 				if(rendering.eventTimeEasementChange !== undefined) {
 					rendering.eventTimeEasementChange(te);
 				}
 			});
-		};
-
-		options.application.events.onCurrentTimeChange.addListener(eventCurrentTimeChange);
+		});
 		options.application.events.onPlayerChange.addListener(changeCanvasCoordinates);
 		options.application.dataStore.canvas.events.onModelChange.addListener(function() {
 			editBoundingBoxBinding.detachRendering();
@@ -1550,6 +1563,75 @@ OAC.Client.namespace("StreamingVideo");
 		app.initShapeLens = function(container, view, model, itemId) {
 			var that = {
 				id: itemId
+			}, calcOpacity,
+			focused, opacity, start, end, fstart, fend, 
+			item = model.getItem(itemId);
+			
+			// ### calcOpacity (private)
+			//
+			// Calculate the opacity of the annotation shape rendering over the video.
+			//
+			// Parameters:
+			//
+			// * n - the current time of the play head
+			//
+			calcOpacity = function(n) {
+				var val = 0;
+				
+				if (n < fstart || n > fend) {
+					return 0.0;
+				}
+				
+				if (n < start) {
+					// fading in
+					val = (1 / (start - n));
+					val = val.toFixed(3);
+				} else if (n > end) {
+					// fading out
+					val = (1 / (n - end));
+					val = val.toFixed(3);
+				} else {
+					val = 1;
+				}
+				return val;
+			};
+			
+			start = item.ntp_start[0];
+			end	  = item.ntp_end[0];
+			fstart = start - app.getTimeEasement();
+			fend   = end   + app.getTimeEasement();
+			
+			opacity = calcOpacity(app.getCurrentTime());
+			
+			that.eventTimeEasementChange = function(v) {
+				fstart = start - v;
+				fend   = end + v;
+				that.setOpacity(calcOpacity(app.getCurrentTime()));
+			};
+			
+			that.eventCurrentTimeChange = function(n) {
+				that.setOpacity(calcOpacity(n));
+			};
+			
+			// #### #setOpacity
+			//
+			// Sets the opacity for the SVG shape. This is moderated by the renderings focus. If in focus, then
+			// the full opacity is set. Otherwise, it is halved.
+			//
+			// If no value is given, then the shape's opacity is updated to reflect the currently set opacity and
+			// focus state.
+			//
+			// Parameters:
+			//
+			// * o - opacity when in focus
+			//
+			// Returns: Nothing.
+			//
+			that.setOpacity = function(o) {
+				if(o !== null && o !== undefined) { opacity = o; }
+				that.shape.attr({
+					opacity: (focused ? 1.0 : 0.5) * opacity
+				});
 			};
 			
 			// #### #eventFocus
@@ -1558,9 +1640,9 @@ OAC.Client.namespace("StreamingVideo");
 			// to the front and makes it opaque.
 			//
 			that.eventFocus = function() {
-				that.shape.attr({
-					opacity: 1
-				}).toFront();
+				focused = 1;
+				that.setOpacity();
+				that.shape.toFront();
 				view.events.onDelete.addListener(that.eventDelete);
 			};
 
@@ -1570,9 +1652,9 @@ OAC.Client.namespace("StreamingVideo");
 			// to the back and makes it semi-transparent.
 			//
 			that.eventUnfocus = function() {
-				that.shape.attr({
-					opacity: 0.5
-				}).toBack();
+				focused = 0;
+				that.setOpacity();
+				that.shape.toBack();
 				view.events.onDelete.removeListener(that.eventDelete);
 			};
 
@@ -1635,6 +1717,20 @@ OAC.Client.namespace("StreamingVideo");
 						x: pos.x,
 						y: pos.y
 					}]);
+				}
+			};
+			
+			// #### update
+			//
+			// Updates the rendering's opacity based on the current time and the time extent of the annotation.
+			//
+			that.update = function(item) {
+				if(item.ntp_start[0] !== start || item.ntp_end[0] !== end) {
+					start = item.ntp_start[0];
+					end = item.ntp_end[0];
+					fstart = start - app.getTimeEasement();
+					fend = end + app.getTimeEasement();
+					that.setOpacity(calcOpacity(app.getCurrentTime()));
 				}
 			};
 
@@ -1813,7 +1909,7 @@ OAC.Client.namespace("StreamingVideo");
 		app.buttonFeature = function(area, grouping, action) {
 			
 			// Check to make sure button isn't already present
-			// FIXME: make sure the id is unique in the page since we can have multiple instances of the
+			// **FIXME:** make sure the id is unique in the page since we can have multiple instances of the
 			// annotation client (one per video)
 			if ($('#' + action).length !== 0) {
 				return false; // Abort
@@ -1829,20 +1925,20 @@ OAC.Client.namespace("StreamingVideo");
 			insertSlider;
 
 			if (area === 'buttongrouping') {
-				/*
-				Set the group element where this button should go in. If no group 
-				element is yet created, create that group element with name *grouping*
-				*/
+				//
+				// Set the group element where this button should go in. If no group 
+				//element is yet created, create that group element with name *grouping*
+				//
 				if ($(container).find('#' + grouping).length === 0) {
 					$(container).append('<div id="' + grouping + '" class="buttongrouping"></div>');
 				}
 
 				groupEl = $("#" + grouping);
 
-				/*
-				generate HTML for button, then attach the callback. action
-				refers to ID and also the title of the button
-				*/
+				//
+				// generate HTML for button, then attach the callback. action
+				// refers to ID and also the title of the button
+				//
 				item = '<div id="' + action + '" class="button">' + action + '</div>';
 
 				$(groupEl).append(item);
@@ -1859,9 +1955,9 @@ OAC.Client.namespace("StreamingVideo");
 
 				groupEl = $("#" + grouping);
 
-				/*
-				HTML for slider button
-				*/
+				//
+				// HTML for slider button
+				//
 				item = '<div id="' + action + '"><div class="header">' + action + '</div>' +
 				'<div id="slider"></div><div class="timedisplay"></div></div>';
 				$(groupEl).append(item);
@@ -1947,7 +2043,7 @@ OAC.Client.namespace("StreamingVideo");
 		// Returns: Nothing.
 		//
 		
-		// FIXME: We should ensure that we don't have clashing IDs. We need to use UUIDs when possible.
+		// **FIXME:** We should ensure that we don't have clashing IDs. We need to use UUIDs when possible.
 		//		
 		app.insertShape = function(coords) {
 			var shapeItem,
@@ -2008,6 +2104,10 @@ OAC.Client.namespace("StreamingVideo");
 
 			// We currently have a Player variable that handles the current player object. This may change since
 			// we intend for the annotation client to be bound to a particular video stream on the page.
+			//
+			// **TODO:** This may be better done as an option when the app object is initialized. Annotations are
+			// specific to the video being annotated, so it doesn't make as much sense to change the video we're
+			// annotating. Better to create a new applicaiton instance.
 			app.events.onPlayerChange.addListener(function(playerobject) {
 				app.setCurrentTime(playerobject.getPlayhead());
 				playerobject.onPlayheadUpdate(function(t) {
@@ -2040,38 +2140,7 @@ OAC.Client.namespace("StreamingVideo");
 			watchButton,
 			timeControlBinding;
 
-			// ### calcOpacity (private)
-			//
-			// Calculate the opacity of the annotation shape rendering over the video.
-			//
-			// Parameters:
-			//
-			// * n - the current time of the play head
-			// * fstart - the start time for fading in (fstart .. start)
-			// * fend - the end time for fading out (end .. fend)
-			// * start - the start time for the annotation (start .. end)
-			// * end - the end time for the annotation (start .. end)
-			//
-			calcOpacity = function(n, fstart, fend, start, end) {
-				var val = 0;
-				
-				if (n < fstart || n > fend) {
-					return 0.0;
-				}
-				
-				if (n < start) {
-					// fading in
-					val = (1 / (start - n));
-					val = val.toFixed(3);
-				} else if (n > end) {
-					// fading out
-					val = (1 / (n - end));
-					val = val.toFixed(3);
-				} else {
-					val = 1;
-				}
-				return val;
-			};
+
 
 			// ### calcRectangle (private)
 			//
@@ -2146,64 +2215,37 @@ OAC.Client.namespace("StreamingVideo");
 				// Note: Rectangle measurements x,y start at CENTER
 				var that = app.initShapeLens(container, view, model, itemId),
 				item = model.getItem(itemId),
+				superUpdate,
 				c,
-				opacityFactor, fstart, fend, start, end, updateOpacity,
 				bbox;
-
-				start = item.ntp_start[0];
-				end	  = item.ntp_end[0];
-				fstart = start - app.getTimeEasement();
-				fend   = end   + app.getTimeEasement();
-				
-				updateOpacity = function() {
-					if(c !== undefined && c !== null) {
-						c.attr({
-							opacity: item.opacity[0] * opacityFactor
-						});
-					}
-				};
-				
-				that.eventTimeEasementChange = function(v) {
-					fstart = start - v;
-					fend   = end + v;
-					updateOpacity();
-				};
-				
-				that.eventCurrentTimeChange = function(n) {
-					opacityFactor = calcOpacity(n, fstart, fend, start, end);
-					updateOpacity();
-				};
 				
 				// Accessing the view.canvas Object that was created in MITHGrid.Presentation.RaphSVG
 				c = view.canvas.rect(item.x[0] - (item.w[0] / 2), item.y[0] - (item.h[0] / 2), item.w[0], item.h[0]);
+
+				that.shape = c;
 				// fill and set opacity
-				opacityFactor = calcOpacity(app.getCurrentTime(), fstart, fend, start, end);
 				c.attr({
-					fill: "red",
-					opacity: item.opacity * opacityFactor
+					fill: "red"
 				});
+				that.setOpacity();
+			
 				// **FIXME:** may break with multiple videos if different annotations have the same ids in different
 				// sets of annotations.
 				$(c.node).attr('id', item.id[0]);
+				
+				superUpdate = that.update;
 				that.update = function(newItem) {
 					// receiving the Object passed through
 					// model.updateItems in move()
 					item = newItem;
-					if(item.ntp_start[0] !== start || item.ntp_end[0] !== end) {
-						start = item.ntp_start[0];
-						end = item.ntp_end[0];
-						fstart = start - app.getTimeEasement();
-						fend = end + app.getTimeEasement();
-						opacityFactor = calcOpacity(app.getCurrentTime(), fstart, fend, start, end);
-					}
+					superUpdate(item);
 					try {
 						if (item.x !== undefined && item.y !== undefined && item.w !== undefined && item.h !== undefined) {
 							c.attr({
 								x: item.x[0] - item.w[0] / 2,
 								y: item.y[0] - item.h[0] / 2,
 								width: item.w[0],
-								height: item.h[0],
-								opacity: item.opacity * opacityFactor
+								height: item.h[0]
 							});
 						}
 					} catch(e) {
@@ -2223,8 +2265,6 @@ OAC.Client.namespace("StreamingVideo");
 					};
 				};
 
-				// register shape
-				that.shape = c;
 				return that;
 			};
 
@@ -2246,27 +2286,33 @@ OAC.Client.namespace("StreamingVideo");
 			lensEllipse = function(container, view, model, itemId) {
 				var that = app.initShapeLens(container, view, model, itemId),
 				item = model.getItem(itemId),
+				superUpdate,
 				c;
+				
 				// create the shape
 				c = view.canvas.ellipse(item.x[0], item.y[0], item.w[0] / 2, item.h[0] / 2);
+				that.shape = c;
+				
 				// fill shape
 				c.attr({
-					fill: "red",
-					opacity: item.opacity
+					fill: "red"
 				});
-
-
+				that.setOpacity();
+				
+				superUpdate = that.update;
+				
 				that.update = function(item) {
 					// receiving the Object passed through
 					// model.updateItems in move()
+					superUpdate(item);
+				
 					try {
 						if (item.x !== undefined && item.y !== undefined) {
 							c.attr({
 								cx: item.x[0],
 								cy: item.y[0],
 								rx: item.w[0] / 2,
-								ry: item.h[0] / 2,
-								opacity: item.opacity
+								ry: item.h[0] / 2
 							});
 						}
 					} catch(e) {
@@ -2275,11 +2321,7 @@ OAC.Client.namespace("StreamingVideo");
 					}
 					// Raphael object is updated
 				};
-
-				that.eventCurrentTimeChange = function(npt) {
-					
-				};
-
+				
 				// calculate the extents (x, y, width, height)
 				// of this type of shape
 				that.getExtents = function() {
@@ -2290,9 +2332,6 @@ OAC.Client.namespace("StreamingVideo");
 						height: (c.attr("ry") * 2)
 					};
 				};
-
-				// register shape
-				that.shape = c;
 
 				return that;
 			};
