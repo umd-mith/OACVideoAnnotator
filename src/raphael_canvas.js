@@ -263,17 +263,13 @@
 			}
 			return rendering;
 		};
-/*
-		that.renderItems = function() {
 
-		};
-*/
 		superEventFocusChange = that.eventFocusChange;
 
 		that.eventFocusChange = function(id) {
 			if (options.application.getCurrentMode() === 'Select') {
 				superEventFocusChange(id);
-				editBoundingBoxBinding.attachRendering(that.renderingFor(id));
+				editBoundingBoxBinding.attachRendering(that.getActiveRendering());
 			}
 		};
 		//console.log(that);

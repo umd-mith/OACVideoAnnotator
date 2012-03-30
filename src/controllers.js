@@ -92,6 +92,48 @@
 		
 		return that;
 	};
+	
+	// ## Select
+	//
+	// Attaches a click handler to an SVG rendering and fires an onSelect event if the rendering is clicked AND
+	// the application is in a mode to select things.
+	//
+	Controller.namespace("Select");
+	
+	// ### Select.initController
+	//
+	// Parameters:
+	//
+	// * options - object holding configuration information
+	//
+	// Returns:
+	//
+	// The configured controller object.
+	//
+	// Configuration Options:
+	//
+	// * isSelectable - function taking no arguments that should return "true" if the click should cause the
+	//                  onSelect event to fire.
+	//
+	Controller.Select.initController = function(options) {
+		var that = MITHGrid.Controller.initController(
+			"OAC.Client.StreamingVideo.Controller.Select",
+			options
+		);
+		options = that.options;
+		
+		that.applyBindings = function(binding) {
+			var el = binding.locate("raphael");
+			
+			el.click(function(e) {
+				if(options.isSelectable()) {
+					binding.events.onSelect.fire();
+				}
+			});
+		};
+		
+		return that;
+	};
 
 	// ## AnnotationEditSelectionGrid
 	//
@@ -215,8 +257,6 @@
 			//
 			// Returns: Nothing.
 			//
-			// **FIXME:** activeRendering management needs to be in the presentation hosting the bounding box rendering.
-			//
 			calcFactors = function() {
 				extents = activeRendering.getExtents();
 
@@ -330,8 +370,6 @@
 						midDragDragBinding.events.onFocus.addListener(
 							function(x, y) {
 								// start
-								//
-								// **FIXME:** layerX and layerY are deprecated in WebKit
 								ox = x;
 								oy = y;
 								calcFactors();
@@ -988,13 +1026,6 @@
 			// Add to events
 			binding.registerRendering = function(newRendering) {
 				renderings[newRendering.id] = newRendering;
-				// add a click event to the SVG shape
-				newRendering.shape.click(function(el) {
-					if(options.application.getCurrentMode() === 'Select') {
-						activeId = newRendering.id;
-						options.application.setActiveAnnotation(newRendering.id);
-					}
-				});
 			};
 
 			binding.removeRendering = function(oldRendering) {

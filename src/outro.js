@@ -124,6 +124,20 @@ MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.Drag", {
 	}
 });
 
+// ## Controller.Select
+//
+MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.Select", {
+	bind: {
+		events: {
+			onSelect: null
+		}
+	},
+	selectors: {
+		'': ''
+	},
+	isSelectable: function() { return true; }
+});
+
 // ## Controller.timeControl
 //
 // Bindings created by this controller will have the following events:
@@ -198,6 +212,9 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 		},
 		windowResize: {
 			type: OAC.Client.StreamingVideo.Controller.WindowResize
+		},
+		selectShape: {
+			type: OAC.Client.StreamingVideo.Controller.Select
 		}
 	},
 	variables: {

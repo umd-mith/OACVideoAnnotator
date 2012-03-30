@@ -70,6 +70,16 @@
 			controllers: {
 				keyboard: {
 					isActive: function() { return app.getCurrentMode() !== 'Editing'; }
+				},
+				selectShape: {
+					isSelectable: function() {
+						if(app.getCurrentMode() === "Select") {
+							return true;
+						}
+						else {
+							return false;
+						}
+					}
 				}
 			},
 			// We connect the SVG overlay and annotation sections of the DOM with their respective
@@ -748,7 +758,7 @@
 				// Note: Rectangle measurements x,y start at CENTER
 				var that = app.initShapeLens(container, view, model, itemId),
 				item = model.getItem(itemId),
-				superUpdate,
+				superUpdate, selectBinding,
 				c,
 				bbox;
 				
@@ -765,6 +775,11 @@
 				// **FIXME:** may break with multiple videos if different annotations have the same ids in different
 				// sets of annotations.
 				$(c.node).attr('id', item.id[0]);
+				
+				selectBinding = app.controller.selectShape.bind(c);
+				selectBinding.events.onSelect.addListener(function() {
+					app.setActiveAnnotation(itemId);
+				});
 				
 				superUpdate = that.update;
 				that.update = function(newItem) {
@@ -819,7 +834,7 @@
 			lensEllipse = function(container, view, model, itemId) {
 				var that = app.initShapeLens(container, view, model, itemId),
 				item = model.getItem(itemId),
-				superUpdate,
+				superUpdate, selectBinding,
 				c;
 				
 				// create the shape
@@ -832,6 +847,11 @@
 				});
 				that.setOpacity();
 				
+				selectBinding = app.controller.selectShape.bind(c);
+				selectBinding.events.onSelect.addListener(function() {
+				app.setActiveAnnotation(itemId);
+				});
+						
 				superUpdate = that.update;
 				
 				that.update = function(item) {

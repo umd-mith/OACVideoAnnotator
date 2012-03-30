@@ -4,7 +4,7 @@
 // The **OAC Video Annotation Tool** is a MITHGrid application providing annotation capabilities for streaming
 // video embedded in a web page. 
 //  
-// Date: Fri Mar 30 12:30:12 2012 -0400
+// Date: Fri Mar 30 14:14:45 2012 -0400
 //  
 // Educational Community License, Version 2.0
 // 
@@ -124,6 +124,48 @@ OAC.Client.namespace("StreamingVideo");
 					binding.events.onUnfocus.fire();
 				}
 			);
+		};
+		
+		return that;
+	};
+	
+	// ## Select
+	//
+	// Attaches a click handler to an SVG rendering and fires an onSelect event if the rendering is clicked AND
+	// the application is in a mode to select things.
+	//
+	Controller.namespace("Select");
+	
+	// ### Select.initController
+	//
+	// Parameters:
+	//
+	// * options - object holding configuration information
+	//
+	// Returns:
+	//
+	// The configured controller object.
+	//
+	// Configuration Options:
+	//
+	// * isSelectable - function taking no arguments that should return "true" if the click should cause the
+	//                  onSelect event to fire.
+	//
+	Controller.Select.initController = function(options) {
+		var that = MITHGrid.Controller.initController(
+			"OAC.Client.StreamingVideo.Controller.Select",
+			options
+		);
+		options = that.options;
+		
+		that.applyBindings = function(binding) {
+			var el = binding.locate("raphael");
+			
+			el.click(function(e) {
+				if(options.isSelectable()) {
+					binding.events.onSelect.fire();
+				}
+			});
 		};
 		
 		return that;
@@ -251,8 +293,6 @@ OAC.Client.namespace("StreamingVideo");
 			//
 			// Returns: Nothing.
 			//
-			// **FIXME:** activeRendering management needs to be in the presentation hosting the bounding box rendering.
-			//
 			calcFactors = function() {
 				extents = activeRendering.getExtents();
 
@@ -366,8 +406,6 @@ OAC.Client.namespace("StreamingVideo");
 						midDragDragBinding.events.onFocus.addListener(
 							function(x, y) {
 								// start
-								//
-								// **FIXME:** layerX and layerY are deprecated in WebKit
 								ox = x;
 								oy = y;
 								calcFactors();
@@ -1024,13 +1062,6 @@ OAC.Client.namespace("StreamingVideo");
 			// Add to events
 			binding.registerRendering = function(newRendering) {
 				renderings[newRendering.id] = newRendering;
-				// add a click event to the SVG shape
-				newRendering.shape.click(function(el) {
-					if(options.application.getCurrentMode() === 'Select') {
-						activeId = newRendering.id;
-						options.application.setActiveAnnotation(newRendering.id);
-					}
-				});
 			};
 
 			binding.removeRendering = function(oldRendering) {
@@ -1486,17 +1517,13 @@ OAC.Client.namespace("StreamingVideo");
 			}
 			return rendering;
 		};
-/*
-		that.renderItems = function() {
 
-		};
-*/
 		superEventFocusChange = that.eventFocusChange;
 
 		that.eventFocusChange = function(id) {
 			if (options.application.getCurrentMode() === 'Select') {
 				superEventFocusChange(id);
-				editBoundingBoxBinding.attachRendering(that.renderingFor(id));
+				editBoundingBoxBinding.attachRendering(that.getActiveRendering());
 			}
 		};
 		//console.log(that);
@@ -1577,6 +1604,16 @@ OAC.Client.namespace("StreamingVideo");
 			controllers: {
 				keyboard: {
 					isActive: function() { return app.getCurrentMode() !== 'Editing'; }
+				},
+				selectShape: {
+					isSelectable: function() {
+						if(app.getCurrentMode() === "Select") {
+							return true;
+						}
+						else {
+							return false;
+						}
+					}
 				}
 			},
 			// We connect the SVG overlay and annotation sections of the DOM with their respective
@@ -2255,7 +2292,7 @@ OAC.Client.namespace("StreamingVideo");
 				// Note: Rectangle measurements x,y start at CENTER
 				var that = app.initShapeLens(container, view, model, itemId),
 				item = model.getItem(itemId),
-				superUpdate,
+				superUpdate, selectBinding,
 				c,
 				bbox;
 				
@@ -2272,6 +2309,11 @@ OAC.Client.namespace("StreamingVideo");
 				// **FIXME:** may break with multiple videos if different annotations have the same ids in different
 				// sets of annotations.
 				$(c.node).attr('id', item.id[0]);
+				
+				selectBinding = app.controller.selectShape.bind(c);
+				selectBinding.events.onSelect.addListener(function() {
+					app.setActiveAnnotation(itemId);
+				});
 				
 				superUpdate = that.update;
 				that.update = function(newItem) {
@@ -2326,7 +2368,7 @@ OAC.Client.namespace("StreamingVideo");
 			lensEllipse = function(container, view, model, itemId) {
 				var that = app.initShapeLens(container, view, model, itemId),
 				item = model.getItem(itemId),
-				superUpdate,
+				superUpdate, selectBinding,
 				c;
 				
 				// create the shape
@@ -2339,6 +2381,11 @@ OAC.Client.namespace("StreamingVideo");
 				});
 				that.setOpacity();
 				
+				selectBinding = app.controller.selectShape.bind(c);
+				selectBinding.events.onSelect.addListener(function() {
+				app.setActiveAnnotation(itemId);
+				});
+						
 				superUpdate = that.update;
 				
 				that.update = function(item) {
@@ -2536,6 +2583,20 @@ MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.Drag", {
 	}
 });
 
+// ## Controller.Select
+//
+MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.Select", {
+	bind: {
+		events: {
+			onSelect: null
+		}
+	},
+	selectors: {
+		'': ''
+	},
+	isSelectable: function() { return true; }
+});
+
 // ## Controller.timeControl
 //
 // Bindings created by this controller will have the following events:
@@ -2610,6 +2671,9 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 		},
 		windowResize: {
 			type: OAC.Client.StreamingVideo.Controller.WindowResize
+		},
+		selectShape: {
+			type: OAC.Client.StreamingVideo.Controller.Select
 		}
 	},
 	variables: {
