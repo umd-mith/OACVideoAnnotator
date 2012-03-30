@@ -4,7 +4,7 @@
 // The **OAC Video Annotation Tool** is a MITHGrid application providing annotation capabilities for streaming
 // video embedded in a web page. 
 //  
-// Date: Thu Mar 15 08:58:53 2012 -0700
+// Date: Thu Mar 29 13:15:17 2012 -0400
 //  
 // Educational Community License, Version 2.0
 // 
@@ -1171,57 +1171,29 @@ OAC.Client.namespace("StreamingVideo");
 		return that;
 	};
 	
-	// ## screenMove
+	// ## WindowResize
 	//
-	// Handles instances where screen has moved and canvas needs to be re-sized
+	// Emits an onResize event when the browser window is resized.
 	//
-	Controller.namespace('screenMove'); 
-	Controller.screenMove.initController = function(options) {
-		var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.screenMove", options);
+	Controller.namespace('WindowResize');
+	Controller.WindowResize.initController = function(options) {
+		var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.WindowResize", options);
 		options = that.options;
 		
 		that.applyBindings = function(binding, opts) {
-			var canvasEl = binding.locate('canvas'),
-			containerEl = binding.locate('container'),
-			htmlWrapper = binding.locate('htmlCanvasWrapper'),
-			w, h, x, y;
-			
-			$(window).resize(function() {
-				setTimeout(function() {
-					// place svg canvas to new area
-					x = parseInt($(containerEl).offset().left, 10);
-					y = parseInt($(containerEl).offset().top, 10);
-					w = parseInt($(containerEl).width(), 10);
-					h = parseInt($(containerEl).height(), 10);
-
-					$(canvasEl).css({
-						left: x + 'px',
-						top: y + 'px',
-						width: w + 'px',
-						height: h + 'px'
-					});
-					
-					$(htmlWrapper).css({
-						left: x + 'px',
-						top: y + 'px',
-						width: w + 'px',
-						height: h + 'px'
-					});
-					
-				}, 10);
-				
-				
+			var w = binding.locate('');
+			w.resize(function() {
+				setTimeout(binding.events.onResize.fire, 0);
 			});
 		};
 		
 		return that;
-		
 	};
 } (jQuery, MITHGrid, OAC));
 
 // # Presentations
 //
-// TODO: rename file to presentations.js
+// TODO: rename file to presentation.js
 //
 // Presentations for canvas.js
 // @author Grant Dickie
@@ -1261,8 +1233,8 @@ OAC.Client.namespace("StreamingVideo");
 		keyboardBinding,
 		shapeCreateController,
 		shapeCreateBinding,
-		screenMoveController,
-		screenMoveBinding,
+		windowResizeController,
+		windowResizeBinding,
 		changeCanvasCoordinates,
 		e,
 		superEventFocusChange,
@@ -1281,7 +1253,7 @@ OAC.Client.namespace("StreamingVideo");
 		keyBoardController = options.controllers.keyboard;
 		editBoxController = options.controllers.shapeEditBox;
 		shapeCreateController = options.controllers.shapeCreateBox;
-		screenMoveController = options.controllers.screenmove;
+		windowResizeController = options.controllers.windowResize;
 		
 		x = $(container).css('x');
 		y = $(container).css('y');
@@ -1292,7 +1264,7 @@ OAC.Client.namespace("StreamingVideo");
 		// to fit
 		h = $(container).height();
 
-		// TODO: We need to change this. If we have multiple videos on a page, this will break.
+		// FIXME: We need to change this. If we have multiple videos on a page, this will break.
 		keyboardBinding = keyBoardController.bind($('body'), {});
 
 		that.events = $.extend(true, that.events, keyboardBinding.events);
@@ -1308,7 +1280,7 @@ OAC.Client.namespace("StreamingVideo");
 		that.canvas = new Raphael($(container), w, h);
 	
 		// attach binding
-		// TODO: We need to change this. If we have multiple videos on a page, this will break.
+		// FIXME: We need to change this. If we have multiple videos on a page, this will break.
 		canvasBinding = canvasController.bind($('body'), {
 			closeEnough: 5,
 			paper: that.canvas
@@ -1322,9 +1294,33 @@ OAC.Client.namespace("StreamingVideo");
 			paper: that.canvas
 		});
 		
-		// TODO: We need to change this. If we have multiple videos on a page, this will break.
-		screenMoveBinding = screenMoveController.bind($('body'), {
+		// FIXME: We need to change this. If we have multiple videos on a page, this will break.
+		windowResizeBinding = windowResizeController.bind(window);
+	
+		windowResizeBinding.events.onResize.addListener(function() {
+			var x, y, w, h, containerEl, canvasEl, htmlWrapper;
+			// the following elements should be parts of this presentation
+			canvasEl = $('body').find('svg');
+			containerEl = $('body').find('#myplayer');
+			htmlWrapper = $('body').find('.section-canvas');
+			x = parseInt($(containerEl).offset().left, 10);
+			y = parseInt($(containerEl).offset().top, 10);
+			w = parseInt($(containerEl).width(), 10);
+			h = parseInt($(containerEl).height(), 10);
+
+			$(canvasEl).css({
+				left: x + 'px',
+				top: y + 'px',
+				width: w + 'px',
+				height: h + 'px'
+			});
 			
+			$(htmlWrapper).css({
+				left: x + 'px',
+				top: y + 'px',
+				width: w + 'px',
+				height: h + 'px'
+			});
 		});
 		
 		//
@@ -2433,6 +2429,19 @@ MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.ShapeCreateBox", {
 	}
 });
 
+// ## Controller.WindowResize
+//
+MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.WindowResize", {
+	bind: {
+		events: {
+			onResize: null
+		}
+	},
+	selectors: {
+		'': ''
+	}
+});
+
 // ## Controller.timeControl
 //
 // Bindings created by this controller will have the following events:
@@ -2505,13 +2514,8 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 				menudiv: ''
 			}
 		},
-		screenmove: {
-			type: OAC.Client.StreamingVideo.Controller.screenMove,
-			selectors: {
-				canvas: 'svg',
-				container: '#myplayer',
-				htmlCanvasWrapper: '.section-canvas'
-			}
+		windowResize: {
+			type: OAC.Client.StreamingVideo.Controller.WindowResize
 		}
 	},
 	variables: {
@@ -2621,13 +2625,14 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 		raphsvg: {
 			type: MITHGrid.Presentation.RaphaelCanvas,
 			dataView: 'currentAnnotations',
+			// The controllers are configured for the application and passed in to the presentation's
+			// initInstance method as named here.
 			controllers: {
 				keyboard: "keyboard",
-				editBox: "editBox",
 				canvas: "canvas",
 				shapeCreateBox: "shapeCreateBox",
 				shapeEditBox: "shapeEditBox",
-				screenmove: "screenmove"
+				windowResize: "windowResize"
 			},
 			events: {
 				onOpacityChange: null

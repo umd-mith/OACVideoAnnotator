@@ -96,6 +96,19 @@ MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.ShapeCreateBox", {
 	}
 });
 
+// ## Controller.WindowResize
+//
+MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.WindowResize", {
+	bind: {
+		events: {
+			onResize: null
+		}
+	},
+	selectors: {
+		'': ''
+	}
+});
+
 // ## Controller.timeControl
 //
 // Bindings created by this controller will have the following events:
@@ -168,13 +181,8 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 				menudiv: ''
 			}
 		},
-		screenmove: {
-			type: OAC.Client.StreamingVideo.Controller.screenMove,
-			selectors: {
-				canvas: 'svg',
-				container: '#myplayer',
-				htmlCanvasWrapper: '.section-canvas'
-			}
+		windowResize: {
+			type: OAC.Client.StreamingVideo.Controller.WindowResize
 		}
 	},
 	variables: {
@@ -284,13 +292,14 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 		raphsvg: {
 			type: MITHGrid.Presentation.RaphaelCanvas,
 			dataView: 'currentAnnotations',
+			// The controllers are configured for the application and passed in to the presentation's
+			// initInstance method as named here.
 			controllers: {
 				keyboard: "keyboard",
-				editBox: "editBox",
 				canvas: "canvas",
 				shapeCreateBox: "shapeCreateBox",
 				shapeEditBox: "shapeEditBox",
-				screenmove: "screenmove"
+				windowResize: "windowResize"
 			},
 			events: {
 				onOpacityChange: null

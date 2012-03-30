@@ -1135,50 +1135,22 @@
 		return that;
 	};
 	
-	// ## screenMove
+	// ## WindowResize
 	//
-	// Handles instances where screen has moved and canvas needs to be re-sized
+	// Emits an onResize event when the browser window is resized.
 	//
-	Controller.namespace('screenMove'); 
-	Controller.screenMove.initController = function(options) {
-		var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.screenMove", options);
+	Controller.namespace('WindowResize');
+	Controller.WindowResize.initController = function(options) {
+		var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.WindowResize", options);
 		options = that.options;
 		
 		that.applyBindings = function(binding, opts) {
-			var canvasEl = binding.locate('canvas'),
-			containerEl = binding.locate('container'),
-			htmlWrapper = binding.locate('htmlCanvasWrapper'),
-			w, h, x, y;
-			
-			$(window).resize(function() {
-				setTimeout(function() {
-					// place svg canvas to new area
-					x = parseInt($(containerEl).offset().left, 10);
-					y = parseInt($(containerEl).offset().top, 10);
-					w = parseInt($(containerEl).width(), 10);
-					h = parseInt($(containerEl).height(), 10);
-
-					$(canvasEl).css({
-						left: x + 'px',
-						top: y + 'px',
-						width: w + 'px',
-						height: h + 'px'
-					});
-					
-					$(htmlWrapper).css({
-						left: x + 'px',
-						top: y + 'px',
-						width: w + 'px',
-						height: h + 'px'
-					});
-					
-				}, 10);
-				
-				
+			var w = binding.locate('');
+			w.resize(function() {
+				setTimeout(binding.events.onResize.fire, 0);
 			});
 		};
 		
 		return that;
-		
 	};
 } (jQuery, MITHGrid, OAC));
