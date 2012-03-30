@@ -77,7 +77,6 @@
 
 		that.events = $.extend(true, that.events, keyboardBinding.events);
 
-
 		// init RaphaelJS canvas
 		// Parameters for Raphael:
 		// * @x: value for top left corner
@@ -104,6 +103,34 @@
 		
 		// **FIXME:** We need to change this. If we have multiple videos on a page, this will break.
 		windowResizeBinding = windowResizeController.bind(window);
+		
+		editBoundingBoxBinding.events.onResize.addListener(function(pos) {
+			var activeRendering = that.getActiveRendering();
+			if(activeRendering !== null && activeRendering.eventResize !== undefined) {
+				activeRendering.eventResize(pos);
+			}
+		});
+		
+		editBoundingBoxBinding.events.onMove.addListener(function(pos) {
+			var activeRendering = that.getActiveRendering();
+			if (activeRendering !== null && activeRendering.eventMove !== undefined) {
+				activeRendering.eventMove(pos);
+			}
+		});
+
+		editBoundingBoxBinding.events.onDelete.addListener(function() {
+			var activeRendering = that.getActiveRendering();
+			if (activeRendering !== null && activeRendering.eventDelete !== undefined) {
+				activeRendering.eventDelete();
+				editBoundingBoxBinding.detachRendering();
+			}
+		});
+		
+		options.application.events.onCurrentModeChange.addListener(function(newMode) {
+			if (newMode !== 'Select' && newMode !== 'Drag') {
+				editBoundingBoxBinding.detachRendering();
+			}
+		});
 	
 		windowResizeBinding.events.onResize.addListener(function() {
 			var x, y, w, h, containerEl, canvasEl, htmlWrapper;
@@ -236,11 +263,11 @@
 			}
 			return rendering;
 		};
-
+/*
 		that.renderItems = function() {
 
 		};
-
+*/
 		superEventFocusChange = that.eventFocusChange;
 
 		that.eventFocusChange = function(id) {

@@ -177,31 +177,6 @@
 			handleCalculationData = {},
 			el;
 
-			binding.events.onResize.addListener(function(id, pos) {
-				if (activeRendering !== undefined && activeRendering.eventResize !== undefined) {
-					activeRendering.eventResize(id, pos);
-				}
-			});
-
-			binding.events.onMove.addListener(function(id, pos) {
-				if (activeRendering !== undefined && activeRendering.eventMove !== undefined) {
-					activeRendering.eventMove(id, pos);
-				}
-			});
-
-			binding.events.onDelete.addListener(function(id) {
-				if (activeRendering !== undefined && activeRendering.eventDelete !== undefined) {
-					activeRendering.eventDelete(id);
-					binding.detachRendering();
-				}
-			});
-
-			options.application.events.onCurrentModeChange.addListener(function(newMode) {
-				if (newMode !== 'Select' && newMode !== 'Drag') {
-					binding.detachRendering();
-				}
-			});
-
 			// Function for applying a new shape to the bounding box
 			binding.attachRendering = function(newRendering) {
 				binding.detachRendering();
@@ -374,10 +349,10 @@
 									y: shapeAttrs.y
 								};
 
-								binding.events.onMove.fire(activeRendering.id, pos);
-								activeRendering.shape.attr({
-									cursor: 'default'
-								});
+								binding.events.onMove.fire(pos);
+								//activeRendering.shape.attr({
+								//	cursor: 'default'
+								//});
 							}
 						);
 					}
@@ -462,7 +437,7 @@
 								height: shapeAttrs.h
 							};
 							if (activeRendering !== undefined) {
-								binding.events.onResize.fire(activeRendering.id, pos);
+								binding.events.onResize.fire(pos);
 							}
 							// change mode back
 							options.application.setCurrentMode('Select');
@@ -566,7 +541,7 @@
 
 					deleteButton.mousedown(function() {
 						if (activeRendering !== undefined) {
-							that.events.onDelete.fire(activeRendering.id);
+							binding.events.onDelete.fire();
 							itemDeleted();
 						}
 					});

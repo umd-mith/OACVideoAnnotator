@@ -4,7 +4,7 @@
 // The **OAC Video Annotation Tool** is a MITHGrid application providing annotation capabilities for streaming
 // video embedded in a web page. 
 //  
-// Date: Fri Mar 30 11:31:52 2012 -0400
+// Date: Fri Mar 30 12:30:12 2012 -0400
 //  
 // Educational Community License, Version 2.0
 // 
@@ -213,31 +213,6 @@ OAC.Client.namespace("StreamingVideo");
 			handleCalculationData = {},
 			el;
 
-			binding.events.onResize.addListener(function(id, pos) {
-				if (activeRendering !== undefined && activeRendering.eventResize !== undefined) {
-					activeRendering.eventResize(id, pos);
-				}
-			});
-
-			binding.events.onMove.addListener(function(id, pos) {
-				if (activeRendering !== undefined && activeRendering.eventMove !== undefined) {
-					activeRendering.eventMove(id, pos);
-				}
-			});
-
-			binding.events.onDelete.addListener(function(id) {
-				if (activeRendering !== undefined && activeRendering.eventDelete !== undefined) {
-					activeRendering.eventDelete(id);
-					binding.detachRendering();
-				}
-			});
-
-			options.application.events.onCurrentModeChange.addListener(function(newMode) {
-				if (newMode !== 'Select' && newMode !== 'Drag') {
-					binding.detachRendering();
-				}
-			});
-
 			// Function for applying a new shape to the bounding box
 			binding.attachRendering = function(newRendering) {
 				binding.detachRendering();
@@ -410,10 +385,10 @@ OAC.Client.namespace("StreamingVideo");
 									y: shapeAttrs.y
 								};
 
-								binding.events.onMove.fire(activeRendering.id, pos);
-								activeRendering.shape.attr({
-									cursor: 'default'
-								});
+								binding.events.onMove.fire(pos);
+								//activeRendering.shape.attr({
+								//	cursor: 'default'
+								//});
 							}
 						);
 					}
@@ -498,7 +473,7 @@ OAC.Client.namespace("StreamingVideo");
 								height: shapeAttrs.h
 							};
 							if (activeRendering !== undefined) {
-								binding.events.onResize.fire(activeRendering.id, pos);
+								binding.events.onResize.fire(pos);
 							}
 							// change mode back
 							options.application.setCurrentMode('Select');
@@ -602,7 +577,7 @@ OAC.Client.namespace("StreamingVideo");
 
 					deleteButton.mousedown(function() {
 						if (activeRendering !== undefined) {
-							that.events.onDelete.fire(activeRendering.id);
+							binding.events.onDelete.fire();
 							itemDeleted();
 						}
 					});
@@ -1325,7 +1300,6 @@ OAC.Client.namespace("StreamingVideo");
 
 		that.events = $.extend(true, that.events, keyboardBinding.events);
 
-
 		// init RaphaelJS canvas
 		// Parameters for Raphael:
 		// * @x: value for top left corner
@@ -1352,6 +1326,34 @@ OAC.Client.namespace("StreamingVideo");
 		
 		// **FIXME:** We need to change this. If we have multiple videos on a page, this will break.
 		windowResizeBinding = windowResizeController.bind(window);
+		
+		editBoundingBoxBinding.events.onResize.addListener(function(pos) {
+			var activeRendering = that.getActiveRendering();
+			if(activeRendering !== null && activeRendering.eventResize !== undefined) {
+				activeRendering.eventResize(pos);
+			}
+		});
+		
+		editBoundingBoxBinding.events.onMove.addListener(function(pos) {
+			var activeRendering = that.getActiveRendering();
+			if (activeRendering !== null && activeRendering.eventMove !== undefined) {
+				activeRendering.eventMove(pos);
+			}
+		});
+
+		editBoundingBoxBinding.events.onDelete.addListener(function() {
+			var activeRendering = that.getActiveRendering();
+			if (activeRendering !== null && activeRendering.eventDelete !== undefined) {
+				activeRendering.eventDelete();
+				editBoundingBoxBinding.detachRendering();
+			}
+		});
+		
+		options.application.events.onCurrentModeChange.addListener(function(newMode) {
+			if (newMode !== 'Select' && newMode !== 'Drag') {
+				editBoundingBoxBinding.detachRendering();
+			}
+		});
 	
 		windowResizeBinding.events.onResize.addListener(function() {
 			var x, y, w, h, containerEl, canvasEl, htmlWrapper;
@@ -1484,11 +1486,11 @@ OAC.Client.namespace("StreamingVideo");
 			}
 			return rendering;
 		};
-
+/*
 		that.renderItems = function() {
 
 		};
-
+*/
 		superEventFocusChange = that.eventFocusChange;
 
 		that.eventFocusChange = function(id) {
@@ -1714,61 +1716,48 @@ OAC.Client.namespace("StreamingVideo");
 			// Called when the data item represented by this rendering is to be deleted. The default implementation
 			// passes the deletion request to the data store with the item ID represented by the rendering.
 			//
-			// The data item is removed if and only if the id passed in matches the id of the rendered item.
+			// Parameters: None.
 			//
-			// Parameters:
+			// Returns: Nothing.
 			//
-			// * id - the item ID of the item to be deleted
-			that.eventDelete = function(id) {
-				if (id === itemId) {
-					model.removeItems([itemId]);
-				}
+			that.eventDelete = function() {
+				model.removeItems([itemId]);
 			};
 
 			// #### #eventResize
 			//
 			// Called when the bounding box of the rendering changes size.
 			//
-			// The item is resized if and only if the id passed in matches the id of the rendered item.
-			//
 			// Parameters:
 			//
-			// * id - the item ID of the item to be resized
 			// * pos - object containing the .width and .height properties
 			//
 			// Returns: Nothing.
 			//
-			that.eventResize = function(id, pos) {
-				if (id === itemId) {
-					model.updateItems([{
-						id: itemId,
-						w: pos.width,
-						h: pos.height
-					}]);
-				}
+			that.eventResize = function(pos) {
+				model.updateItems([{
+					id: itemId,
+					w: pos.width,
+					h: pos.height
+				}]);
 			};
 
 			// #### #eventMove
 			//
 			// Called when the bounding box of the rendering is moved.
 			//
-			// The item is moved if and only if the id passed in matches the id of the rendered item.
-			//
 			// Parameters:
 			//
-			// * id - the item ID of the item to be moved
 			// * pos - object containing the .x and .y properties
 			//
 			// Returns: Nothing.
 			//
-			that.eventMove = function(id, pos) {
-				if (id === itemId) {
-					model.updateItems([{
-						id: itemId,
-						x: pos.x,
-						y: pos.y
-					}]);
-				}
+			that.eventMove = function(pos) {
+				model.updateItems([{
+					id: itemId,
+					x: pos.x,
+					y: pos.y
+				}]);
 			};
 			
 			// #### update

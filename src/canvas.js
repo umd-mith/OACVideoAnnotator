@@ -209,61 +209,48 @@
 			// Called when the data item represented by this rendering is to be deleted. The default implementation
 			// passes the deletion request to the data store with the item ID represented by the rendering.
 			//
-			// The data item is removed if and only if the id passed in matches the id of the rendered item.
+			// Parameters: None.
 			//
-			// Parameters:
+			// Returns: Nothing.
 			//
-			// * id - the item ID of the item to be deleted
-			that.eventDelete = function(id) {
-				if (id === itemId) {
-					model.removeItems([itemId]);
-				}
+			that.eventDelete = function() {
+				model.removeItems([itemId]);
 			};
 
 			// #### #eventResize
 			//
 			// Called when the bounding box of the rendering changes size.
 			//
-			// The item is resized if and only if the id passed in matches the id of the rendered item.
-			//
 			// Parameters:
 			//
-			// * id - the item ID of the item to be resized
 			// * pos - object containing the .width and .height properties
 			//
 			// Returns: Nothing.
 			//
-			that.eventResize = function(id, pos) {
-				if (id === itemId) {
-					model.updateItems([{
-						id: itemId,
-						w: pos.width,
-						h: pos.height
-					}]);
-				}
+			that.eventResize = function(pos) {
+				model.updateItems([{
+					id: itemId,
+					w: pos.width,
+					h: pos.height
+				}]);
 			};
 
 			// #### #eventMove
 			//
 			// Called when the bounding box of the rendering is moved.
 			//
-			// The item is moved if and only if the id passed in matches the id of the rendered item.
-			//
 			// Parameters:
 			//
-			// * id - the item ID of the item to be moved
 			// * pos - object containing the .x and .y properties
 			//
 			// Returns: Nothing.
 			//
-			that.eventMove = function(id, pos) {
-				if (id === itemId) {
-					model.updateItems([{
-						id: itemId,
-						x: pos.x,
-						y: pos.y
-					}]);
-				}
+			that.eventMove = function(pos) {
+				model.updateItems([{
+					id: itemId,
+					x: pos.x,
+					y: pos.y
+				}]);
 			};
 			
 			// #### update
