@@ -4,7 +4,7 @@
 // The **OAC Video Annotation Tool** is a MITHGrid application providing annotation capabilities for streaming
 // video embedded in a web page. 
 //  
-// Date: Fri Mar 30 10:14:44 2012 -0400
+// Date: Fri Mar 30 11:31:52 2012 -0400
 //  
 // Educational Community License, Version 2.0
 // 
@@ -92,6 +92,42 @@ OAC.Client.namespace("StreamingVideo");
 
 		return that;
 	};
+	
+	// ## Drag
+	//
+	// Attaches to an SVG rendering and produces events at the start, middle, and end of a drag.
+	//
+	Controller.namespace("Drag");
+	
+	// ### Drag.initController
+	//
+	Controller.Drag.initController = function(options) {
+		var that = MITHGrid.Controller.initController(
+			"OAC.Client.StreamingVideo.Controller.Drag",
+			options
+		);
+		
+		that.applyBindings = function(binding, opts) {
+			var el = binding.locate('raphael');
+			
+			el.drag(
+				function(x, y) {
+					binding.events.onUpdate.fire(x, y);
+				},
+				function(x, y, e) {
+					// **FIXME**: layerX and layerY are deprecated in WebKit
+					x = e.layerX;
+					y = e.layerY;
+					binding.events.onFocus.fire(x, y);
+				},
+				function() {
+					binding.events.onUnfocus.fire();
+				}
+			);
+		};
+		
+		return that;
+	};
 
 	// ## AnnotationEditSelectionGrid
 	//
@@ -135,10 +171,13 @@ OAC.Client.namespace("StreamingVideo");
 		"OAC.Client.StreamingVideo.Controller.AnnotationEditSelectionGrid",
 		options
 		),
+		dragController,
 		dirs = [];
 
 		options = that.options;
 		dirs = that.options.dirs; // || ['ul', 'top', 'ur', 'lft', 'lr', 'btm', 'll', 'rgt', 'mid'];
+		
+		dragController = OAC.Client.StreamingVideo.Controller.Drag.initController({});
 
 		// #### AnnotationEditSelectionGrid #applyBindings
 		//
@@ -265,6 +304,8 @@ OAC.Client.namespace("StreamingVideo");
 			// Returns: Nothing.
 			//
 			drawHandles = function() {
+				var midDragDragBinding;
+				
 				if ($.isEmptyObject(handleSet)) {
 
 					// draw the corner and mid-point squares
@@ -313,146 +354,156 @@ OAC.Client.namespace("StreamingVideo");
 					if (! ($.isEmptyObject(midDrag))) {
 
 						// Attaching listener to drag-only handle (midDrag)
-						midDrag.drag(
-						function(dx, dy) {
-							// dragging means that the svgBBox stays padding-distance
-							// away from the lens' shape and the lens shape gets updated
-							// in dataStore
-							handleAttrs.nx = attrs.x + dx;
-							handleAttrs.ny = attrs.y + dy;
-							shapeAttrs.x = extents.x + dx;
-							shapeAttrs.y = extents.y + dy;
+						midDragDragBinding = dragController.bind(midDrag);
+						
+						midDragDragBinding.events.onUpdate.addListener(
+							function(dx, dy) {
+								// dragging means that the svgBBox stays padding-distance
+								// away from the lens' shape and the lens shape gets updated
+								// in dataStore
+								handleAttrs.nx = attrs.x + dx;
+								handleAttrs.ny = attrs.y + dy;
+								shapeAttrs.x = extents.x + dx;
+								shapeAttrs.y = extents.y + dy;
 
-							svgBBox.attr({
-								x: handleAttrs.nx,
-								y: handleAttrs.ny
-							});
+								svgBBox.attr({
+									x: handleAttrs.nx,
+									y: handleAttrs.ny
+								});
 
-							calcHandles({
-								x: handleAttrs.nx,
-								y: handleAttrs.ny,
-								width: attrs.width,
-								height: attrs.height
-							});
-							if (itemMenu) {
-								drawMenu({
+								calcHandles({
 									x: handleAttrs.nx,
 									y: handleAttrs.ny,
 									width: attrs.width,
 									height: attrs.height
 								});
+								if (itemMenu) {
+									drawMenu({
+										x: handleAttrs.nx,
+										y: handleAttrs.ny,
+										width: attrs.width,
+										height: attrs.height
+									});
+								}
 							}
-						},
-						function(x, y, e) {
-							// start
-							//
-							// **FIXME:** layerX and layerY are deprecated in WebKit
-							ox = e.layerX;
-							oy = e.layerY;
-							calcFactors();
-							activeRendering.shape.attr({
-								cursor: 'move'
-							});
-						},
-						function() {
-							// end
-							var pos = {
-								x: shapeAttrs.x,
-								y: shapeAttrs.y
-							};
+						);
+						
+						midDragDragBinding.events.onFocus.addListener(
+							function(x, y) {
+								// start
+								//
+								// **FIXME:** layerX and layerY are deprecated in WebKit
+								ox = x;
+								oy = y;
+								calcFactors();
+								activeRendering.shape.attr({
+									cursor: 'move'
+								});
+							}
+						);
+						
+						midDragDragBinding.events.onUnfocus.addListener(
+							function() {
+								// end
+								var pos = {
+									x: shapeAttrs.x,
+									y: shapeAttrs.y
+								};
 
-							binding.events.onMove.fire(activeRendering.id, pos);
-							activeRendering.shape.attr({
-								cursor: 'default'
-							});
-						}
+								binding.events.onMove.fire(activeRendering.id, pos);
+								activeRendering.shape.attr({
+									cursor: 'default'
+								});
+							}
 						);
 					}
 
 					// Attaching drag and resize handlers
-					handleSet.drag(
-					function(dx, dy) {
-						// onmove function - handles dragging
-						// dragging here means that the shape is being resized;
-						// the factorial determines in which direction the
-						// shape is pulled
-						shapeAttrs.w = Math.abs(extents.width + dx * factors.x);
-						shapeAttrs.h = Math.abs(extents.height + dy * factors.y);
-						handleAttrs.nw = shapeAttrs.w + (padding * 2);
-						handleAttrs.nh = shapeAttrs.h + (padding * 2);
-						handleAttrs.nx = (extents.x - (padding / 4)) - (handleAttrs.nw / 2);
-						handleAttrs.ny = (extents.y - (padding / 4)) - (handleAttrs.nh / 2);
+					handleSet.forEach(function(handle) {
+						var handleBinding = dragController.bind(handle);
+						
+						handleBinding.events.onUpdate.addListener(function(dx, dy) {
+							// onmove function - handles dragging
+							// dragging here means that the shape is being resized;
+							// the factorial determines in which direction the
+							// shape is pulled
+							shapeAttrs.w = Math.abs(extents.width + dx * factors.x);
+							shapeAttrs.h = Math.abs(extents.height + dy * factors.y);
+							handleAttrs.nw = shapeAttrs.w + (padding * 2);
+							handleAttrs.nh = shapeAttrs.h + (padding * 2);
+							handleAttrs.nx = (extents.x - (padding / 4)) - (handleAttrs.nw / 2);
+							handleAttrs.ny = (extents.y - (padding / 4)) - (handleAttrs.nh / 2);
 
-						svgBBox.attr({
-							x: handleAttrs.nx,
-							y: handleAttrs.ny,
-							width: handleAttrs.nw,
-							height: handleAttrs.nh
-						});
-						calcHandles({
-							x: handleAttrs.nx,
-							y: handleAttrs.ny,
-							width: handleAttrs.nw,
-							height: handleAttrs.nh
-						});
-						if (itemMenu) {
-							drawMenu({
+							svgBBox.attr({
 								x: handleAttrs.nx,
 								y: handleAttrs.ny,
 								width: handleAttrs.nw,
 								height: handleAttrs.nh
 							});
-						}
-					},
-					function(x, y, e) {
-						// onstart function
-						var px,
-						py;
-						extents = activeRendering.getExtents();
-						//
-						// **FIXME:** layerX and layerY are deprecated in WebKit
-						ox = e.layerX;
-						oy = e.layerY;
+							calcHandles({
+								x: handleAttrs.nx,
+								y: handleAttrs.ny,
+								width: handleAttrs.nw,
+								height: handleAttrs.nh
+							});
+							if (itemMenu) {
+								drawMenu({
+									x: handleAttrs.nx,
+									y: handleAttrs.ny,
+									width: handleAttrs.nw,
+									height: handleAttrs.nh
+								});
+							}
+						});
+						
+						handleBinding.events.onFocus.addListener(function(x, y) {
+								// onstart function
+								var px,
+								py;
+								extents = activeRendering.getExtents();
+								ox = x;
+								oy = y;
 
-						// change mode
-						options.application.setCurrentMode('Drag');
-						// extents: x, y, width, height
-						px = (8 * (ox - extents.x) / extents.width) + 4;
-						py = (8 * (oy - extents.y) / extents.height) + 4;
-						if (px < 3) {
-							factors.x = -2;
-						}
-						else if (px < 5) {
-							factors.x = 0;
-						}
-						else {
-							factors.x = 2;
-						}
-						if (py < 3) {
-							factors.y = -2;
-						}
-						else if (py < 5) {
-							factors.y = 0;
-						}
-						else {
-							factors.y = 2;
-						}
-						calcFactors();
-					},
-					function() {
-						// onend function
-						// update
-						var pos = {
-							width: shapeAttrs.w,
-							height: shapeAttrs.h
-						};
-						if (activeRendering !== undefined) {
-							binding.events.onResize.fire(activeRendering.id, pos);
-						}
-						// change mode back
-						options.application.setCurrentMode('Select');
-					}
-					);
+								// change mode
+								options.application.setCurrentMode('Drag');
+								// extents: x, y, width, height
+								px = (8 * (ox - extents.x) / extents.width) + 4;
+								py = (8 * (oy - extents.y) / extents.height) + 4;
+								if (px < 3) {
+									factors.x = -2;
+								}
+								else if (px < 5) {
+									factors.x = 0;
+								}
+								else {
+									factors.x = 2;
+								}
+								if (py < 3) {
+									factors.y = -2;
+								}
+								else if (py < 5) {
+									factors.y = 0;
+								}
+								else {
+									factors.y = 2;
+								}
+								calcFactors();
+						});
+						
+						handleBinding.events.onUnfocus.addListener(function() {
+							// onend function
+							// update
+							var pos = {
+								width: shapeAttrs.w,
+								height: shapeAttrs.h
+							};
+							if (activeRendering !== undefined) {
+								binding.events.onResize.fire(activeRendering.id, pos);
+							}
+							// change mode back
+							options.application.setCurrentMode('Select');
+						});
+					});
 				} else {
 					// show all the boxes and
 					// handles
@@ -2474,6 +2525,21 @@ MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.WindowResize", {
 	bind: {
 		events: {
 			onResize: null
+		}
+	},
+	selectors: {
+		'': ''
+	}
+});
+
+// ## Controller.Drag
+//
+MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.Drag", {
+	bind: {
+		events: {
+			onFocus: null,
+			onUnfocus: null,
+			onUpdate: null
 		}
 	},
 	selectors: {

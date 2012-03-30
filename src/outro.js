@@ -109,6 +109,21 @@ MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.WindowResize", {
 	}
 });
 
+// ## Controller.Drag
+//
+MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.Drag", {
+	bind: {
+		events: {
+			onFocus: null,
+			onUnfocus: null,
+			onUpdate: null
+		}
+	},
+	selectors: {
+		'': ''
+	}
+});
+
 // ## Controller.timeControl
 //
 // Bindings created by this controller will have the following events:
