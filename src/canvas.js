@@ -392,7 +392,7 @@
 				console.log('i: ' + i + ' o: ' + o);
 				if(o.type[0] === 'Annotation') {
 					RDF += '<rdf:Description rdf:about="' + idcount + '">\n' + 
-							'\t<rdf:hasBody rdf:resource="' + window.encodeURI(window.location) + 'body' + idcount + '">' + o.bodyContent[0] + '</rdf:hasBody>\n' + 
+							'\t<rdf:hasBody rdf:resource="' + window.encodeURI(window.location) + '/body/' + idcount + '">' + o.bodyContent[0] + '</rdf:hasBody>\n' + 
 							'\t<rdf:type rdf:resource="' + NSArray.annotation + '"></rdf:type>\n';
 					if(o.bodyType === 'text') {
 						RDF += '\t<rdf:type rdf:resource="' + NSArray.textanno + '" />';
@@ -423,7 +423,7 @@
 				$('iframe').attr('src', 'http://localhost:8080');
 			});
 			
-		
+			
 		};
 		
         app.ready(function() {
