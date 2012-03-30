@@ -72,11 +72,10 @@
 		// to fit
 		h = $(container).height();
 
-		// FIXME: We need to change this. If we have multiple videos on a page, this will break.
+		// **FIXME:** We need to change this. If we have multiple videos on a page, this will break.
 		keyboardBinding = keyBoardController.bind($('body'), {});
 
 		that.events = $.extend(true, that.events, keyboardBinding.events);
-
 
 		// init RaphaelJS canvas
 		// Parameters for Raphael:
@@ -88,7 +87,7 @@
 		that.canvas = new Raphael($(container), w, h);
 	
 		// attach binding
-		// FIXME: We need to change this. If we have multiple videos on a page, this will break.
+		// **FIXME:** We need to change this. If we have multiple videos on a page, this will break.
 		canvasBinding = canvasController.bind($('body'), {
 			closeEnough: 5,
 			paper: that.canvas
@@ -102,8 +101,36 @@
 			paper: that.canvas
 		});
 		
-		// FIXME: We need to change this. If we have multiple videos on a page, this will break.
+		// **FIXME:** We need to change this. If we have multiple videos on a page, this will break.
 		windowResizeBinding = windowResizeController.bind(window);
+		
+		editBoundingBoxBinding.events.onResize.addListener(function(pos) {
+			var activeRendering = that.getActiveRendering();
+			if(activeRendering !== null && activeRendering.eventResize !== undefined) {
+				activeRendering.eventResize(pos);
+			}
+		});
+		
+		editBoundingBoxBinding.events.onMove.addListener(function(pos) {
+			var activeRendering = that.getActiveRendering();
+			if (activeRendering !== null && activeRendering.eventMove !== undefined) {
+				activeRendering.eventMove(pos);
+			}
+		});
+
+		editBoundingBoxBinding.events.onDelete.addListener(function() {
+			var activeRendering = that.getActiveRendering();
+			if (activeRendering !== null && activeRendering.eventDelete !== undefined) {
+				activeRendering.eventDelete();
+				editBoundingBoxBinding.detachRendering();
+			}
+		});
+		
+		options.application.events.onCurrentModeChange.addListener(function(newMode) {
+			if (newMode !== 'Select' && newMode !== 'Drag') {
+				editBoundingBoxBinding.detachRendering();
+			}
+		});
 	
 		windowResizeBinding.events.onResize.addListener(function() {
 			var x, y, w, h, containerEl, canvasEl, htmlWrapper;
@@ -130,6 +157,8 @@
 				height: h + 'px'
 			});
 		});
+		
+		windowResizeBinding.events.onResize.fire(); // to make sure we get things set up right
 		
 		//
 		// Registering canvas special events for start, drag, stop
@@ -187,23 +216,29 @@
 		// opacity (Fades as it comes into play and fades as it goes out
 		// of play)
 		//
+		/*
 		eventCurrentTimeChange = function(npt) {
 			that.visitRenderings(function(id, rendering) {
 				if(rendering.eventCurrentTimeChange !== undefined) {
 					rendering.eventCurrentTimeChange(npt);
 				}
 			});
-		};
+		};*/
 
-		eventTimeEasementChange = function(te) {
+		options.application.events.onCurrentTimeChange.addListener(function(npt) {
+			that.visitRenderings(function(id, rendering) {
+				if(rendering.eventCurrentTimeChange !== undefined) {
+					rendering.eventCurrentTimeChange(npt);
+				}
+			});
+		});
+		options.application.events.onTimeEasementChange.addListener(function(te) {
 			that.visitRenderings(function(id, rendering) {
 				if(rendering.eventTimeEasementChange !== undefined) {
 					rendering.eventTimeEasementChange(te);
 				}
 			});
-		};
-
-		options.application.events.onCurrentTimeChange.addListener(eventCurrentTimeChange);
+		});
 		options.application.events.onPlayerChange.addListener(changeCanvasCoordinates);
 		options.application.dataStore.canvas.events.onModelChange.addListener(function() {
 			editBoundingBoxBinding.detachRendering();
@@ -229,16 +264,12 @@
 			return rendering;
 		};
 
-		that.renderItems = function() {
-
-		};
-
 		superEventFocusChange = that.eventFocusChange;
 
 		that.eventFocusChange = function(id) {
 			if (options.application.getCurrentMode() === 'Select') {
 				superEventFocusChange(id);
-				editBoundingBoxBinding.attachRendering(that.renderingFor(id));
+				editBoundingBoxBinding.attachRendering(that.getActiveRendering());
 			}
 		};
 		//console.log(that);
