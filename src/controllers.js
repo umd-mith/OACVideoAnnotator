@@ -56,6 +56,84 @@
 
 		return that;
 	};
+	
+	// ## Drag
+	//
+	// Attaches to an SVG rendering and produces events at the start, middle, and end of a drag.
+	//
+	Controller.namespace("Drag");
+	
+	// ### Drag.initController
+	//
+	Controller.Drag.initController = function(options) {
+		var that = MITHGrid.Controller.initController(
+			"OAC.Client.StreamingVideo.Controller.Drag",
+			options
+		);
+		
+		that.applyBindings = function(binding, opts) {
+			var el = binding.locate('raphael');
+			
+			el.drag(
+				function(x, y) {
+					binding.events.onUpdate.fire(x, y);
+				},
+				function(x, y, e) {
+					// **FIXME**: layerX and layerY are deprecated in WebKit
+					x = e.layerX;
+					y = e.layerY;
+					binding.events.onFocus.fire(x, y);
+				},
+				function() {
+					binding.events.onUnfocus.fire();
+				}
+			);
+		};
+		
+		return that;
+	};
+	
+	// ## Select
+	//
+	// Attaches a click handler to an SVG rendering and fires an onSelect event if the rendering is clicked AND
+	// the application is in a mode to select things.
+	//
+	Controller.namespace("Select");
+	
+	// ### Select.initController
+	//
+	// Parameters:
+	//
+	// * options - object holding configuration information
+	//
+	// Returns:
+	//
+	// The configured controller object.
+	//
+	// Configuration Options:
+	//
+	// * isSelectable - function taking no arguments that should return "true" if the click should cause the
+	//                  onSelect event to fire.
+	//
+	Controller.Select.initController = function(options) {
+		var that = MITHGrid.Controller.initController(
+			"OAC.Client.StreamingVideo.Controller.Select",
+			options
+		);
+		options = that.options;
+		
+		that.applyBindings = function(binding) {
+			var el = binding.locate("raphael");
+			
+			el.click(function(e) {
+				if(options.isSelectable()) {
+					binding.events.onSelect.fire();
+				}
+			});
+		};
+		
+		return that;
+	};
 
 	// ## AnnotationEditSelectionGrid
 	//
@@ -83,7 +161,7 @@
 	//
 	// The initialized controller object.
 	//
-	// FIXME:
+	// **FIXME:**
 	//
 	// The controller needs to be broken up a bit. The idea of providing a bounding box for renderings is something that
 	// should be handled in the presentation, not here. The controller should just generate events based on user interactions.
@@ -99,10 +177,13 @@
 		"OAC.Client.StreamingVideo.Controller.AnnotationEditSelectionGrid",
 		options
 		),
+		dragController,
 		dirs = [];
 
 		options = that.options;
 		dirs = that.options.dirs; // || ['ul', 'top', 'ur', 'lft', 'lr', 'btm', 'll', 'rgt', 'mid'];
+		
+		dragController = OAC.Client.StreamingVideo.Controller.Drag.initController({});
 
 		// #### AnnotationEditSelectionGrid #applyBindings
 		//
@@ -137,31 +218,6 @@
 			eAttrs = {},
 			handleCalculationData = {},
 			el;
-
-			binding.events.onResize.addListener(function(id, pos) {
-				if (activeRendering !== undefined && activeRendering.eventResize !== undefined) {
-					activeRendering.eventResize(id, pos);
-				}
-			});
-
-			binding.events.onMove.addListener(function(id, pos) {
-				if (activeRendering !== undefined && activeRendering.eventMove !== undefined) {
-					activeRendering.eventMove(id, pos);
-				}
-			});
-
-			binding.events.onDelete.addListener(function(id) {
-				if (activeRendering !== undefined && activeRendering.eventDelete !== undefined) {
-					activeRendering.eventDelete(id);
-					binding.detachRendering();
-				}
-			});
-
-			options.application.events.onCurrentModeChange.addListener(function(newMode) {
-				if (newMode !== 'Select' && newMode !== 'Drag') {
-					binding.detachRendering();
-				}
-			});
 
 			// Function for applying a new shape to the bounding box
 			binding.attachRendering = function(newRendering) {
@@ -201,8 +257,6 @@
 			//
 			// Returns: Nothing.
 			//
-			// FIXME: activeRendering management needs to be in the presentation hosting the bounding box rendering.
-			//
 			calcFactors = function() {
 				extents = activeRendering.getExtents();
 
@@ -229,6 +283,8 @@
 			// Returns: Nothing.
 			//
 			drawHandles = function() {
+				var midDragDragBinding;
+				
 				if ($.isEmptyObject(handleSet)) {
 
 					// draw the corner and mid-point squares
@@ -277,142 +333,154 @@
 					if (! ($.isEmptyObject(midDrag))) {
 
 						// Attaching listener to drag-only handle (midDrag)
-						midDrag.drag(
-						function(dx, dy) {
-							// dragging means that the svgBBox stays padding-distance
-							// away from the lens' shape and the lens shape gets updated
-							// in dataStore
-							handleAttrs.nx = attrs.x + dx;
-							handleAttrs.ny = attrs.y + dy;
-							shapeAttrs.x = extents.x + dx;
-							shapeAttrs.y = extents.y + dy;
+						midDragDragBinding = dragController.bind(midDrag);
+						
+						midDragDragBinding.events.onUpdate.addListener(
+							function(dx, dy) {
+								// dragging means that the svgBBox stays padding-distance
+								// away from the lens' shape and the lens shape gets updated
+								// in dataStore
+								handleAttrs.nx = attrs.x + dx;
+								handleAttrs.ny = attrs.y + dy;
+								shapeAttrs.x = extents.x + dx;
+								shapeAttrs.y = extents.y + dy;
 
-							svgBBox.attr({
-								x: handleAttrs.nx,
-								y: handleAttrs.ny
-							});
+								svgBBox.attr({
+									x: handleAttrs.nx,
+									y: handleAttrs.ny
+								});
 
-							calcHandles({
-								x: handleAttrs.nx,
-								y: handleAttrs.ny,
-								width: attrs.width,
-								height: attrs.height
-							});
-							if (itemMenu) {
-								drawMenu({
+								calcHandles({
 									x: handleAttrs.nx,
 									y: handleAttrs.ny,
 									width: attrs.width,
 									height: attrs.height
 								});
+								if (itemMenu) {
+									drawMenu({
+										x: handleAttrs.nx,
+										y: handleAttrs.ny,
+										width: attrs.width,
+										height: attrs.height
+									});
+								}
 							}
-						},
-						function(x, y, e) {
-							// start
-							ox = e.layerX;
-							oy = e.layerY;
-							calcFactors();
-							activeRendering.shape.attr({
-								cursor: 'move'
-							});
-						},
-						function() {
-							// end
-							var pos = {
-								x: shapeAttrs.x,
-								y: shapeAttrs.y
-							};
+						);
+						
+						midDragDragBinding.events.onFocus.addListener(
+							function(x, y) {
+								// start
+								ox = x;
+								oy = y;
+								calcFactors();
+								activeRendering.shape.attr({
+									cursor: 'move'
+								});
+							}
+						);
+						
+						midDragDragBinding.events.onUnfocus.addListener(
+							function() {
+								// end
+								var pos = {
+									x: shapeAttrs.x,
+									y: shapeAttrs.y
+								};
 
-							binding.events.onMove.fire(activeRendering.id, pos);
-							activeRendering.shape.attr({
-								cursor: 'default'
-							});
-						}
+								binding.events.onMove.fire(pos);
+								//activeRendering.shape.attr({
+								//	cursor: 'default'
+								//});
+							}
 						);
 					}
 
 					// Attaching drag and resize handlers
-					handleSet.drag(
-					function(dx, dy) {
-						// onmove function - handles dragging
-						// dragging here means that the shape is being resized;
-						// the factorial determines in which direction the
-						// shape is pulled
-						shapeAttrs.w = Math.abs(extents.width + dx * factors.x);
-						shapeAttrs.h = Math.abs(extents.height + dy * factors.y);
-						handleAttrs.nw = shapeAttrs.w + (padding * 2);
-						handleAttrs.nh = shapeAttrs.h + (padding * 2);
-						handleAttrs.nx = (extents.x - (padding / 4)) - (handleAttrs.nw / 2);
-						handleAttrs.ny = (extents.y - (padding / 4)) - (handleAttrs.nh / 2);
+					handleSet.forEach(function(handle) {
+						var handleBinding = dragController.bind(handle);
+						
+						handleBinding.events.onUpdate.addListener(function(dx, dy) {
+							// onmove function - handles dragging
+							// dragging here means that the shape is being resized;
+							// the factorial determines in which direction the
+							// shape is pulled
+							shapeAttrs.w = Math.abs(extents.width + dx * factors.x);
+							shapeAttrs.h = Math.abs(extents.height + dy * factors.y);
+							handleAttrs.nw = shapeAttrs.w + (padding * 2);
+							handleAttrs.nh = shapeAttrs.h + (padding * 2);
+							handleAttrs.nx = (extents.x - (padding / 4)) - (handleAttrs.nw / 2);
+							handleAttrs.ny = (extents.y - (padding / 4)) - (handleAttrs.nh / 2);
 
-						svgBBox.attr({
-							x: handleAttrs.nx,
-							y: handleAttrs.ny,
-							width: handleAttrs.nw,
-							height: handleAttrs.nh
-						});
-						calcHandles({
-							x: handleAttrs.nx,
-							y: handleAttrs.ny,
-							width: handleAttrs.nw,
-							height: handleAttrs.nh
-						});
-						if (itemMenu) {
-							drawMenu({
+							svgBBox.attr({
 								x: handleAttrs.nx,
 								y: handleAttrs.ny,
 								width: handleAttrs.nw,
 								height: handleAttrs.nh
 							});
-						}
-					},
-					function(x, y, e) {
-						// onstart function
-						var px,
-						py;
-						extents = activeRendering.getExtents();
-						ox = e.layerX;
-						oy = e.layerY;
+							calcHandles({
+								x: handleAttrs.nx,
+								y: handleAttrs.ny,
+								width: handleAttrs.nw,
+								height: handleAttrs.nh
+							});
+							if (itemMenu) {
+								drawMenu({
+									x: handleAttrs.nx,
+									y: handleAttrs.ny,
+									width: handleAttrs.nw,
+									height: handleAttrs.nh
+								});
+							}
+						});
+						
+						handleBinding.events.onFocus.addListener(function(x, y) {
+								// onstart function
+								var px,
+								py;
+								extents = activeRendering.getExtents();
+								ox = x;
+								oy = y;
 
-						// change mode
-						options.application.setCurrentMode('Drag');
-						// extents: x, y, width, height
-						px = (8 * (ox - extents.x) / extents.width) + 4;
-						py = (8 * (oy - extents.y) / extents.height) + 4;
-						if (px < 3) {
-							factors.x = -2;
-						}
-						else if (px < 5) {
-							factors.x = 0;
-						}
-						else {
-							factors.x = 2;
-						}
-						if (py < 3) {
-							factors.y = -2;
-						}
-						else if (py < 5) {
-							factors.y = 0;
-						}
-						else {
-							factors.y = 2;
-						}
-						calcFactors();
-					},
-					function() {
-						// onend function
-						// update
-						var pos = {
-							width: shapeAttrs.w,
-							height: shapeAttrs.h
-						};
-						if (activeRendering !== undefined) {
-							binding.events.onResize.fire(activeRendering.id, pos);
-						}
-						// change mode back
-						options.application.setCurrentMode('Select');
-					}
-					);
+								// change mode
+								options.application.setCurrentMode('Drag');
+								// extents: x, y, width, height
+								px = (8 * (ox - extents.x) / extents.width) + 4;
+								py = (8 * (oy - extents.y) / extents.height) + 4;
+								if (px < 3) {
+									factors.x = -2;
+								}
+								else if (px < 5) {
+									factors.x = 0;
+								}
+								else {
+									factors.x = 2;
+								}
+								if (py < 3) {
+									factors.y = -2;
+								}
+								else if (py < 5) {
+									factors.y = 0;
+								}
+								else {
+									factors.y = 2;
+								}
+								calcFactors();
+						});
+						
+						handleBinding.events.onUnfocus.addListener(function() {
+							// onend function
+							// update
+							var pos = {
+								width: shapeAttrs.w,
+								height: shapeAttrs.h
+							};
+							if (activeRendering !== undefined) {
+								binding.events.onResize.fire(pos);
+							}
+							// change mode back
+							options.application.setCurrentMode('Select');
+						});
+					});
 				} else {
 					// show all the boxes and
 					// handles
@@ -511,7 +579,7 @@
 
 					deleteButton.mousedown(function() {
 						if (activeRendering !== undefined) {
-							that.events.onDelete.fire(activeRendering.id);
+							binding.events.onDelete.fire();
 							itemDeleted();
 						}
 					});
@@ -958,13 +1026,6 @@
 			// Add to events
 			binding.registerRendering = function(newRendering) {
 				renderings[newRendering.id] = newRendering;
-				// add a click event to the SVG shape
-				newRendering.shape.click(function(el) {
-					if(options.application.getCurrentMode() === 'Select') {
-						activeId = newRendering.id;
-						options.application.setActiveAnnotation(newRendering.id);
-					}
-				});
 			};
 
 			binding.removeRendering = function(oldRendering) {
@@ -1109,6 +1170,7 @@
 
 			$(submit).bind('click',
 			function() {
+				// **FIXME:** times can be in parts of seconds
 				start_time = parseInt($(timestart).val(), 10);
 				end_time = parseInt($(timeend).val(), 10);
 				if (binding.currentId !== undefined && start_time !== undefined && end_time !== undefined) {

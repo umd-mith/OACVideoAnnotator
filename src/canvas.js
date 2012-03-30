@@ -70,6 +70,16 @@
 			controllers: {
 				keyboard: {
 					isActive: function() { return app.getCurrentMode() !== 'Editing'; }
+				},
+				selectShape: {
+					isSelectable: function() {
+						if(app.getCurrentMode() === "Select") {
+							return true;
+						}
+						else {
+							return false;
+						}
+					}
 				}
 			},
 			// We connect the SVG overlay and annotation sections of the DOM with their respective
@@ -109,6 +119,75 @@
 		app.initShapeLens = function(container, view, model, itemId) {
 			var that = {
 				id: itemId
+			}, calcOpacity,
+			focused, opacity, start, end, fstart, fend, 
+			item = model.getItem(itemId);
+			
+			// ### calcOpacity (private)
+			//
+			// Calculate the opacity of the annotation shape rendering over the video.
+			//
+			// Parameters:
+			//
+			// * n - the current time of the play head
+			//
+			calcOpacity = function(n) {
+				var val = 0;
+				
+				if (n < fstart || n > fend) {
+					return 0.0;
+				}
+				
+				if (n < start) {
+					// fading in
+					val = (1 / (start - n));
+					val = val.toFixed(3);
+				} else if (n > end) {
+					// fading out
+					val = (1 / (n - end));
+					val = val.toFixed(3);
+				} else {
+					val = 1;
+				}
+				return val;
+			};
+			
+			start = item.ntp_start[0];
+			end	  = item.ntp_end[0];
+			fstart = start - app.getTimeEasement();
+			fend   = end   + app.getTimeEasement();
+			
+			opacity = calcOpacity(app.getCurrentTime());
+			
+			that.eventTimeEasementChange = function(v) {
+				fstart = start - v;
+				fend   = end + v;
+				that.setOpacity(calcOpacity(app.getCurrentTime()));
+			};
+			
+			that.eventCurrentTimeChange = function(n) {
+				that.setOpacity(calcOpacity(n));
+			};
+			
+			// #### #setOpacity
+			//
+			// Sets the opacity for the SVG shape. This is moderated by the renderings focus. If in focus, then
+			// the full opacity is set. Otherwise, it is halved.
+			//
+			// If no value is given, then the shape's opacity is updated to reflect the currently set opacity and
+			// focus state.
+			//
+			// Parameters:
+			//
+			// * o - opacity when in focus
+			//
+			// Returns: Nothing.
+			//
+			that.setOpacity = function(o) {
+				if(o !== null && o !== undefined) { opacity = o; }
+				that.shape.attr({
+					opacity: (focused ? 1.0 : 0.5) * opacity
+				});
 			};
 			
 			// #### #eventFocus
@@ -117,9 +196,9 @@
 			// to the front and makes it opaque.
 			//
 			that.eventFocus = function() {
-				that.shape.attr({
-					opacity: 1
-				}).toFront();
+				focused = 1;
+				that.setOpacity();
+				that.shape.toFront();
 				view.events.onDelete.addListener(that.eventDelete);
 			};
 
@@ -129,9 +208,9 @@
 			// to the back and makes it semi-transparent.
 			//
 			that.eventUnfocus = function() {
-				that.shape.attr({
-					opacity: 0.5
-				}).toBack();
+				focused = 0;
+				that.setOpacity();
+				that.shape.toBack();
 				view.events.onDelete.removeListener(that.eventDelete);
 			};
 
@@ -140,60 +219,61 @@
 			// Called when the data item represented by this rendering is to be deleted. The default implementation
 			// passes the deletion request to the data store with the item ID represented by the rendering.
 			//
-			// The data item is removed if and only if the id passed in matches the id of the rendered item.
+			// Parameters: None.
 			//
-			// Parameters:
+			// Returns: Nothing.
 			//
-			// * id - the item ID of the item to be deleted
-			that.eventDelete = function(id) {
-				if (id === itemId) {
-					model.removeItems([itemId]);
-				}
+			that.eventDelete = function() {
+				model.removeItems([itemId]);
 			};
 
 			// #### #eventResize
 			//
 			// Called when the bounding box of the rendering changes size.
 			//
-			// The item is resized if and only if the id passed in matches the id of the rendered item.
-			//
 			// Parameters:
 			//
-			// * id - the item ID of the item to be resized
 			// * pos - object containing the .width and .height properties
 			//
 			// Returns: Nothing.
 			//
-			that.eventResize = function(id, pos) {
-				if (id === itemId) {
-					model.updateItems([{
-						id: itemId,
-						w: pos.width,
-						h: pos.height
-					}]);
-				}
+			that.eventResize = function(pos) {
+				model.updateItems([{
+					id: itemId,
+					w: pos.width,
+					h: pos.height
+				}]);
 			};
 
 			// #### #eventMove
 			//
 			// Called when the bounding box of the rendering is moved.
 			//
-			// The item is moved if and only if the id passed in matches the id of the rendered item.
-			//
 			// Parameters:
 			//
-			// * id - the item ID of the item to be moved
 			// * pos - object containing the .x and .y properties
 			//
 			// Returns: Nothing.
 			//
-			that.eventMove = function(id, pos) {
-				if (id === itemId) {
-					model.updateItems([{
-						id: itemId,
-						x: pos.x,
-						y: pos.y
-					}]);
+			that.eventMove = function(pos) {
+				model.updateItems([{
+					id: itemId,
+					x: pos.x,
+					y: pos.y
+				}]);
+			};
+			
+			// #### update
+			//
+			// Updates the rendering's opacity based on the current time and the time extent of the annotation.
+			//
+			that.update = function(item) {
+				if(item.ntp_start[0] !== start || item.ntp_end[0] !== end) {
+					start = item.ntp_start[0];
+					end = item.ntp_end[0];
+					fstart = start - app.getTimeEasement();
+					fend = end + app.getTimeEasement();
+					that.setOpacity(calcOpacity(app.getCurrentTime()));
 				}
 			};
 
@@ -372,7 +452,7 @@
 		app.buttonFeature = function(area, grouping, action) {
 			
 			// Check to make sure button isn't already present
-			// FIXME: make sure the id is unique in the page since we can have multiple instances of the
+			// **FIXME:** make sure the id is unique in the page since we can have multiple instances of the
 			// annotation client (one per video)
 			if ($('#' + action).length !== 0) {
 				return false; // Abort
@@ -388,20 +468,20 @@
 			insertSlider;
 
 			if (area === 'buttongrouping') {
-				/*
-				Set the group element where this button should go in. If no group 
-				element is yet created, create that group element with name *grouping*
-				*/
+				//
+				// Set the group element where this button should go in. If no group 
+				//element is yet created, create that group element with name *grouping*
+				//
 				if ($(container).find('#' + grouping).length === 0) {
 					$(container).append('<div id="' + grouping + '" class="buttongrouping"></div>');
 				}
 
 				groupEl = $("#" + grouping);
 
-				/*
-				generate HTML for button, then attach the callback. action
-				refers to ID and also the title of the button
-				*/
+				//
+				// generate HTML for button, then attach the callback. action
+				// refers to ID and also the title of the button
+				//
 				item = '<div id="' + action + '" class="button">' + action + '</div>';
 
 				$(groupEl).append(item);
@@ -418,9 +498,9 @@
 
 				groupEl = $("#" + grouping);
 
-				/*
-				HTML for slider button
-				*/
+				//
+				// HTML for slider button
+				//
 				item = '<div id="' + action + '"><div class="header">' + action + '</div>' +
 				'<div id="slider"></div><div class="timedisplay"></div></div>';
 				$(groupEl).append(item);
@@ -506,7 +586,7 @@
 		// Returns: Nothing.
 		//
 		
-		// FIXME: We should ensure that we don't have clashing IDs. We need to use UUIDs when possible.
+		// **FIXME:** We should ensure that we don't have clashing IDs. We need to use UUIDs when possible.
 		//		
 		app.insertShape = function(coords) {
 			var shapeItem,
@@ -567,6 +647,10 @@
 
 			// We currently have a Player variable that handles the current player object. This may change since
 			// we intend for the annotation client to be bound to a particular video stream on the page.
+			//
+			// **TODO:** This may be better done as an option when the app object is initialized. Annotations are
+			// specific to the video being annotated, so it doesn't make as much sense to change the video we're
+			// annotating. Better to create a new applicaiton instance.
 			app.events.onPlayerChange.addListener(function(playerobject) {
 				app.setCurrentTime(playerobject.getPlayhead());
 				playerobject.onPlayheadUpdate(function(t) {
@@ -599,38 +683,7 @@
 			watchButton,
 			timeControlBinding;
 
-			// ### calcOpacity (private)
-			//
-			// Calculate the opacity of the annotation shape rendering over the video.
-			//
-			// Parameters:
-			//
-			// * n - the current time of the play head
-			// * fstart - the start time for fading in (fstart .. start)
-			// * fend - the end time for fading out (end .. fend)
-			// * start - the start time for the annotation (start .. end)
-			// * end - the end time for the annotation (start .. end)
-			//
-			calcOpacity = function(n, fstart, fend, start, end) {
-				var val = 0;
-				
-				if (n < fstart || n > fend) {
-					return 0.0;
-				}
-				
-				if (n < start) {
-					// fading in
-					val = (1 / (start - n));
-					val = val.toFixed(3);
-				} else if (n > end) {
-					// fading out
-					val = (1 / (n - end));
-					val = val.toFixed(3);
-				} else {
-					val = 1;
-				}
-				return val;
-			};
+
 
 			// ### calcRectangle (private)
 			//
@@ -705,64 +758,42 @@
 				// Note: Rectangle measurements x,y start at CENTER
 				var that = app.initShapeLens(container, view, model, itemId),
 				item = model.getItem(itemId),
+				superUpdate, selectBinding,
 				c,
-				opacityFactor, fstart, fend, start, end, updateOpacity,
 				bbox;
-
-				start = item.ntp_start[0];
-				end	  = item.ntp_end[0];
-				fstart = start - app.getTimeEasement();
-				fend   = end   + app.getTimeEasement();
-				
-				updateOpacity = function() {
-					if(c !== undefined && c !== null) {
-						c.attr({
-							opacity: item.opacity[0] * opacityFactor
-						});
-					}
-				};
-				
-				that.eventTimeEasementChange = function(v) {
-					fstart = start - v;
-					fend   = end + v;
-					updateOpacity();
-				};
-				
-				that.eventCurrentTimeChange = function(n) {
-					opacityFactor = calcOpacity(n, fstart, fend, start, end);
-					updateOpacity();
-				};
 				
 				// Accessing the view.canvas Object that was created in MITHGrid.Presentation.RaphSVG
 				c = view.canvas.rect(item.x[0] - (item.w[0] / 2), item.y[0] - (item.h[0] / 2), item.w[0], item.h[0]);
+
+				that.shape = c;
 				// fill and set opacity
-				opacityFactor = calcOpacity(app.getCurrentTime(), fstart, fend, start, end);
 				c.attr({
-					fill: "red",
-					opacity: item.opacity * opacityFactor
+					fill: "red"
 				});
+				that.setOpacity();
+			
 				// **FIXME:** may break with multiple videos if different annotations have the same ids in different
 				// sets of annotations.
 				$(c.node).attr('id', item.id[0]);
+				
+				selectBinding = app.controller.selectShape.bind(c);
+				selectBinding.events.onSelect.addListener(function() {
+					app.setActiveAnnotation(itemId);
+				});
+				
+				superUpdate = that.update;
 				that.update = function(newItem) {
 					// receiving the Object passed through
 					// model.updateItems in move()
 					item = newItem;
-					if(item.ntp_start[0] !== start || item.ntp_end[0] !== end) {
-						start = item.ntp_start[0];
-						end = item.ntp_end[0];
-						fstart = start - app.getTimeEasement();
-						fend = end + app.getTimeEasement();
-						opacityFactor = calcOpacity(app.getCurrentTime(), fstart, fend, start, end);
-					}
+					superUpdate(item);
 					try {
 						if (item.x !== undefined && item.y !== undefined && item.w !== undefined && item.h !== undefined) {
 							c.attr({
 								x: item.x[0] - item.w[0] / 2,
 								y: item.y[0] - item.h[0] / 2,
 								width: item.w[0],
-								height: item.h[0],
-								opacity: item.opacity * opacityFactor
+								height: item.h[0]
 							});
 						}
 					} catch(e) {
@@ -782,8 +813,6 @@
 					};
 				};
 
-				// register shape
-				that.shape = c;
 				return that;
 			};
 
@@ -805,27 +834,38 @@
 			lensEllipse = function(container, view, model, itemId) {
 				var that = app.initShapeLens(container, view, model, itemId),
 				item = model.getItem(itemId),
+				superUpdate, selectBinding,
 				c;
+				
 				// create the shape
 				c = view.canvas.ellipse(item.x[0], item.y[0], item.w[0] / 2, item.h[0] / 2);
+				that.shape = c;
+				
 				// fill shape
 				c.attr({
-					fill: "red",
-					opacity: item.opacity
+					fill: "red"
 				});
-
-
+				that.setOpacity();
+				
+				selectBinding = app.controller.selectShape.bind(c);
+				selectBinding.events.onSelect.addListener(function() {
+				app.setActiveAnnotation(itemId);
+				});
+						
+				superUpdate = that.update;
+				
 				that.update = function(item) {
 					// receiving the Object passed through
 					// model.updateItems in move()
+					superUpdate(item);
+				
 					try {
 						if (item.x !== undefined && item.y !== undefined) {
 							c.attr({
 								cx: item.x[0],
 								cy: item.y[0],
 								rx: item.w[0] / 2,
-								ry: item.h[0] / 2,
-								opacity: item.opacity
+								ry: item.h[0] / 2
 							});
 						}
 					} catch(e) {
@@ -834,11 +874,7 @@
 					}
 					// Raphael object is updated
 				};
-
-				that.eventCurrentTimeChange = function(npt) {
-					
-				};
-
+				
 				// calculate the extents (x, y, width, height)
 				// of this type of shape
 				that.getExtents = function() {
@@ -849,9 +885,6 @@
 						height: (c.attr("ry") * 2)
 					};
 				};
-
-				// register shape
-				that.shape = c;
 
 				return that;
 			};
