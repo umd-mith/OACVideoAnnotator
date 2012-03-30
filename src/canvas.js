@@ -1,576 +1,893 @@
+
+// # Annotation Application
+//
+// TODO: rename file to application.js
+
 (function($, MITHGrid, OAC) {
-    /**
-	* MITHGrid Canvas
-	* Creates a canvas using the Raphael JS library
-	*/
-    // generating the canvasId allows us to have multiple instances of the app on a page and still
-    // have a unique ID as expected by the Raphaël library
-    var canvasId = 1;
-    OAC.Client.StreamingVideo.initApp = function(container, options) {
-        var renderListItem,
-        annoActiveController,
-        app,
-        svgLens,
-        textLens,
-        fade,
-        myCanvasId = 'OAC-Client-StreamingVideo-SVG-Canvas-' + canvasId,
-        xy = [],
-        wh = [];
+	var canvasId = 1;
 
-        canvasId += 1;
+	// ## StreamingVideo.initApp
+	//
+	// Parameters:
+	//
+	// * container - the DOM container in which the application should place its content
+	// * options - an object holding configuration information
+	//
+	// Returns:
+	//
+	// The configured OAC streaming video annotation client object.
+	//
+	// Options:
+	//
+	OAC.Client.StreamingVideo.initApp = function(container, options) {
+		var renderListItem,
+		app,
+		svgLens,
+		textLens,
+		fade,
+		shapeTypes = {},
+		shapeAnnotationId = 0,
+		myCanvasId = 'OAC-Client-StreamingVideo-SVG-Canvas-' + canvasId,
+		xy = [],
+		wh = [];
 
-        /*
-		* Creating application to run DOM and presentations
-		*/
-        app = MITHGrid.Application.initApp("OAC.Client.StreamingVideo", container,
-        $.extend(true, {},
-        {
-            viewSetup:
-            // '<div class="mithgrid-toparea">' +
-            '<div id="' + myCanvasId + '" class="section-canvas"></div>' +
-            // '</div>' +
-            '<div class="mithgrid-bottomarea">' +
-            '<div class="timeselect">' +
-            '<p>Enter start time:</p>' +
-            '<input id="timestart" type="text" />' +
-            '<p>Enter end time:</p>' +
-            '<input id="timeend" type="text" />' +
-            '<div id="submittime" class="button">Confirm time settings</div>' +
-            '</div>' +
-            '<div id="sidebar' + myCanvasId + '" class="section-controls"></div>' +
-            '<div class="section-annotations">' +
-            '<div class="header">' +
-            'Annotations' +
-            '</div>' +
-            '</div>' +
-            '</div>',
-            presentations: {
-                raphsvg: {
-                    container: "#" + myCanvasId,
-                    lenses: {
-                        /*
-							* The following are lenses for shapes that
-							* are found in the dataStore. These items are using
-							* the MITHGrid.Presentation.RaphaelCanvas.canvas
-							* object, which is a Raphaël paper object, to draw
-							* themselves.
-							*/
-                    },
-                    lensKey: ['.shapeType']
-                },
-                annoItem: {
-                    container: '.section-annotations',
-                    lenses: {
-                        //			Rectangle: textLens,
-                        //			Ellipse: textLens
-                        },
-                    //annoItem lenses
-                    lensKey: ['.bodyType']
-                }
-                //annoItem
-            }
-        },
-        options)
-        );
-        // Set initial size for canvas window
-        app.cWidth = 100;
-        app.cHeight = 100;
-        app.cX = 0;
-        app.cY = 0;
+		// Generating the canvasId allows us to have multiple instances of the application on a page and still
+		// have a unique ID as expected by the Raphaël library.
+		canvasId += 1;
 
-        app.shapeTypes = {};
+		app = MITHGrid.Application.initApp("OAC.Client.StreamingVideo", container,
+		$.extend(true, {},
+		{
+			// We create a general template that holds all of the different DOM elements we need:
+			//
+			// * the SVG view that will overlay the play surface (myCanvasId is the DOM id)
+			// * the time selection input area (.timeselect)
+			// * the controls (.section-controls)
+			// * the annotations (.section-annotations)
+			//
+			// TODO: Split out display of modes into a separate issue... let this application focus on
+			//		 the display of annotations and targets instead of the chrome.
+			//		 We'll put together a demo page that does have all of the parts working together.
+			viewSetup:
+				'<div id="' + myCanvasId + '" class="section-canvas"></div>' +
+				'<div class="mithgrid-bottomarea">' +
+				'<div class="timeselect">' +
+				'<p>Enter start time:</p>' +
+				'<input id="timestart" type="text" />' +
+				'<p>Enter end time:</p>' +
+				'<input id="timeend" type="text" />' +
+				'<div id="submittime" class="button">Confirm time settings</div>' +
+				'</div>' +
+				'<div id="sidebar' + myCanvasId + '" class="section-controls"></div>' +
+				'<div class="section-annotations">' +
+				'<div class="header">' +
+				'Annotations' +
+				'</div>' +
+				'</div>' +
+				'</div>',
+			// We make the isActive() function available to the keyboard controller to let it know if
+			// the keyboard should be considered active.
+			controllers: {
+				keyboard: {
+					isActive: function() { return app.getCurrentMode() !== 'Editing'; }
+				}
+			},
+			// We connect the SVG overlay and annotation sections of the DOM with their respective
+			// presentations.
+			presentations: {
+				raphsvg: {
+					container: "#" + myCanvasId,
+					lenses: { },
+					lensKey: ['.shapeType']
+				},
+				annoItem: {
+					container: '.section-annotations',
+					lenses: { },
+					lensKey: ['.bodyType']
+				}
+			}
+		},
+		options)
+		);
 
-        /*
-		svgLens builds an object with functionality common to all SVG shapes on the canvas.
-		The methods expect the SVG shape object to be in that.shape
-		 */
-        app.initShapeLens = function(container, view, model, itemId) {
-            var that = {
-                id: itemId
-            };
-            that.eventFocus = function() {
-                that.shape.attr({
-                    opacity: 1
-                }).toFront();
-                view.events.onDelete.addListener(that.eventDelete);
-            };
+		// ### #initShapeLens
+		//
+		// Initializes a basic shape lens. The default methods expect the Raphaël SVG shape object to
+		// be held in the .shape property.
+		//
+		// Parameters:
+		//
+		// * container - the container holding the lens content
+		// * view - the presentation managing the collection of renderings
+		// * model - the data store or data view holding information about the item to be rendered
+		// * itemId - the item ID of the item to be rendered
+		//
+		// Returns:
+		//
+		// The basic lens object with the following methods defined:
 
-            that.eventUnfocus = function() {
-                that.shape.attr({
-                    opacity: 0.5
-                }).toBack();
-                view.events.onDelete.removeListener(that.eventDelete);
-            };
+		app.initShapeLens = function(container, view, model, itemId) {
+			var that = {
+				id: itemId
+			};
+			
+			// #### #eventFocus
+			//
+			// Called when this rendering receives the selection focus. The default implementation brings the rendering
+			// to the front and makes it opaque.
+			//
+			that.eventFocus = function() {
+				that.shape.attr({
+					opacity: 1
+				}).toFront();
+				view.events.onDelete.addListener(that.eventDelete);
+			};
 
-            that.eventDelete = function(id) {
-                if (id === itemId) {
-                    model.removeItems([itemId]);
-                }
-            };
+			// #### #eventUnfocus
+			//
+			// Called when this rendering loses the selection focus. The default implementation pushes the rendering
+			// to the back and makes it semi-transparent.
+			//
+			that.eventUnfocus = function() {
+				that.shape.attr({
+					opacity: 0.5
+				}).toBack();
+				view.events.onDelete.removeListener(that.eventDelete);
+			};
 
-            that.eventResize = function(id, pos) {
-                if (id === itemId) {
-                    // update item with new width/height
-                    model.updateItems([{
-                        id: itemId,
-                        w: pos.width,
-                        h: pos.height
-                    }]);
-                }
-            };
+			// #### #eventDelete
+			//
+			// Called when the data item represented by this rendering is to be deleted. The default implementation
+			// passes the deletion request to the data store with the item ID represented by the rendering.
+			//
+			// The data item is removed if and only if the id passed in matches the id of the rendered item.
+			//
+			// Parameters:
+			//
+			// * id - the item ID of the item to be deleted
+			that.eventDelete = function(id) {
+				if (id === itemId) {
+					model.removeItems([itemId]);
+				}
+			};
 
-            that.eventMove = function(id, pos) {
-                if (id === itemId) {
-                    // update item with new x/y
-                    model.updateItems([{
-                        id: itemId,
-                        x: pos.x,
-                        y: pos.y
-                    }]);
-                }
-            };
+			// #### #eventResize
+			//
+			// Called when the bounding box of the rendering changes size.
+			//
+			// The item is resized if and only if the id passed in matches the id of the rendered item.
+			//
+			// Parameters:
+			//
+			// * id - the item ID of the item to be resized
+			// * pos - object containing the .width and .height properties
+			//
+			// Returns: Nothing.
+			//
+			that.eventResize = function(id, pos) {
+				if (id === itemId) {
+					model.updateItems([{
+						id: itemId,
+						w: pos.width,
+						h: pos.height
+					}]);
+				}
+			};
 
-            that.remove = function(item) {
-                // getting the removeItems callback
-                that.shape.remove();
-            };
+			// #### #eventMove
+			//
+			// Called when the bounding box of the rendering is moved.
+			//
+			// The item is moved if and only if the id passed in matches the id of the rendered item.
+			//
+			// Parameters:
+			//
+			// * id - the item ID of the item to be moved
+			// * pos - object containing the .x and .y properties
+			//
+			// Returns: Nothing.
+			//
+			that.eventMove = function(id, pos) {
+				if (id === itemId) {
+					model.updateItems([{
+						id: itemId,
+						x: pos.x,
+						y: pos.y
+					}]);
+				}
+			};
+
+			// #### #remove
+			//
+			// Called to remove the rendering from the presentation.
+			//
+			that.remove = function(item) {
+				that.shape.remove();
+			};
+
+			return that;
+		};
+
+		// ### #initTextLens
+		//
+		// Initializes a basic text lens.
+		//
+		// Parameters:
+		//
+		// * container - the container holding the lens content
+		// * view - the presentation managing the collection of renderings
+		// * model - the data store or data view holding information abut the item to be rendered
+		// * itemId - the item ID of the item to be rendered
+		//
+		// Returns:
+		//
+		// The basic lens object.
+		//
+		app.initTextLens = function(container, view, model, itemId) {
+			var that = {},
+			item = model.getItem(itemId),
+			itemEl,
+			annoEvents,
+			bodyContentTextArea,
+			bodyContent;
+
+			// We put together a template representing the text annotations associated with any shape.
+			itemEl =
+			$('<div class="anno_item">' +
+			'<p class="bodyContentInstructions">Double click here to open edit window.</p>' +
+			'<div class="editArea">' +
+			'<textarea class="bodyContentTextArea"></textarea>' +
+			'<div id="editUpdate" class="button update">Update</div>' +
+			'<div id="editDelete" class="button delete">Delete</div>' +
+			'</div>' +
+			'<div class="body">' +
+			'<p class="bodyContent"></p>' +
+			'</div>' +
+			'</div>');
+
+			// We capture the parts of the annotation presentation for use later.
+			bodyContentTextArea = $(itemEl).find(".bodyContentTextArea");
+			bodyContent = $(itemEl).find(".bodyContent");
+
+			$(bodyContentTextArea).text(item.bodyContent[0]);
+			$(bodyContent).text(item.bodyContent[0]);
+
+			// We attach the rendering to the container and hide the edit area.
+			$(container).append(itemEl);
+			$(itemEl).find(".editArea").hide();
 
 
 
-            return that;
-        };
+			// We then construct the following methods:
 
-        /*
-		textLens returns a rendering of the text body of an annotation regardless of the shape
-		 */
-        app.initTextLens = function(container, view, model, itemId) {
-            var that = {},
-            item = model.getItem(itemId),
-            itemEl,
-            annoEvents,
-            bodyContentTextArea,
-            bodyContent;
-            itemEl =
-            $('<div class="anno_item">' +
-            '<p class="bodyContentInstructions">Double click here to open edit window.</p>' +
-            '<div class="editArea">' +
-            '<textarea class="bodyContentTextArea"></textarea>' +
-            '<div id="editUpdate" class="button update">Update</div>' +
-            '<div id="editDelete" class="button delete">Delete</div>' +
-            '</div>' +
-            '<div class="body">' +
-            '<p class="bodyContent"></p>' +
-            '</div>' +
-            '</div>');
+			// #### #eventFocus
+			//
+			// Called when this rendering receives the selection focus. The default implementation adds the
+			// .selected CSS class.
+			//
+			that.eventFocus = function() {
+				itemEl.addClass('selected');
+			};
 
-            bodyContentTextArea = $(itemEl).find(".bodyContentTextArea");
-            bodyContent = $(itemEl).find(".bodyContent");
+			// #### #eventUnfocus
+			//
+			// Called when this rendering loses the selection focus. The default implementation removes the
+			// .selected CSS class.
+			//
+			that.eventUnfocus = function() {
+				itemEl.removeClass('selected');
+			};
 
-            $(bodyContentTextArea).text(item.bodyContent[0]);
-            $(bodyContent).text(item.bodyContent[0]);
+			// #### #eventUpdate
+			//
+			//
+			// Called when the text annotation body is updated. This will update the data store with the new body.
+			//
+			// The rendering is update if and only if the id passed in matches the id of the rendered item.
+			//
+			// Parameters:
+			//
+			// * id - the item ID of the item to be updated
+			// * data - the object holding the current data associated with the item ID
+			//
+			// Returns: Nothing.
+			//
+			that.eventUpdate = function(id, data) {
+				if (id === itemId) {
+					model.updateItems([{
+						id: itemId,
+						bodyContent: data
+					}]);
+				}
+			};
 
-            $(container).append(itemEl);
-            $(itemEl).find(".editArea").hide();
+			// #### #eventDelete
+			//
+			// Called when the data item represented by this rendering is to be deleted. The default implementation
+			// passes the deletion request to the data store with the item ID represented by the rendering.
+			//
+			// The data item is removed if and only if the id passed in matches the id of the rendered item.
+			//
+			// Parameters:
+			//
+			// * id - the item ID of the item to be deleted
+			//
+			// Returns: Nothing.
+			//
+			that.eventDelete = function(id) {
+				if (id === itemId) {
+					model.removeItems([itemId]);
+				}
+			};
 
-            // attaching controller to make the
-            // HTML highlighted when shape is selected
-            annoEvents = annoActiveController.bind(itemEl, {
-                model: model,
-                itemId: itemId
-            });
+			// #### #update
+			//
+			// Called when the underlying data represented by the rendering changes. The rendering is updated to
+			// reflect the item data.
+			//
+			// The rendering is update if and only if the id passed in matches the id of the rendered item.
+			//
+			// Parameters:
+			//
+			// * data - the object holding the current data associated with the item ID
+			//
+			// Returns: Nothing.
+			//
+			that.update = function(item) {
+				$(itemEl).find(".bodyContent").text(item.bodyContent[0]);
+				$(itemEl).find(".bodyContentTextArea").text(item.bodyContent[0]);
+			};
 
-            that.eventUpdate = function(id, data) {
-                if (id === itemId) {
-                    model.updateItems([{
-                        id: itemId,
-                        bodyContent: data
-                    }]);
-                }
-            };
+			// #### #remove
+			//
+			// Called to remove the rendering from the presentation.
+			//
+			that.remove = function() {
+				$(itemEl).remove();
+			};
 
-            that.eventFocus = function() {
-                itemEl.addClass('selected');
-            };
+			// #### UI events
+			//
+			// We attach a controller to highlight the
+			// HTML when the corresponding shape is selected.
+			annoEvents = app.controller.annoActive.bind(itemEl, {
+				model: model,
+				itemId: itemId
+			});
 
-            that.eventUnfocus = function() {
-                itemEl.removeClass('selected');
-            };
+			// We hook up the events generated by the controller to events on the application or
+			// rendering, as appropriate.
+			annoEvents.events.onClick.addListener(app.setActiveAnnotation);
+			annoEvents.events.onDelete.addListener(that.eventDelete);
+			annoEvents.events.onUpdate.addListener(that.eventUpdate);
 
-            annoEvents.events.onClick.addListener(app.setActiveAnnotation);
-            annoEvents.events.onDelete.addListener(function(id) {
-                if (id === itemId) {
-                    // delete entire annotation
-                    app.dataStore.canvas.removeItems([itemId]);
-                }
-            });
-            annoEvents.events.onUpdate.addListener(that.eventUpdate);
 
-            that.update = function(item) {
-                $(itemEl).find(".bodyContent").text(item.bodyContent[0]);
-                $(itemEl).find(".bodyContentTextArea").text(item.bodyContent[0]);
-            };
+			return that;
+		};
 
-            that.remove = function() {
-                $(itemEl).remove();
-            };
+		// ### app.buttonFeature
+		//
+		// Creates an HTML div that acts as a button
+		//
+		app.buttonFeature = function(area, grouping, action) {
+			
+			// Check to make sure button isn't already present
+			// FIXME: make sure the id is unique in the page since we can have multiple instances of the
+			// annotation client (one per video)
+			if ($('#' + action).length !== 0) {
+				return false; // Abort
+			}
 
-            return that;
-        };
+			var that = {},
+			item,
+			buttons = $(".button"),
+			groupEl,
+			container = $("#sidebar" + myCanvasId),
+			buttonBinding,
+			insertButton,
+			insertSlider;
 
-        /*
-		Creates an HTML div that acts as a button
-		*/
-        app.buttonFeature = function(area, grouping, action) {
-            /*
-			Check to make sure button isn't already present
-			*/
-            if ($('#' + action).length !== 0) {
-                return false;
-                // Abort
-            }
-
-            var that = {},
-            item,
-            buttons = $(".button"),
-            groupEl,
-            container = $("#sidebar" + myCanvasId),
-            buttonBinding,
-            insertButton,
-            insertSlider;
-
-            if (area === 'buttongrouping') {
-                /*
+			if (area === 'buttongrouping') {
+				/*
 				Set the group element where this button should go in. If no group 
 				element is yet created, create that group element with name *grouping*
 				*/
-                if ($(container).find('#' + grouping).length === 0) {
-                    $(container).append('<div id="' + grouping + '" class="buttongrouping"></div>');
-                }
+				if ($(container).find('#' + grouping).length === 0) {
+					$(container).append('<div id="' + grouping + '" class="buttongrouping"></div>');
+				}
 
-                groupEl = $("#" + grouping);
+				groupEl = $("#" + grouping);
 
-                /*
+				/*
 				generate HTML for button, then attach the callback. action
 				refers to ID and also the title of the button
 				*/
-                item = '<div id="' + action + '" class="button">' + action + '</div>';
+				item = '<div id="' + action + '" class="button">' + action + '</div>';
 
-                $(groupEl).append(item);
+				$(groupEl).append(item);
 
-                that.element = $("#" + action);
+				that.element = $("#" + action);
 
-                buttonBinding = app.controller.buttonActive.bind(that.element, {
-                    action: action
-                });
-            } else if (area === 'slidergrouping') {
-                if ($(container).find('#' + grouping).length === 0) {
-                    $(container).append('<div id="' + grouping + '" class="slidergrouping"></div>');
-                }
+				buttonBinding = app.controller.buttonActive.bind(that.element, {
+					action: action
+				});
+			} else if (area === 'slidergrouping') {
+				if ($(container).find('#' + grouping).length === 0) {
+					$(container).append('<div id="' + grouping + '" class="slidergrouping"></div>');
+				}
 
-                groupEl = $("#" + grouping);
+				groupEl = $("#" + grouping);
 
-                /*
+				/*
 				HTML for slider button
 				*/
-                item = '<div id="' + action + '"><div class="header">' + action + '</div>' +
-                '<div id="slider"></div><div class="timedisplay"></div></div>';
-                $(groupEl).append(item);
-                that.element = $("#" + action);
+				item = '<div id="' + action + '"><div class="header">' + action + '</div>' +
+				'<div id="slider"></div><div class="timedisplay"></div></div>';
+				$(groupEl).append(item);
+				that.element = $("#" + action);
 
-                buttonBinding = app.controller.slider.bind(that.element, {
-                    action: action
-                });
-            }
-            return that;
-        };
+				buttonBinding = app.controller.slider.bind(that.element, {
+					action: action
+				});
+			}
+			return that;
+		};
 
-        app.addShape = function(key, svgShape) {
-            app.presentation.raphsvg.addLens(key, svgShape);
-        };
+		// ### #addShape
+		//
+		// Adds a shape lens to the SVG overlay presentation.
+		//
+		// Parameters:
+		//
+		// * key - the internal shape name
+		// * svgShape - the lens rendering function for rendering the shape on the SVG overlay
+		//
+		// Returns: Nothing.
+		//
+		app.addShape = function(key, svgShape) {
+			app.presentation.raphsvg.addLens(key, svgShape);
+		};
 
-        app.addBody = function(key, textLens) {
-            app.presentation.annoItem.addLens(key, textLens);
-        };
+		// ### #addBody
+		//
+		// Adds an annotation body lens to the annotation presentation
+		//
+		// Parameters:
+		//
+		// * key - the internal annotation body type
+		// * textLens - the lens rendering function for rendering the annotation body in the annotation presentation
+		//
+		// Returns: Nothing.
+		//
+		app.addBody = function(key, textLens) {
+			app.presentation.annoItem.addLens(key, textLens);
+		};
 
-        /*
-		Adding a shape type, which includes lens, button to activate shape mode,
-		and dataStore item load function
-		*/
-        app.addShapeType = function(type, args) {
-            var button,
-            calcF,
-            lensF;
+		// ### #addShapeType
+		//
+		// Adds a shape type. This includes a lens, a button to activate the shape mode, and
+		// a callback function for creating an item in the data store.
+		//
+		// Parameters:
+		//
+		// * type - the internal shape name
+		// * args - an object containing the following items:
+		//		* calc - the callback function for inserting the new shape into the data store
+		//		* lens - the lens rendering function for rendering the shape on the SVG overlay
+		//
+		// Returns: Nothing.
+		//
+		app.addShapeType = function(type, args) {
+			var button,
+			calcF,
+			lensF;
 
-            calcF = args.calc;
-            lensF = args.lens;
-            button = app.buttonFeature('Shapes', type);
-            // add to shapeTypes array
-            app.shapeTypes[type] = {
-                calc: calcF
-            };
-            app.addShape(type, lensF);
-        };
+			calcF = args.calc;
+			lensF = args.lens;
+			button = app.buttonFeature('Shapes', type);
 
-        /*
-		*
-		Called Externally to insert a shape into the data Store regardless of what SVG
-		type it is
-		*/
-        app.insertShape = function(coords) {
-            var shapeItem,
-            idSearch = app.dataStore.canvas.prepare(['!type']),
-            idCount = idSearch.evaluate('Annotation'),
-            ntp_start = app.getCurrentTime() - 5,
-            ntp_end = app.getCurrentTime() + 5,
-            curMode = app.getCurrentMode(),
-            shape;
+			shapeTypes[type] = {
+				calc: calcF
+			};
 
-            shape = app.shapeTypes[curMode].calc(coords);
+			app.addShape(type, lensF);
+		};
 
-            shapeItem = {
-                id: "anno" + idCount.length,
-                type: "Annotation",
-                bodyType: "Text",
-                bodyContent: "This is an annotation for " + curMode,
-                shapeType: curMode,
-                opacity: 1,
-                ntp_start: parseInt(ntp_start, 10),
-                ntp_end: parseInt(ntp_end, 10)
-            };
+		// ### #insertShape
+		//
+		// Inserts a new annotation into the data store using the passed coordinates. An empty text annotation body
+		// is added. The application CurrentMode variable determines the shape. The time span is 5 seconds on either side
+		// of the CurrentTime variable.
+		//
+		// Parameters:
+		//
+		// * coords - the coordinates of the center of the shape in the .x, .y, .width, and .height properties.
+		//
+		// Returns: Nothing.
+		//
+		
+		// FIXME: We should ensure that we don't have clashing IDs. We need to use UUIDs when possible.
+		//		
+		app.insertShape = function(coords) {
+			var shapeItem,
+			ntp_start = parseFloat(app.getCurrentTime()) - 5,
+			ntp_end = parseFloat(app.getCurrentTime()) + 5,
+			curMode = app.getCurrentMode(),
+			shape;
 
-            $.extend(shapeItem, shape);
-            app.dataStore.canvas.loadItems([shapeItem]);
-        };
+			shape = shapeTypes[curMode].calc(coords);
+			shapeAnnotationId += 1;
 
-        /*
-		Exports all annotation data as JSON. All 
-		SVG data is converted to generic units
-		*/
-        app.exportShapes = function() {
-            var canvasWidth,
-            canvasHeight;
+			shapeItem = {
+				id: "anno" + shapeAnnotationId,
+				type: "Annotation",
+				bodyType: "Text",
+				bodyContent: "This is an annotation for " + curMode,
+				shapeType: curMode,
+				opacity: 1,
+				ntp_start: ntp_start,
+				ntp_end: ntp_end
+			};
 
-            canvasWidth = $('#' + myCanvasId).width();
-            canvasHeight = $('#' + myCanvasId).height();
+			app.dataStore.canvas.loadItems([$.extend(shapeItem, shape)]);
+		};
 
-            $.each([]);
-        };
+		// ### #exportShapes
+		//
+		// Exports all annotation data as JSON. All SVG data is converted to generic units.
+		//
+		app.exportShapes = function() {
+			var canvasWidth,
+			canvasHeight;
 
+			canvasWidth = $('#' + myCanvasId).width();
+			canvasHeight = $('#' + myCanvasId).height();
 
-        app.ready(function() {
-            annoActiveController = app.controller.annoActive;
-            app.events.onActiveAnnotationChange.addListener(app.presentation.raphsvg.eventFocusChange);
-            app.events.onActiveAnnotationChange.addListener(app.presentation.annoItem.eventFocusChange);
-            app.events.onCurrentTimeChange.addListener(function(t) {
-                // five seconds on either side of the current time
-                app.dataView.currentAnnotations.setKeyRange(t - 5, t + 5);
-            });
+			$.each([]);
+		};
 
+		// ## Application Configuration
+		//
+		// The rest of this prepares the annotation application once it's in the up-and-running process.
+		//
+		// We wrap all of this in the app.ready() call so we will have all of the events, presentations,
+		// data stores, etc., instantiated for us.
+		//
+		app.ready(function() {
+			// We want the SVG overlay and the annotation body presentation to react to changes in
+			// the selection focus.
+			app.events.onActiveAnnotationChange.addListener(app.presentation.raphsvg.eventFocusChange);
+			app.events.onActiveAnnotationChange.addListener(app.presentation.annoItem.eventFocusChange);
 
-            app.events.onPlayerChange.addListener(function(playerobject) {
-                app.setCurrentTime(playerobject.getPlayhead());
-                playerobject.onPlayheadUpdate(function(t) {
-                    app.setCurrentTime((app.getCurrentTime() + 1));
-                });
-                app.events.onCurrentModeChange.addListener(function(nmode) {
-                    if (nmode !== 'Watch') {
-                        playerobject.pause();
-                    } else if (nmode === 'Watch') {
-                        playerobject.play();
-                    }
-                });
+			// We always want the current annotation list to include anything that covers a time within five seconds
+			// of the current time.
+			app.events.onCurrentTimeChange.addListener(function(t) {
+				app.dataView.currentAnnotations.setKeyRange(t - 5, t + 5);
+			});
 
-            });
-        });
+			// We currently have a Player variable that handles the current player object. This may change since
+			// we intend for the annotation client to be bound to a particular video stream on the page.
+			app.events.onPlayerChange.addListener(function(playerobject) {
+				app.setCurrentTime(playerobject.getPlayhead());
+				playerobject.onPlayheadUpdate(function(t) {
+					app.setCurrentTime((app.getCurrentTime() + 1));
+				});
+				app.events.onCurrentModeChange.addListener(function(nmode) {
+					if (nmode !== 'Watch') {
+						playerobject.pause();
+					} else if (nmode === 'Watch') {
+						playerobject.play();
+					}
+				});
 
-        app.ready(function() {
-            var calcRectangle,
-            calcEllipse,
-            lensRectangle,
-            lensEllipse,
-            rectButton,
-            ellipseButton,
-            selectButton,
-            sliderButton,
-            exportRectangle,
-            watchButton,
-            timeControlBinding;
+			});
+		});
 
-            calcRectangle = function(coords) {
-                var attrs = {};
-                attrs.x = (coords.x + (coords.width / 2));
-                attrs.y = (coords.y + (coords.height / 2));
-                attrs.w = coords.width;
-                attrs.h = coords.height;
-                return attrs;
-            };
-            exportRectangle = function(item, w, h) {
-                var attrs = {},
-                itemCopy;
-                itemCopy = $.extend(true, {},
-                item);
+		// We want to populate the available shapes with the rectangle and ellipse. These are considered stock
+		// shapes for annotations.
+		app.ready(function() {
+			var calcOpacity,
+			calcRectangle,
+			calcEllipse,
+			lensRectangle,
+			lensEllipse,
+			rectButton,
+			ellipseButton,
+			selectButton,
+			sliderButton,
+			exportRectangle,
+			watchButton,
+			timeControlBinding;
 
-                attrs.x = (itemCopy.x / w) * 100;
-                attrs.y = (itemCopy.y / h) * 100;
-                attrs.w = (itemCopy.w / w) * 100;
-                attrs.h = (itemCopy.h / h) * 100;
+			// ### calcOpacity (private)
+			//
+			// Calculate the opacity of the annotation shape rendering over the video.
+			//
+			// Parameters:
+			//
+			// * n - the current time of the play head
+			// * fstart - the start time for fading in (fstart .. start)
+			// * fend - the end time for fading out (end .. fend)
+			// * start - the start time for the annotation (start .. end)
+			// * end - the end time for the annotation (start .. end)
+			//
+			calcOpacity = function(n, fstart, fend, start, end) {
+				var val = 0;
+				
+				if (n < fstart || n > fend) {
+					return 0.0;
+				}
+				
+				if (n < start) {
+					// fading in
+					val = (1 / (start - n));
+					val = val.toFixed(3);
+				} else if (n > end) {
+					// fading out
+					val = (1 / (n - end));
+					val = val.toFixed(3);
+				} else {
+					val = 1;
+				}
+				return val;
+			};
 
-                $.extend(itemCopy, attrs);
+			// ### calcRectangle (private)
+			//
+			// Calculate the center and extents given the corner and extents.
+			//
+			// Parameters:
+			//
+			// * coords - object holding the .x, .y, .width, and .height
+			//
+			// Returns:
+			//
+			// An object holding the .x, .y, .w, and .h holding the center and extents.
+			//
+			calcRectangle = function(coords) {
+				var attrs = {};
+				attrs.x = (coords.x + (coords.width / 2));
+				attrs.y = (coords.y + (coords.height / 2));
+				attrs.w = coords.width;
+				attrs.h = coords.height;
+				return attrs;
+			};
+			
+			// ### exportRectangle (private)
+			//
+			// Calculate the attributes needed for exporting the rectangle constraint.
+			//
+			// Parameters:
+			//
+			// * item - an object holding the .x, .y, .w, and .h (center and extents)
+			//
+			// * w - width of play surface
+			//
+			// * h - height of play surface
+			//
+			// Returns:
+			//
+			// Returns an object with the scaled .x, .y, .w, and .h.
+			//
+			exportRectangle = function(item, w, h) {
+				var attrs = {},
+				itemCopy;
+				itemCopy = $.extend(true, {},
+				item);
 
-                return itemCopy;
-            };
-            lensRectangle = function(container, view, model, itemId) {
-                // Note: Rectangle measurements x,y start at CENTER
-                var that = app.initShapeLens(container, view, model, itemId),
-                item = model.getItem(itemId),
-                c,
-                bbox;
-                // Accessing the view.canvas Object that was created in MITHGrid.Presentation.RaphSVG
-                c = view.canvas.rect(item.x[0] - (item.w[0] / 2), item.y[0] - (item.h[0] / 2), item.w[0], item.h[0]);
-                // fill and set opacity
-                c.attr({
-                    fill: "red",
-                    opacity: item.opacity
-                });
-                $(c.node).attr('id', item.id[0]);
-                that.update = function(item) {
-                    // receiving the Object passed through
-                    // model.updateItems in move()
-                    try {
-                        if (item.x !== undefined && item.y !== undefined && item.w !== undefined && item.h !== undefined) {
-                            c.attr({
-                                x: item.x[0] - item.w[0] / 2,
-                                y: item.y[0] - item.h[0] / 2,
-                                width: item.w[0],
-                                height: item.h[0],
-                                opacity: item.opacity
-                            });
-                        }
-                    } catch(e) {
-                        MITHGrid.debug(e);
-                    }
-                    // Raphael object is updated
-                };
+				attrs.x = (itemCopy.x / w) * 100;
+				attrs.y = (itemCopy.y / h) * 100;
+				attrs.w = (itemCopy.w / w) * 100;
+				attrs.h = (itemCopy.h / h) * 100;
 
-                // attach listener to opacity change event
-                view.events.onOpacityChange.addListener(function(n) {
-                    $(c).attr('opacity', n);
-                });
+				return $.extend(itemCopy, attrs);
+			};
+			
+			// ### lensRectangle (private)
+			//
+			// Renders the rectangular constraint on the video target.
+			//
+			// Parameters:
+			//
+			// * container -
+			//
+			// * view -
+			//
+			// * model -
+			//
+			// * itemId -
+			//
+			// Returns:
+			//
+			// The rendering object.
+			//
+			lensRectangle = function(container, view, model, itemId) {
+				// Note: Rectangle measurements x,y start at CENTER
+				var that = app.initShapeLens(container, view, model, itemId),
+				item = model.getItem(itemId),
+				c,
+				opacityFactor, fstart, fend, start, end, updateOpacity,
+				bbox;
 
-                // calculate the extents (x, y, width, height)
-                // of this type of shape
-                that.getExtents = function() {
-                    return {
-                        x: c.attr("x") + (c.attr("width") / 2),
-                        y: c.attr("y") + (c.attr("height") / 2),
+				start = item.ntp_start[0];
+				end	  = item.ntp_end[0];
+				fstart = start - app.getTimeEasement();
+				fend   = end   + app.getTimeEasement();
+				
+				updateOpacity = function() {
+					if(c !== undefined && c !== null) {
+						c.attr({
+							opacity: item.opacity[0] * opacityFactor
+						});
+					}
+				};
+				
+				that.eventTimeEasementChange = function(v) {
+					fstart = start - v;
+					fend   = end + v;
+					updateOpacity();
+				};
+				
+				that.eventCurrentTimeChange = function(n) {
+					opacityFactor = calcOpacity(n, fstart, fend, start, end);
+					updateOpacity();
+				};
+				
+				// Accessing the view.canvas Object that was created in MITHGrid.Presentation.RaphSVG
+				c = view.canvas.rect(item.x[0] - (item.w[0] / 2), item.y[0] - (item.h[0] / 2), item.w[0], item.h[0]);
+				// fill and set opacity
+				opacityFactor = calcOpacity(app.getCurrentTime(), fstart, fend, start, end);
+				c.attr({
+					fill: "red",
+					opacity: item.opacity * opacityFactor
+				});
+				// **FIXME:** may break with multiple videos if different annotations have the same ids in different
+				// sets of annotations.
+				$(c.node).attr('id', item.id[0]);
+				that.update = function(newItem) {
+					// receiving the Object passed through
+					// model.updateItems in move()
+					item = newItem;
+					if(item.ntp_start[0] !== start || item.ntp_end[0] !== end) {
+						start = item.ntp_start[0];
+						end = item.ntp_end[0];
+						fstart = start - app.getTimeEasement();
+						fend = end + app.getTimeEasement();
+						opacityFactor = calcOpacity(app.getCurrentTime(), fstart, fend, start, end);
+					}
+					try {
+						if (item.x !== undefined && item.y !== undefined && item.w !== undefined && item.h !== undefined) {
+							c.attr({
+								x: item.x[0] - item.w[0] / 2,
+								y: item.y[0] - item.h[0] / 2,
+								width: item.w[0],
+								height: item.h[0],
+								opacity: item.opacity * opacityFactor
+							});
+						}
+					} catch(e) {
+						MITHGrid.debug(e);
+					}
+					// Raphael object is updated
+				};
+
+				// calculate the extents (x, y, width, height)
+				// of this type of shape
+				that.getExtents = function() {
+					return {
+						x: c.attr("x") + (c.attr("width") / 2),
+						y: c.attr("y") + (c.attr("height") / 2),
 						width: c.attr("width"),
-                        height: c.attr("height")
-                    };
-                };
+						height: c.attr("height")
+					};
+				};
 
-                // register shape
-                that.shape = c;
-                return that;
-            };
+				// register shape
+				that.shape = c;
+				return that;
+			};
 
-            app.addShapeType("Rectangle",
-            {
-                calc: calcRectangle,
-                lens: lensRectangle
-            });
+			app.addShapeType("Rectangle",
+			{
+				calc: calcRectangle,
+				lens: lensRectangle
+			});
 
-            calcEllipse = function(coords) {
-                var attrs = {};
-                attrs.x = coords.x + (coords.width / 2);
-                attrs.y = coords.y + (coords.height / 2);
-                attrs.w = coords.width;
-                attrs.h = coords.height;
-                return attrs;
-            };
+			calcEllipse = function(coords) {
+				var attrs = {};
+				attrs.x = coords.x + (coords.width / 2);
+				attrs.y = coords.y + (coords.height / 2);
+				attrs.w = coords.width;
+				attrs.h = coords.height;
+				return attrs;
+			};
 
-            lensEllipse = function(container, view, model, itemId) {
-                var that = app.initShapeLens(container, view, model, itemId),
-                item = model.getItem(itemId),
-                c;
-                // create the shape
-                c = view.canvas.ellipse(item.x[0], item.y[0], item.w[0] / 2, item.h[0] / 2);
-                // fill shape
-                c.attr({
-                    fill: "red",
-                    opacity: 0.5
-                });
+			lensEllipse = function(container, view, model, itemId) {
+				var that = app.initShapeLens(container, view, model, itemId),
+				item = model.getItem(itemId),
+				c;
+				// create the shape
+				c = view.canvas.ellipse(item.x[0], item.y[0], item.w[0] / 2, item.h[0] / 2);
+				// fill shape
+				c.attr({
+					fill: "red",
+					opacity: item.opacity
+				});
 
 
-                that.update = function(item) {
-                    // receiving the Object passed through
-                    // model.updateItems in move()
-                    try {
-                        if (item.x !== undefined && item.y !== undefined) {
-                            c.attr({
-                                cx: item.x[0],
-                                cy: item.y[0],
-                                rx: item.w[0] / 2,
-                                ry: item.h[0] / 2
-                            });
-                        }
-                    } catch(e) {
-                        MITHGrid.debug(e);
+				that.update = function(item) {
+					// receiving the Object passed through
+					// model.updateItems in move()
+					try {
+						if (item.x !== undefined && item.y !== undefined) {
+							c.attr({
+								cx: item.x[0],
+								cy: item.y[0],
+								rx: item.w[0] / 2,
+								ry: item.h[0] / 2,
+								opacity: item.opacity
+							});
+						}
+					} catch(e) {
+						MITHGrid.debug(e);
 
-                    }
-                    // Raphael object is updated
-                };
+					}
+					// Raphael object is updated
+				};
 
-                // calculate the extents (x, y, width, height)
-                // of this type of shape
-                that.getExtents = function() {
-                    return {
-                        x: c.attr("cx"),
-                        y: c.attr("cy"),
-                        width: (c.attr("rx") * 2),
-                        height: (c.attr("ry") * 2)
-                    };
-                };
+				that.eventCurrentTimeChange = function(npt) {
+					
+				};
 
-                // register shape
-                that.shape = c;
+				// calculate the extents (x, y, width, height)
+				// of this type of shape
+				that.getExtents = function() {
+					return {
+						x: c.attr("cx"),
+						y: c.attr("cy"),
+						width: (c.attr("rx") * 2),
+						height: (c.attr("ry") * 2)
+					};
+				};
 
-                return that;
-            };
-            app.addShapeType("Ellipse", {
-                calc: calcEllipse,
-                lens: lensEllipse
-            });
+				// register shape
+				that.shape = c;
 
-            app.addBody("Text", app.initTextLens);
+				return that;
+			};
+			app.addShapeType("Ellipse", {
+				calc: calcEllipse,
+				lens: lensEllipse
+			});
 
-            /*
-			Adding in button features for annotation creation
-			*/
+			app.addBody("Text", app.initTextLens);
 
-            rectButton = app.buttonFeature('buttongrouping', 'Shapes', 'Rectangle');
+			
+			// Adding in button features for annotation creation
+			
 
-            ellipseButton = app.buttonFeature('buttongrouping', 'Shapes', 'Ellipse');
+			rectButton = app.buttonFeature('buttongrouping', 'Shapes', 'Rectangle');
 
-            selectButton = app.buttonFeature('buttongrouping', 'General', 'Select');
+			ellipseButton = app.buttonFeature('buttongrouping', 'Shapes', 'Ellipse');
 
-            watchButton = app.buttonFeature('buttongrouping', 'General', 'Watch');
+			selectButton = app.buttonFeature('buttongrouping', 'General', 'Select');
 
-            app.setCurrentTime(0);
+			watchButton = app.buttonFeature('buttongrouping', 'General', 'Watch');
 
-            // binding time controller to time DOM
-            timeControlBinding = app.controller.timecontrol.bind('.timeselect', {});
-            timeControlBinding.events.onUpdate.addListener(function(id, start, end) {
-                app.dataStore.canvas.updateItems([{
-                    id: id,
-                    ntp_start: start,
-                    ntp_end: end
-                }]);
-            });
+			app.setCurrentTime(0);
 
-        });
+			// binding time controller to time DOM
+			timeControlBinding = app.controller.timecontrol.bind('.timeselect', {});
+			timeControlBinding.events.onUpdate.addListener(function(id, start, end) {
+				app.dataStore.canvas.updateItems([{
+					id: id,
+					ntp_start: start,
+					ntp_end: end
+				}]);
+			});
 
-        return app;
-    };
+		});
+
+		return app;
+	};
 } (jQuery, MITHGrid, OAC));
-
-// Default library for the Canvas application
