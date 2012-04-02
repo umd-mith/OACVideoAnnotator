@@ -201,26 +201,6 @@
 				});
 				// Move canvas SVG to this location
 				$('svg').css({
-<<<<<<< HEAD
-                    left: (parseInt(xy[0], 10) + 'px'),
-                    top: (parseInt(xy[1], 10) + 'px'),
-                    width: wh[0],
-                    height: wh[1]
-                });
-				
-				$('.section-controls').css({
-					left: ((parseInt(xy[0], 10) + wh[0] + 10) + 'px'),
-					top: (parseInt(xy[1], 10) + 'px')
-				});
-				
-				$('.section-annotations').css({
-					left: ((parseInt(xy[0], 10) + wh[0] + wh[0]) + 'px'),
-					top: (parseInt(xy[1], 10) + 'px')
-				});
-            }
-        };
-
-=======
 					left: (parseInt(xy[0], 10) + 'px'),
 					top: (parseInt(xy[1], 10) + 'px'),
 					width: wh[0],
@@ -236,7 +216,6 @@
 		// opacity (Fades as it comes into play and fades as it goes out
 		// of play)
 		//
->>>>>>> c7d711250f069877efc73c7019b3cc3d113bcd4b
 		/*
 		eventCurrentTimeChange = function(npt) {
 			that.visitRenderings(function(id, rendering) {

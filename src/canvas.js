@@ -13,6 +13,8 @@
 	// * container - the DOM container in which the application should place its content
 	// * options - an object holding configuration information
 	//
+	// Currently, there are no required option settings.
+	//
 	// Returns:
 	//
 	// The configured OAC streaming video annotation client object.
@@ -115,7 +117,6 @@
 		// Returns:
 		//
 		// The basic lens object with the following methods defined:
-
 		app.initShapeLens = function(container, view, model, itemId) {
 			var that = {
 				id: itemId
@@ -159,12 +160,34 @@
 			
 			opacity = calcOpacity(app.getCurrentTime());
 			
+			
+			// ### eventTimeEasementChange (private)
+			//
+			// Handles event calls for when the user wants
+			// to see the annotation at a specific interval. 
+			// By default, annotations are in view for the time period
+			// of the item being annotated. They are 'eased in', or fade in
+			// and out depending on the Easement variable, which is set
+			// here.
+			//
+			// Parameters: 
+			//
+			// * v: when the annotation should be in view
+			//
 			that.eventTimeEasementChange = function(v) {
 				fstart = start - v;
 				fend   = end + v;
 				that.setOpacity(calcOpacity(app.getCurrentTime()));
 			};
 			
+			// ### eventCurrentTimeChange (private)
+			// 
+			// Handles when application advances the time
+			// 
+			// Parameters:
+			// 
+			// *n: current time of the video player
+			// 
 			that.eventCurrentTimeChange = function(n) {
 				that.setOpacity(calcOpacity(n));
 			};
@@ -263,7 +286,7 @@
 				}]);
 			};
 			
-			// #### update
+			// #### #update
 			//
 			// Updates the rendering's opacity based on the current time and the time extent of the annotation.
 			//
@@ -924,4 +947,3 @@
 		return app;
 	};
 } (jQuery, MITHGrid, OAC));
->>>>>>> c7d711250f069877efc73c7019b3cc3d113bcd4b

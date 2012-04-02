@@ -12,10 +12,7 @@ var initPlugin = function() {
 	
 	initStreamingVideoApp = function(playerobj) {
 		// Create Raphael canvas application controls
-		raphApp = OAC.Client.StreamingVideo.initApp("#myplayer", {
-			base: "http://www.shared-canvas.org/impl/demo1/res/",
-			manifest: "http://www.shared-canvas.org/impl/demo1/res/Manifest.xml"
-		});
+		raphApp = OAC.Client.StreamingVideo.initApp("#myplayer", {});
 		
 		raphApp.ready(function() {
 			raphApp.setPlayer(playerobj);
