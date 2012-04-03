@@ -13,18 +13,36 @@
 	<script src="../lib/jquery.js" type="text/javascript"></script> 
 	<script src="../lib/jquery-ui-1.8.16.custom.min.js" type="text/javascript"></script>
 	<script src="../lib/jquery.rdfquery.core-1.0.js" type="text/javascript"></script>
-	<script src="../lib/mithgrid.js" type="text/javascript"></script>
+	<script src="../oacframework/oac-player-integration/js/mithgrid.js" type="text/javascript"></script>
 	<script src="../lib/raphael.js" type="text/javascript"></script>
 	<script src="../dist/videoanno.js" type="text/javascript"></script>
+	<script type="text/javascript" SRC="../oacframework/oac-player-integration/js/oac-framework-1.0.js"></script>
+	<script type="text/javascript" SRC="../oacframework/oac-player-integration/js/oac-dummyplayer-drv-1.0.js"></script>
 	<script src="./genApps.js" type="text/javascript"></script>
-	<script src="http://localhost:8080/socket.io/socket.io.js" type="text/javascript"></script>
 	
 </head>
 <body>
 <h2>
 	Raphael Test
 </h2>
-<div id="main"></div>
+<div id="main-container">
+	<div id="content-container">
+		<div id="myplayer" class="dummyplayer" style="width:300px; height:200px;"></div>
+			<div id="myplayer-controls">
+	
+				<input type = "button" value="Play" onClick="OAC_Controller.player().play()" />
+				&nbsp;&nbsp;
+				<input type = "button" value="Pause" onClick="OAC_Controller.player().pause()" />
+				&nbsp;&nbsp;
+				<input type = "button" value="Rewind" onClick="$('#info_position').html(OAC_Controller.player().setPlayhead(OAC_Controller.player().getPlayhead() - 5))"/>
+				&nbsp;&nbsp;
+				<input type = "button" value="Forward" onClick="$('#info_position').html(OAC_Controller.player().setPlayhead(OAC_Controller.player().getPlayhead() + 5))"/>
+			</div>
+		
+		</div>
+	</div>
+	
+</div>
 
 
 
