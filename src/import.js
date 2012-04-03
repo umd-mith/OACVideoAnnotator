@@ -5,23 +5,24 @@ manifest data into MITHGrid and OAC
 Converting: RDF -> JSON
 */
 
- (function (OAC,MITHGrid,$) {
+ (function(OAC, MITHGrid, $) {
     var prefixes,
     that,
     rdfbase,
     socket,
-	proxyRequests,
-	loadUri,
-	__indexOf,
-	urisDone = [],
-	requestId = 0;
+    proxyRequests,
+    loadUri,
+    __indexOf,
+    urisDone = [],
+    requestId = 0;
 
- 	__indexOf = Array.prototype.indexOf || function(item) {
-	    for (var i = 0, l = this.length; i < l; i++) {
-	      if (this[i] === item) return i;
-	    }
-	    return -1;
-	  };
+    __indexOf = Array.prototype.indexOf ||
+    function(item) {
+        for (var i = 0, l = this.length; i < l; i++) {
+            if (this[i] === item) return i;
+        }
+        return - 1;
+    };
     prefixes = {
         dc: 'http://purl.org/dc/elements/1.1/',
         dcterms: 'http://purl.org/dc/terms/',
