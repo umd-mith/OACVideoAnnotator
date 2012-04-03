@@ -4,7 +4,7 @@
 // The **OAC Video Annotation Tool** is a MITHGrid application providing annotation capabilities for streaming
 // video embedded in a web page. 
 //  
-// Date: Mon Apr 2 13:53:20 2012 -0400
+// Date: Tue Apr 3 10:54:22 2012 -0400
 //  
 // Educational Community License, Version 2.0
 // 
@@ -255,8 +255,14 @@ OAC.Client.namespace("StreamingVideo");
 			eAttrs = {},
 			handleCalculationData = {},
 			el;
-
+			
+			// ### attachRendering
+			// 
 			// Function for applying a new shape to the bounding box
+			// 
+			// Parameters: 
+			// 
+			// * newRendering - 
 			binding.attachRendering = function(newRendering) {
 				binding.detachRendering();
 
@@ -722,14 +728,24 @@ OAC.Client.namespace("StreamingVideo");
 
 	// ## ShapeCreateBox
 	//
-	// Similar to the Edit bounding box, but displays differently
-	// and listens for events from canvasClickController in "create" mode
+	// Creates an SVG shape with a dotted border to be used as a guide for drawing shapes. Listens for user mousedown, which
+	// activates the appearance of the box at the x,y where the mousedown coords are, then finishes when user mouseup call is made
 	//
 	Controller.namespace('ShapeCreateBox');
 	Controller.ShapeCreateBox.initController = function(options) {
 		var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.ShapeCreateBox", options);
 		options = that.options;
-
+		
+		// #### ShapeCreateBox #applyBindings
+		// 
+		// Init function for Controller. 
+		// 
+		// Parameters: 
+		// 
+		// * binding - refers to Controller instance
+		// * opts - copy of options passed through initController
+		// 
+		// Creates the following methods:
 		that.applyBindings = function(binding, opts) {
 			//
 			// Bounding box is created once in memory - it should be bound to the
@@ -749,10 +765,15 @@ OAC.Client.namespace("StreamingVideo");
 			cursor,
 			el;
 
+			// #### createGuide
 			//
 			// Creates the SVGBBOX which acts as a guide to the user 
 			// of how big their shape will be once shapeDone is fired
 			//
+			// Parameters: 
+			// 
+			// * coords - object that has x,y coordinates for user mousedown. This is where the left and top of the box will start
+			// 
 			binding.createGuide = function(coords) {
 				// coordinates are top x,y values
 				attrs.x = coords[0];
@@ -781,11 +802,16 @@ OAC.Client.namespace("StreamingVideo");
 				}
 
 			};
-
+			
+			// #### resizeGuide
 			//
 			// Take passed x,y coords and set as bottom-right, not
 			// top left
 			//
+			// Parameters:
+			// 
+			// * coords - array of x,y coordinates to use as bottom-right coords of the box
+			// 
 			binding.resizeGuide = function(coords) {
 
 				attrs.width = (coords[0] - attrs.x);
@@ -796,11 +822,19 @@ OAC.Client.namespace("StreamingVideo");
 					height: attrs.height
 				});
 			};
-
+			
+			// #### completeShape
 			//
 			// Take the saved coordinates and pass them back 
 			// to the calling function
 			//
+			// Parameters:
+			// 
+			// * coords - coordinates object with properties x, y, width, and height
+			// 
+			// Returns: 
+			// Coordinates object with properties x, y, width, and height
+			// 
 			binding.completeShape = function(coords) {
 				attrs.width = coords.width;
 				attrs.height = coords.height;
@@ -823,13 +857,18 @@ OAC.Client.namespace("StreamingVideo");
 	};
 
 	// ## TextBodyEditor
+	// 
 	// Handles HTML annotation lens for editing the bodyContent text.
 	//
+	// 
 	Controller.namespace("TextBodyEditor");
 	Controller.TextBodyEditor.initController = function(options) {
 		var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.TextBodyEditor", options);
 		options = that.options;
 
+		// ### TextBodyEditor #applyBindings
+		// 
+		// Generates the following the methods:
 		that.applyBindings = function(binding, opts) {
 			var editStart,
 			editEnd,
@@ -844,7 +883,11 @@ OAC.Client.namespace("StreamingVideo");
 			deleteButton = binding.locate('deletebutton'),
 			bindingActive = false,
 			prevMode;
-
+			
+			// #### editStart (private)
+			// 
+			// displays editing area
+			// 
 			editStart = function() {
 				$(editArea).show();
 				$(bodyContent).hide();
@@ -852,13 +895,21 @@ OAC.Client.namespace("StreamingVideo");
 				binding.events.onClick.fire(opts.itemId);
 			};
 
+			// #### editEnd (private)
+			// 
+			// Hides the editing area after the user has completed editing/canceled editing
+			// 
 			editEnd = function() {
 				$(editArea).hide();
 				$(bodyContent).show();
 				bindingActive = false;
 
 			};
-
+			
+			// #### editUpdate (private)
+			// 
+			// Called when the user sends new data to dataStore
+			// 
 			editUpdate = function(e) {
 				var data = $(textArea).val();
 				e.preventDefault();
@@ -866,6 +917,8 @@ OAC.Client.namespace("StreamingVideo");
 				editEnd();
 			};
 
+			// Annotation DOM element listens for a double-click to either
+			// display and become active or hide and become unactive
 			$(annoEl).bind('dblclick',
 			function(e) {
 				e.preventDefault();
@@ -880,12 +933,15 @@ OAC.Client.namespace("StreamingVideo");
 				}
 			});
 
+			// Clicking once on the annotation DOM element will activate the attached SVG shape
 			$(annoEl).bind('click',
 			function(e) {
 				// binding.events.onClick.fire(opts.itemId);
 				options.application.setActiveAnnotation(opts.itemId);
 			});
 
+			// Attach binding to the update button which ends editing and updates the bodyContent of the attached
+			// annotation
 			$(updateButton).bind('click',
 			function(e) {
 				binding.events.onUpdate.fire(opts.itemId, $(textArea).val());
@@ -893,6 +949,7 @@ OAC.Client.namespace("StreamingVideo");
 				options.application.setCurrentMode(prevMode);
 			});
 
+			// Attach binding to the delete button to delete the entire annotation - removes from dataStore
 			$(deleteButton).bind('click',
 			function(e) {
 				binding.events.onDelete.fire(opts.itemId);
@@ -900,6 +957,7 @@ OAC.Client.namespace("StreamingVideo");
 				$(annoEl).remove();
 			});
 
+			// Listening for changes in active annotation so that annotation text lens stays current
 			options.application.events.onActiveAnnotationChange.addListener(function(id) {
 				if (id !== opts.id && bindingActive) {
 					editUpdate({
@@ -909,6 +967,7 @@ OAC.Client.namespace("StreamingVideo");
 				}
 			});
 
+			// Listens for changes in the mode in order to stay current with rest of the application
 			options.application.events.onCurrentModeChange.addListener(function(newMode) {
 				if (newMode !== 'TextEdit') {
 					editEnd();
@@ -919,13 +978,25 @@ OAC.Client.namespace("StreamingVideo");
 	};
 
 	// ## CanvasClickController
+	// 
 	// Listens for all clicks on the canvas and connects shapes with the Edit controller above
 	//
+	// Parameters:
+	// 
+	// * options - Object that includes:
+	// 	** paper - RaphaelSVG canvas object generated by Raphael Presentation
+	//  ** closeEnough - value for how close (In RaphaelSVG units) a mouse-click has to be in order to be considered
+	// 'clicking' an object
+	// 
 	Controller.namespace("CanvasClickController");
 	Controller.CanvasClickController.initController = function(options) {
 		var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.CanvasClickController", options);
 		options = that.options;
+		
+		// #### CanvasClickController #applyBindings
+		// 
 		// Create the object passed back to the Presentation
+		// 
 		that.applyBindings = function(binding, opts) {
 			var ox,
 			oy,
@@ -942,6 +1013,14 @@ OAC.Client.namespace("StreamingVideo");
 			renderings = {},
 			paper = opts.paper,
 			offset,
+			// #### attachDragResize (private)
+			// 
+			// Find the passed rendering ID, set that rendering object
+			// as the current rendering
+			// 
+			// Parameters: 
+			// * id - ID of the rendering to set as active
+			// 
 			attachDragResize = function(id) {
 				var o;
 				if ((curRendering !== undefined) && (id === curRendering.id)) {
@@ -960,17 +1039,29 @@ OAC.Client.namespace("StreamingVideo");
 				curRendering = o;
 
 			},
+			// #### detachDragResize (private)
+			// 
+			// Make the current rendering or rendering that has matching ID *id* non-active
+			// 
+			// Parameters:
+			// * id - ID of rendering to make non-active
+			// 
 			detachDragResize = function(id) {
 				if ((curRendering !== undefined) && (id === curRendering.id)) {
 					return;
 				}
 				var o = renderings[id];
 			},
-			//
+			// #### drawShape (private)
+			// 
 			// Using two html elements: container is for 
 			// registering the offset of the screen (.section-canvas) and 
 			// the svgEl is for registering mouse clicks on the svg element (svg)
 			//
+			// Parameters: 
+			// * container - DOM element that contains the canvas
+			// * svgEl - SVG shape element that will have mouse bindings attached to it
+			// 
 			drawShape = function(container, svgEl) {
 				//
 				// Sets mousedown, mouseup, mousemove to draw a 
@@ -1031,6 +1122,12 @@ OAC.Client.namespace("StreamingVideo");
 					});
 				});
 			},
+			// #### selectShape (private)
+			// 
+			// Creates a binding for the canvas to listen for mousedowns to select a shape
+			// 
+			// Parameters:
+			// * container - HTML element housing the canvas
 			selectShape = function(container) {
 				//
 				// Sets mousedown events to select shapes, not to draw
@@ -1047,6 +1144,7 @@ OAC.Client.namespace("StreamingVideo");
 				
 			};
 
+			// Attaches binding for active annotation change to attachDragResize
 			options.application.events.onActiveAnnotationChange.addListener(attachDragResize);
 			// Change the mouse actions depending on what Mode the application is currently
 			// in
@@ -1061,11 +1159,25 @@ OAC.Client.namespace("StreamingVideo");
 				}
 			});
 
-			// Add to events
+			// #### registerRendering
+			// 
+			// Takes a rendering object and adds it to internal array for renderings
+			// 
+			// Parameters:
+			// * newRendering - Rendering object for a shape annotation
+			// 
 			binding.registerRendering = function(newRendering) {
 				renderings[newRendering.id] = newRendering;
 			};
 
+			// #### removeRendering 
+			// 
+			// Removes rendering object from internal array - for when a shape is out of view or deleted.
+			// 
+			// Parameters: 
+			// 
+			// * oldRendering - Rendering object for a shape annotation
+			// 
 			binding.removeRendering = function(oldRendering) {
 				delete renderings[oldRendering.id];
 			};
@@ -1083,6 +1195,7 @@ OAC.Client.namespace("StreamingVideo");
 		var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.AnnotationCreationButton", options);
 		options = that.options;
 
+		// #### AnnotationCreationButton #applyBindings
 		that.applyBindings = function(binding, opts) {
 			var buttonEl,
 			active = false,
@@ -1098,6 +1211,7 @@ OAC.Client.namespace("StreamingVideo");
 			//
 			buttonEl = binding.locate('button');
 
+			// Attach binding to the mousedown
 			$(buttonEl).live('mousedown',
 			function(e) {
 				if (active === false) {
@@ -1111,6 +1225,13 @@ OAC.Client.namespace("StreamingVideo");
 				}
 			});
 
+			// #### onCurrentModeChangeHandle (private)
+			// 
+			// Handles when the mode is changed externally from controller
+			// 
+			// Parameters:
+			// * action - name of new mode
+			// 
 			onCurrentModeChangeHandle = function(action) {
 
 				if (action === options.action) {
@@ -1130,6 +1251,8 @@ OAC.Client.namespace("StreamingVideo");
 
 	// ## sliderButton
 	//
+	// Creates a jQuery UI slider for the current time in the video
+	// 
 	Controller.namespace('sliderButton');
 	Controller.sliderButton.initController = function(options) {
 		var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.sliderButton", options);
@@ -1196,6 +1319,9 @@ OAC.Client.namespace("StreamingVideo");
 		var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.timeControl", options);
 		options = that.options;
 		that.currentId = '';
+		
+		// #### timeControl #applyBindings
+		
 		that.applyBindings = function(binding, opts) {
 			var timestart = binding.locate('timestart'),
 			timeend = binding.locate('timeend'),
@@ -1245,7 +1371,7 @@ OAC.Client.namespace("StreamingVideo");
 		options = that.options;
 		
 		that.applyBindings = function(binding, opts) {
-			var w = binding.locate('');
+			var w = binding.locate('resizeBox');
 			w.resize(function() {
 				setTimeout(binding.events.onResize.fire, 0);
 			});
@@ -2250,6 +2376,7 @@ OAC.Client.namespace("StreamingVideo");
             // specific to the video being annotated, so it doesn't make as much sense to change the video we're
             // annotating. Better to create a new applicaiton instance.
             app.events.onPlayerChange.addListener(function(playerobject) {
+				
                 app.setCurrentTime(playerobject.getPlayhead());
                 playerobject.onPlayheadUpdate(function(t) {
                     app.setCurrentTime((app.getCurrentTime() + 1));
@@ -2415,13 +2542,20 @@ OAC.Client.namespace("StreamingVideo");
 
                 return that;
             };
-
+			
+			// Using addShapeType to add Rectangle to the array of possible SVG
+			// shapes
             app.addShapeType("Rectangle",
             {
                 calc: calcRectangle,
                 lens: lensRectangle
             });
-
+			
+			
+			// 
+			// 
+			// 
+			// 
             calcEllipse = function(coords) {
                 var attrs = {};
                 attrs.x = coords.x + (coords.width / 2);
@@ -2719,13 +2853,6 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 				button: ''
 			}
 		},
-		slider: {
-			type: OAC.Client.StreamingVideo.Controller.sliderButton,
-			selectors: {
-				slider: '#slider',
-				timedisplay: '.timedisplay'
-			}
-		},
 		timecontrol: {
 			type: OAC.Client.StreamingVideo.Controller.timeControl,
 			selectors: {
@@ -2735,19 +2862,17 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 				menudiv: ''
 			}
 		},
-		screenmove: {
-			type: OAC.Client.StreamingVideo.Controller.screenMove,
+		selectShape: {
+			type: OAC.Client.StreamingVideo.Controller.Select,
 			selectors: {
-				canvas: 'svg',
-				container: '.section-canvas',
-				htmlCanvasWrapper: '.section-canvas'
+				raphael: ''
 			}
 		},
 		windowResize: {
-			type: OAC.Client.StreamingVideo.Controller.WindowResize
-		},
-		selectShape: {
-			type: OAC.Client.StreamingVideo.Controller.Select
+			type: OAC.Client.StreamingVideo.Controller.WindowResize,
+			selectors: {
+				resizeBox: ''
+			}
 		}
 	},
 	variables: {

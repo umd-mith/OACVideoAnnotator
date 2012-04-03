@@ -714,6 +714,7 @@
             // specific to the video being annotated, so it doesn't make as much sense to change the video we're
             // annotating. Better to create a new applicaiton instance.
             app.events.onPlayerChange.addListener(function(playerobject) {
+				
                 app.setCurrentTime(playerobject.getPlayhead());
                 playerobject.onPlayheadUpdate(function(t) {
                     app.setCurrentTime((app.getCurrentTime() + 1));

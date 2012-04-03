@@ -10,7 +10,6 @@ var initPlugin = function() {
 	OACVideoController;
 	
 	initStreamingVideoApp = function(playerobj) {
-		console.log('initstreaming app: ' + JSON.stringify(playerobj));
 		// Create Raphael canvas application controls
 		raphApp = OAC.Client.StreamingVideo.initApp("#content-container", {
 			

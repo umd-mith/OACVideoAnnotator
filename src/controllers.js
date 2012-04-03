@@ -1174,6 +1174,7 @@
 			//
 			buttonEl = binding.locate('button');
 
+			// Attach binding to the mousedown
 			$(buttonEl).live('mousedown',
 			function(e) {
 				if (active === false) {
@@ -1187,6 +1188,13 @@
 				}
 			});
 
+			// #### onCurrentModeChangeHandle (private)
+			// 
+			// Handles when the mode is changed externally from controller
+			// 
+			// Parameters:
+			// * action - name of new mode
+			// 
 			onCurrentModeChangeHandle = function(action) {
 
 				if (action === options.action) {
@@ -1206,6 +1214,8 @@
 
 	// ## sliderButton
 	//
+	// Creates a jQuery UI slider for the current time in the video
+	// 
 	Controller.namespace('sliderButton');
 	Controller.sliderButton.initController = function(options) {
 		var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.sliderButton", options);
@@ -1272,6 +1282,9 @@
 		var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.timeControl", options);
 		options = that.options;
 		that.currentId = '';
+		
+		// #### timeControl #applyBindings
+		
 		that.applyBindings = function(binding, opts) {
 			var timestart = binding.locate('timestart'),
 			timeend = binding.locate('timeend'),
@@ -1321,7 +1334,7 @@
 		options = that.options;
 		
 		that.applyBindings = function(binding, opts) {
-			var w = binding.locate('');
+			var w = binding.locate('resizeBox');
 			w.resize(function() {
 				setTimeout(binding.events.onResize.fire, 0);
 			});
