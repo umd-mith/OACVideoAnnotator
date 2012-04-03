@@ -194,13 +194,6 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 				button: ''
 			}
 		},
-		slider: {
-			type: OAC.Client.StreamingVideo.Controller.sliderButton,
-			selectors: {
-				slider: '#slider',
-				timedisplay: '.timedisplay'
-			}
-		},
 		timecontrol: {
 			type: OAC.Client.StreamingVideo.Controller.timeControl,
 			selectors: {
@@ -210,11 +203,17 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 				menudiv: ''
 			}
 		},
-		windowResize: {
-			type: OAC.Client.StreamingVideo.Controller.WindowResize
-		},
 		selectShape: {
-			type: OAC.Client.StreamingVideo.Controller.Select
+			type: OAC.Client.StreamingVideo.Controller.Select,
+			selectors: {
+				raphael: ''
+			}
+		},
+		windowResize: {
+			type: OAC.Client.StreamingVideo.Controller.WindowResize,
+			selectors: {
+				resizeBox: ''
+			}
 		}
 	},
 	variables: {

@@ -2961,6 +2961,7 @@
           _ref10 = options.controllers;
           _results = [];
           for (cName in _ref10) {
+			console.log('cName: ' + cName);
             cconfig = _ref10[cName];
             coptions = $.extend(true, {}, cconfig);
             coptions.application = that;

@@ -12,13 +12,20 @@ var initPlugin = function() {
 	initStreamingVideoApp = function(playerobj) {
 		// Create Raphael canvas application controls
 		raphApp = OAC.Client.StreamingVideo.initApp("#content-container", {
-			playerobject: playerobj,
-			base: "http://www.shared-canvas.org/impl/demo1/res/",
-			manifest: "http://www.shared-canvas.org/impl/demo1/res/Manifest.xml"
+			
 		});
-	
+		
+		// Adding a ready wrapper function to set the playerobject
+		setTimeout(function() {
+			raphApp.ready(function() {
+				raphApp.setPlayer(playerobj);
+			});
+		}, 1);
+
 		// creating Raphael canvas application
-		raphApp.run();
+		setTimeout(function() {
+			raphApp.run();
+		}, 10);
 	};
 	
 	// setting up listener for when a new player is created
@@ -26,6 +33,5 @@ var initPlugin = function() {
 };
 
 $(function() {
-	
 	initPlugin();
 });
