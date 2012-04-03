@@ -25,10 +25,10 @@
     // **FIXME: Abstract so that there is a server prefix component that insures
     // more of a GUID
     //
-    uuid = function() {
-        return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
-    };
-
+	uuid = function() {
+		return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
+	};
+	
     // Create a Unique identifier
     // **FIXME: abstract this so that it is performed server-side, and we attach
     // server-side GUID as prefix to local, browser-side UUID
@@ -48,7 +48,8 @@
     //
     // Options:
     //
-    // Currently, there are no required option settings.
+    // * playerWrapper: [Required] DOM path to the top-level element of the video player
+	// 
     OAC.Client.StreamingVideo.initApp = function(container, options) {
         var renderListItem,
         app,
@@ -120,7 +121,8 @@
                 raphsvg: {
                     container: "#" + myCanvasId,
                     lenses: {},
-                    lensKey: ['.shapeType']
+                    lensKey: ['.shapeType'],
+					playerWrapper: options.playerWrapper
                 },
                 annoItem: {
                     container: '.section-annotations',
@@ -660,7 +662,7 @@
         // Returns: Nothing.
         //
         // **FIXME:** We should ensure that we don't have clashing IDs. We need to use UUIDs when possible.
-		//  : Using guid() to generate local UUIDs - not truly a UUID, but close enough for now.
+		//  : Using uuid() to generate local UUIDs - not truly a UUID, but close enough for now.
         //		
         app.insertShape = function(coords) {
             var shapeItem,
@@ -672,7 +674,7 @@
 			// Insert into local array of ShapeTypes
 			// 
             shape = shapeTypes[curMode].calc(coords);
-            shapeAnnotationId = guid();
+            shapeAnnotationId = uuid();
 
             shapeItem = {
                 id: "anno" + shapeAnnotationId,
@@ -688,6 +690,27 @@
             app.dataStore.canvas.loadItems([$.extend(shapeItem, shape)]);
         };
 
+		// ### importData
+		// 
+		// Importing annotation data from an external source. Must be in JSON format 
+		// 
+		// Parameters: 
+		// * data - Object housing the data for application
+		// 
+		app.importData = function(data) {
+			// ingest data and put it into dataStore
+			var tempstore = {};
+			
+			$.each(data, function(i, o) {
+				// determine type
+				if(o['rdf:type'] === 'Annotation') {
+					
+				}
+			});
+
+			
+		};
+		
         // ## Application Configuration
         //
         // The rest of this prepares the annotation application once it's in the up-and-running process.

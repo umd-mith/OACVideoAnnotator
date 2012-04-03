@@ -4,7 +4,7 @@
 // The **OAC Video Annotation Tool** is a MITHGrid application providing annotation capabilities for streaming
 // video embedded in a web page. 
 //  
-// Date: Tue Apr 3 10:54:22 2012 -0400
+// Date: Tue Apr 3 13:29:43 2012 -0400
 //  
 // Educational Community License, Version 2.0
 // 
@@ -1062,7 +1062,7 @@ OAC.Client.namespace("StreamingVideo");
 			// * container - DOM element that contains the canvas
 			// * svgEl - SVG shape element that will have mouse bindings attached to it
 			// 
-			drawShape = function(container, svgEl) {
+			drawShape = function(container) {
 				//
 				// Sets mousedown, mouseup, mousemove to draw a 
 				// shape on the canvas.
@@ -1085,7 +1085,7 @@ OAC.Client.namespace("StreamingVideo");
 				// remove all previous bindings
 				$(container).unbind();
 				
-				$(svgEl).mousedown(function(e) {
+				$(container).mousedown(function(e) {
 					if (mouseMode > 0) {
 						return;
 					}
@@ -1096,7 +1096,7 @@ OAC.Client.namespace("StreamingVideo");
 					binding.events.onShapeStart.fire(topLeft);
 				});
 
-				$(svgEl).mousemove(function(e) {
+				$(container).mousemove(function(e) {
 					if (mouseMode === 2 || mouseMode === 0) {
 						return;
 					}
@@ -1106,7 +1106,7 @@ OAC.Client.namespace("StreamingVideo");
 					binding.events.onShapeDrag.fire(bottomRight);
 				});
 
-				$(svgEl).mouseup(function(e) {
+				$(container).mouseup(function(e) {
 					if (mouseMode < 1) {
 						return;
 					}
@@ -1139,7 +1139,6 @@ OAC.Client.namespace("StreamingVideo");
 					// By default, nullifies all selections
 					options.application.setActiveAnnotation(undefined);
 					activeId = '';
-
 				});
 				
 			};
@@ -1150,12 +1149,11 @@ OAC.Client.namespace("StreamingVideo");
 			// in
 			options.application.events.onCurrentModeChange.addListener(function(mode) {
 				if (mode === 'Rectangle' || mode === 'Ellipse') {
-					drawShape(binding.locate('svgwrapper'), binding.locate('svg'));
+					drawShape(binding.locate('svgwrapper'));
 				} else if (mode === 'Select') {
-					selectShape(binding.locate('svg'));
-					
+					selectShape(binding.locate('svgwrapper'));
 				} else {
-					$(binding.locate('svg')).unbind();
+					$(binding.locate('svgwrapper')).unbind();
 				}
 			});
 
@@ -1437,14 +1435,14 @@ OAC.Client.namespace("StreamingVideo");
 
 		options = that.options;
 		
-
-
+		// Setting up local names for the assigned presentation controllers
 		canvasController = options.controllers.canvas;
 		keyBoardController = options.controllers.keyboard;
 		editBoxController = options.controllers.shapeEditBox;
 		shapeCreateController = options.controllers.shapeCreateBox;
 		windowResizeController = options.controllers.windowResize;
 		
+		// x,y,w, and h coordinates are set through the CSS of the container passed in the constructor
 		x = $(container).css('x');
 		y = $(container).css('y');
 
@@ -1454,8 +1452,8 @@ OAC.Client.namespace("StreamingVideo");
 		// to fit
 		h = $(container).height();
 
-		// **FIXME:** We need to change this. If we have multiple videos on a page, this will break.
-		keyboardBinding = keyBoardController.bind($('body'), {});
+		// Keyboard binding attached to container to avoid multiple-keyboard events from firing
+		keyboardBinding = keyBoardController.bind($(container), {});
 
 		that.events = $.extend(true, that.events, keyboardBinding.events);
 
@@ -1470,7 +1468,7 @@ OAC.Client.namespace("StreamingVideo");
 	
 		// attach binding
 		// **FIXME:** We need to change this. If we have multiple videos on a page, this will break.
-		canvasBinding = canvasController.bind($('body'), {
+		canvasBinding = canvasController.bind($(container), {
 			closeEnough: 5,
 			paper: that.canvas
 		});
@@ -1514,12 +1512,15 @@ OAC.Client.namespace("StreamingVideo");
 			}
 		});
 	
+	
+		// Adjusts the canvas area, canvas wrapper to fall directly over the 
+		// player area
 		windowResizeBinding.events.onResize.addListener(function() {
 			var x, y, w, h, containerEl, canvasEl, htmlWrapper;
 			// the following elements should be parts of this presentation
 			canvasEl = $('body').find('svg');
-			containerEl = $('body').find('#myplayer');
-			htmlWrapper = $('body').find('.section-canvas');
+			containerEl = $(options.playerWrapper);
+			htmlWrapper = $(container);
 			x = parseInt($(containerEl).offset().left, 10);
 			y = parseInt($(containerEl).offset().top, 10);
 			w = parseInt($(containerEl).width(), 10);
@@ -1687,10 +1688,10 @@ OAC.Client.namespace("StreamingVideo");
     // **FIXME: Abstract so that there is a server prefix component that insures
     // more of a GUID
     //
-    uuid = function() {
-        return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
-    };
-
+	uuid = function() {
+		return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
+	};
+	
     // Create a Unique identifier
     // **FIXME: abstract this so that it is performed server-side, and we attach
     // server-side GUID as prefix to local, browser-side UUID
@@ -1710,7 +1711,8 @@ OAC.Client.namespace("StreamingVideo");
     //
     // Options:
     //
-    // Currently, there are no required option settings.
+    // * playerWrapper: [Required] DOM path to the top-level element of the video player
+	// 
     OAC.Client.StreamingVideo.initApp = function(container, options) {
         var renderListItem,
         app,
@@ -1782,7 +1784,8 @@ OAC.Client.namespace("StreamingVideo");
                 raphsvg: {
                     container: "#" + myCanvasId,
                     lenses: {},
-                    lensKey: ['.shapeType']
+                    lensKey: ['.shapeType'],
+					playerWrapper: options.playerWrapper
                 },
                 annoItem: {
                     container: '.section-annotations',
@@ -2322,7 +2325,7 @@ OAC.Client.namespace("StreamingVideo");
         // Returns: Nothing.
         //
         // **FIXME:** We should ensure that we don't have clashing IDs. We need to use UUIDs when possible.
-		//  : Using guid() to generate local UUIDs - not truly a UUID, but close enough for now.
+		//  : Using uuid() to generate local UUIDs - not truly a UUID, but close enough for now.
         //		
         app.insertShape = function(coords) {
             var shapeItem,
@@ -2334,7 +2337,7 @@ OAC.Client.namespace("StreamingVideo");
 			// Insert into local array of ShapeTypes
 			// 
             shape = shapeTypes[curMode].calc(coords);
-            shapeAnnotationId = guid();
+            shapeAnnotationId = uuid();
 
             shapeItem = {
                 id: "anno" + shapeAnnotationId,
@@ -2350,6 +2353,27 @@ OAC.Client.namespace("StreamingVideo");
             app.dataStore.canvas.loadItems([$.extend(shapeItem, shape)]);
         };
 
+		// ### importData
+		// 
+		// Importing annotation data from an external source. Must be in JSON format 
+		// 
+		// Parameters: 
+		// * data - Object housing the data for application
+		// 
+		app.importData = function(data) {
+			// ingest data and put it into dataStore
+			var tempstore = {};
+			
+			$.each(data, function(i, o) {
+				// determine type
+				if(o['rdf:type'] === 'Annotation') {
+					
+				}
+			});
+
+			
+		};
+		
         // ## Application Configuration
         //
         // The rest of this prepares the annotation application once it's in the up-and-running process.
@@ -2829,8 +2853,7 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 		canvas: {
 			type: OAC.Client.StreamingVideo.Controller.CanvasClickController,
 			selectors: {
-				svg: ' > svg',
-				svgwrapper: '.section-canvas'
+				svgwrapper: ''
 			}
 		},
 		annoActive: {

@@ -1,0 +1,127 @@
+/**
+Style.css
+
+@author: Grant Dickie
+Styling both the MITHGrid components and the DummyPlayer components
+**/
+
+/**
+Main Body
+**/
+body {
+	font-family: Helvetica;
+}
+.header {
+	margin: 0 auto;
+	padding: 20px;
+}
+#main-container {
+	margin: 0 auto;
+	width: 1000px;
+	background: #fff;
+}
+.mithgrid-toparea {
+	float: left;
+	width: 1000px;
+}
+.mithgrid-bottomarea {
+	float: left;
+	width: 1000px;
+	margin: 10px 0 0 0;
+}
+
+/**
+MITHGrid
+**/
+.section-controls {
+	float: left;
+	width: 300px;
+	padding: 20px 0;
+	margin: 0 20px;
+	display: inline;
+	background: #777;
+	color: #000066;
+	position: absolute;
+}
+.section-canvas {
+	background: transparent;
+	border: 2px solid red;
+	position: absolute;
+	z-index: 9999;
+}
+.section-annotations {
+	background: #FFF;
+	border: 2px solid red;
+	float: right;
+	padding: 20px 0;
+	width: 200px;
+	display: inline;
+	position: absolute;
+	margin-left: 500px;
+}
+.section-annotations .header {
+	background: #777;
+	font-size: 14px;
+	text-decoration: underline;
+}
+.anno_item {
+	padding: 3px;
+}
+.anno_item.selected {
+	padding: 1px;
+	border: dashed black 2px;
+}
+.anno_item .bodyContentInstructions {
+	font-size: 12px;
+	color: grey;
+}
+/*
+.canvas_svg {
+	height: 766px;
+	width: 600px;
+	margin: 0px;
+	padding: 0px;
+	border: 0px;
+}
+*/
+.controlarea .buttongrouping {
+	padding: 5px;
+	background: #FFF;
+	color: #5272e7;
+	border: 1px solid red;
+	margin-top: 10px;
+	cursor: pointer;
+	width: 230px;
+}
+.button {
+	padding: .5em;
+	font-size: 24px;
+	border: 1px solid red;
+	cursor: pointer;
+}
+.button:hover {
+	padding: .5em;
+	font-size: 26px;
+	border: 1px dotted green;
+	cursor: pointer;	
+}
+.button.active {
+	padding: .5em;
+	font-size: 26px;
+	text-decoration: bold;
+	color: green;
+	border: 1px dotted green;
+	cursor: pointer;
+}
+
+/**
+ASP Streaming Player/DummyPlayer
+**/
+.dummyplayer {
+	
+}
+.myplayer-controls {
+	margin-top: 10px;
+}
+
+
