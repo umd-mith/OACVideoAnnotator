@@ -5,7 +5,7 @@
     var canvasId,
     S4,
     uuid;
-
+	
     // #S4 (private)
     //
     // Generates a UUID value, this is not a global uid
@@ -60,7 +60,22 @@
         shapeAnnotationId = 0,
         myCanvasId = 'OAC-Client-StreamingVideo-SVG-Canvas-' + canvasId,
         xy = [],
-        wh = [];
+        wh = [],
+		// **FIXME:** May want to tease this out as a configurable option or as a global
+		// 
+		// For now, putting namespaces of Annotations, bodies, targets, contraints here in order to be used 
+		// in import/export
+		//
+		OAC_NS = {
+			root: 'http://www.openannotation.org/ns/',
+			Annotation: 'http://www.openannotation.org/ns/Annotation',
+			Body: 'http://www.openannotation.org/ns/Body',
+			Target: 'http://www.openannotation.org/ns/Target',
+			SpTarget: 'http://www.openannotation.org/ns/ConstrainedTarget',
+			Selector: 'http://mith.umd.edu/ns/asp/SvgNptSelector',
+			FragSelector: 'http://www.w3.org/ns/openannotation/core/FragmentSelector',
+			SVGConstraint: 'http://www.w3.org/ns/openannotation/extensions/SvgSelector'
+		};
 
         // Generating the canvasId allows us to have multiple instances of the application on a page and still
         // have a unique ID as expected by the Raphaël library.
@@ -133,7 +148,8 @@
         },
         options)
         );
-
+		
+		
         // ### #initShapeLens
         //
         // Initializes a basic shape lens. The default methods expect the Raphaël SVG shape object to
@@ -682,7 +698,7 @@
                 bodyType: "Text",
                 bodyContent: "This is an annotation for " + curMode,
                 shapeType: curMode,
-                opacity: 1,
+                opacity: 0.5, // Starts off with half-opacity, 1 is for in-focus
                 ntp_start: ntp_start,
                 ntp_end: ntp_end
             };
@@ -699,15 +715,127 @@
 		// 
 		app.importData = function(data) {
 			// ingest data and put it into dataStore
-			var tempstore = {};
+			var tempstore = {}, temp, npt, constraint;
 			
 			$.each(data, function(i, o) {
-				// determine type
-				if(o['rdf:type'] === 'Annotation') {
-					
+				// determine type by matching up the RDF:OAC namespaces with the type.value of an item
+				switch(o.type[0].value) {
+					case OAC_NS.Annotation:
+						// Unique ID comes from the URI value of type
+						temp = {
+							id: o.type[0].value,
+							type: "Annotation",
+							bodyContent: o.hasBody[0].value,
+							bodyType: 'Text',
+							shapeType: o.hasTarget[0].value,
+							opacity: 0.5,
+							npt_start: 0,
+							npt_end: 0
+						};
+						
+						// add to stack
+						tempstore = $.extend(true, tempstore, temp);
+					break;
+					case OAC_NS.Body:
+						// Attach body data to the exisiting annotation
+						$.each(tempstore, function(id, anno) {
+							if(anno.bodyContent === i) {
+								// matching anno with matching bodyContent
+								anno.bodyContent = o.chars[0].value;
+							}
+						});
+						
+					break;
+					case OAC_NS.SpTarget:
+						// References a constrained target
+						$.each(tempstore, function(id, anno) {
+							if(anno.shapeType === i) {
+								// matching anno with matching bodyContent
+								anno.shapeType = o.hasSelector[0].value;
+							}
+						});
+						
+					break;
+					case OAC_NS.Selector:
+						// 
+						$.each(tempstore, function(id, anno) {
+							if(anno.shapeType === i) {
+								//
+								anno.shapeType = o.hasSvgSelector[0].value;
+								anno.x = o.hasSvgSelector[0].value;
+								anno.y = o.hasSvgSelector[0].value;
+								anno.w = o.hasSvgSelector[0].value;
+								anno.h = o.hasSvgSelector[0].value;
+								anno.ntp_start = o.hasNptSelector[0].value;
+								anno.ntp_end = o.hasNptSelector[0].value;
+							}
+						});
+					break;
+					case OAC_NS.FragSelector:
+						$.each(tempstore, function(id, anno) {
+							if(anno.ntp_start === i) {
+								npt = o.value[0].value.replace(/^t=/g, '');
+								anno.ntp_start = o.hasNptSelector[0].value.replace(/\,[0-9]+/g, '');
+								anno.ntp_end = o.hasNptSelector[0].value.replace(/^[0-9]+/g, '');
+							}
+						});
+					break;
+					case OAC_NS.SVGSelector:
+						$.each(tempstore, function(id, anno) {
+							if(anno.shapeType === i) {
+								anno.shapeType = $(o.chars[0].value)[0].nodeName;
+								anno.x = $(o.chars[0].value).attr('x');
+								anno.y = $(o.chars[0].value).attr('y');
+								anno.w = $(o.chars[0].value).attr('width');
+								anno.h = $(o.chars[0].value).attr('height');
+							}
+						});
+					break;
 				}
 			});
-
+		};
+		
+		// ### exportData
+		// 
+		// Works backwards from the importData function for now. 
+		// 
+		// Returns:
+		// 
+		// JSON Object that conforms to the 
+		app.exportData = function() {
+			// Get all data from dataStore
+			var tempstore, 
+			findAnnos = app.dataStore.canvas.prepare(['.type']),
+			annos,
+			obj,
+			temp,
+			tuid,
+			buid,
+			// #### createJSONObjSeries (private)
+			// 
+			// Creates the necessary series of objects to be inserted
+			// into the exported JSON. Only called if there isn't already a RDF:JSON object that was imported with a matching ID
+			// 
+			createJSONObjSeries = function() {
+				
+			};
+			
+			annos = findAnnos.evaluate('Annotation');
+			$.each(annos, function(i, o) {
+				obj = app.dataStore.canvas.getItem(o);
+				buid = 
+				tempstore[obj.id[0]] = {
+					'type' : [{
+						'type' : 'uri',
+						'value' : OAC_NS.Annotation
+					}],
+					'hasBody' : [{
+						type : 'bnode',
+						value : '_:' + buid
+					}]
+				};
+				
+			});
 			
 		};
 		
