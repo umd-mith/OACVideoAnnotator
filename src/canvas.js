@@ -207,8 +207,8 @@
                 return val;
             };
 
-            start = item.ntp_start[0];
-            end = item.ntp_end[0];
+            start = item.npt_start[0];
+            end = item.npt_end[0];
             fstart = start - app.getTimeEasement();
             fend = end + app.getTimeEasement();
 
@@ -347,9 +347,9 @@
             // Updates the rendering's opacity based on the current time and the time extent of the annotation.
             //
             that.update = function(item) {
-                if (item.ntp_start[0] !== start || item.ntp_end[0] !== end) {
-                    start = item.ntp_start[0];
-                    end = item.ntp_end[0];
+                if (item.npt_start[0] !== start || item.npt_end[0] !== end) {
+                    start = item.npt_start[0];
+                    end = item.npt_end[0];
                     fstart = start - app.getTimeEasement();
                     fend = end + app.getTimeEasement();
                     that.setOpacity(calcOpacity(app.getCurrentTime()));
@@ -682,8 +682,8 @@
         //		
         app.insertShape = function(coords) {
             var shapeItem,
-            ntp_start = parseFloat(app.getCurrentTime()) - 5,
-            ntp_end = parseFloat(app.getCurrentTime()) + 5,
+            npt_start = parseFloat(app.getCurrentTime()) - 5,
+            npt_end = parseFloat(app.getCurrentTime()) + 5,
             curMode = app.getCurrentMode(),
             shape;
 			
@@ -699,8 +699,8 @@
                 bodyContent: "This is an annotation for " + curMode,
                 shapeType: curMode,
                 opacity: 0.5, // Starts off with half-opacity, 1 is for in-focus
-                ntp_start: ntp_start,
-                ntp_end: ntp_end
+                npt_start: npt_start,
+                npt_end: npt_end
             };
 
             app.dataStore.canvas.loadItems([$.extend(shapeItem, shape)]);
@@ -766,17 +766,17 @@
 								anno.y = o.hasSvgSelector[0].value;
 								anno.w = o.hasSvgSelector[0].value;
 								anno.h = o.hasSvgSelector[0].value;
-								anno.ntp_start = o.hasNptSelector[0].value;
-								anno.ntp_end = o.hasNptSelector[0].value;
+								anno.npt_start = o.hasNptSelector[0].value;
+								anno.npt_end = o.hasNptSelector[0].value;
 							}
 						});
 					break;
 					case OAC_NS.FragSelector:
 						$.each(tempstore, function(id, anno) {
-							if(anno.ntp_start === i) {
+							if(anno.npt_start === i) {
 								npt = o.value[0].value.replace(/^t=/g, '');
-								anno.ntp_start = o.hasNptSelector[0].value.replace(/\,[0-9]+/g, '');
-								anno.ntp_end = o.hasNptSelector[0].value.replace(/^[0-9]+/g, '');
+								anno.npt_start = o.hasNptSelector[0].value.replace(/\,[0-9]+/g, '');
+								anno.npt_end = o.hasNptSelector[0].value.replace(/^[0-9]+/g, '');
 							}
 						});
 					break;
@@ -799,10 +799,14 @@
 		// 
 		// Works backwards from the importData function for now. 
 		// 
+		// Parameters:
+		// 
+		// * data - JSON Object of the original data used during import (Not stored locally during MITHGrid session) 
+		// 
 		// Returns:
 		// 
 		// JSON Object that conforms to the 
-		app.exportData = function() {
+		app.exportData = function(data) {
 			// Get all data from dataStore
 			var tempstore, 
 			findAnnos = app.dataStore.canvas.prepare(['.type']),
@@ -811,19 +815,25 @@
 			temp,
 			tuid,
 			buid,
+			fgid,
+			svgid,
+			suid,
 			// #### createJSONObjSeries (private)
 			// 
 			// Creates the necessary series of objects to be inserted
 			// into the exported JSON. Only called if there isn't already a RDF:JSON object that was imported with a matching ID
 			// 
-			createJSONObjSeries = function() {
-				
-			};
-			
-			annos = findAnnos.evaluate('Annotation');
-			$.each(annos, function(i, o) {
-				obj = app.dataStore.canvas.getItem(o);
-				buid = 
+			// Parameters: 
+			// 
+			// * id - ID of the item to create in OAC:ASP JSON
+			// 
+			createJSONObjSeries = function(id) {
+				obj = app.dataStore.canvas.getItem(id);
+				buid = 'b' + uuid();
+				tuid = 't' + uuid();
+				suid = 's' + uuid(); // selector ID
+				svgid = 'svg' + uuid(); // SVG constraint ID
+				fgid = 'frag' + uuid(); // Fragment Idenitifier ID
 				tempstore[obj.id[0]] = {
 					'type' : [{
 						'type' : 'uri',
@@ -832,9 +842,89 @@
 					'hasBody' : [{
 						type : 'bnode',
 						value : '_:' + buid
+					}],
+					'hasTarget' : [{
+						type : 'bnode',
+						value : '_:' + tuid
+					}]
+				};
+				// Generating body element
+				tempstore[buid] = {
+					'type' : [{
+						'type' : 'uri',
+						'value' : OAC_NS.Body
+					}],
+					'format' : [{
+						'type' : 'literal',
+						'value' : 'text/plain'
+					}],
+					'characterEncoding': [{ type: 'literal',    value: 'utf-8' }],
+
+					'chars':         [{ type: 'literal',    value: obj.bodyContent[0] }]
+				};
+				// Generating target element
+				tempstore[tuid] = {
+					'type' : [{
+						'type' : 'uri',
+						'value' : OAC_NS.SpTarget
+					}],
+					'hasSource' : [{
+						'type' : 'uri',
+						'value' : obj.targetURI[0]
+					}],
+					'hasSelector' : [{
+						'type' : 'bnode',
+						'value' : suid
 					}]
 				};
 				
+				// Selector element, which points to the SVG constraint and NPT constraint
+				tempstore[suid] = {
+					'type' : [{
+						'type' : 'uri',
+						'value' : OAC_NS.Selector
+					}],
+					'hasSvgSelector' : [{
+						type: 'bnode',    
+						value: svgid
+					}],
+					'hasNptSelector' : [{
+						type: 'bnode',    
+						value: fgid
+					}]
+				};
+				
+				// Targets have selectors, which then have svg and npt elements
+				tempstore[svgid] = {
+					'type' : [{
+						'type' : 'uri',
+						'value' : OAC_NS.SVGConstraint
+					}],
+					'dc:format':         [{ type: 'literal',    value: 'text/svg+xml' }],
+
+					'cnt:characterEncoding': [{ type: 'literal',    value: 'utf-8' }],
+
+					'cnt:chars':         [{ type: 'literal',    value: '<' + obj.shapeType[0].substring(0,4).toLowerCase() +
+								' x="' + obj.x[0] + '" y="' + obj.y[0] + ' width="' + obj.width[0] + '" height="' + obj.height[0] + '" />'}]
+				};
+				
+				tempstore[fgid] = {
+					'type' : [{
+						'type' : 'uri',
+						'value' : OAC_NS.FragSelector
+					}],
+					'value' : [{
+						'type' : 'literal',
+						'value' : 't=npt:' + obj.npt_start[0] + ',' + obj.npt_end[0]
+					}]
+				};
+			};
+			
+			annos = findAnnos.evaluate('Annotation');
+			$.each(annos, function(i, o) {
+				if(data === undefined) {
+					createJSONObjSeries(o);
+				}
 			});
 			
 		};
@@ -1137,8 +1227,8 @@
             timeControlBinding.events.onUpdate.addListener(function(id, start, end) {
                 app.dataStore.canvas.updateItems([{
                     id: id,
-                    ntp_start: start,
-                    ntp_end: end
+                    npt_start: start,
+                    npt_end: end
                 }]);
             });
 

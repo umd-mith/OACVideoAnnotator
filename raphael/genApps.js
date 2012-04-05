@@ -7,7 +7,7 @@
 // pass in ID for the main div
 var initPlugin = function() {
 	var raphApp, setupAllPlayers, player, OACdrv, wh = [], xy = [],
-	OACVideoController;
+	OACVideoController, data;
 	
 	initStreamingVideoApp = function(playerobj) {
 		// Create Raphael canvas application controls
@@ -22,9 +22,20 @@ var initPlugin = function() {
 			});
 		}, 1);
 
+	
 		// creating Raphael canvas application
 		setTimeout(function() {
 			raphApp.run();
+	
+			// Creating handler for the export area 
+			// 
+			// May need to bring this into the application? 
+			// 
+			$('.section-export-data > #exportDataStore').click(function() {
+				// init exportData
+				data = raphApp.exportData();
+				$('.section-export-data > #export-text').val(JSON.stringify(data));
+			});
 		}, 10);
 	};
 	

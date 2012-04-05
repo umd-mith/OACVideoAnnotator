@@ -4,7 +4,7 @@
 // The **OAC Video Annotation Tool** is a MITHGrid application providing annotation capabilities for streaming
 // video embedded in a web page. 
 //  
-// Date: Tue Apr 3 13:29:43 2012 -0400
+// Date: Wed Apr 4 16:23:09 2012 -0400
 //  
 // Educational Community License, Version 2.0
 // 
@@ -1668,7 +1668,7 @@ OAC.Client.namespace("StreamingVideo");
     var canvasId,
     S4,
     uuid;
-
+	
     // #S4 (private)
     //
     // Generates a UUID value, this is not a global uid
@@ -1723,7 +1723,22 @@ OAC.Client.namespace("StreamingVideo");
         shapeAnnotationId = 0,
         myCanvasId = 'OAC-Client-StreamingVideo-SVG-Canvas-' + canvasId,
         xy = [],
-        wh = [];
+        wh = [],
+		// **FIXME:** May want to tease this out as a configurable option or as a global
+		// 
+		// For now, putting namespaces of Annotations, bodies, targets, contraints here in order to be used 
+		// in import/export
+		//
+		OAC_NS = {
+			root: 'http://www.openannotation.org/ns/',
+			Annotation: 'http://www.openannotation.org/ns/Annotation',
+			Body: 'http://www.openannotation.org/ns/Body',
+			Target: 'http://www.openannotation.org/ns/Target',
+			SpTarget: 'http://www.openannotation.org/ns/ConstrainedTarget',
+			Selector: 'http://mith.umd.edu/ns/asp/SvgNptSelector',
+			FragSelector: 'http://www.w3.org/ns/openannotation/core/FragmentSelector',
+			SVGConstraint: 'http://www.w3.org/ns/openannotation/extensions/SvgSelector'
+		};
 
         // Generating the canvasId allows us to have multiple instances of the application on a page and still
         // have a unique ID as expected by the Raphaël library.
@@ -1796,7 +1811,8 @@ OAC.Client.namespace("StreamingVideo");
         },
         options)
         );
-
+		
+		
         // ### #initShapeLens
         //
         // Initializes a basic shape lens. The default methods expect the Raphaël SVG shape object to
@@ -1854,8 +1870,8 @@ OAC.Client.namespace("StreamingVideo");
                 return val;
             };
 
-            start = item.ntp_start[0];
-            end = item.ntp_end[0];
+            start = item.npt_start[0];
+            end = item.npt_end[0];
             fstart = start - app.getTimeEasement();
             fend = end + app.getTimeEasement();
 
@@ -1994,9 +2010,9 @@ OAC.Client.namespace("StreamingVideo");
             // Updates the rendering's opacity based on the current time and the time extent of the annotation.
             //
             that.update = function(item) {
-                if (item.ntp_start[0] !== start || item.ntp_end[0] !== end) {
-                    start = item.ntp_start[0];
-                    end = item.ntp_end[0];
+                if (item.npt_start[0] !== start || item.npt_end[0] !== end) {
+                    start = item.npt_start[0];
+                    end = item.npt_end[0];
                     fstart = start - app.getTimeEasement();
                     fend = end + app.getTimeEasement();
                     that.setOpacity(calcOpacity(app.getCurrentTime()));
@@ -2329,8 +2345,8 @@ OAC.Client.namespace("StreamingVideo");
         //		
         app.insertShape = function(coords) {
             var shapeItem,
-            ntp_start = parseFloat(app.getCurrentTime()) - 5,
-            ntp_end = parseFloat(app.getCurrentTime()) + 5,
+            npt_start = parseFloat(app.getCurrentTime()) - 5,
+            npt_end = parseFloat(app.getCurrentTime()) + 5,
             curMode = app.getCurrentMode(),
             shape;
 			
@@ -2345,9 +2361,9 @@ OAC.Client.namespace("StreamingVideo");
                 bodyType: "Text",
                 bodyContent: "This is an annotation for " + curMode,
                 shapeType: curMode,
-                opacity: 1,
-                ntp_start: ntp_start,
-                ntp_end: ntp_end
+                opacity: 0.5, // Starts off with half-opacity, 1 is for in-focus
+                npt_start: npt_start,
+                npt_end: npt_end
             };
 
             app.dataStore.canvas.loadItems([$.extend(shapeItem, shape)]);
@@ -2362,15 +2378,217 @@ OAC.Client.namespace("StreamingVideo");
 		// 
 		app.importData = function(data) {
 			// ingest data and put it into dataStore
-			var tempstore = {};
+			var tempstore = {}, temp, npt, constraint;
 			
 			$.each(data, function(i, o) {
-				// determine type
-				if(o['rdf:type'] === 'Annotation') {
-					
+				// determine type by matching up the RDF:OAC namespaces with the type.value of an item
+				switch(o.type[0].value) {
+					case OAC_NS.Annotation:
+						// Unique ID comes from the URI value of type
+						temp = {
+							id: o.type[0].value,
+							type: "Annotation",
+							bodyContent: o.hasBody[0].value,
+							bodyType: 'Text',
+							shapeType: o.hasTarget[0].value,
+							opacity: 0.5,
+							npt_start: 0,
+							npt_end: 0
+						};
+						
+						// add to stack
+						tempstore = $.extend(true, tempstore, temp);
+					break;
+					case OAC_NS.Body:
+						// Attach body data to the exisiting annotation
+						$.each(tempstore, function(id, anno) {
+							if(anno.bodyContent === i) {
+								// matching anno with matching bodyContent
+								anno.bodyContent = o.chars[0].value;
+							}
+						});
+						
+					break;
+					case OAC_NS.SpTarget:
+						// References a constrained target
+						$.each(tempstore, function(id, anno) {
+							if(anno.shapeType === i) {
+								// matching anno with matching bodyContent
+								anno.shapeType = o.hasSelector[0].value;
+							}
+						});
+						
+					break;
+					case OAC_NS.Selector:
+						// 
+						$.each(tempstore, function(id, anno) {
+							if(anno.shapeType === i) {
+								//
+								anno.shapeType = o.hasSvgSelector[0].value;
+								anno.x = o.hasSvgSelector[0].value;
+								anno.y = o.hasSvgSelector[0].value;
+								anno.w = o.hasSvgSelector[0].value;
+								anno.h = o.hasSvgSelector[0].value;
+								anno.npt_start = o.hasNptSelector[0].value;
+								anno.npt_end = o.hasNptSelector[0].value;
+							}
+						});
+					break;
+					case OAC_NS.FragSelector:
+						$.each(tempstore, function(id, anno) {
+							if(anno.npt_start === i) {
+								npt = o.value[0].value.replace(/^t=/g, '');
+								anno.npt_start = o.hasNptSelector[0].value.replace(/\,[0-9]+/g, '');
+								anno.npt_end = o.hasNptSelector[0].value.replace(/^[0-9]+/g, '');
+							}
+						});
+					break;
+					case OAC_NS.SVGSelector:
+						$.each(tempstore, function(id, anno) {
+							if(anno.shapeType === i) {
+								anno.shapeType = $(o.chars[0].value)[0].nodeName;
+								anno.x = $(o.chars[0].value).attr('x');
+								anno.y = $(o.chars[0].value).attr('y');
+								anno.w = $(o.chars[0].value).attr('width');
+								anno.h = $(o.chars[0].value).attr('height');
+							}
+						});
+					break;
 				}
 			});
+		};
+		
+		// ### exportData
+		// 
+		// Works backwards from the importData function for now. 
+		// 
+		// Parameters:
+		// 
+		// * data - JSON Object of the original data used during import (Not stored locally during MITHGrid session) 
+		// 
+		// Returns:
+		// 
+		// JSON Object that conforms to the 
+		app.exportData = function(data) {
+			// Get all data from dataStore
+			var tempstore, 
+			findAnnos = app.dataStore.canvas.prepare(['.type']),
+			annos,
+			obj,
+			temp,
+			tuid,
+			buid,
+			fgid,
+			svgid,
+			suid,
+			// #### createJSONObjSeries (private)
+			// 
+			// Creates the necessary series of objects to be inserted
+			// into the exported JSON. Only called if there isn't already a RDF:JSON object that was imported with a matching ID
+			// 
+			// Parameters: 
+			// 
+			// * id - ID of the item to create in OAC:ASP JSON
+			// 
+			createJSONObjSeries = function(id) {
+				obj = app.dataStore.canvas.getItem(id);
+				buid = 'b' + uuid();
+				tuid = 't' + uuid();
+				suid = 's' + uuid(); // selector ID
+				svgid = 'svg' + uuid(); // SVG constraint ID
+				fgid = 'frag' + uuid(); // Fragment Idenitifier ID
+				tempstore[obj.id[0]] = {
+					'type' : [{
+						'type' : 'uri',
+						'value' : OAC_NS.Annotation
+					}],
+					'hasBody' : [{
+						type : 'bnode',
+						value : '_:' + buid
+					}],
+					'hasTarget' : [{
+						type : 'bnode',
+						value : '_:' + tuid
+					}]
+				};
+				// Generating body element
+				tempstore[buid] = {
+					'type' : [{
+						'type' : 'uri',
+						'value' : OAC_NS.Body
+					}],
+					'format' : [{
+						'type' : 'literal',
+						'value' : 'text/plain'
+					}],
+					'characterEncoding': [{ type: 'literal',    value: 'utf-8' }],
 
+					'chars':         [{ type: 'literal',    value: obj.bodyContent[0] }]
+				};
+				// Generating target element
+				tempstore[tuid] = {
+					'type' : [{
+						'type' : 'uri',
+						'value' : OAC_NS.SpTarget
+					}],
+					'hasSource' : [{
+						'type' : 'uri',
+						'value' : obj.targetURI[0]
+					}],
+					'hasSelector' : [{
+						'type' : 'bnode',
+						'value' : suid
+					}]
+				};
+				
+				// Selector element, which points to the SVG constraint and NPT constraint
+				tempstore[suid] = {
+					'type' : [{
+						'type' : 'uri',
+						'value' : OAC_NS.Selector
+					}],
+					'hasSvgSelector' : [{
+						type: 'bnode',    
+						value: svgid
+					}],
+					'hasNptSelector' : [{
+						type: 'bnode',    
+						value: fgid
+					}]
+				};
+				
+				// Targets have selectors, which then have svg and npt elements
+				tempstore[svgid] = {
+					'type' : [{
+						'type' : 'uri',
+						'value' : OAC_NS.SVGConstraint
+					}],
+					'dc:format':         [{ type: 'literal',    value: 'text/svg+xml' }],
+
+					'cnt:characterEncoding': [{ type: 'literal',    value: 'utf-8' }],
+
+					'cnt:chars':         [{ type: 'literal',    value: '<' + obj.shapeType[0].substring(0,4).toLowerCase() +
+								' x="' + obj.x[0] + '" y="' + obj.y[0] + ' width="' + obj.width[0] + '" height="' + obj.height[0] + '" />'}]
+				};
+				
+				tempstore[fgid] = {
+					'type' : [{
+						'type' : 'uri',
+						'value' : OAC_NS.FragSelector
+					}],
+					'value' : [{
+						'type' : 'literal',
+						'value' : 't=npt:' + obj.npt_start[0] + ',' + obj.npt_end[0]
+					}]
+				};
+			};
+			
+			annos = findAnnos.evaluate('Annotation');
+			$.each(annos, function(i, o) {
+				if(data === undefined) {
+					createJSONObjSeries(o);
+				}
+			});
 			
 		};
 		
@@ -2672,8 +2890,8 @@ OAC.Client.namespace("StreamingVideo");
             timeControlBinding.events.onUpdate.addListener(function(id, start, end) {
                 app.dataStore.canvas.updateItems([{
                     id: id,
-                    ntp_start: start,
-                    ntp_end: end
+                    npt_start: start,
+                    npt_end: end
                 }]);
             });
 
@@ -2951,13 +3169,13 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 		},
 		*/
 		// **currentAnnotations** pages a range of times through the annotation store selecting those
-		// annotations which have a time range (.ntp\_start through .ntp\_end) that fall within the time
+		// annotations which have a time range (.npt\_start through .npt\_end) that fall within the time
 		// range set.
 		currentAnnotations: {
 			dataStore: 'canvas',
 			type: MITHGrid.Data.RangePager,
-			leftExpressions: [ '.ntp_start' ],
-			rightExpressions: [ '.ntp_end' ]
+			leftExpressions: [ '.npt_start' ],
+			rightExpressions: [ '.npt_end' ]
 		}
 	},
 	// Data store for the Application
@@ -2991,11 +3209,11 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 					valueType: 'numeric'
 				},
 				// - the play head position at which this annotation becomes active/current
-				ntp_start: {
+				npt_start: {
 					valueType: "numeric"
 				},
 				// - the play head position at which this annotation ceases being active/current
-				ntp_end: {
+				npt_end: {
 					valueType: "numeric"
 				}
 			}
