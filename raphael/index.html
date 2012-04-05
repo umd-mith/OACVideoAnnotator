@@ -8,12 +8,9 @@
 	<meta name="generator" content="TextMate http://macromates.com/">
 	<meta name="author" content="Grant Dickie">
 	<!-- Date: 2011-09-28 -->
-	<link rel="stylesheet" href="raphaeltest.css" />
-	<link rel="stylesheet" href="../lib/css/ui-lightness/jquery-ui-1.8.16.custom.css" />
+	<link rel="stylesheet" href="style.css" />
 	<script src="../lib/jquery.js" type="text/javascript"></script> 
-	<script src="../lib/jquery-ui-1.8.16.custom.min.js" type="text/javascript"></script>
-	<script src="../lib/jquery.rdfquery.core-1.0.js" type="text/javascript"></script>
-	<script src="../oacframework/oac-player-integration/js/mithgrid.js" type="text/javascript"></script>
+	<script src="../lib/mithgrid.js" type="text/javascript"></script>
 	<script src="../lib/raphael.js" type="text/javascript"></script>
 	<script src="../dist/videoanno.js" type="text/javascript"></script>
 	<script type="text/javascript" SRC="../oacframework/oac-player-integration/js/dummy-player.1.0.js"></script>
@@ -24,6 +21,7 @@
 	
 </head>
 <body>
+	
 <h2>
 	Raphael Test
 </h2>
@@ -46,7 +44,11 @@
 	
 </div>
 
-
+<div class="section-export-data">
+	<textarea id="export-text" cols="100" rows="10"></textarea>
+	
+	<div id="exportDataStore" class="button">Export</div>
+</div>
 
 </body>
 </html>

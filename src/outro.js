@@ -170,8 +170,7 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 		canvas: {
 			type: OAC.Client.StreamingVideo.Controller.CanvasClickController,
 			selectors: {
-				svg: ' > svg',
-				svgwrapper: '.section-canvas'
+				svgwrapper: ''
 			}
 		},
 		annoActive: {
@@ -269,13 +268,13 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 		},
 		*/
 		// **currentAnnotations** pages a range of times through the annotation store selecting those
-		// annotations which have a time range (.ntp\_start through .ntp\_end) that fall within the time
+		// annotations which have a time range (.npt\_start through .npt\_end) that fall within the time
 		// range set.
 		currentAnnotations: {
 			dataStore: 'canvas',
 			type: MITHGrid.Data.RangePager,
-			leftExpressions: [ '.ntp_start' ],
-			rightExpressions: [ '.ntp_end' ]
+			leftExpressions: [ '.npt_start' ],
+			rightExpressions: [ '.npt_end' ]
 		}
 	},
 	// Data store for the Application
@@ -309,11 +308,11 @@ MITHGrid.defaults("OAC.Client.StreamingVideo", {
 					valueType: 'numeric'
 				},
 				// - the play head position at which this annotation becomes active/current
-				ntp_start: {
+				npt_start: {
 					valueType: "numeric"
 				},
 				// - the play head position at which this annotation ceases being active/current
-				ntp_end: {
+				npt_end: {
 					valueType: "numeric"
 				}
 			}

@@ -1025,7 +1025,7 @@
 			// * container - DOM element that contains the canvas
 			// * svgEl - SVG shape element that will have mouse bindings attached to it
 			// 
-			drawShape = function(container, svgEl) {
+			drawShape = function(container) {
 				//
 				// Sets mousedown, mouseup, mousemove to draw a 
 				// shape on the canvas.
@@ -1048,7 +1048,7 @@
 				// remove all previous bindings
 				$(container).unbind();
 				
-				$(svgEl).mousedown(function(e) {
+				$(container).mousedown(function(e) {
 					if (mouseMode > 0) {
 						return;
 					}
@@ -1059,7 +1059,7 @@
 					binding.events.onShapeStart.fire(topLeft);
 				});
 
-				$(svgEl).mousemove(function(e) {
+				$(container).mousemove(function(e) {
 					if (mouseMode === 2 || mouseMode === 0) {
 						return;
 					}
@@ -1069,7 +1069,7 @@
 					binding.events.onShapeDrag.fire(bottomRight);
 				});
 
-				$(svgEl).mouseup(function(e) {
+				$(container).mouseup(function(e) {
 					if (mouseMode < 1) {
 						return;
 					}
@@ -1102,7 +1102,6 @@
 					// By default, nullifies all selections
 					options.application.setActiveAnnotation(undefined);
 					activeId = '';
-
 				});
 				
 			};
@@ -1113,12 +1112,11 @@
 			// in
 			options.application.events.onCurrentModeChange.addListener(function(mode) {
 				if (mode === 'Rectangle' || mode === 'Ellipse') {
-					drawShape(binding.locate('svgwrapper'), binding.locate('svg'));
+					drawShape(binding.locate('svgwrapper'));
 				} else if (mode === 'Select') {
-					selectShape(binding.locate('svg'));
-					
+					selectShape(binding.locate('svgwrapper'));
 				} else {
-					$(binding.locate('svg')).unbind();
+					$(binding.locate('svgwrapper')).unbind();
 				}
 			});
 
