@@ -1,10 +1,9 @@
 
 // # Presentations
 //
-// TODO: rename file to presentation.js
 //
-// Presentations for canvas.js
-// @author Grant Dickie
+// Presentations for OAC:ASP Application
+// @author Grant Dickie, Jim Smith
 //
 
 
@@ -55,14 +54,14 @@
 
 		options = that.options;
 		
-
-
+		// Setting up local names for the assigned presentation controllers
 		canvasController = options.controllers.canvas;
 		keyBoardController = options.controllers.keyboard;
 		editBoxController = options.controllers.shapeEditBox;
 		shapeCreateController = options.controllers.shapeCreateBox;
 		windowResizeController = options.controllers.windowResize;
 		
+		// x,y,w, and h coordinates are set through the CSS of the container passed in the constructor
 		x = $(container).css('x');
 		y = $(container).css('y');
 
@@ -72,8 +71,8 @@
 		// to fit
 		h = $(container).height();
 
-		// **FIXME:** We need to change this. If we have multiple videos on a page, this will break.
-		keyboardBinding = keyBoardController.bind($('body'), {});
+		// Keyboard binding attached to container to avoid multiple-keyboard events from firing
+		keyboardBinding = keyBoardController.bind($(container), {});
 
 		that.events = $.extend(true, that.events, keyboardBinding.events);
 
@@ -88,7 +87,7 @@
 	
 		// attach binding
 		// **FIXME:** We need to change this. If we have multiple videos on a page, this will break.
-		canvasBinding = canvasController.bind($('body'), {
+		canvasBinding = canvasController.bind($(container), {
 			closeEnough: 5,
 			paper: that.canvas
 		});
@@ -132,12 +131,15 @@
 			}
 		});
 	
+	
+		// Adjusts the canvas area, canvas wrapper to fall directly over the 
+		// player area
 		windowResizeBinding.events.onResize.addListener(function() {
 			var x, y, w, h, containerEl, canvasEl, htmlWrapper;
 			// the following elements should be parts of this presentation
 			canvasEl = $('body').find('svg');
-			containerEl = $('body').find('#myplayer');
-			htmlWrapper = $('body').find('.section-canvas');
+			containerEl = $(options.playerWrapper);
+			htmlWrapper = $(container);
 			x = parseInt($(containerEl).offset().left, 10);
 			y = parseInt($(containerEl).offset().top, 10);
 			w = parseInt($(containerEl).width(), 10);
@@ -253,7 +255,6 @@
 
 				tempStore = m;
 				while (tempStore.dataStore) {
-
 					tempStore = tempStore.dataStore;
 				}
 				allAnnosModel = tempStore;
@@ -276,5 +277,8 @@
 
 		return that;
 	};
+	
+	
+	
 } (jQuery, MITHGrid, OAC));
 // End of Presentation constructors

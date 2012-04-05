@@ -16,7 +16,7 @@ POST_COMPILER = ${JS_ENGINE} ${BUILD_DIR}/post-compile.js
 DOCCO ?= `which docco`
 
 BASE_FILES = ${SRC_DIR}/controllers.js \
-	${SRC_DIR}/raphael_canvas.js \
+	${SRC_DIR}/presentations.js \
 	${SRC_DIR}/canvas.js
 
 MG = ${DIST_DIR}/videoanno.js
