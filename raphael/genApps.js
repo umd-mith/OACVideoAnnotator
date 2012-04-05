@@ -33,7 +33,9 @@ var initPlugin = function() {
 			// 
 			$('.section-export-data > #exportDataStore').click(function() {
 				// init exportData
+				console.log('exporting data');
 				data = raphApp.exportData();
+				console.log('received exported data: ' + data);
 				$('.section-export-data > #export-text').val(JSON.stringify(data));
 			});
 		}, 10);

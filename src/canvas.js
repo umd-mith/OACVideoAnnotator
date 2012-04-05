@@ -698,6 +698,7 @@
                 bodyType: "Text",
                 bodyContent: "This is an annotation for " + curMode,
                 shapeType: curMode,
+				targetURI: 'http://youtube.com', // **FIXME: Needs to be changed to dynamic value
                 opacity: 0.5, // Starts off with half-opacity, 1 is for in-focus
                 npt_start: npt_start,
                 npt_end: npt_end
@@ -808,8 +809,8 @@
 		// JSON Object that conforms to the 
 		app.exportData = function(data) {
 			// Get all data from dataStore
-			var tempstore, 
-			findAnnos = app.dataStore.canvas.prepare(['.type']),
+			var tempstore = {}, 
+			findAnnos = app.dataStore.canvas.prepare(['!type']),
 			annos,
 			obj,
 			temp,
@@ -849,7 +850,7 @@
 					}]
 				};
 				// Generating body element
-				tempstore[buid] = {
+				tempstore['_:' + buid] = {
 					'type' : [{
 						'type' : 'uri',
 						'value' : OAC_NS.Body
@@ -863,7 +864,7 @@
 					'chars':         [{ type: 'literal',    value: obj.bodyContent[0] }]
 				};
 				// Generating target element
-				tempstore[tuid] = {
+				tempstore['_:' + tuid] = {
 					'type' : [{
 						'type' : 'uri',
 						'value' : OAC_NS.SpTarget
@@ -886,16 +887,16 @@
 					}],
 					'hasSvgSelector' : [{
 						type: 'bnode',    
-						value: svgid
+						value: '_:' + svgid
 					}],
 					'hasNptSelector' : [{
 						type: 'bnode',    
-						value: fgid
+						value: '_:' + fgid
 					}]
 				};
 				
 				// Targets have selectors, which then have svg and npt elements
-				tempstore[svgid] = {
+				tempstore['_:' + svgid] = {
 					'type' : [{
 						'type' : 'uri',
 						'value' : OAC_NS.SVGConstraint
@@ -905,10 +906,10 @@
 					'cnt:characterEncoding': [{ type: 'literal',    value: 'utf-8' }],
 
 					'cnt:chars':         [{ type: 'literal',    value: '<' + obj.shapeType[0].substring(0,4).toLowerCase() +
-								' x="' + obj.x[0] + '" y="' + obj.y[0] + ' width="' + obj.width[0] + '" height="' + obj.height[0] + '" />'}]
+								' x="' + obj.x[0] + '" y="' + obj.y[0] + ' width="' + obj.w[0] + '" height="' + obj.h[0] + '" />'}]
 				};
 				
-				tempstore[fgid] = {
+				tempstore['_:' + fgid] = {
 					'type' : [{
 						'type' : 'uri',
 						'value' : OAC_NS.FragSelector
@@ -926,6 +927,8 @@
 					createJSONObjSeries(o);
 				}
 			});
+			
+			return tempstore;
 			
 		};
 		

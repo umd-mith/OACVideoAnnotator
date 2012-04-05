@@ -4,7 +4,7 @@
 // The **OAC Video Annotation Tool** is a MITHGrid application providing annotation capabilities for streaming
 // video embedded in a web page. 
 //  
-// Date: Wed Apr 4 16:23:09 2012 -0400
+// Date: Thu Apr 5 15:21:26 2012 -0400
 //  
 // Educational Community License, Version 2.0
 // 
@@ -2361,6 +2361,7 @@ OAC.Client.namespace("StreamingVideo");
                 bodyType: "Text",
                 bodyContent: "This is an annotation for " + curMode,
                 shapeType: curMode,
+				targetURI: 'http://youtube.com', // **FIXME: Needs to be changed to dynamic value
                 opacity: 0.5, // Starts off with half-opacity, 1 is for in-focus
                 npt_start: npt_start,
                 npt_end: npt_end
@@ -2471,8 +2472,8 @@ OAC.Client.namespace("StreamingVideo");
 		// JSON Object that conforms to the 
 		app.exportData = function(data) {
 			// Get all data from dataStore
-			var tempstore, 
-			findAnnos = app.dataStore.canvas.prepare(['.type']),
+			var tempstore = {}, 
+			findAnnos = app.dataStore.canvas.prepare(['!type']),
 			annos,
 			obj,
 			temp,
@@ -2568,7 +2569,7 @@ OAC.Client.namespace("StreamingVideo");
 					'cnt:characterEncoding': [{ type: 'literal',    value: 'utf-8' }],
 
 					'cnt:chars':         [{ type: 'literal',    value: '<' + obj.shapeType[0].substring(0,4).toLowerCase() +
-								' x="' + obj.x[0] + '" y="' + obj.y[0] + ' width="' + obj.width[0] + '" height="' + obj.height[0] + '" />'}]
+								' x="' + obj.x[0] + '" y="' + obj.y[0] + ' width="' + obj.w[0] + '" height="' + obj.h[0] + '" />'}]
 				};
 				
 				tempstore[fgid] = {
@@ -2589,6 +2590,8 @@ OAC.Client.namespace("StreamingVideo");
 					createJSONObjSeries(o);
 				}
 			});
+			
+			return tempstore;
 			
 		};
 		

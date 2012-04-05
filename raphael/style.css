@@ -64,6 +64,11 @@ MITHGrid
 	font-size: 14px;
 	text-decoration: underline;
 }
+.section-export-data {
+	position: absolute;
+	top: 0px;
+	right: 0px;
+}
 .anno_item {
 	padding: 3px;
 }

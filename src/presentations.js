@@ -1,10 +1,9 @@
 
 // # Presentations
 //
-// TODO: rename file to presentation.js
 //
-// Presentations for canvas.js
-// @author Grant Dickie
+// Presentations for OAC:ASP Application
+// @author Grant Dickie, Jim Smith
 //
 
 
@@ -256,7 +255,6 @@
 
 				tempStore = m;
 				while (tempStore.dataStore) {
-
 					tempStore = tempStore.dataStore;
 				}
 				allAnnosModel = tempStore;
@@ -279,5 +277,8 @@
 
 		return that;
 	};
+	
+	
+	
 } (jQuery, MITHGrid, OAC));
 // End of Presentation constructors
