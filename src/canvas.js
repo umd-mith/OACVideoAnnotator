@@ -5,7 +5,7 @@
     var canvasId,
     S4,
     uuid;
-	
+
     // #S4 (private)
     //
     // Generates a UUID value, this is not a global uid
@@ -25,10 +25,10 @@
     // **FIXME: Abstract so that there is a server prefix component that insures
     // more of a GUID
     //
-	uuid = function() {
-		return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
-	};
-	
+    uuid = function() {
+        return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
+    };
+
     // Create a Unique identifier
     // **FIXME: abstract this so that it is performed server-side, and we attach
     // server-side GUID as prefix to local, browser-side UUID
@@ -49,7 +49,7 @@
     // Options:
     //
     // * playerWrapper: [Required] DOM path to the top-level element of the video player
-	// 
+    //
     OAC.Client.StreamingVideo.initApp = function(container, options) {
         var renderListItem,
         app,
@@ -61,21 +61,21 @@
         myCanvasId = 'OAC-Client-StreamingVideo-SVG-Canvas-' + canvasId,
         xy = [],
         wh = [],
-		// **FIXME:** May want to tease this out as a configurable option or as a global
-		// 
-		// For now, putting namespaces of Annotations, bodies, targets, contraints here in order to be used 
-		// in import/export
-		//
-		OAC_NS = {
-			root: 'http://www.openannotation.org/ns/',
-			Annotation: 'http://www.openannotation.org/ns/Annotation',
-			Body: 'http://www.openannotation.org/ns/Body',
-			Target: 'http://www.openannotation.org/ns/Target',
-			SpTarget: 'http://www.openannotation.org/ns/ConstrainedTarget',
-			Selector: 'http://mith.umd.edu/ns/asp/SvgNptSelector',
-			FragSelector: 'http://www.w3.org/ns/openannotation/core/FragmentSelector',
-			SVGConstraint: 'http://www.w3.org/ns/openannotation/extensions/SvgSelector'
-		};
+        // **FIXME:** May want to tease this out as a configurable option or as a global
+        //
+        // For now, putting namespaces of Annotations, bodies, targets, contraints here in order to be used
+        // in import/export
+        //
+        OAC_NS = {
+            root: 'http://www.openannotation.org/ns/',
+            Annotation: 'http://www.openannotation.org/ns/Annotation',
+            Body: 'http://www.openannotation.org/ns/Body',
+            Target: 'http://www.openannotation.org/ns/Target',
+            SpTarget: 'http://www.openannotation.org/ns/ConstrainedTarget',
+            Selector: 'http://www.w3.org/ns/openannotation/core/CompoundSelector',
+            FragSelector: 'http://www.w3.org/ns/openannotation/core/FragmentSelector',
+            SVGConstraint: 'http://www.w3.org/ns/openannotation/extensions/SvgSelector'
+        };
 
         // Generating the canvasId allows us to have multiple instances of the application on a page and still
         // have a unique ID as expected by the Raphaël library.
@@ -137,7 +137,7 @@
                     container: "#" + myCanvasId,
                     lenses: {},
                     lensKey: ['.shapeType'],
-					playerWrapper: options.playerWrapper
+                    playerWrapper: options.playerWrapper
                 },
                 annoItem: {
                     container: '.section-annotations',
@@ -148,8 +148,8 @@
         },
         options)
         );
-		
-		
+
+
         // ### #initShapeLens
         //
         // Initializes a basic shape lens. The default methods expect the Raphaël SVG shape object to
@@ -532,12 +532,13 @@
         // Parameters:
         //
         // * area - Classname of the div where the button should go; so far, this can be either 'buttongrouping', where all
-		//  general buttons go, or 'slidergrouping', where a jQuery UI slider can be placed
-		// 
-		// * grouping - Name to be given to the inner div inside the area div
-		// 
-		// * action - Name to be given to the ID of the clickable HTML button and the name of the event to fire when button is clicked 
-		// 
+        //  general buttons go, or 'slidergrouping', where a jQuery UI slider can be placed
+        //
+        // * grouping - Name to be given to the inner div inside the area div
+        //
+        // * action - Name to be given to the ID of the clickable HTML button and the name
+        // of the event to fire when button is clicked
+        //
         app.buttonFeature = function(area, grouping, action) {
 
             // Check to make sure button isn't already present
@@ -678,7 +679,7 @@
         // Returns: Nothing.
         //
         // **FIXME:** We should ensure that we don't have clashing IDs. We need to use UUIDs when possible.
-		//  : Using uuid() to generate local UUIDs - not truly a UUID, but close enough for now.
+        //  : Using uuid() to generate local UUIDs - not truly a UUID, but close enough for now.
         //		
         app.insertShape = function(coords) {
             var shapeItem,
@@ -686,9 +687,9 @@
             npt_end = parseFloat(app.getCurrentTime()) + 5,
             curMode = app.getCurrentMode(),
             shape;
-			
-			// Insert into local array of ShapeTypes
-			// 
+
+            // Insert into local array of ShapeTypes
+            //
             shape = shapeTypes[curMode].calc(coords);
             shapeAnnotationId = uuid();
 
@@ -698,8 +699,10 @@
                 bodyType: "Text",
                 bodyContent: "This is an annotation for " + curMode,
                 shapeType: curMode,
-				targetURI: 'http://youtube.com', // **FIXME: Needs to be changed to dynamic value
-                opacity: 0.5, // Starts off with half-opacity, 1 is for in-focus
+                targetURI: 'http://youtube.com',
+                // **FIXME: Needs to be changed to dynamic value
+                opacity: 0.5,
+                // Starts off with half-opacity, 1 is for in-focus
                 npt_start: npt_start,
                 npt_end: npt_end
             };
@@ -707,231 +710,351 @@
             app.dataStore.canvas.loadItems([$.extend(shapeItem, shape)]);
         };
 
-		// ### importData
-		// 
-		// Importing annotation data from an external source. Must be in JSON format 
-		// 
-		// Parameters: 
-		// * data - Object housing the data for application
-		// 
-		app.importData = function(data) {
-			// ingest data and put it into dataStore
-			var tempstore = {}, temp, npt, constraint;
+        // ### importData
+        //
+        // Importing annotation data from an external source. Must be in JSON format
+        //
+        // Parameters:
+        // * data - Object housing the data for application
+        //
+        app.importData = function(data) {
+            // ingest data and put it into dataStore
+            var tempstore = [],
+            temp,
+            npt,
+            constraint,
+            tuid,
+            suid,
+            svgid,
+            nptid;
+			console.log('data received in importData: ' + JSON.stringify(data));
+            $.each(data,
+            function(i, o) {
+                // Singling out the Annotations from the rest of the RDF data so
+                // we can work down from just the Annotation object and its pointers
+                if (o.type[0].value === OAC_NS.Annotation && o.hasTarget !== undefined && o.hasBody !== undefined) {
+                    // Unique ID comes from the URI value of type
+                    temp = {
+                        id: i,
+                        type: "Annotation",
+                        bodyContent: '',
+                        bodyType: 'Text',
+                        shapeType: '',
+                        opacity: 0.5,
+                        npt_start: 0,
+                        npt_end: 0
+                    };
+
+                    //
+                    // Check to see if target is a CompoundSelection Resource
+                    // Right now, we don't care about things that are not Compound Resources made
+                    // up of a time fragment and an SVG Constraint
+                    //
+                    tuid = data[o.hasTarget[0].value];
+
+                    if (tuid.hasSelector !== undefined && data[tuid.hasSelector[0].value].type[0].value === OAC_NS.Selector) {
+                        suid = data[tuid.hasSelector[0].value];
+                        svgid = data[suid.hasSelector[0].value];
+						
+                        // Fill in blanks for SVG
+                        temp.shapeType = $(svgid.chars[0].value)[0].nodeName;
+                        temp.x = $(svgid.chars[0].value).attr('x');
+                        temp.y = $(svgid.chars[0].value).attr('y');
+                        temp.w = $(svgid.chars[0].value).attr('width');
+                        temp.h = $(svgid.chars[0].value).attr('height');
+
+                        // Fill in blanks for the NPT constraint
+                        nptid = data[suid.hasSelector[1].value];
+                        npt = nptid.value[0].value.replace(/^t=/g, '');
+                        temp.npt_start = nptid.value[0].value.replace(/\,[0-9]+/g, '');
+                        temp.npt_end = nptid.value[0].value.replace(/^[0-9]+/g, '');
+
+                        // Fill in blanks for body
+                        temp.bodyContent = data[o.hasBody[0].value].chars[0].value;
+
+                        tempstore.push(temp);
+                    }
+                }
+            });
+            // insert into dataStore
+            app.dataStore.canvas.loadItems(tempstore);
 			
-			$.each(data, function(i, o) {
-				// determine type by matching up the RDF:OAC namespaces with the type.value of an item
-				switch(o.type[0].value) {
-					case OAC_NS.Annotation:
-						// Unique ID comes from the URI value of type
-						temp = {
-							id: o.type[0].value,
-							type: "Annotation",
-							bodyContent: o.hasBody[0].value,
-							bodyType: 'Text',
-							shapeType: o.hasTarget[0].value,
-							opacity: 0.5,
-							npt_start: 0,
-							npt_end: 0
-						};
-						
-						// add to stack
-						tempstore = $.extend(true, tempstore, temp);
-					break;
-					case OAC_NS.Body:
-						// Attach body data to the exisiting annotation
-						$.each(tempstore, function(id, anno) {
-							if(anno.bodyContent === i) {
-								// matching anno with matching bodyContent
-								anno.bodyContent = o.chars[0].value;
-							}
-						});
-						
-					break;
-					case OAC_NS.SpTarget:
-						// References a constrained target
-						$.each(tempstore, function(id, anno) {
-							if(anno.shapeType === i) {
-								// matching anno with matching bodyContent
-								anno.shapeType = o.hasSelector[0].value;
-							}
-						});
-						
-					break;
-					case OAC_NS.Selector:
-						// 
-						$.each(tempstore, function(id, anno) {
-							if(anno.shapeType === i) {
-								//
-								anno.shapeType = o.hasSvgSelector[0].value;
-								anno.x = o.hasSvgSelector[0].value;
-								anno.y = o.hasSvgSelector[0].value;
-								anno.w = o.hasSvgSelector[0].value;
-								anno.h = o.hasSvgSelector[0].value;
-								anno.npt_start = o.hasNptSelector[0].value;
-								anno.npt_end = o.hasNptSelector[0].value;
-							}
-						});
-					break;
-					case OAC_NS.FragSelector:
-						$.each(tempstore, function(id, anno) {
-							if(anno.npt_start === i) {
-								npt = o.value[0].value.replace(/^t=/g, '');
-								anno.npt_start = o.hasNptSelector[0].value.replace(/\,[0-9]+/g, '');
-								anno.npt_end = o.hasNptSelector[0].value.replace(/^[0-9]+/g, '');
-							}
-						});
-					break;
-					case OAC_NS.SVGSelector:
-						$.each(tempstore, function(id, anno) {
-							if(anno.shapeType === i) {
-								anno.shapeType = $(o.chars[0].value)[0].nodeName;
-								anno.x = $(o.chars[0].value).attr('x');
-								anno.y = $(o.chars[0].value).attr('y');
-								anno.w = $(o.chars[0].value).attr('width');
-								anno.h = $(o.chars[0].value).attr('height');
-							}
-						});
-					break;
+			testprep = app.dataStore.canvas.prepare(['!type']);
+			console.log('annotations in store: ' + testprep.evaluate('Annotation'));
+			
+        };
+
+        // ### exportData
+        //
+        // Works backwards from the importData function for now.
+        //
+        // Parameters:
+        //
+        // * data - JSON Object of the original data used during import (Not stored locally during MITHGrid session)
+        //
+        // Returns:
+        //
+        // JSON Object that conforms to the
+        app.exportData = function(data) {
+            // Get all data from dataStore
+            var tempstore = {},
+            findAnnos = app.dataStore.canvas.prepare(['!type']),
+            annos,
+            obj,
+            temp,
+            tuid,
+            buid,
+            fgid,
+            svgid,
+            suid,
+            found,
+
+            // #### genBody (private)
+            //
+            // Generates the body oject and adds it to tempstore
+            //
+            // Parameters:
+			// * obj - DataStore item
+            // * id (optional) - create Body Object with specific ID
+            //
+            genBody = function(obj, id) {
+                
+                // Generating body element
+                tempstore[id] = {
+                    'type': [{
+                        'type': 'uri',
+                        'value': OAC_NS.Body
+                    }],
+                    'format': [{
+                        'type': 'literal',
+                        'value': 'text/plain'
+                    }],
+                    'characterEncoding': [{
+                        type: 'literal',
+                        value: 'utf-8'
+                    }],
+
+                    'chars': [{
+                        type: 'literal',
+                        value: obj.bodyContent[0]
+                    }]
+                };
+            },
+            // #### genTarget (private)
+            //
+            // Generates a JSON object representing a target and adds it to tempstore
+            //
+            // Parameters
+            // * obj - dataStore item
+            // * id (optional) - pass array of IDs to use as target ID, Selector ID, etc
+            //
+            genTarget = function(obj, id) {
+                // Unique Identifiers for pieces of Target
+                
+                // Generating target element
+                tempstore[id[0]] = {
+                    'type': [{
+                        'type': 'uri',
+                        'value': OAC_NS.SpTarget
+                    }],
+                    'hasSource': [{
+                        'type': 'uri',
+                        'value': obj.targetURI[0]
+                    }],
+                    'hasSelector': [{
+                        'type': 'bnode',
+                        'value': suid
+                    }]
+                };
+
+                // Selector element, which points to the SVG constraint and NPT constraint
+                tempstore[id[1]] = {
+                    'type': [{
+                        'type': 'uri',
+                        'value': OAC_NS.Selector
+                    }],
+                    'hasSelector': [{
+                        type: 'bnode',
+                        value: id[2]
+                    },
+                    {
+                        type: 'bnode',
+                        value: id[3]
+                    }]
+                };
+
+                // Targets have selectors, which then have svg and npt elements
+                tempstore[id[2]] = {
+                    'type': [{
+                        'type': 'uri',
+                        'value': OAC_NS.SVGConstraint
+                    }],
+                    'format': [{
+                        type: 'literal',
+                        value: 'text/svg+xml'
+                    }],
+
+                    'characterEncoding': [{
+                        type: 'literal',
+                        value: 'utf-8'
+                    }],
+
+                    'chars': [{
+                        type: 'literal',
+                        value: '<' + obj.shapeType[0].substring(0, 4).toLowerCase() +
+                        ' x="' + obj.x[0] + '" y="' + obj.y[0] + ' width="' + obj.w[0] + '" height="' + obj.h[0] + '" />'
+                    }]
+                };
+
+                tempstore[id[3]] = {
+                    'type': [{
+                        'type': 'uri',
+                        'value': OAC_NS.FragSelector
+                    }],
+                    'value': [{
+                        'type': 'literal',
+                        'value': 't=npt:' + obj.npt_start[0] + ',' + obj.npt_end[0]
+                    }]
+                };
+            },
+            // #### createJSONObjSeries (private)
+            //
+            // Creates the necessary series of objects to be inserted
+            // into the exported JSON. Only called if there isn't already a RDF:JSON object that was imported with a matching ID
+            //
+            // Parameters:
+            //
+            // * id - Array of Ids to use as:
+            // 0th - Annotation Object (required)
+            // 1st - Body Object (optional)
+            // 2nd - Target (optional)
+            // 3rd - Target Selector (optional)
+            // 4th - Target SVG (optional)
+            // 5th - Target NPT (optional)
+            createJSONObjSeries = function(id) {
+                obj = app.dataStore.canvas.getItem(id);
+				if (id.length > 1) {
+					annoid = id[0];
+					buid = id[1];
+					tuid = id[2];
+                    suid = id[3];
+                    svgid = id[4];
+                    fgid = id[5];
+				} else {
+					
+					buid = '_:b' + uuid();
+					tuid = '_:t' + uuid();
+					suid = '_:sel' + uuid();
+					svgid = '_:sel' + uuid();
+					fgid = '_:sel' + uuid();
 				}
-			});
-		};
-		
-		// ### exportData
-		// 
-		// Works backwards from the importData function for now. 
-		// 
-		// Parameters:
-		// 
-		// * data - JSON Object of the original data used during import (Not stored locally during MITHGrid session) 
-		// 
-		// Returns:
-		// 
-		// JSON Object that conforms to the 
-		app.exportData = function(data) {
-			// Get all data from dataStore
-			var tempstore = {}, 
-			findAnnos = app.dataStore.canvas.prepare(['!type']),
-			annos,
-			obj,
-			temp,
-			tuid,
-			buid,
-			fgid,
-			svgid,
-			suid,
-			// #### createJSONObjSeries (private)
-			// 
-			// Creates the necessary series of objects to be inserted
-			// into the exported JSON. Only called if there isn't already a RDF:JSON object that was imported with a matching ID
-			// 
-			// Parameters: 
-			// 
-			// * id - ID of the item to create in OAC:ASP JSON
-			// 
-			createJSONObjSeries = function(id) {
-				obj = app.dataStore.canvas.getItem(id);
-				buid = 'b' + uuid();
-				tuid = 't' + uuid();
-				suid = 's' + uuid(); // selector ID
-				svgid = 'svg' + uuid(); // SVG constraint ID
-				fgid = 'frag' + uuid(); // Fragment Idenitifier ID
-				tempstore[obj.id[0]] = {
-					'type' : [{
-						'type' : 'uri',
-						'value' : OAC_NS.Annotation
-					}],
-					'hasBody' : [{
-						type : 'bnode',
-						value : '_:' + buid
-					}],
-					'hasTarget' : [{
-						type : 'bnode',
-						value : '_:' + tuid
-					}]
-				};
-				// Generating body element
-				tempstore['_:' + buid] = {
-					'type' : [{
-						'type' : 'uri',
-						'value' : OAC_NS.Body
-					}],
-					'format' : [{
-						'type' : 'literal',
-						'value' : 'text/plain'
-					}],
-					'characterEncoding': [{ type: 'literal',    value: 'utf-8' }],
 
-					'chars':         [{ type: 'literal',    value: obj.bodyContent[0] }]
-				};
-				// Generating target element
-				tempstore['_:' + tuid] = {
-					'type' : [{
-						'type' : 'uri',
-						'value' : OAC_NS.SpTarget
-					}],
-					'hasSource' : [{
-						'type' : 'uri',
-						'value' : obj.targetURI[0]
-					}],
-					'hasSelector' : [{
-						'type' : 'bnode',
-						'value' : suid
-					}]
-				};
-				
-				// Selector element, which points to the SVG constraint and NPT constraint
-				tempstore[suid] = {
-					'type' : [{
-						'type' : 'uri',
-						'value' : OAC_NS.Selector
-					}],
-					'hasSvgSelector' : [{
-						type: 'bnode',    
-						value: '_:' + svgid
-					}],
-					'hasNptSelector' : [{
-						type: 'bnode',    
-						value: '_:' + fgid
-					}]
-				};
-				
-				// Targets have selectors, which then have svg and npt elements
-				tempstore['_:' + svgid] = {
-					'type' : [{
-						'type' : 'uri',
-						'value' : OAC_NS.SVGConstraint
-					}],
-					'dc:format':         [{ type: 'literal',    value: 'text/svg+xml' }],
+				console.log('tuid + buid: ' + tuid + ', ' + buid);
+                // Fragment Idenitifier ID
+                tempstore[id[0]] = {
+                    'type': [{
+                        'type': 'uri',
+                        'value': OAC_NS.Annotation
+                    }],
+                    'hasBody': [{
+                        type: 'bnode',
+                        value: buid
+                    }],
+                    'hasTarget': [{
+                        type: 'bnode',
+                        value: tuid
+                    }]
+                };
 
-					'cnt:characterEncoding': [{ type: 'literal',    value: 'utf-8' }],
+                genBody(obj, buid);
+                genTarget(obj, [tuid, suid, svgid, fgid]);
+            },
+            // #### mergeData (private)
+            //
+            // Takes an id of a dataStore object and merges the data
+            // in the object with what is in the (optionally) passed
+            // RDF:JSON object
+            //
+            // Parameters:
+            // * id - ID of object to merge
+            //
+            mergeData = function(id) {
+                obj = app.dataStore.canvas.getItem(id);
 
-					'cnt:chars':         [{ type: 'literal',    value: '<' + obj.shapeType[0].substring(0,4).toLowerCase() +
-								' x="' + obj.x[0] + '" y="' + obj.y[0] + ' width="' + obj.w[0] + '" height="' + obj.h[0] + '" />'}]
-				};
-				
-				tempstore['_:' + fgid] = {
-					'type' : [{
-						'type' : 'uri',
-						'value' : OAC_NS.FragSelector
-					}],
-					'value' : [{
-						'type' : 'literal',
-						'value' : 't=npt:' + obj.npt_start[0] + ',' + obj.npt_end[0]
-					}]
-				};
-			};
-			
-			annos = findAnnos.evaluate('Annotation');
-			$.each(annos, function(i, o) {
-				if(data === undefined) {
-					createJSONObjSeries(o);
-				}
-			});
-			
-			return tempstore;
-			
-		};
-		
+                // check where data merges
+                if (data[obj.id] !== undefined) {
+                    // go through annotation pointers in RDF:JSON to update body, target, etc
+                    $.each(data[obj.id],
+                    function(type, value) {
+                        switch (type) {
+                        case 'hasBody':
+                            buid = data[obj.id].hasBody[0].value;
+                            data[buid].chars[0].value = obj.bodyContent;
+                            break;
+                        case 'hasTarget':
+                            // If Target is undefined within ASP JSON, then it remains blank in RDF:JSON
+                            if (obj.targetURI[0] !== undefined && obj.x[0] !== undefined) {
+                                tuid = data[obj.id].hasTarget[0].value;
+                                // Using variable to check against whether object is found or not
+                                found = false;
+                                // Matching video URLs means matching Targets
+                                if (data[tuid].hasSource[0].value === obj.targetURI[0]) {
+                                    // matching sources - merging
+                                    suid = data[tuid].hasSelector[0].value;
+                                    found = true;
+                                    // Go through the selectors
+                                    $.each(data[suid],
+                                    function(seltype, selval) {
+                                        if (seltype === 'hasSelector') {
+                                            $.each(selval,
+                                            function(seli, selo) {
+                                                // is svg, npt?
+                                                if (data[selo.value].type[0].value === OAC_NS.SVGConstraint) {
+                                                    data[selo.value].chars = [{
+                                                        type: 'literal',
+                                                        value: '<' + obj.shapeType[0].substring(0, 4).toLowerCase() +
+                                                        ' x="' + obj.x[0] + '" y="' + obj.y[0] + ' width="' +
+                                                        obj.w[0] + '" height="' + obj.h[0] + '" />'
+                                                    }];
+                                                } else if (data[selo.value].type[0].value === OAC_NS.FragSelector) {
+                                                    data[selval].chars = [{
+                                                        'type': 'literal',
+                                                        'value': 't=npt:' + obj.npt_start[0] + ',' + obj.npt_end[0]
+                                                    }];
+                                                }
+                                            });
+                                        }
+                                    });
+                                }
+
+                                // If no target element found, create new one in RDF:JSON
+                                if (found === false) {
+                                    genTarget(obj);
+                                }
+                            }
+                            break;
+                        default:
+                            // do nothing
+                            break;
+                        };
+                    });
+                } else {
+                    createJSONObjSeries(obj.id);
+                }
+            };
+
+            data = data || {};
+
+            annos = findAnnos.evaluate('Annotation');
+            $.each(annos,
+            function(i, o) {
+                mergeData(o);
+            });
+
+            return tempstore;
+
+        };
+
         // ## Application Configuration
         //
         // The rest of this prepares the annotation application once it's in the up-and-running process.
@@ -958,7 +1081,7 @@
             // specific to the video being annotated, so it doesn't make as much sense to change the video we're
             // annotating. Better to create a new applicaiton instance.
             app.events.onPlayerChange.addListener(function(playerobject) {
-				
+
                 app.setCurrentTime(playerobject.getPlayhead());
                 playerobject.onPlayheadUpdate(function(t) {
                     app.setCurrentTime((app.getCurrentTime() + 1));
@@ -1048,7 +1171,7 @@
             // Parameters:
             //
             // * container - the container holding the lens content
-			// 
+            //
             // * view - the presentation managing the collection of renderings
             //
             // * model - the data store or data view holding information abut the item to be rendered
@@ -1061,8 +1184,7 @@
             //
             lensRectangle = function(container, view, model, itemId) {
                 // Note: Rectangle measurements x,y start at CENTER
-
-				// Initiate object with super-class methods and variables
+                // Initiate object with super-class methods and variables
                 var that = app.initShapeLens(container, view, model, itemId),
                 item = model.getItem(itemId),
                 superUpdate,
@@ -1082,7 +1204,7 @@
 
                 // **FIXME:** may break with multiple videos if different annotations have the same ids in different
                 // sets of annotations.
-				// Should be fixed with UUID
+                // Should be fixed with UUID
                 $(c.node).attr('id', item.id[0]);
 
                 selectBinding = app.controller.selectShape.bind(c);
@@ -1124,20 +1246,23 @@
 
                 return that;
             };
-			
-			// Using addShapeType to add Rectangle to the array of possible SVG
-			// shapes
+
+            // Using addShapeType to add Rectangle to the array of possible SVG
+            // shapes
             app.addShapeType("Rectangle",
             {
                 calc: calcRectangle,
                 lens: lensRectangle
             });
-			
-			
-			// 
-			// 
-			// 
-			// 
+
+
+            // #### calcEllipse (private)
+            //
+            // Generates a JSON object containing the measurements for an
+            // ellipse object but only using x, y, w, h
+            //
+            // Returns:
+            // JSON object
             calcEllipse = function(coords) {
                 var attrs = {};
                 attrs.x = coords.x + (coords.width / 2);
@@ -1147,6 +1272,24 @@
                 return attrs;
             };
 
+            // #### lensEllipse
+            //
+            // Rendering Lens for the Ellipse SVG shape
+            //
+            // Parameters:
+            //
+            // * container - the container holding the lens content
+            //
+            // * view - the presentation managing the collection of renderings
+            //
+            // * model - the data store or data view holding information abut the item to be rendered
+            //
+            // * itemId - the item ID of the item to be rendered
+            //
+            // Returns:
+            //
+            // The rendering object.
+            //
             lensEllipse = function(container, view, model, itemId) {
                 var that = app.initShapeLens(container, view, model, itemId),
                 item = model.getItem(itemId),
@@ -1214,7 +1357,6 @@
 
 
             // Adding in button features for annotation creation
-
             rectButton = app.buttonFeature('buttongrouping', 'Shapes', 'Rectangle');
 
             ellipseButton = app.buttonFeature('buttongrouping', 'Shapes', 'Ellipse');

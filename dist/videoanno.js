@@ -4,7 +4,7 @@
 // The **OAC Video Annotation Tool** is a MITHGrid application providing annotation capabilities for streaming
 // video embedded in a web page. 
 //  
-// Date: Thu Apr 5 15:21:26 2012 -0400
+// Date: Thu Apr 5 17:00:30 2012 -0400
 //  
 // Educational Community License, Version 2.0
 // 
@@ -35,1571 +35,1573 @@ var Raphael = Raphael || {};
 var OAC = MITHGrid.globalNamespace("OAC");
 OAC.namespace("Client");
 OAC.Client.namespace("StreamingVideo");
-
 // # Controllers
 //
 (function($, MITHGrid, OAC) {
-	var Controller = OAC.Client.StreamingVideo.namespace('Controller');
-
-	// ## KeyboardListener
-	//
-	// OAC.Client.StreamingVideo.Controller.KeyboardListener listens to keydown events on the DOM document
-	// level and translates them into delete events.
-	//
-	Controller.namespace("KeyboardListener");
-	
-	// ### KeyboardListener.initController
-	//
-	// Parameters:
-	//
-	// * options - object holding configuration options for the KeyboardListener object
-	//
-	// Returns:
-	//
-	// The configured KeyboardListener controller.
-	//
-	// Options:
-	//
-	// * application - the application using this controller
-	// * isAction - a function which returns true if keyboard events should be propagated
-	//
-	Controller.KeyboardListener.initController = function(options) {
-		var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.KeyboardListener", options);
-		options = that.options;
-
-		that.applyBindings = function(binding, opts) {
-			var doc = binding.locate('doc'),
-			activeId;
-
-			options.application.events.onActiveAnnotationChange.addListener(function(id) {
-				activeId = id;
-			});
-
-			$(doc).keydown(function(e) {
-				if (options.application.getCurrentMode() === 'Editing') {
-					return;
-				}
-				if (activeId !== undefined || activeId !== '') {
-					// If backspace or delete is pressed,
-					// then it is interpreted as a
-					// delete call.
-					if (e.keyCode === 8 || e.keyCode === 46) {
-						binding.events.onDelete.fire(activeId);
-						activeId = '';
-					}
-				}
-			});
-		};
-
-		return that;
-	};
-	
-	// ## Drag
-	//
-	// Attaches to an SVG rendering and produces events at the start, middle, and end of a drag.
-	//
-	Controller.namespace("Drag");
-	
-	// ### Drag.initController
-	//
-	Controller.Drag.initController = function(options) {
-		var that = MITHGrid.Controller.initController(
-			"OAC.Client.StreamingVideo.Controller.Drag",
-			options
-		);
-		
-		that.applyBindings = function(binding, opts) {
-			var el = binding.locate('raphael');
-			
-			el.drag(
-				function(x, y) {
-					binding.events.onUpdate.fire(x, y);
-				},
-				function(x, y, e) {
-					// **FIXME**: layerX and layerY are deprecated in WebKit
-					x = e.layerX;
-					y = e.layerY;
-					binding.events.onFocus.fire(x, y);
-				},
-				function() {
-					binding.events.onUnfocus.fire();
-				}
-			);
-		};
-		
-		return that;
-	};
-	
-	// ## Select
-	//
-	// Attaches a click handler to an SVG rendering and fires an onSelect event if the rendering is clicked AND
-	// the application is in a mode to select things.
-	//
-	Controller.namespace("Select");
-	
-	// ### Select.initController
-	//
-	// Parameters:
-	//
-	// * options - object holding configuration information
-	//
-	// Returns:
-	//
-	// The configured controller object.
-	//
-	// Configuration Options:
-	//
-	// * isSelectable - function taking no arguments that should return "true" if the click should cause the
-	//                  onSelect event to fire.
-	//
-	Controller.Select.initController = function(options) {
-		var that = MITHGrid.Controller.initController(
-			"OAC.Client.StreamingVideo.Controller.Select",
-			options
-		);
-		options = that.options;
-		
-		that.applyBindings = function(binding) {
-			var el = binding.locate("raphael");
-			
-			el.click(function(e) {
-				if(options.isSelectable()) {
-					binding.events.onSelect.fire();
-				}
-			});
-		};
-		
-		return that;
-	};
-
-	// ## AnnotationEditSelectionGrid
-	//
-	// Attaches to an SVG lens and creates a green rectangle dashed box to
-	// act as the resize and drag tool. Only edits the SVG data - no annotation
-	// bodyContent data.
-	Controller.namespace("AnnotationEditSelectionGrid");
-
-	// ### AnnotationEditSelectionGrid.initController
-	//
-	// Initializes the AnnotationEditSelectionGrid controller object. This object may then be used to bind actions to
-	// the DOM.
-	//
-	// We create the bounding box once and keep it around. We then track which rendering is associated with
-	// the bounding box and draw it accordingly.
-	// We associate the bounding box with the SVG/Raphaël canvas holding the renderings we want to use it with.
-	//
-	// Each Raphaël canvas should have its own AnnotationEditSelectionGrid instance for binding renderings.
-	//
-	// Parameters:
-	//
-	// * options - object holding configuration information
-	//
-	// Returns:
-	//
-	// The initialized controller object.
-	//
-	// **FIXME:**
-	//
-	// The controller needs to be broken up a bit. The idea of providing a bounding box for renderings is something that
-	// should be handled in the presentation, not here. The controller should just generate events based on user interactions.
-	// The presentation should worry about which rendering is currently active and manage the translation of controller
-	// events to the rendering.
-	//
-	// For now, we'll refactor this into two pieces: the bounding box drawing (rendering), and translating events in the binding.
-	//
-	// We will eventually split this controller into two: bounding box resize controller and bounding box drag/move controller.
-	//
-	Controller.AnnotationEditSelectionGrid.initController = function(options) {
-		var that = MITHGrid.Controller.initController(
-		"OAC.Client.StreamingVideo.Controller.AnnotationEditSelectionGrid",
-		options
-		),
-		dragController,
-		dirs = [];
-
-		options = that.options;
-		dirs = that.options.dirs; // || ['ul', 'top', 'ur', 'lft', 'lr', 'btm', 'll', 'rgt', 'mid'];
-		
-		dragController = OAC.Client.StreamingVideo.Controller.Drag.initController({});
-
-		// #### AnnotationEditSelectionGrid #applyBindings
-		//
-		that.applyBindings = function(binding, opts) {
-			var ox,
-			oy,
-			handleSet = {},
-			midDrag = {},
-			svgBBox = {},
-			itemMenu = {},
-			handles = {},
-			activeRendering,
-			deleteButton = {},
-			editButton = {},
-			menuContainer = {},
-			factors = {},
-			extents,
-			paper = opts.paper,
-			attrs = {},
-			padding = 5,
-			calcFactors,
-			calcHandles,
-			drawMenu,
-			itemDeleted,
-			handleIds = {},
-			drawHandles,
-			handleAttrs = {},
-			shapeAttrs = {},
-			menuAttrs = {},
-			cursor,
-			dAttrs = {},
-			eAttrs = {},
-			handleCalculationData = {},
-			el;
-			
-			// ### attachRendering
-			// 
-			// Function for applying a new shape to the bounding box
-			// 
-			// Parameters: 
-			// 
-			// * newRendering - 
-			binding.attachRendering = function(newRendering) {
-				binding.detachRendering();
-
-				if (newRendering === undefined) {
-					return;
-				}
-
-				// register the rendering
-				activeRendering = newRendering;
-				calcFactors();
-				drawHandles();
-			};
-
-			// Function to call in order to "de-activate" the edit box
-			// (i.e. make it hidden)
-			binding.detachRendering = function() {
-				if ($.isEmptyObject(handleSet)) {
-					return;
-				}
-				activeRendering = undefined;
-				handleSet.hide();
-
-				svgBBox.hide();
-				midDrag.hide();
-				if (itemMenu) {
-					itemMenu.hide();
-				}
-			};
-			
-			// ##### calcFactors (private)
-			//
-			// Measures where the handles should be on mousemove.
-			//
-			// Parameters: None.
-			//
-			// Returns: Nothing.
-			//
-			calcFactors = function() {
-				extents = activeRendering.getExtents();
-
-				// create offset factors for
-				// bounding box
-				// calculate width - height to be larger
-				// than shape
-				attrs.width = extents.width + (2 * padding);
-				attrs.height = extents.height + (2 * padding);
-				attrs.x = (extents.x - (padding / 8)) - (attrs.width / 2);
-				attrs.y = (extents.y - (padding / 8)) - (attrs.height / 2);
-				calcHandles(attrs);
-				if (itemMenu) {
-					drawMenu(attrs);
-				}
-			};
-
-			// #### drawHandles (private)
-			//
-			// Draws the handles defined in dirs as SVG rectangles and draws the SVG bounding box
-			//
-			// Parameters: None.
-			//
-			// Returns: Nothing.
-			//
-			drawHandles = function() {
-				var midDragDragBinding;
-				
-				if ($.isEmptyObject(handleSet)) {
-
-					// draw the corner and mid-point squares
-					handleSet = paper.set();
-					$.each(handles,
-					function(i, o) {
-						var h;
-						if (i === 'mid') {
-							midDrag = paper.rect(o.x, o.y, padding, padding);
-							o.id = midDrag.id;
-
-						} else {
-							h = paper.rect(o.x, o.y, padding, padding);
-							o.id = h.id;
-
-							h.attr({
-								cursor: o.cursor
-							});
-							handleSet.push(h);
-						}
-					});
-
-					// make them all similar looking
-					handleSet.attr({
-						fill: 990000,
-						stroke: 'black'
-					});
-
-					if (! ($.isEmptyObject(midDrag))) {
-						midDrag.attr({
-							fill: 990000,
-							stroke: 'black',
-							cursor: 'move'
-						});
-					}
-
-					// drawing bounding box
-					svgBBox = paper.rect(attrs.x, attrs.y, attrs.width, attrs.height);
-					svgBBox.attr({
-						stroke: 'green',
-						'stroke-dasharray': ["--"]
-					});
-					// Draw the accompanying menu that sits at top-right corner
-					drawMenu(attrs);
-
-					if (! ($.isEmptyObject(midDrag))) {
-
-						// Attaching listener to drag-only handle (midDrag)
-						midDragDragBinding = dragController.bind(midDrag);
-						
-						midDragDragBinding.events.onUpdate.addListener(
-							function(dx, dy) {
-								// dragging means that the svgBBox stays padding-distance
-								// away from the lens' shape and the lens shape gets updated
-								// in dataStore
-								handleAttrs.nx = attrs.x + dx;
-								handleAttrs.ny = attrs.y + dy;
-								shapeAttrs.x = extents.x + dx;
-								shapeAttrs.y = extents.y + dy;
-
-								svgBBox.attr({
-									x: handleAttrs.nx,
-									y: handleAttrs.ny
-								});
-
-								calcHandles({
-									x: handleAttrs.nx,
-									y: handleAttrs.ny,
-									width: attrs.width,
-									height: attrs.height
-								});
-								if (itemMenu) {
-									drawMenu({
-										x: handleAttrs.nx,
-										y: handleAttrs.ny,
-										width: attrs.width,
-										height: attrs.height
-									});
-								}
-							}
-						);
-						
-						midDragDragBinding.events.onFocus.addListener(
-							function(x, y) {
-								// start
-								ox = x;
-								oy = y;
-								calcFactors();
-								activeRendering.shape.attr({
-									cursor: 'move'
-								});
-							}
-						);
-						
-						midDragDragBinding.events.onUnfocus.addListener(
-							function() {
-								// end
-								var pos = {
-									x: shapeAttrs.x,
-									y: shapeAttrs.y
-								};
-
-								binding.events.onMove.fire(pos);
-								//activeRendering.shape.attr({
-								//	cursor: 'default'
-								//});
-							}
-						);
-					}
-
-					// Attaching drag and resize handlers
-					handleSet.forEach(function(handle) {
-						var handleBinding = dragController.bind(handle);
-						
-						handleBinding.events.onUpdate.addListener(function(dx, dy) {
-							// onmove function - handles dragging
-							// dragging here means that the shape is being resized;
-							// the factorial determines in which direction the
-							// shape is pulled
-							shapeAttrs.w = Math.abs(extents.width + dx * factors.x);
-							shapeAttrs.h = Math.abs(extents.height + dy * factors.y);
-							handleAttrs.nw = shapeAttrs.w + (padding * 2);
-							handleAttrs.nh = shapeAttrs.h + (padding * 2);
-							handleAttrs.nx = (extents.x - (padding / 4)) - (handleAttrs.nw / 2);
-							handleAttrs.ny = (extents.y - (padding / 4)) - (handleAttrs.nh / 2);
-
-							svgBBox.attr({
-								x: handleAttrs.nx,
-								y: handleAttrs.ny,
-								width: handleAttrs.nw,
-								height: handleAttrs.nh
-							});
-							calcHandles({
-								x: handleAttrs.nx,
-								y: handleAttrs.ny,
-								width: handleAttrs.nw,
-								height: handleAttrs.nh
-							});
-							if (itemMenu) {
-								drawMenu({
-									x: handleAttrs.nx,
-									y: handleAttrs.ny,
-									width: handleAttrs.nw,
-									height: handleAttrs.nh
-								});
-							}
-						});
-						
-						handleBinding.events.onFocus.addListener(function(x, y) {
-								// onstart function
-								var px,
-								py;
-								extents = activeRendering.getExtents();
-								ox = x;
-								oy = y;
-
-								// change mode
-								options.application.setCurrentMode('Drag');
-								// extents: x, y, width, height
-								px = (8 * (ox - extents.x) / extents.width) + 4;
-								py = (8 * (oy - extents.y) / extents.height) + 4;
-								if (px < 3) {
-									factors.x = -2;
-								}
-								else if (px < 5) {
-									factors.x = 0;
-								}
-								else {
-									factors.x = 2;
-								}
-								if (py < 3) {
-									factors.y = -2;
-								}
-								else if (py < 5) {
-									factors.y = 0;
-								}
-								else {
-									factors.y = 2;
-								}
-								calcFactors();
-						});
-						
-						handleBinding.events.onUnfocus.addListener(function() {
-							// onend function
-							// update
-							var pos = {
-								width: shapeAttrs.w,
-								height: shapeAttrs.h
-							};
-							if (activeRendering !== undefined) {
-								binding.events.onResize.fire(pos);
-							}
-							// change mode back
-							options.application.setCurrentMode('Select');
-						});
-					});
-				} else {
-					// show all the boxes and
-					// handles
-					svgBBox.show();
-					// adjust the SvgBBox to be around new
-					// shape
-					svgBBox.attr({
-						x: attrs.x,
-						y: attrs.y,
-						width: attrs.width,
-						height: attrs.height
-					});
-					handleSet.show();
-					midDrag.show().toFront();
-					if (itemMenu) {
-						itemMenu.show();
-						drawMenu(attrs);
-					}
-				}
-			};
-
-			// #### drawMenu (private)
-			//
-			// Draws menu that sits at the top-right corner of the shape.
-			//
-			// Parameters:
-			//
-			// * args - object holding the .x, .y, and .width properties
-			//
-			// Returns: Nothing.
-			//
-			drawMenu = function(args) {
-				if ($.isEmptyObject(itemMenu)) {
-
-					menuAttrs.x = args.x + (args.width);
-					menuAttrs.y = args.y - (padding * 4) - 2;
-					menuAttrs.w = 100;
-					menuAttrs.h = 20;
-					// Create separate attribute objects
-					// for each menu button/container
-					eAttrs = {
-						x: menuAttrs.x + 2,
-						y: menuAttrs.y + 2,
-						w: menuAttrs.w / 2 - 4,
-						h: menuAttrs.h - (menuAttrs.h / 8)
-					};
-
-					dAttrs = {
-						x: (eAttrs.x + eAttrs.w + 2),
-						y: menuAttrs.y + 2,
-						w: menuAttrs.w / 2 - 4,
-						h: menuAttrs.h - (menuAttrs.h / 8)
-					};
-
-					itemMenu = paper.set();
-					menuContainer = paper.rect(menuAttrs.x, menuAttrs.y, menuAttrs.w, menuAttrs.h);
-					menuContainer.attr({
-						fill: '#FFFFFF',
-						stroke: '#000'
-					});
-
-					itemMenu.push(menuContainer);
-
-					editButton = paper.rect(eAttrs.x, eAttrs.y, eAttrs.w, eAttrs.h);
-					editButton.attr({
-						fill: 334009,
-						cursor: 'pointer'
-					});
-
-					itemMenu.push(editButton);
-
-					deleteButton = paper.rect(dAttrs.x, dAttrs.y, dAttrs.w, dAttrs.h);
-					deleteButton.attr({
-						fill: 334009,
-						cursor: 'pointer'
-					});
-
-					itemMenu.push(deleteButton);
-					// attach event firers
-					editButton.mousedown(function() {
-						if (activeRendering !== undefined) {
-							that.events.onEdit.fire(activeRendering.id);
-						}
-					});
-					editButton.hover(function() {
-						editButton.attr({
-							fill: 443009
-						});
-					},
-					function() {
-						editButton.attr({
-							fill: 334009
-						});
-					});
-
-
-					deleteButton.mousedown(function() {
-						if (activeRendering !== undefined) {
-							binding.events.onDelete.fire();
-							itemDeleted();
-						}
-					});
-					deleteButton.hover(function() {
-						deleteButton.attr({
-							fill: 443009
-						});
-					},
-					function() {
-						deleteButton.attr({
-							fill: 334009
-						});
-					});
-				} else {
-
-
-					menuAttrs.x = args.x + (args.width);
-					menuAttrs.y = args.y - (padding * 4) - 2;
-
-					eAttrs = {
-						x: (menuAttrs.x + 2),
-						y: (menuAttrs.y + 2)
-					};
-
-					dAttrs = {
-						x: (eAttrs.x + editButton.attr('width') + 2),
-						y: menuAttrs.y + 2
-					};
-					menuContainer.attr({
-						x: menuAttrs.x,
-						y: menuAttrs.y
-					});
-					editButton.attr(eAttrs);
-					deleteButton.attr(dAttrs);
-				}
-			};
-
-			itemDeleted = function() {
-				// set rendering to undefined
-				binding.detachRendering();
-				activeRendering = undefined;
-
-				itemMenu.hide();
-				svgBBox.hide();
-				handleSet.hide();
-				midDrag.hide();
-			};
-
-			handleCalculationData = {
-				ul: ['nw', 0, 0, 0, 0],
-				top: ['n', 1, 0, 0, 0],
-				ur: ['ne', 2, -1, 0, 0],
-				rgt: ['e', 2, -1, 1, 0],
-				lr: ['se', 2, -1, 2, -1],
-				btm: ['s', 1, 0, 2, -1],
-				ll: ['sw', 0, 0, 2, -1],
-				lft: ['w', 0, 0, 1, 0],
-				mid: ['pointer', 1, 0, 1, 0]
-			};
-
-			//
-			// Goes through handle object array and 
-			// sets each handle box coordinate
-			//
-			calcHandles = function(args) {
-				// calculate where the resize handles
-				// will be located
-				var calcHandle = function(type, xn, xp, yn, yp) {
-					return {
-						x: args.x + xn * args.width / 2 + xp * padding,
-						y: args.y + yn * args.height / 2 + yp * padding,
-						cursor: type.length > 2 ? type: type + "-resize"
-					};
-				},
-				recalcHandle = function(info, xn, xp, yn, yp) {
-					var el;
-					info.x = args.x + xn * args.width / 2 + xp * padding;
-					info.y = args.y + yn * args.height / 2 + yp * padding;
-					el = paper.getById(info.id);
-					el.attr({
-						x: info.x,
-						y: info.y
-					});
-				};
-				$.each(dirs,
-				function(i, o) {
-					var data = handleCalculationData[o];
-					if (data === undefined) {
-						return;
-					}
-					if (handles[o] === undefined) {
-						handles[o] = calcHandle(data[0], data[1], data[2], data[3], data[4]);
-					}
-					else {
-						recalcHandle(handles[o], data[1], data[2], data[3], data[4]);
-					}
-				});
-			};
-		};
-
-		return that;
-	};
-
-	// ## ShapeCreateBox
-	//
-	// Creates an SVG shape with a dotted border to be used as a guide for drawing shapes. Listens for user mousedown, which
-	// activates the appearance of the box at the x,y where the mousedown coords are, then finishes when user mouseup call is made
-	//
-	Controller.namespace('ShapeCreateBox');
-	Controller.ShapeCreateBox.initController = function(options) {
-		var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.ShapeCreateBox", options);
-		options = that.options;
-		
-		// #### ShapeCreateBox #applyBindings
-		// 
-		// Init function for Controller. 
-		// 
-		// Parameters: 
-		// 
-		// * binding - refers to Controller instance
-		// * opts - copy of options passed through initController
-		// 
-		// Creates the following methods:
-		that.applyBindings = function(binding, opts) {
-			//
-			// Bounding box is created once in memory - it should be bound to the
-			// canvas/paper object or something that contains more than 1 shape.
-			//
-			var ox,
-			oy,
-			svgBBox = {},
-			activeRendering,
-			factors = {},
-			paper = opts.paper,
-			attrs = {},
-			padding = 10,
-			drawMenu,
-			itemDeleted,
-			shapeAttrs = {},
-			cursor,
-			el;
-
-			// #### createGuide
-			//
-			// Creates the SVGBBOX which acts as a guide to the user 
-			// of how big their shape will be once shapeDone is fired
-			//
-			// Parameters: 
-			// 
-			// * coords - object that has x,y coordinates for user mousedown. This is where the left and top of the box will start
-			// 
-			binding.createGuide = function(coords) {
-				// coordinates are top x,y values
-				attrs.x = coords[0];
-				attrs.y = coords[1];
-				attrs.width = (coords[0] + padding);
-				attrs.height = (coords[1] + padding);
-				if ($.isEmptyObject(svgBBox)) {
-					svgBBox = paper.rect(attrs.x, attrs.y, attrs.width, attrs.height);
-					svgBBox.attr({
-						stroke: 'green',
-						'stroke-dasharray': ["--"]
-					});
-
-				} else {
-					// show all the boxes and
-					// handles
-					svgBBox.show();
-					// adjust the SvgBBox to be around new
-					// shape
-					svgBBox.attr({
-						x: attrs.x,
-						y: attrs.y,
-						width: attrs.width,
-						height: attrs.height
-					});
-				}
-
-			};
-			
-			// #### resizeGuide
-			//
-			// Take passed x,y coords and set as bottom-right, not
-			// top left
-			//
-			// Parameters:
-			// 
-			// * coords - array of x,y coordinates to use as bottom-right coords of the box
-			// 
-			binding.resizeGuide = function(coords) {
-
-				attrs.width = (coords[0] - attrs.x);
-				attrs.height = (coords[1] - attrs.y);
-
-				svgBBox.attr({
-					width: attrs.width,
-					height: attrs.height
-				});
-			};
-			
-			// #### completeShape
-			//
-			// Take the saved coordinates and pass them back 
-			// to the calling function
-			//
-			// Parameters:
-			// 
-			// * coords - coordinates object with properties x, y, width, and height
-			// 
-			// Returns: 
-			// Coordinates object with properties x, y, width, and height
-			// 
-			binding.completeShape = function(coords) {
-				attrs.width = coords.width;
-				attrs.height = coords.height;
-
-				svgBBox.attr({
-					width: attrs.width,
-					height: attrs.height
-				});
-				svgBBox.hide();
-				return {
-					x: attrs.x,
-					y: attrs.y,
-					width: attrs.width,
-					height: attrs.height
-				};
-			};
-		};
-
-		return that;
-	};
-
-	// ## TextBodyEditor
-	// 
-	// Handles HTML annotation lens for editing the bodyContent text.
-	//
-	// 
-	Controller.namespace("TextBodyEditor");
-	Controller.TextBodyEditor.initController = function(options) {
-		var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.TextBodyEditor", options);
-		options = that.options;
-
-		// ### TextBodyEditor #applyBindings
-		// 
-		// Generates the following the methods:
-		that.applyBindings = function(binding, opts) {
-			var editStart,
-			editEnd,
-			editUpdate,
-			annoEl = binding.locate('annotation'),
-			bodyContent = binding.locate('body'),
-			allAnnos = binding.locate('annotations'),
-			textArea = binding.locate('textarea'),
-			editArea = binding.locate('editarea'),
-			editButton = binding.locate('editbutton'),
-			updateButton = binding.locate('updatebutton'),
-			deleteButton = binding.locate('deletebutton'),
-			bindingActive = false,
-			prevMode;
-			
-			// #### editStart (private)
-			// 
-			// displays editing area
-			// 
-			editStart = function() {
-				$(editArea).show();
-				$(bodyContent).hide();
-				bindingActive = true;
-				binding.events.onClick.fire(opts.itemId);
-			};
-
-			// #### editEnd (private)
-			// 
-			// Hides the editing area after the user has completed editing/canceled editing
-			// 
-			editEnd = function() {
-				$(editArea).hide();
-				$(bodyContent).show();
-				bindingActive = false;
-
-			};
-			
-			// #### editUpdate (private)
-			// 
-			// Called when the user sends new data to dataStore
-			// 
-			editUpdate = function(e) {
-				var data = $(textArea).val();
-				e.preventDefault();
-				binding.events.onUpdate.fire(opts.itemId, data);
-				editEnd();
-			};
-
-			// Annotation DOM element listens for a double-click to either
-			// display and become active or hide and become unactive
-			$(annoEl).bind('dblclick',
-			function(e) {
-				e.preventDefault();
-				if (bindingActive) {
-					editEnd();
-
-					options.application.setCurrentMode(prevMode || '');
-				} else {
-					editStart();
-					prevMode = options.application.getCurrentMode();
-					options.application.setCurrentMode('TextEdit');
-				}
-			});
-
-			// Clicking once on the annotation DOM element will activate the attached SVG shape
-			$(annoEl).bind('click',
-			function(e) {
-				// binding.events.onClick.fire(opts.itemId);
-				options.application.setActiveAnnotation(opts.itemId);
-			});
-
-			// Attach binding to the update button which ends editing and updates the bodyContent of the attached
-			// annotation
-			$(updateButton).bind('click',
-			function(e) {
-				binding.events.onUpdate.fire(opts.itemId, $(textArea).val());
-				editEnd();
-				options.application.setCurrentMode(prevMode);
-			});
-
-			// Attach binding to the delete button to delete the entire annotation - removes from dataStore
-			$(deleteButton).bind('click',
-			function(e) {
-				binding.events.onDelete.fire(opts.itemId);
-				// remove DOM elements
-				$(annoEl).remove();
-			});
-
-			// Listening for changes in active annotation so that annotation text lens stays current
-			options.application.events.onActiveAnnotationChange.addListener(function(id) {
-				if (id !== opts.id && bindingActive) {
-					editUpdate({
-						preventDefault: function() {}
-					});
-					editEnd();
-				}
-			});
-
-			// Listens for changes in the mode in order to stay current with rest of the application
-			options.application.events.onCurrentModeChange.addListener(function(newMode) {
-				if (newMode !== 'TextEdit') {
-					editEnd();
-				}
-			});
-		};
-		return that;
-	};
-
-	// ## CanvasClickController
-	// 
-	// Listens for all clicks on the canvas and connects shapes with the Edit controller above
-	//
-	// Parameters:
-	// 
-	// * options - Object that includes:
-	// 	** paper - RaphaelSVG canvas object generated by Raphael Presentation
-	//  ** closeEnough - value for how close (In RaphaelSVG units) a mouse-click has to be in order to be considered
-	// 'clicking' an object
-	// 
-	Controller.namespace("CanvasClickController");
-	Controller.CanvasClickController.initController = function(options) {
-		var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.CanvasClickController", options);
-		options = that.options;
-		
-		// #### CanvasClickController #applyBindings
-		// 
-		// Create the object passed back to the Presentation
-		// 
-		that.applyBindings = function(binding, opts) {
-			var ox,
-			oy,
-			extents,
-			activeId,
-			closeEnough = opts.closeEnough,
-			dx,
-			dy,
-			x,
-			y,
-			w,
-			h,
-			curRendering,
-			renderings = {},
-			paper = opts.paper,
-			offset,
-			// #### attachDragResize (private)
-			// 
-			// Find the passed rendering ID, set that rendering object
-			// as the current rendering
-			// 
-			// Parameters: 
-			// * id - ID of the rendering to set as active
-			// 
-			attachDragResize = function(id) {
-				var o;
-				if ((curRendering !== undefined) && (id === curRendering.id)) {
-					return;
-				}
-				o = renderings[id];
-				if (o === undefined) {
-					// de-activate rendering and all other listeners
-					binding.events.onClick.fire(undefined);
-					// hide the editBox
-					// editBoxController.deActivateEditBox();
-					curRendering = undefined;
-					return false;
-				}
-
-				curRendering = o;
-
-			},
-			// #### detachDragResize (private)
-			// 
-			// Make the current rendering or rendering that has matching ID *id* non-active
-			// 
-			// Parameters:
-			// * id - ID of rendering to make non-active
-			// 
-			detachDragResize = function(id) {
-				if ((curRendering !== undefined) && (id === curRendering.id)) {
-					return;
-				}
-				var o = renderings[id];
-			},
-			// #### drawShape (private)
-			// 
-			// Using two html elements: container is for 
-			// registering the offset of the screen (.section-canvas) and 
-			// the svgEl is for registering mouse clicks on the svg element (svg)
-			//
-			// Parameters: 
-			// * container - DOM element that contains the canvas
-			// * svgEl - SVG shape element that will have mouse bindings attached to it
-			// 
-			drawShape = function(container) {
-				//
-				// Sets mousedown, mouseup, mousemove to draw a 
-				// shape on the canvas.
-				//
-				var mouseMode = 0,
-				topLeft = [],
-				bottomRight = [],
-				x,
-				y,
-				w,
-				h,
-				offset = $(container).offset();
-
-				//
-				// MouseMode cycles through three settings:
-				// * 0: stasis
-				// * 1: Mousedown and ready to drag
-				// * 2: Mouse being dragged
-				//
-				// remove all previous bindings
-				$(container).unbind();
-				
-				$(container).mousedown(function(e) {
-					if (mouseMode > 0) {
-						return;
-					}
-					x = e.pageX - offset.left;
-					y = e.pageY - offset.top;
-					topLeft = [x, y];
-					mouseMode = 1;
-					binding.events.onShapeStart.fire(topLeft);
-				});
-
-				$(container).mousemove(function(e) {
-					if (mouseMode === 2 || mouseMode === 0) {
-						return;
-					}
-					x = e.pageX - offset.left;
-					y = e.pageY - offset.top;
-					bottomRight = [x, y];
-					binding.events.onShapeDrag.fire(bottomRight);
-				});
-
-				$(container).mouseup(function(e) {
-					if (mouseMode < 1) {
-						return;
-					}
-					mouseMode = 0;
-					if (bottomRight === undefined) {
-						bottomRight = [x + 5, y + 5];
-					}
-					binding.events.onShapeDone.fire({
-						x: topLeft[0],
-						y: topLeft[1],
-						width: (bottomRight[0] - topLeft[0]),
-						height: (bottomRight[1] - topLeft[1])
-					});
-				});
-			},
-			// #### selectShape (private)
-			// 
-			// Creates a binding for the canvas to listen for mousedowns to select a shape
-			// 
-			// Parameters:
-			// * container - HTML element housing the canvas
-			selectShape = function(container) {
-				//
-				// Sets mousedown events to select shapes, not to draw
-				// them.
-				//
-				$(container).unbind();
-				$(container).bind('mousedown',
-				function(e) {
-					// By default, nullifies all selections
-					options.application.setActiveAnnotation(undefined);
-					activeId = '';
-				});
-				
-			};
-
-			// Attaches binding for active annotation change to attachDragResize
-			options.application.events.onActiveAnnotationChange.addListener(attachDragResize);
-			// Change the mouse actions depending on what Mode the application is currently
-			// in
-			options.application.events.onCurrentModeChange.addListener(function(mode) {
-				if (mode === 'Rectangle' || mode === 'Ellipse') {
-					drawShape(binding.locate('svgwrapper'));
-				} else if (mode === 'Select') {
-					selectShape(binding.locate('svgwrapper'));
-				} else {
-					$(binding.locate('svgwrapper')).unbind();
-				}
-			});
-
-			// #### registerRendering
-			// 
-			// Takes a rendering object and adds it to internal array for renderings
-			// 
-			// Parameters:
-			// * newRendering - Rendering object for a shape annotation
-			// 
-			binding.registerRendering = function(newRendering) {
-				renderings[newRendering.id] = newRendering;
-			};
-
-			// #### removeRendering 
-			// 
-			// Removes rendering object from internal array - for when a shape is out of view or deleted.
-			// 
-			// Parameters: 
-			// 
-			// * oldRendering - Rendering object for a shape annotation
-			// 
-			binding.removeRendering = function(oldRendering) {
-				delete renderings[oldRendering.id];
-			};
-		};
-
-		return that;
-	};
-
-	// ## AnnotationCreationButton
-	//
-	// Controls the Annotation Creation Tools set by app.buttonFeature
-	//
-	Controller.namespace('AnnotationCreationButton');
-	Controller.AnnotationCreationButton.initController = function(options) {
-		var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.AnnotationCreationButton", options);
-		options = that.options;
-
-		// #### AnnotationCreationButton #applyBindings
-		that.applyBindings = function(binding, opts) {
-			var buttonEl,
-			active = false,
-			onCurrentModeChangeHandle,
-			id;
-
-			//
-			// Mousedown: activate button - set as active mode
-			//
-			// Mousedown #2: de-activate button - unset active mode
-			//
-			// onCurrentModeChange: if != id passed, deactivate, else do nothing
-			//
-			buttonEl = binding.locate('button');
-
-			// Attach binding to the mousedown
-			$(buttonEl).live('mousedown',
-			function(e) {
-				if (active === false) {
-					active = true;
-					options.application.setCurrentMode(opts.action);
-					$(buttonEl).addClass("active");
-				} else if (active === true) {
-					active = false;
-					options.application.setCurrentMode('');
-					$(buttonEl).removeClass("active");
-				}
-			});
-
-			// #### onCurrentModeChangeHandle (private)
-			// 
-			// Handles when the mode is changed externally from controller
-			// 
-			// Parameters:
-			// * action - name of new mode
-			// 
-			onCurrentModeChangeHandle = function(action) {
-
-				if (action === options.action) {
-					active = true;
-					$(buttonEl).addClass('active');
-				} else {
-					active = false;
-					$(buttonEl).removeClass("active");
-				}
-			};
-
-			options.application.events.onCurrentModeChange.addListener(onCurrentModeChangeHandle);
-		};
-
-		return that;
-	};
-
-	// ## sliderButton
-	//
-	// Creates a jQuery UI slider for the current time in the video
-	// 
-	Controller.namespace('sliderButton');
-	Controller.sliderButton.initController = function(options) {
-		var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.sliderButton", options);
-		options = that.options;
-
-		that.applyBindings = function(binding, opts) {
-			var sliderElement,
-			displayElement,
-			sliderStart,
-			sliderMove,
-			localTime,
-			positionCheck;
-			displayElement = binding.locate('timedisplay');
-			positionCheck = function(t) {
-				//
-				// if time is not equal to internal time, then 
-				// reset the slider
-				//
-				if (localTime === undefined) {
-					localTime = t;
-					$(sliderElement).slider('value', localTime);
-				}
-			};
-
-			sliderStart = function(e, ui) {
-				options.application.setCurrentTime(ui.value);
-				$(displayElement).text('TIME: ' + ui.value);
-				localTime = ui.value;
-			};
-
-			sliderMove = function(e, ui) {
-				if (ui === undefined) {
-					localTime = e;
-					$(sliderElement).slider('value', e);
-				}
-
-				if (localTime === ui.value) {
-					return;
-				}
-				options.application.setCurrentTime(ui.value);
-				$(displayElement).text('TIME: ' + ui.value);
-				localTime = ui.value;
-			};
-			sliderElement = binding.locate("slider");
-
-			$(sliderElement).slider({
-				start: sliderStart,
-				slide: sliderMove
-			});
-
-
-		};
-
-		return that;
-	};
-
-	// ## timeControl
-	//
-	// Controller for manipulating the time sequence for an annotation.
-	// Currently, just a text box for user to enter basic time data
-	//
-	Controller.namespace('timeControl');
-	Controller.timeControl.initController = function(options) {
-		var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.timeControl", options);
-		options = that.options;
-		that.currentId = '';
-		
-		// #### timeControl #applyBindings
-		
-		that.applyBindings = function(binding, opts) {
-			var timestart = binding.locate('timestart'),
-			timeend = binding.locate('timeend'),
-			submit = binding.locate('submit'),
-			menudiv = binding.locate('menudiv'),
-			start_time,
-			end_time;
-
-			$(menudiv).hide();
-
-			$(submit).bind('click',
-			function() {
-				// **FIXME:** times can be in parts of seconds
-				start_time = parseInt($(timestart).val(), 10);
-				end_time = parseInt($(timeend).val(), 10);
-				if (binding.currentId !== undefined && start_time !== undefined && end_time !== undefined) {
-					// update core data
-				   
-					binding.events.onUpdate.fire(binding.currentId, start_time, end_time);
-					
-					$(menudiv).hide();
-				}
-			});
-
-			options.application.events.onActiveAnnotationChange.addListener(function(id) {
-				if (id !== undefined) {
-					$(menudiv).show();
-					$(timestart).val('');
-					$(timeend).val('');
-					binding.currentId = id;
-				} else if (id === undefined) {
-					$(menudiv).hide();
-				}
-			});
-		};
-
-		return that;
-	};
-	
-	// ## WindowResize
-	//
-	// Emits an onResize event when the browser window is resized.
-	//
-	Controller.namespace('WindowResize');
-	Controller.WindowResize.initController = function(options) {
-		var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.WindowResize", options);
-		options = that.options;
-		
-		that.applyBindings = function(binding, opts) {
-			var w = binding.locate('resizeBox');
-			w.resize(function() {
-				setTimeout(binding.events.onResize.fire, 0);
-			});
-		};
-		
-		return that;
-	};
+    var Controller = OAC.Client.StreamingVideo.namespace('Controller');
+
+    // ## KeyboardListener
+    //
+    // OAC.Client.StreamingVideo.Controller.KeyboardListener listens to keydown events on the DOM document
+    // level and translates them into delete events.
+    //
+    Controller.namespace("KeyboardListener");
+
+    // ### KeyboardListener.initController
+    //
+    // Parameters:
+    //
+    // * options - object holding configuration options for the KeyboardListener object
+    //
+    // Returns:
+    //
+    // The configured KeyboardListener controller.
+    //
+    // Options:
+    //
+    // * application - the application using this controller
+    // * isAction - a function which returns true if keyboard events should be propagated
+    //
+    Controller.KeyboardListener.initController = function(options) {
+        var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.KeyboardListener", options);
+        options = that.options;
+
+        that.applyBindings = function(binding, opts) {
+            var doc = binding.locate('doc'),
+            activeId;
+
+            options.application.events.onActiveAnnotationChange.addListener(function(id) {
+                activeId = id;
+            });
+
+            $(doc).keydown(function(e) {
+                if (options.application.getCurrentMode() === 'Editing') {
+                    return;
+                }
+                if (activeId !== undefined || activeId !== '') {
+                    // If backspace or delete is pressed,
+                    // then it is interpreted as a
+                    // delete call.
+                    if (e.keyCode === 8 || e.keyCode === 46) {
+                        binding.events.onDelete.fire(activeId);
+                        activeId = '';
+                    }
+                }
+            });
+        };
+
+        return that;
+    };
+
+    // ## Drag
+    //
+    // Attaches to an SVG rendering and produces events at the start, middle, and end of a drag.
+    //
+    Controller.namespace("Drag");
+
+    // ### Drag.initController
+    //
+    Controller.Drag.initController = function(options) {
+        var that = MITHGrid.Controller.initController(
+        "OAC.Client.StreamingVideo.Controller.Drag",
+        options
+        );
+
+        that.applyBindings = function(binding, opts) {
+            var el = binding.locate('raphael');
+
+            el.drag(
+            function(x, y) {
+                binding.events.onUpdate.fire(x, y);
+            },
+            function(x, y, e) {
+                // **FIXME**: layerX and layerY are deprecated in WebKit
+                x = e.layerX;
+                y = e.layerY;
+                binding.events.onFocus.fire(x, y);
+            },
+            function() {
+                binding.events.onUnfocus.fire();
+            }
+            );
+        };
+
+        return that;
+    };
+
+    // ## Select
+    //
+    // Attaches a click handler to an SVG rendering and fires an onSelect event if the rendering is clicked AND
+    // the application is in a mode to select things.
+    //
+    Controller.namespace("Select");
+
+    // ### Select.initController
+    //
+    // Parameters:
+    //
+    // * options - object holding configuration information
+    //
+    // Returns:
+    //
+    // The configured controller object.
+    //
+    // Configuration Options:
+    //
+    // * isSelectable - function taking no arguments that should return "true" if the click should cause the
+    //                  onSelect event to fire.
+    //
+    Controller.Select.initController = function(options) {
+        var that = MITHGrid.Controller.initController(
+        "OAC.Client.StreamingVideo.Controller.Select",
+        options
+        );
+        options = that.options;
+
+        that.applyBindings = function(binding) {
+            var el = binding.locate("raphael");
+
+            el.click(function(e) {
+                if (options.isSelectable()) {
+                    binding.events.onSelect.fire();
+                }
+            });
+        };
+
+        return that;
+    };
+
+    // ## AnnotationEditSelectionGrid
+    //
+    // Attaches to an SVG lens and creates a green rectangle dashed box to
+    // act as the resize and drag tool. Only edits the SVG data - no annotation
+    // bodyContent data.
+    Controller.namespace("AnnotationEditSelectionGrid");
+
+    // ### AnnotationEditSelectionGrid.initController
+    //
+    // Initializes the AnnotationEditSelectionGrid controller object. This object may then be used to bind actions to
+    // the DOM.
+    //
+    // We create the bounding box once and keep it around. We then track which rendering is associated with
+    // the bounding box and draw it accordingly.
+    // We associate the bounding box with the SVG/Raphaël canvas holding the renderings we want to use it with.
+    //
+    // Each Raphaël canvas should have its own AnnotationEditSelectionGrid instance for binding renderings.
+    //
+    // Parameters:
+    //
+    // * options - object holding configuration information
+    //
+    // Returns:
+    //
+    // The initialized controller object.
+    //
+    // **FIXME:**
+    //
+    // The controller needs to be broken up a bit. The idea of providing a bounding box for renderings is something that
+    // should be handled in the presentation, not here. The controller should just generate events based on user interactions.
+    // The presentation should worry about which rendering is currently active and manage the translation of controller
+    // events to the rendering.
+    //
+    // For now, we'll refactor this into two pieces: the bounding box drawing (rendering), and translating events in the binding.
+    //
+    // We will eventually split this controller into two: bounding box resize controller and bounding box drag/move controller.
+    //
+    Controller.AnnotationEditSelectionGrid.initController = function(options) {
+        var that = MITHGrid.Controller.initController(
+        "OAC.Client.StreamingVideo.Controller.AnnotationEditSelectionGrid",
+        options
+        ),
+        dragController,
+        dirs = [];
+
+        options = that.options;
+        dirs = that.options.dirs;
+        // || ['ul', 'top', 'ur', 'lft', 'lr', 'btm', 'll', 'rgt', 'mid'];
+        dragController = OAC.Client.StreamingVideo.Controller.Drag.initController({});
+
+        // #### AnnotationEditSelectionGrid #applyBindings
+        //
+        that.applyBindings = function(binding, opts) {
+            var ox,
+            oy,
+            handleSet = {},
+            midDrag = {},
+            svgBBox = {},
+            itemMenu = {},
+            handles = {},
+            activeRendering,
+            deleteButton = {},
+            editButton = {},
+            menuContainer = {},
+            factors = {},
+            extents,
+            paper = opts.paper,
+            attrs = {},
+            padding = 5,
+            calcFactors,
+            calcHandles,
+            drawMenu,
+            itemDeleted,
+            handleIds = {},
+            drawHandles,
+            handleAttrs = {},
+            shapeAttrs = {},
+            menuAttrs = {},
+            cursor,
+            dAttrs = {},
+            eAttrs = {},
+            handleCalculationData = {},
+            el;
+
+            // ### attachRendering
+            //
+            // Function for applying a new shape to the bounding box
+            //
+            // Parameters:
+            //
+            // * newRendering -
+            binding.attachRendering = function(newRendering) {
+                binding.detachRendering();
+
+                if (newRendering === undefined) {
+                    return;
+                }
+
+                // register the rendering
+                activeRendering = newRendering;
+                calcFactors();
+                drawHandles();
+            };
+
+            // Function to call in order to "de-activate" the edit box
+            // (i.e. make it hidden)
+            binding.detachRendering = function() {
+                if ($.isEmptyObject(handleSet)) {
+                    return;
+                }
+                activeRendering = undefined;
+                handleSet.hide();
+
+                svgBBox.hide();
+                midDrag.hide();
+                if (itemMenu) {
+                    itemMenu.hide();
+                }
+            };
+
+            // ##### calcFactors (private)
+            //
+            // Measures where the handles should be on mousemove.
+            //
+            // Parameters: None.
+            //
+            // Returns: Nothing.
+            //
+            calcFactors = function() {
+                extents = activeRendering.getExtents();
+
+                // create offset factors for
+                // bounding box
+                // calculate width - height to be larger
+                // than shape
+                attrs.width = extents.width + (2 * padding);
+                attrs.height = extents.height + (2 * padding);
+                attrs.x = (extents.x - (padding / 8)) - (attrs.width / 2);
+                attrs.y = (extents.y - (padding / 8)) - (attrs.height / 2);
+                calcHandles(attrs);
+                if (itemMenu) {
+                    drawMenu(attrs);
+                }
+            };
+
+            // #### drawHandles (private)
+            //
+            // Draws the handles defined in dirs as SVG rectangles and draws the SVG bounding box
+            //
+            // Parameters: None.
+            //
+            // Returns: Nothing.
+            //
+            drawHandles = function() {
+                var midDragDragBinding;
+
+                if ($.isEmptyObject(handleSet)) {
+
+                    // draw the corner and mid-point squares
+                    handleSet = paper.set();
+                    $.each(handles,
+                    function(i, o) {
+                        var h;
+                        if (i === 'mid') {
+                            midDrag = paper.rect(o.x, o.y, padding, padding);
+                            o.id = midDrag.id;
+
+                        } else {
+                            h = paper.rect(o.x, o.y, padding, padding);
+                            o.id = h.id;
+
+                            h.attr({
+                                cursor: o.cursor
+                            });
+                            handleSet.push(h);
+                        }
+                    });
+
+                    // make them all similar looking
+                    handleSet.attr({
+                        fill: 990000,
+                        stroke: 'black'
+                    });
+
+                    if (! ($.isEmptyObject(midDrag))) {
+                        midDrag.attr({
+                            fill: 990000,
+                            stroke: 'black',
+                            cursor: 'move'
+                        });
+                    }
+
+                    // drawing bounding box
+                    svgBBox = paper.rect(attrs.x, attrs.y, attrs.width, attrs.height);
+                    svgBBox.attr({
+                        stroke: 'green',
+                        'stroke-dasharray': ["--"]
+                    });
+                    // Draw the accompanying menu that sits at top-right corner
+                    drawMenu(attrs);
+
+                    if (! ($.isEmptyObject(midDrag))) {
+
+                        // Attaching listener to drag-only handle (midDrag)
+                        midDragDragBinding = dragController.bind(midDrag);
+
+                        midDragDragBinding.events.onUpdate.addListener(
+                        function(dx, dy) {
+                            // dragging means that the svgBBox stays padding-distance
+                            // away from the lens' shape and the lens shape gets updated
+                            // in dataStore
+                            handleAttrs.nx = attrs.x + dx;
+                            handleAttrs.ny = attrs.y + dy;
+                            shapeAttrs.x = extents.x + dx;
+                            shapeAttrs.y = extents.y + dy;
+
+                            svgBBox.attr({
+                                x: handleAttrs.nx,
+                                y: handleAttrs.ny
+                            });
+
+                            calcHandles({
+                                x: handleAttrs.nx,
+                                y: handleAttrs.ny,
+                                width: attrs.width,
+                                height: attrs.height
+                            });
+                            if (itemMenu) {
+                                drawMenu({
+                                    x: handleAttrs.nx,
+                                    y: handleAttrs.ny,
+                                    width: attrs.width,
+                                    height: attrs.height
+                                });
+                            }
+                        }
+                        );
+
+                        midDragDragBinding.events.onFocus.addListener(
+                        function(x, y) {
+                            // start
+                            ox = x;
+                            oy = y;
+                            calcFactors();
+                            activeRendering.shape.attr({
+                                cursor: 'move'
+                            });
+                        }
+                        );
+
+                        midDragDragBinding.events.onUnfocus.addListener(
+                        function() {
+                            // end
+                            var pos = {
+                                x: shapeAttrs.x,
+                                y: shapeAttrs.y
+                            };
+
+                            binding.events.onMove.fire(pos);
+                            //activeRendering.shape.attr({
+                            //	cursor: 'default'
+                            //});
+                        }
+                        );
+                    }
+
+                    // Attaching drag and resize handlers
+                    handleSet.forEach(function(handle) {
+                        var handleBinding = dragController.bind(handle);
+
+                        handleBinding.events.onUpdate.addListener(function(dx, dy) {
+                            // onmove function - handles dragging
+                            // dragging here means that the shape is being resized;
+                            // the factorial determines in which direction the
+                            // shape is pulled
+                            shapeAttrs.w = Math.abs(extents.width + dx * factors.x);
+                            shapeAttrs.h = Math.abs(extents.height + dy * factors.y);
+                            handleAttrs.nw = shapeAttrs.w + (padding * 2);
+                            handleAttrs.nh = shapeAttrs.h + (padding * 2);
+                            handleAttrs.nx = (extents.x - (padding / 4)) - (handleAttrs.nw / 2);
+                            handleAttrs.ny = (extents.y - (padding / 4)) - (handleAttrs.nh / 2);
+
+                            svgBBox.attr({
+                                x: handleAttrs.nx,
+                                y: handleAttrs.ny,
+                                width: handleAttrs.nw,
+                                height: handleAttrs.nh
+                            });
+                            calcHandles({
+                                x: handleAttrs.nx,
+                                y: handleAttrs.ny,
+                                width: handleAttrs.nw,
+                                height: handleAttrs.nh
+                            });
+                            if (itemMenu) {
+                                drawMenu({
+                                    x: handleAttrs.nx,
+                                    y: handleAttrs.ny,
+                                    width: handleAttrs.nw,
+                                    height: handleAttrs.nh
+                                });
+                            }
+                        });
+
+                        handleBinding.events.onFocus.addListener(function(x, y) {
+                            // onstart function
+                            var px,
+                            py;
+                            extents = activeRendering.getExtents();
+                            ox = x;
+                            oy = y;
+
+                            // change mode
+                            options.application.setCurrentMode('Drag');
+                            // extents: x, y, width, height
+                            px = (8 * (ox - extents.x) / extents.width) + 4;
+                            py = (8 * (oy - extents.y) / extents.height) + 4;
+                            if (px < 3) {
+                                factors.x = -2;
+                            }
+                            else if (px < 5) {
+                                factors.x = 0;
+                            }
+                            else {
+                                factors.x = 2;
+                            }
+                            if (py < 3) {
+                                factors.y = -2;
+                            }
+                            else if (py < 5) {
+                                factors.y = 0;
+                            }
+                            else {
+                                factors.y = 2;
+                            }
+                            calcFactors();
+                        });
+
+                        handleBinding.events.onUnfocus.addListener(function() {
+                            // onend function
+                            // update
+                            var pos = {
+                                width: shapeAttrs.w,
+                                height: shapeAttrs.h
+                            };
+                            if (activeRendering !== undefined) {
+                                binding.events.onResize.fire(pos);
+                            }
+                            // change mode back
+                            options.application.setCurrentMode('Select');
+                        });
+                    });
+                } else {
+                    // show all the boxes and
+                    // handles
+                    svgBBox.show();
+                    // adjust the SvgBBox to be around new
+                    // shape
+                    svgBBox.attr({
+                        x: attrs.x,
+                        y: attrs.y,
+                        width: attrs.width,
+                        height: attrs.height
+                    });
+                    handleSet.show();
+                    midDrag.show().toFront();
+                    if (itemMenu) {
+                        itemMenu.show();
+                        drawMenu(attrs);
+                    }
+                }
+            };
+
+            // #### drawMenu (private)
+            //
+            // Draws menu that sits at the top-right corner of the shape.
+            //
+            // Parameters:
+            //
+            // * args - object holding the .x, .y, and .width properties
+            //
+            // Returns: Nothing.
+            //
+            drawMenu = function(args) {
+                if ($.isEmptyObject(itemMenu)) {
+
+                    menuAttrs.x = args.x + (args.width);
+                    menuAttrs.y = args.y - (padding * 4) - 2;
+                    menuAttrs.w = 100;
+                    menuAttrs.h = 20;
+                    // Create separate attribute objects
+                    // for each menu button/container
+                    eAttrs = {
+                        x: menuAttrs.x + 2,
+                        y: menuAttrs.y + 2,
+                        w: menuAttrs.w / 2 - 4,
+                        h: menuAttrs.h - (menuAttrs.h / 8)
+                    };
+
+                    dAttrs = {
+                        x: (eAttrs.x + eAttrs.w + 2),
+                        y: menuAttrs.y + 2,
+                        w: menuAttrs.w / 2 - 4,
+                        h: menuAttrs.h - (menuAttrs.h / 8)
+                    };
+
+                    itemMenu = paper.set();
+                    menuContainer = paper.rect(menuAttrs.x, menuAttrs.y, menuAttrs.w, menuAttrs.h);
+                    menuContainer.attr({
+                        fill: '#FFFFFF',
+                        stroke: '#000'
+                    });
+
+                    itemMenu.push(menuContainer);
+
+                    editButton = paper.rect(eAttrs.x, eAttrs.y, eAttrs.w, eAttrs.h);
+                    editButton.attr({
+                        fill: 334009,
+                        cursor: 'pointer'
+                    });
+
+                    itemMenu.push(editButton);
+
+                    deleteButton = paper.rect(dAttrs.x, dAttrs.y, dAttrs.w, dAttrs.h);
+                    deleteButton.attr({
+                        fill: 334009,
+                        cursor: 'pointer'
+                    });
+
+                    itemMenu.push(deleteButton);
+                    // attach event firers
+                    editButton.mousedown(function() {
+                        if (activeRendering !== undefined) {
+                            that.events.onEdit.fire(activeRendering.id);
+                        }
+                    });
+                    editButton.hover(function() {
+                        editButton.attr({
+                            fill: 443009
+                        });
+                    },
+                    function() {
+                        editButton.attr({
+                            fill: 334009
+                        });
+                    });
+
+
+                    deleteButton.mousedown(function() {
+                        if (activeRendering !== undefined) {
+                            binding.events.onDelete.fire();
+                            itemDeleted();
+                        }
+                    });
+                    deleteButton.hover(function() {
+                        deleteButton.attr({
+                            fill: 443009
+                        });
+                    },
+                    function() {
+                        deleteButton.attr({
+                            fill: 334009
+                        });
+                    });
+                } else {
+
+
+                    menuAttrs.x = args.x + (args.width);
+                    menuAttrs.y = args.y - (padding * 4) - 2;
+
+                    eAttrs = {
+                        x: (menuAttrs.x + 2),
+                        y: (menuAttrs.y + 2)
+                    };
+
+                    dAttrs = {
+                        x: (eAttrs.x + editButton.attr('width') + 2),
+                        y: menuAttrs.y + 2
+                    };
+                    menuContainer.attr({
+                        x: menuAttrs.x,
+                        y: menuAttrs.y
+                    });
+                    editButton.attr(eAttrs);
+                    deleteButton.attr(dAttrs);
+                }
+            };
+
+            itemDeleted = function() {
+                // set rendering to undefined
+                binding.detachRendering();
+                activeRendering = undefined;
+
+                itemMenu.hide();
+                svgBBox.hide();
+                handleSet.hide();
+                midDrag.hide();
+            };
+
+            handleCalculationData = {
+                ul: ['nw', 0, 0, 0, 0],
+                top: ['n', 1, 0, 0, 0],
+                ur: ['ne', 2, -1, 0, 0],
+                rgt: ['e', 2, -1, 1, 0],
+                lr: ['se', 2, -1, 2, -1],
+                btm: ['s', 1, 0, 2, -1],
+                ll: ['sw', 0, 0, 2, -1],
+                lft: ['w', 0, 0, 1, 0],
+                mid: ['pointer', 1, 0, 1, 0]
+            };
+
+            //
+            // Goes through handle object array and
+            // sets each handle box coordinate
+            //
+            calcHandles = function(args) {
+                // calculate where the resize handles
+                // will be located
+                var calcHandle = function(type, xn, xp, yn, yp) {
+                    return {
+                        x: args.x + xn * args.width / 2 + xp * padding,
+                        y: args.y + yn * args.height / 2 + yp * padding,
+                        cursor: type.length > 2 ? type: type + "-resize"
+                    };
+                },
+                recalcHandle = function(info, xn, xp, yn, yp) {
+                    var el;
+                    info.x = args.x + xn * args.width / 2 + xp * padding;
+                    info.y = args.y + yn * args.height / 2 + yp * padding;
+                    el = paper.getById(info.id);
+                    el.attr({
+                        x: info.x,
+                        y: info.y
+                    });
+                };
+                $.each(dirs,
+                function(i, o) {
+                    var data = handleCalculationData[o];
+                    if (data === undefined) {
+                        return;
+                    }
+                    if (handles[o] === undefined) {
+                        handles[o] = calcHandle(data[0], data[1], data[2], data[3], data[4]);
+                    }
+                    else {
+                        recalcHandle(handles[o], data[1], data[2], data[3], data[4]);
+                    }
+                });
+            };
+        };
+
+        return that;
+    };
+
+    // ## ShapeCreateBox
+    //
+    // Creates an SVG shape with a dotted border to be used as a guide for drawing shapes. Listens for user mousedown, which
+    // activates the appearance of the box at the x,y where the mousedown coords are, then finishes when user mouseup call is made
+    //
+    Controller.namespace('ShapeCreateBox');
+    Controller.ShapeCreateBox.initController = function(options) {
+        var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.ShapeCreateBox", options);
+        options = that.options;
+
+        // #### ShapeCreateBox #applyBindings
+        //
+        // Init function for Controller.
+        //
+        // Parameters:
+        //
+        // * binding - refers to Controller instance
+        // * opts - copy of options passed through initController
+        //
+        // Creates the following methods:
+        that.applyBindings = function(binding, opts) {
+            //
+            // Bounding box is created once in memory - it should be bound to the
+            // canvas/paper object or something that contains more than 1 shape.
+            //
+            var ox,
+            oy,
+            svgBBox = {},
+            activeRendering,
+            factors = {},
+            paper = opts.paper,
+            attrs = {},
+            padding = 10,
+            drawMenu,
+            itemDeleted,
+            shapeAttrs = {},
+            cursor,
+            el;
+
+            // #### createGuide
+            //
+            // Creates the SVGBBOX which acts as a guide to the user
+            // of how big their shape will be once shapeDone is fired
+            //
+            // Parameters:
+            //
+            // * coords - object that has x,y coordinates for user mousedown. This is where the left and top of the box will start
+            //
+            binding.createGuide = function(coords) {
+                // coordinates are top x,y values
+                attrs.x = coords[0];
+                attrs.y = coords[1];
+                attrs.width = (coords[0] + padding);
+                attrs.height = (coords[1] + padding);
+                if ($.isEmptyObject(svgBBox)) {
+                    svgBBox = paper.rect(attrs.x, attrs.y, attrs.width, attrs.height);
+                    svgBBox.attr({
+                        stroke: 'green',
+                        'stroke-dasharray': ["--"]
+                    });
+
+                } else {
+                    // show all the boxes and
+                    // handles
+                    svgBBox.show();
+                    // adjust the SvgBBox to be around new
+                    // shape
+                    svgBBox.attr({
+                        x: attrs.x,
+                        y: attrs.y,
+                        width: attrs.width,
+                        height: attrs.height
+                    });
+                }
+
+            };
+
+            // #### resizeGuide
+            //
+            // Take passed x,y coords and set as bottom-right, not
+            // top left
+            //
+            // Parameters:
+            //
+            // * coords - array of x,y coordinates to use as bottom-right coords of the box
+            //
+            binding.resizeGuide = function(coords) {
+
+                attrs.width = (coords[0] - attrs.x);
+                attrs.height = (coords[1] - attrs.y);
+
+                svgBBox.attr({
+                    width: attrs.width,
+                    height: attrs.height
+                });
+            };
+
+            // #### completeShape
+            //
+            // Take the saved coordinates and pass them back
+            // to the calling function
+            //
+            // Parameters:
+            //
+            // * coords - coordinates object with properties x, y, width, and height
+            //
+            // Returns:
+            // Coordinates object with properties x, y, width, and height
+            //
+            binding.completeShape = function(coords) {
+                attrs.width = coords.width;
+                attrs.height = coords.height;
+
+                svgBBox.attr({
+                    width: attrs.width,
+                    height: attrs.height
+                });
+                svgBBox.hide();
+                return {
+                    x: attrs.x,
+                    y: attrs.y,
+                    width: attrs.width,
+                    height: attrs.height
+                };
+            };
+        };
+
+        return that;
+    };
+
+    // ## TextBodyEditor
+    //
+    // Handles HTML annotation lens for editing the bodyContent text.
+    //
+    //
+    Controller.namespace("TextBodyEditor");
+    Controller.TextBodyEditor.initController = function(options) {
+        var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.TextBodyEditor", options);
+        options = that.options;
+
+        // ### TextBodyEditor #applyBindings
+        //
+        // Generates the following the methods:
+        that.applyBindings = function(binding, opts) {
+            var editStart,
+            editEnd,
+            editUpdate,
+            annoEl = binding.locate('annotation'),
+            bodyContent = binding.locate('body'),
+            allAnnos = binding.locate('annotations'),
+            textArea = binding.locate('textarea'),
+            editArea = binding.locate('editarea'),
+            editButton = binding.locate('editbutton'),
+            updateButton = binding.locate('updatebutton'),
+            deleteButton = binding.locate('deletebutton'),
+            bindingActive = false,
+            prevMode;
+
+            // #### editStart (private)
+            //
+            // displays editing area
+            //
+            editStart = function() {
+                $(editArea).show();
+                $(bodyContent).hide();
+                bindingActive = true;
+                binding.events.onClick.fire(opts.itemId);
+            };
+
+            // #### editEnd (private)
+            //
+            // Hides the editing area after the user has completed editing/canceled editing
+            //
+            editEnd = function() {
+                $(editArea).hide();
+                $(bodyContent).show();
+                bindingActive = false;
+
+            };
+
+            // #### editUpdate (private)
+            //
+            // Called when the user sends new data to dataStore
+            //
+            editUpdate = function(e) {
+                var data = $(textArea).val();
+                e.preventDefault();
+                binding.events.onUpdate.fire(opts.itemId, data);
+                editEnd();
+            };
+
+            // Annotation DOM element listens for a double-click to either
+            // display and become active or hide and become unactive
+            $(annoEl).bind('dblclick',
+            function(e) {
+                e.preventDefault();
+                if (bindingActive) {
+                    editEnd();
+
+                    options.application.setCurrentMode(prevMode || '');
+                } else {
+                    editStart();
+                    prevMode = options.application.getCurrentMode();
+                    options.application.setCurrentMode('TextEdit');
+                }
+            });
+
+            // Clicking once on the annotation DOM element will activate the attached SVG shape
+            $(annoEl).bind('click',
+            function(e) {
+                // binding.events.onClick.fire(opts.itemId);
+                options.application.setActiveAnnotation(opts.itemId);
+            });
+
+            // Attach binding to the update button which ends editing and updates the bodyContent of the attached
+            // annotation
+            $(updateButton).bind('click',
+            function(e) {
+                binding.events.onUpdate.fire(opts.itemId, $(textArea).val());
+                editEnd();
+                options.application.setCurrentMode(prevMode);
+            });
+
+            // Attach binding to the delete button to delete the entire annotation - removes from dataStore
+            $(deleteButton).bind('click',
+            function(e) {
+                binding.events.onDelete.fire(opts.itemId);
+                // remove DOM elements
+                $(annoEl).remove();
+            });
+
+            // Listening for changes in active annotation so that annotation text lens stays current
+            options.application.events.onActiveAnnotationChange.addListener(function(id) {
+                if (id !== opts.id && bindingActive) {
+                    editUpdate({
+                        preventDefault: function() {}
+                    });
+                    editEnd();
+                }
+            });
+
+            // Listens for changes in the mode in order to stay current with rest of the application
+            options.application.events.onCurrentModeChange.addListener(function(newMode) {
+                if (newMode !== 'TextEdit') {
+                    editEnd();
+                }
+            });
+        };
+        return that;
+    };
+
+    // ## CanvasClickController
+    //
+    // Listens for all clicks on the canvas and connects shapes with the Edit controller above
+    //
+    // Parameters:
+    //
+    // * options - Object that includes:
+    //	** paper - RaphaelSVG canvas object generated by Raphael Presentation
+    //	** closeEnough - value for how close (In RaphaelSVG units) a mouse-click has to be in order to be considered
+    // 'clicking' an object
+    //
+    Controller.namespace("CanvasClickController");
+    Controller.CanvasClickController.initController = function(options) {
+        var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.CanvasClickController", options);
+        options = that.options;
+
+        // #### CanvasClickController #applyBindings
+        //
+        // Create the object passed back to the Presentation
+        //
+        that.applyBindings = function(binding, opts) {
+            var ox,
+            oy,
+            extents,
+            activeId,
+            closeEnough = opts.closeEnough,
+            dx,
+            dy,
+            x,
+            y,
+            w,
+            h,
+            curRendering,
+            renderings = {},
+            paper = opts.paper,
+            offset,
+            // #### attachDragResize (private)
+            //
+            // Find the passed rendering ID, set that rendering object
+            // as the current rendering
+            //
+            // Parameters:
+            // * id - ID of the rendering to set as active
+            //
+            attachDragResize = function(id) {
+                var o;
+                if ((curRendering !== undefined) && (id === curRendering.id)) {
+                    return;
+                }
+                o = renderings[id];
+                if (o === undefined) {
+                    // de-activate rendering and all other listeners
+                    binding.events.onClick.fire(undefined);
+                    // hide the editBox
+                    // editBoxController.deActivateEditBox();
+                    curRendering = undefined;
+                    return false;
+                }
+
+                curRendering = o;
+
+            },
+            // #### detachDragResize (private)
+            //
+            // Make the current rendering or rendering that has matching ID *id* non-active
+            //
+            // Parameters:
+            // * id - ID of rendering to make non-active
+            //
+            detachDragResize = function(id) {
+                if ((curRendering !== undefined) && (id === curRendering.id)) {
+                    return;
+                }
+                var o = renderings[id];
+            },
+            // #### drawShape (private)
+            //
+            // Using two html elements: container is for
+            // registering the offset of the screen (.section-canvas) and
+            // the svgEl is for registering mouse clicks on the svg element (svg)
+            //
+            // Parameters:
+            // * container - DOM element that contains the canvas
+            // * svgEl - SVG shape element that will have mouse bindings attached to it
+            //
+            drawShape = function(container) {
+                //
+                // Sets mousedown, mouseup, mousemove to draw a
+                // shape on the canvas.
+                //
+                var mouseMode = 0,
+                topLeft = [],
+                bottomRight = [],
+                x,
+                y,
+                w,
+                h,
+                offset = $(container).offset();
+
+                //
+                // MouseMode cycles through three settings:
+                // * 0: stasis
+                // * 1: Mousedown and ready to drag
+                // * 2: Mouse being dragged
+                //
+                // remove all previous bindings
+                $(container).unbind();
+
+                $(container).mousedown(function(e) {
+                    if (mouseMode > 0) {
+                        return;
+                    }
+                    x = e.pageX - offset.left;
+                    y = e.pageY - offset.top;
+                    topLeft = [x, y];
+                    mouseMode = 1;
+                    binding.events.onShapeStart.fire(topLeft);
+                });
+
+                $(container).mousemove(function(e) {
+                    if (mouseMode === 2 || mouseMode === 0) {
+                        return;
+                    }
+                    x = e.pageX - offset.left;
+                    y = e.pageY - offset.top;
+                    bottomRight = [x, y];
+                    binding.events.onShapeDrag.fire(bottomRight);
+                });
+
+                $(container).mouseup(function(e) {
+                    if (mouseMode < 1) {
+                        return;
+                    }
+                    mouseMode = 0;
+                    if (bottomRight === undefined) {
+                        bottomRight = [x + 5, y + 5];
+                    }
+                    binding.events.onShapeDone.fire({
+                        x: topLeft[0],
+                        y: topLeft[1],
+                        width: (bottomRight[0] - topLeft[0]),
+                        height: (bottomRight[1] - topLeft[1])
+                    });
+                });
+            },
+            // #### selectShape (private)
+            //
+            // Creates a binding for the canvas to listen for mousedowns to select a shape
+            //
+            // Parameters:
+            // * container - HTML element housing the canvas
+            selectShape = function(container) {
+                //
+                // Sets mousedown events to select shapes, not to draw
+                // them.
+                //
+                $(container).unbind();
+                $(container).bind('mousedown',
+                function(e) {
+                    // By default, nullifies all selections
+                    options.application.setActiveAnnotation(undefined);
+                    activeId = '';
+                });
+
+            };
+
+            // Attaches binding for active annotation change to attachDragResize
+            options.application.events.onActiveAnnotationChange.addListener(attachDragResize);
+            // Change the mouse actions depending on what Mode the application is currently
+            // in
+            options.application.events.onCurrentModeChange.addListener(function(mode) {
+                if (mode === 'Rectangle' || mode === 'Ellipse') {
+                    drawShape(binding.locate('svgwrapper'));
+                } else if (mode === 'Select') {
+                    selectShape(binding.locate('svgwrapper'));
+                } else {
+                    $(binding.locate('svgwrapper')).unbind();
+                }
+            });
+
+            // #### registerRendering
+            //
+            // Takes a rendering object and adds it to internal array for renderings
+            //
+            // Parameters:
+            // * newRendering - Rendering object for a shape annotation
+            //
+            binding.registerRendering = function(newRendering) {
+                renderings[newRendering.id] = newRendering;
+            };
+
+            // #### removeRendering
+            //
+            // Removes rendering object from internal array - for when a shape is out of view or deleted.
+            //
+            // Parameters:
+            //
+            // * oldRendering - Rendering object for a shape annotation
+            //
+            binding.removeRendering = function(oldRendering) {
+                delete renderings[oldRendering.id];
+            };
+        };
+
+        return that;
+    };
+
+    // ## AnnotationCreationButton
+    //
+    // Controls the Annotation Creation Tools set by app.buttonFeature
+    //
+    Controller.namespace('AnnotationCreationButton');
+    Controller.AnnotationCreationButton.initController = function(options) {
+        var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.AnnotationCreationButton", options);
+        options = that.options;
+
+        // #### AnnotationCreationButton #applyBindings
+        that.applyBindings = function(binding, opts) {
+            var buttonEl,
+            active = false,
+            onCurrentModeChangeHandle,
+            id;
+
+            //
+            // Mousedown: activate button - set as active mode
+            //
+            // Mousedown #2: de-activate button - unset active mode
+            //
+            // onCurrentModeChange: if != id passed, deactivate, else do nothing
+            //
+            buttonEl = binding.locate('button');
+
+            // Attach binding to the mousedown
+            $(buttonEl).live('mousedown',
+            function(e) {
+                if (active === false) {
+                    active = true;
+                    options.application.setCurrentMode(opts.action);
+                    $(buttonEl).addClass("active");
+                } else if (active === true) {
+                    active = false;
+                    options.application.setCurrentMode('');
+                    $(buttonEl).removeClass("active");
+                }
+            });
+
+            // #### onCurrentModeChangeHandle (private)
+            //
+            // Handles when the mode is changed externally from controller
+            //
+            // Parameters:
+            // * action - name of new mode
+            //
+            onCurrentModeChangeHandle = function(action) {
+
+                if (action === options.action) {
+                    active = true;
+                    $(buttonEl).addClass('active');
+                } else {
+                    active = false;
+                    $(buttonEl).removeClass("active");
+                }
+            };
+
+            options.application.events.onCurrentModeChange.addListener(onCurrentModeChangeHandle);
+        };
+
+        return that;
+    };
+
+    // ## sliderButton
+    //
+    // Creates a jQuery UI slider for the current time in the video
+    //
+    Controller.namespace('sliderButton');
+    Controller.sliderButton.initController = function(options) {
+        var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.sliderButton", options);
+        options = that.options;
+
+        that.applyBindings = function(binding, opts) {
+            var sliderElement,
+            displayElement,
+            sliderStart,
+            sliderMove,
+            localTime,
+            positionCheck;
+            displayElement = binding.locate('timedisplay');
+            positionCheck = function(t) {
+                //
+                // if time is not equal to internal time, then
+                // reset the slider
+                //
+                if (localTime === undefined) {
+                    localTime = t;
+                    $(sliderElement).slider('value', localTime);
+                }
+            };
+
+            sliderStart = function(e, ui) {
+                options.application.setCurrentTime(ui.value);
+                $(displayElement).text('TIME: ' + ui.value);
+                localTime = ui.value;
+            };
+
+            sliderMove = function(e, ui) {
+                if (ui === undefined) {
+                    localTime = e;
+                    $(sliderElement).slider('value', e);
+                }
+
+                if (localTime === ui.value) {
+                    return;
+                }
+                options.application.setCurrentTime(ui.value);
+                $(displayElement).text('TIME: ' + ui.value);
+                localTime = ui.value;
+            };
+            sliderElement = binding.locate("slider");
+
+            $(sliderElement).slider({
+                start: sliderStart,
+                slide: sliderMove
+            });
+
+
+        };
+
+        return that;
+    };
+
+    // ## timeControl
+    //
+    // Controller for manipulating the time sequence for an annotation.
+    // Currently, just a text box for user to enter basic time data
+    //
+    Controller.namespace('timeControl');
+    Controller.timeControl.initController = function(options) {
+        var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.timeControl", options);
+        options = that.options;
+        that.currentId = '';
+
+        // #### timeControl #applyBindings
+        that.applyBindings = function(binding, opts) {
+            var timestart = binding.locate('timestart'),
+            timeend = binding.locate('timeend'),
+            submit = binding.locate('submit'),
+            menudiv = binding.locate('menudiv'),
+            start_time,
+            end_time;
+
+            $(menudiv).hide();
+
+            $(submit).bind('click',
+            function() {
+                // **FIXME:** times can be in parts of seconds
+                start_time = parseInt($(timestart).val(), 10);
+                end_time = parseInt($(timeend).val(), 10);
+                if (binding.currentId !== undefined && start_time !== undefined && end_time !== undefined) {
+                    // update core data
+                    binding.events.onUpdate.fire(binding.currentId, start_time, end_time);
+
+                    $(menudiv).hide();
+                }
+            });
+
+            options.application.events.onActiveAnnotationChange.addListener(function(id) {
+                if (id !== undefined) {
+                    $(menudiv).show();
+                    $(timestart).val('');
+                    $(timeend).val('');
+                    binding.currentId = id;
+                } else if (id === undefined) {
+                    $(menudiv).hide();
+                }
+            });
+        };
+
+        return that;
+    };
+
+    // ## WindowResize
+    //
+    // Emits an onResize event when the browser window is resized.
+    //
+    Controller.namespace('WindowResize');
+    Controller.WindowResize.initController = function(options) {
+        var that = MITHGrid.Controller.initController("OAC.Client.StreamingVideo.Controller.WindowResize", options);
+        options = that.options;
+
+        that.applyBindings = function(binding, opts) {
+            var w = binding.locate('resizeBox');
+            w.resize(function() {
+                setTimeout(binding.events.onResize.fire, 0);
+            });
+        };
+
+        return that;
+    };
 } (jQuery, MITHGrid, OAC));
-
 // # Presentations
 //
-// TODO: rename file to presentation.js
 //
-// Presentations for canvas.js
-// @author Grant Dickie
+// Presentations for OAC:ASP Application
+// @author Grant Dickie, Jim Smith
 //
-
 
 (function($, MITHGrid, OAC) {
-	// ## AnnotationList
-	//
-	// Presentation that extends SimpleText in order to add new 
-	// functionality for Annotation HTML lens
-	//
-	MITHGrid.Presentation.namespace("AnnotationList");
-	MITHGrid.Presentation.AnnotationList.initPresentation = function(container, options) {
-		var that = MITHGrid.Presentation.initPresentation("MITHGrid.Presentation.AnnotationList", container, options);
+    // ## AnnotationList
+    //
+    // Presentation that extends SimpleText in order to add new
+    // functionality for Annotation HTML lens
+    //
+    MITHGrid.Presentation.namespace("AnnotationList");
+    MITHGrid.Presentation.AnnotationList.initPresentation = function(container, options) {
+        var that = MITHGrid.Presentation.initPresentation("MITHGrid.Presentation.AnnotationList", container, options);
 
-		return that;
-	};
+        return that;
+    };
 
-	// ## RaphaelCanvas
-	//
-	// Presentation for the Canvas area - area that the Raphael canvas is drawn on
-	//
-	MITHGrid.Presentation.namespace("RaphaelCanvas");
-	MITHGrid.Presentation.RaphaelCanvas.initPresentation = function(container, options) {
-		var that = MITHGrid.Presentation.initPresentation("MITHGrid.Presentation.RaphaelCanvas", container, options),
-		id = $(container).attr('id'),
-		h,
-		w,
-		x,
-		y,
-		canvasController,
-		keyBoardController,
-		editBoxController,
-		superRender,
-		canvasBinding,
-		keyboardBinding,
-		shapeCreateController,
-		shapeCreateBinding,
-		windowResizeController,
-		windowResizeBinding,
-		changeCanvasCoordinates,
-		e,
-		superEventFocusChange,
-		editBoundingBoxBinding,
-		eventCurrentTimeChange,
-		searchAnnos,
-		allAnnosModel,
-		initCanvas,
-		cachedRendering, xy, wh;
+    // ## RaphaelCanvas
+    //
+    // Presentation for the Canvas area - area that the Raphael canvas is drawn on
+    //
+    MITHGrid.Presentation.namespace("RaphaelCanvas");
+    MITHGrid.Presentation.RaphaelCanvas.initPresentation = function(container, options) {
+        var that = MITHGrid.Presentation.initPresentation("MITHGrid.Presentation.RaphaelCanvas", container, options),
+        id = $(container).attr('id'),
+        h,
+        w,
+        x,
+        y,
+        canvasController,
+        keyBoardController,
+        editBoxController,
+        superRender,
+        canvasBinding,
+        keyboardBinding,
+        shapeCreateController,
+        shapeCreateBinding,
+        windowResizeController,
+        windowResizeBinding,
+        changeCanvasCoordinates,
+        e,
+        superEventFocusChange,
+        editBoundingBoxBinding,
+        eventCurrentTimeChange,
+        searchAnnos,
+        allAnnosModel,
+        initCanvas,
+        cachedRendering,
+        xy,
+        wh;
 
-		options = that.options;
-		
-		// Setting up local names for the assigned presentation controllers
-		canvasController = options.controllers.canvas;
-		keyBoardController = options.controllers.keyboard;
-		editBoxController = options.controllers.shapeEditBox;
-		shapeCreateController = options.controllers.shapeCreateBox;
-		windowResizeController = options.controllers.windowResize;
-		
-		// x,y,w, and h coordinates are set through the CSS of the container passed in the constructor
-		x = $(container).css('x');
-		y = $(container).css('y');
+        options = that.options;
 
-		
-		w = $(container).width();
-		// measure the div space and make the canvas
-		// to fit
-		h = $(container).height();
+        // Setting up local names for the assigned presentation controllers
+        canvasController = options.controllers.canvas;
+        keyBoardController = options.controllers.keyboard;
+        editBoxController = options.controllers.shapeEditBox;
+        shapeCreateController = options.controllers.shapeCreateBox;
+        windowResizeController = options.controllers.windowResize;
 
-		// Keyboard binding attached to container to avoid multiple-keyboard events from firing
-		keyboardBinding = keyBoardController.bind($(container), {});
+        // x,y,w, and h coordinates are set through the CSS of the container passed in the constructor
+        x = $(container).css('x');
+        y = $(container).css('y');
 
-		that.events = $.extend(true, that.events, keyboardBinding.events);
 
-		// init RaphaelJS canvas
-		// Parameters for Raphael:
-		// * @x: value for top left corner
-		// * @y: value for top left corner
-		// * @w: Integer value for width of the SVG canvas
-		// * @h: Integer value for height of the SVG canvas
-		// Create canvas at xy and width height
-		that.canvas = new Raphael($(container), w, h);
-	
-		// attach binding
-		// **FIXME:** We need to change this. If we have multiple videos on a page, this will break.
-		canvasBinding = canvasController.bind($(container), {
-			closeEnough: 5,
-			paper: that.canvas
-		});
+        w = $(container).width();
+        // measure the div space and make the canvas
+        // to fit
+        h = $(container).height();
 
-		editBoundingBoxBinding = editBoxController.bind($(container), {
-			paper: that.canvas
-		});
+        // Keyboard binding attached to container to avoid multiple-keyboard events from firing
+        keyboardBinding = keyBoardController.bind($(container), {});
 
-		shapeCreateBinding = shapeCreateController.bind($(container), {
-			paper: that.canvas
-		});
-		
-		// **FIXME:** We need to change this. If we have multiple videos on a page, this will break.
-		windowResizeBinding = windowResizeController.bind(window);
-		
-		editBoundingBoxBinding.events.onResize.addListener(function(pos) {
-			var activeRendering = that.getActiveRendering();
-			if(activeRendering !== null && activeRendering.eventResize !== undefined) {
-				activeRendering.eventResize(pos);
-			}
-		});
-		
-		editBoundingBoxBinding.events.onMove.addListener(function(pos) {
-			var activeRendering = that.getActiveRendering();
-			if (activeRendering !== null && activeRendering.eventMove !== undefined) {
-				activeRendering.eventMove(pos);
-			}
-		});
+        that.events = $.extend(true, that.events, keyboardBinding.events);
 
-		editBoundingBoxBinding.events.onDelete.addListener(function() {
-			var activeRendering = that.getActiveRendering();
-			if (activeRendering !== null && activeRendering.eventDelete !== undefined) {
-				activeRendering.eventDelete();
-				editBoundingBoxBinding.detachRendering();
-			}
-		});
-		
-		options.application.events.onCurrentModeChange.addListener(function(newMode) {
-			if (newMode !== 'Select' && newMode !== 'Drag') {
-				editBoundingBoxBinding.detachRendering();
-			}
-		});
-	
-	
-		// Adjusts the canvas area, canvas wrapper to fall directly over the 
-		// player area
-		windowResizeBinding.events.onResize.addListener(function() {
-			var x, y, w, h, containerEl, canvasEl, htmlWrapper;
-			// the following elements should be parts of this presentation
-			canvasEl = $('body').find('svg');
-			containerEl = $(options.playerWrapper);
-			htmlWrapper = $(container);
-			x = parseInt($(containerEl).offset().left, 10);
-			y = parseInt($(containerEl).offset().top, 10);
-			w = parseInt($(containerEl).width(), 10);
-			h = parseInt($(containerEl).height(), 10);
+        // init RaphaelJS canvas
+        // Parameters for Raphael:
+        // * @x: value for top left corner
+        // * @y: value for top left corner
+        // * @w: Integer value for width of the SVG canvas
+        // * @h: Integer value for height of the SVG canvas
+        // Create canvas at xy and width height
+        that.canvas = new Raphael($(container), w, h);
 
-			$(canvasEl).css({
-				left: x + 'px',
-				top: y + 'px',
-				width: w + 'px',
-				height: h + 'px'
-			});
-			
-			$(htmlWrapper).css({
-				left: x + 'px',
-				top: y + 'px',
-				width: w + 'px',
-				height: h + 'px'
-			});
-		});
-		
-		windowResizeBinding.events.onResize.fire(); // to make sure we get things set up right
-		
-		//
-		// Registering canvas special events for start, drag, stop
-		//
-		canvasBinding.events.onShapeStart.addListener(function(coords) {
-			shapeCreateBinding.createGuide(coords);
-		});
+        // attach binding
+        // **FIXME:** We need to change this. If we have multiple videos on a page, this will break.
+        canvasBinding = canvasController.bind($(container), {
+            closeEnough: 5,
+            paper: that.canvas
+        });
 
-		canvasBinding.events.onShapeDrag.addListener(function(coords) {
-			shapeCreateBinding.resizeGuide(coords);
-		});
+        editBoundingBoxBinding = editBoxController.bind($(container), {
+            paper: that.canvas
+        });
 
-		canvasBinding.events.onShapeDone.addListener(function(coords) {
-			//
-			// Adjust x,y in order to fit data store 
-			// model
-			//
-			var shape = shapeCreateBinding.completeShape(coords);
-			options.application.insertShape(shape);
-		});
-		
-		
-		//
-		// Called whenever a player is set by the Application. 
-		// Assumes that said player object has getcoordinates() and 
-		// getsize() as valid methods that return arrays.
-		//
-		changeCanvasCoordinates = function(args) {
-			if (args !== undefined) {
-				
-				// player passes args of x,y and width, height
-				xy = args.getcoordinates();
-				wh = args.getsize();
-				// move container and change size
-				$(container).css({
-					left: (parseInt(xy[0], 10) + 'px'),
-					top: (parseInt(xy[1], 10) + 'px'),
-					width: wh[0],
-					height: wh[1]
-				});
-				// Move canvas SVG to this location
-				$('svg').css({
-					left: (parseInt(xy[0], 10) + 'px'),
-					top: (parseInt(xy[1], 10) + 'px'),
-					width: wh[0],
-					height: wh[1]
-				});
+        shapeCreateBinding = shapeCreateController.bind($(container), {
+            paper: that.canvas
+        });
 
-			}
-		};
+        // **FIXME:** We need to change this. If we have multiple videos on a page, this will break.
+        windowResizeBinding = windowResizeController.bind(window);
 
-		//
-		// Called when the time change event is fired. Makes sure
-		// that the present annotations are queued and have the correct
-		// opacity (Fades as it comes into play and fades as it goes out
-		// of play)
-		//
-		/*
+        editBoundingBoxBinding.events.onResize.addListener(function(pos) {
+            var activeRendering = that.getActiveRendering();
+            if (activeRendering !== null && activeRendering.eventResize !== undefined) {
+                activeRendering.eventResize(pos);
+            }
+        });
+
+        editBoundingBoxBinding.events.onMove.addListener(function(pos) {
+            var activeRendering = that.getActiveRendering();
+            if (activeRendering !== null && activeRendering.eventMove !== undefined) {
+                activeRendering.eventMove(pos);
+            }
+        });
+
+        editBoundingBoxBinding.events.onDelete.addListener(function() {
+            var activeRendering = that.getActiveRendering();
+            if (activeRendering !== null && activeRendering.eventDelete !== undefined) {
+                activeRendering.eventDelete();
+                editBoundingBoxBinding.detachRendering();
+            }
+        });
+
+        options.application.events.onCurrentModeChange.addListener(function(newMode) {
+            if (newMode !== 'Select' && newMode !== 'Drag') {
+                editBoundingBoxBinding.detachRendering();
+            }
+        });
+
+
+        // Adjusts the canvas area, canvas wrapper to fall directly over the
+        // player area
+        windowResizeBinding.events.onResize.addListener(function() {
+            var x,
+            y,
+            w,
+            h,
+            containerEl,
+            canvasEl,
+            htmlWrapper;
+            // the following elements should be parts of this presentation
+            canvasEl = $('body').find('svg');
+            containerEl = $(options.playerWrapper);
+            htmlWrapper = $(container);
+            x = parseInt($(containerEl).offset().left, 10);
+            y = parseInt($(containerEl).offset().top, 10);
+            w = parseInt($(containerEl).width(), 10);
+            h = parseInt($(containerEl).height(), 10);
+
+            $(canvasEl).css({
+                left: x + 'px',
+                top: y + 'px',
+                width: w + 'px',
+                height: h + 'px'
+            });
+
+            $(htmlWrapper).css({
+                left: x + 'px',
+                top: y + 'px',
+                width: w + 'px',
+                height: h + 'px'
+            });
+        });
+
+        windowResizeBinding.events.onResize.fire();
+        // to make sure we get things set up right
+        //
+        // Registering canvas special events for start, drag, stop
+        //
+        canvasBinding.events.onShapeStart.addListener(function(coords) {
+            shapeCreateBinding.createGuide(coords);
+        });
+
+        canvasBinding.events.onShapeDrag.addListener(function(coords) {
+            shapeCreateBinding.resizeGuide(coords);
+        });
+
+        canvasBinding.events.onShapeDone.addListener(function(coords) {
+            //
+            // Adjust x,y in order to fit data store
+            // model
+            //
+            var shape = shapeCreateBinding.completeShape(coords);
+            options.application.insertShape(shape);
+        });
+
+
+        //
+        // Called whenever a player is set by the Application.
+        // Assumes that said player object has getcoordinates() and
+        // getsize() as valid methods that return arrays.
+        //
+        changeCanvasCoordinates = function(args) {
+            if (args !== undefined) {
+
+                // player passes args of x,y and width, height
+                xy = args.getcoordinates();
+                wh = args.getsize();
+                // move container and change size
+                $(container).css({
+                    left: (parseInt(xy[0], 10) + 'px'),
+                    top: (parseInt(xy[1], 10) + 'px'),
+                    width: wh[0],
+                    height: wh[1]
+                });
+                // Move canvas SVG to this location
+                $('svg').css({
+                    left: (parseInt(xy[0], 10) + 'px'),
+                    top: (parseInt(xy[1], 10) + 'px'),
+                    width: wh[0],
+                    height: wh[1]
+                });
+
+            }
+        };
+
+        //
+        // Called when the time change event is fired. Makes sure
+        // that the present annotations are queued and have the correct
+        // opacity (Fades as it comes into play and fades as it goes out
+        // of play)
+        //
+        /*
 		eventCurrentTimeChange = function(npt) {
 			that.visitRenderings(function(id, rendering) {
 				if(rendering.eventCurrentTimeChange !== undefined) {
@@ -1608,57 +1610,58 @@ OAC.Client.namespace("StreamingVideo");
 			});
 		};*/
 
-		options.application.events.onCurrentTimeChange.addListener(function(npt) {
-			that.visitRenderings(function(id, rendering) {
-				if(rendering.eventCurrentTimeChange !== undefined) {
-					rendering.eventCurrentTimeChange(npt);
-				}
-			});
-		});
-		options.application.events.onTimeEasementChange.addListener(function(te) {
-			that.visitRenderings(function(id, rendering) {
-				if(rendering.eventTimeEasementChange !== undefined) {
-					rendering.eventTimeEasementChange(te);
-				}
-			});
-		});
-		options.application.events.onPlayerChange.addListener(changeCanvasCoordinates);
-		options.application.dataStore.canvas.events.onModelChange.addListener(function() {
-			editBoundingBoxBinding.detachRendering();
-		});
-		
-		superRender = that.render;
-		
-		that.render = function(c, m, i) {
-			var rendering = superRender(c, m, i),
-			tempStore;
-			if (rendering !== undefined) {
+        options.application.events.onCurrentTimeChange.addListener(function(npt) {
+            that.visitRenderings(function(id, rendering) {
+                if (rendering.eventCurrentTimeChange !== undefined) {
+                    rendering.eventCurrentTimeChange(npt);
+                }
+            });
+        });
+        options.application.events.onTimeEasementChange.addListener(function(te) {
+            that.visitRenderings(function(id, rendering) {
+                if (rendering.eventTimeEasementChange !== undefined) {
+                    rendering.eventTimeEasementChange(te);
+                }
+            });
+        });
+        options.application.events.onPlayerChange.addListener(changeCanvasCoordinates);
+        options.application.dataStore.canvas.events.onModelChange.addListener(function() {
+            editBoundingBoxBinding.detachRendering();
+        });
 
-				tempStore = m;
-				while (tempStore.dataStore) {
+        superRender = that.render;
 
-					tempStore = tempStore.dataStore;
-				}
-				allAnnosModel = tempStore;
-				searchAnnos = options.dataView.prepare(['!type']);
-				
-				canvasBinding.registerRendering(rendering);
-			}
-			return rendering;
-		};
+        that.render = function(c, m, i) {
+            var rendering = superRender(c, m, i),
+            tempStore;
+            if (rendering !== undefined) {
 
-		superEventFocusChange = that.eventFocusChange;
+                tempStore = m;
+                while (tempStore.dataStore) {
+                    tempStore = tempStore.dataStore;
+                }
+                allAnnosModel = tempStore;
+                searchAnnos = options.dataView.prepare(['!type']);
 
-		that.eventFocusChange = function(id) {
-			if (options.application.getCurrentMode() === 'Select') {
-				superEventFocusChange(id);
-				editBoundingBoxBinding.attachRendering(that.getActiveRendering());
-			}
-		};
-		//console.log(that);
+                canvasBinding.registerRendering(rendering);
+            }
+            return rendering;
+        };
 
-		return that;
-	};
+        superEventFocusChange = that.eventFocusChange;
+
+        that.eventFocusChange = function(id) {
+            if (options.application.getCurrentMode() === 'Select') {
+                superEventFocusChange(id);
+                editBoundingBoxBinding.attachRendering(that.getActiveRendering());
+            }
+        };
+        //console.log(that);
+        return that;
+    };
+
+
+
 } (jQuery, MITHGrid, OAC));
 // End of Presentation constructors
 // # Annotation Application
@@ -1668,7 +1671,7 @@ OAC.Client.namespace("StreamingVideo");
     var canvasId,
     S4,
     uuid;
-	
+
     // #S4 (private)
     //
     // Generates a UUID value, this is not a global uid
@@ -1688,10 +1691,10 @@ OAC.Client.namespace("StreamingVideo");
     // **FIXME: Abstract so that there is a server prefix component that insures
     // more of a GUID
     //
-	uuid = function() {
-		return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
-	};
-	
+    uuid = function() {
+        return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
+    };
+
     // Create a Unique identifier
     // **FIXME: abstract this so that it is performed server-side, and we attach
     // server-side GUID as prefix to local, browser-side UUID
@@ -1712,7 +1715,7 @@ OAC.Client.namespace("StreamingVideo");
     // Options:
     //
     // * playerWrapper: [Required] DOM path to the top-level element of the video player
-	// 
+    //
     OAC.Client.StreamingVideo.initApp = function(container, options) {
         var renderListItem,
         app,
@@ -1724,21 +1727,21 @@ OAC.Client.namespace("StreamingVideo");
         myCanvasId = 'OAC-Client-StreamingVideo-SVG-Canvas-' + canvasId,
         xy = [],
         wh = [],
-		// **FIXME:** May want to tease this out as a configurable option or as a global
-		// 
-		// For now, putting namespaces of Annotations, bodies, targets, contraints here in order to be used 
-		// in import/export
-		//
-		OAC_NS = {
-			root: 'http://www.openannotation.org/ns/',
-			Annotation: 'http://www.openannotation.org/ns/Annotation',
-			Body: 'http://www.openannotation.org/ns/Body',
-			Target: 'http://www.openannotation.org/ns/Target',
-			SpTarget: 'http://www.openannotation.org/ns/ConstrainedTarget',
-			Selector: 'http://mith.umd.edu/ns/asp/SvgNptSelector',
-			FragSelector: 'http://www.w3.org/ns/openannotation/core/FragmentSelector',
-			SVGConstraint: 'http://www.w3.org/ns/openannotation/extensions/SvgSelector'
-		};
+        // **FIXME:** May want to tease this out as a configurable option or as a global
+        //
+        // For now, putting namespaces of Annotations, bodies, targets, contraints here in order to be used
+        // in import/export
+        //
+        OAC_NS = {
+            root: 'http://www.openannotation.org/ns/',
+            Annotation: 'http://www.openannotation.org/ns/Annotation',
+            Body: 'http://www.openannotation.org/ns/Body',
+            Target: 'http://www.openannotation.org/ns/Target',
+            SpTarget: 'http://www.openannotation.org/ns/ConstrainedTarget',
+            Selector: 'http://www.w3.org/ns/openannotation/core/CompoundSelector',
+            FragSelector: 'http://www.w3.org/ns/openannotation/core/FragmentSelector',
+            SVGConstraint: 'http://www.w3.org/ns/openannotation/extensions/SvgSelector'
+        };
 
         // Generating the canvasId allows us to have multiple instances of the application on a page and still
         // have a unique ID as expected by the Raphaël library.
@@ -1800,7 +1803,7 @@ OAC.Client.namespace("StreamingVideo");
                     container: "#" + myCanvasId,
                     lenses: {},
                     lensKey: ['.shapeType'],
-					playerWrapper: options.playerWrapper
+                    playerWrapper: options.playerWrapper
                 },
                 annoItem: {
                     container: '.section-annotations',
@@ -1811,8 +1814,8 @@ OAC.Client.namespace("StreamingVideo");
         },
         options)
         );
-		
-		
+
+
         // ### #initShapeLens
         //
         // Initializes a basic shape lens. The default methods expect the Raphaël SVG shape object to
@@ -2195,12 +2198,13 @@ OAC.Client.namespace("StreamingVideo");
         // Parameters:
         //
         // * area - Classname of the div where the button should go; so far, this can be either 'buttongrouping', where all
-		//  general buttons go, or 'slidergrouping', where a jQuery UI slider can be placed
-		// 
-		// * grouping - Name to be given to the inner div inside the area div
-		// 
-		// * action - Name to be given to the ID of the clickable HTML button and the name of the event to fire when button is clicked 
-		// 
+        //  general buttons go, or 'slidergrouping', where a jQuery UI slider can be placed
+        //
+        // * grouping - Name to be given to the inner div inside the area div
+        //
+        // * action - Name to be given to the ID of the clickable HTML button and the name
+        // of the event to fire when button is clicked
+        //
         app.buttonFeature = function(area, grouping, action) {
 
             // Check to make sure button isn't already present
@@ -2341,7 +2345,7 @@ OAC.Client.namespace("StreamingVideo");
         // Returns: Nothing.
         //
         // **FIXME:** We should ensure that we don't have clashing IDs. We need to use UUIDs when possible.
-		//  : Using uuid() to generate local UUIDs - not truly a UUID, but close enough for now.
+        //  : Using uuid() to generate local UUIDs - not truly a UUID, but close enough for now.
         //		
         app.insertShape = function(coords) {
             var shapeItem,
@@ -2349,9 +2353,9 @@ OAC.Client.namespace("StreamingVideo");
             npt_end = parseFloat(app.getCurrentTime()) + 5,
             curMode = app.getCurrentMode(),
             shape;
-			
-			// Insert into local array of ShapeTypes
-			// 
+
+            // Insert into local array of ShapeTypes
+            //
             shape = shapeTypes[curMode].calc(coords);
             shapeAnnotationId = uuid();
 
@@ -2361,8 +2365,10 @@ OAC.Client.namespace("StreamingVideo");
                 bodyType: "Text",
                 bodyContent: "This is an annotation for " + curMode,
                 shapeType: curMode,
-				targetURI: 'http://youtube.com', // **FIXME: Needs to be changed to dynamic value
-                opacity: 0.5, // Starts off with half-opacity, 1 is for in-focus
+                targetURI: 'http://youtube.com',
+                // **FIXME: Needs to be changed to dynamic value
+                opacity: 0.5,
+                // Starts off with half-opacity, 1 is for in-focus
                 npt_start: npt_start,
                 npt_end: npt_end
             };
@@ -2370,231 +2376,351 @@ OAC.Client.namespace("StreamingVideo");
             app.dataStore.canvas.loadItems([$.extend(shapeItem, shape)]);
         };
 
-		// ### importData
-		// 
-		// Importing annotation data from an external source. Must be in JSON format 
-		// 
-		// Parameters: 
-		// * data - Object housing the data for application
-		// 
-		app.importData = function(data) {
-			// ingest data and put it into dataStore
-			var tempstore = {}, temp, npt, constraint;
+        // ### importData
+        //
+        // Importing annotation data from an external source. Must be in JSON format
+        //
+        // Parameters:
+        // * data - Object housing the data for application
+        //
+        app.importData = function(data) {
+            // ingest data and put it into dataStore
+            var tempstore = [],
+            temp,
+            npt,
+            constraint,
+            tuid,
+            suid,
+            svgid,
+            nptid;
+			console.log('data received in importData: ' + JSON.stringify(data));
+            $.each(data,
+            function(i, o) {
+                // Singling out the Annotations from the rest of the RDF data so
+                // we can work down from just the Annotation object and its pointers
+                if (o.type[0].value === OAC_NS.Annotation && o.hasTarget !== undefined && o.hasBody !== undefined) {
+                    // Unique ID comes from the URI value of type
+                    temp = {
+                        id: i,
+                        type: "Annotation",
+                        bodyContent: '',
+                        bodyType: 'Text',
+                        shapeType: '',
+                        opacity: 0.5,
+                        npt_start: 0,
+                        npt_end: 0
+                    };
+
+                    //
+                    // Check to see if target is a CompoundSelection Resource
+                    // Right now, we don't care about things that are not Compound Resources made
+                    // up of a time fragment and an SVG Constraint
+                    //
+                    tuid = data[o.hasTarget[0].value];
+
+                    if (tuid.hasSelector !== undefined && data[tuid.hasSelector[0].value].type[0].value === OAC_NS.Selector) {
+                        suid = data[tuid.hasSelector[0].value];
+                        svgid = data[suid.hasSelector[0].value];
+						
+                        // Fill in blanks for SVG
+                        temp.shapeType = $(svgid.chars[0].value)[0].nodeName;
+                        temp.x = $(svgid.chars[0].value).attr('x');
+                        temp.y = $(svgid.chars[0].value).attr('y');
+                        temp.w = $(svgid.chars[0].value).attr('width');
+                        temp.h = $(svgid.chars[0].value).attr('height');
+
+                        // Fill in blanks for the NPT constraint
+                        nptid = data[suid.hasSelector[1].value];
+                        npt = nptid.value[0].value.replace(/^t=/g, '');
+                        temp.npt_start = nptid.value[0].value.replace(/\,[0-9]+/g, '');
+                        temp.npt_end = nptid.value[0].value.replace(/^[0-9]+/g, '');
+
+                        // Fill in blanks for body
+                        temp.bodyContent = data[o.hasBody[0].value].chars[0].value;
+
+                        tempstore.push(temp);
+                    }
+                }
+            });
+            // insert into dataStore
+            app.dataStore.canvas.loadItems(tempstore);
 			
-			$.each(data, function(i, o) {
-				// determine type by matching up the RDF:OAC namespaces with the type.value of an item
-				switch(o.type[0].value) {
-					case OAC_NS.Annotation:
-						// Unique ID comes from the URI value of type
-						temp = {
-							id: o.type[0].value,
-							type: "Annotation",
-							bodyContent: o.hasBody[0].value,
-							bodyType: 'Text',
-							shapeType: o.hasTarget[0].value,
-							opacity: 0.5,
-							npt_start: 0,
-							npt_end: 0
-						};
-						
-						// add to stack
-						tempstore = $.extend(true, tempstore, temp);
-					break;
-					case OAC_NS.Body:
-						// Attach body data to the exisiting annotation
-						$.each(tempstore, function(id, anno) {
-							if(anno.bodyContent === i) {
-								// matching anno with matching bodyContent
-								anno.bodyContent = o.chars[0].value;
-							}
-						});
-						
-					break;
-					case OAC_NS.SpTarget:
-						// References a constrained target
-						$.each(tempstore, function(id, anno) {
-							if(anno.shapeType === i) {
-								// matching anno with matching bodyContent
-								anno.shapeType = o.hasSelector[0].value;
-							}
-						});
-						
-					break;
-					case OAC_NS.Selector:
-						// 
-						$.each(tempstore, function(id, anno) {
-							if(anno.shapeType === i) {
-								//
-								anno.shapeType = o.hasSvgSelector[0].value;
-								anno.x = o.hasSvgSelector[0].value;
-								anno.y = o.hasSvgSelector[0].value;
-								anno.w = o.hasSvgSelector[0].value;
-								anno.h = o.hasSvgSelector[0].value;
-								anno.npt_start = o.hasNptSelector[0].value;
-								anno.npt_end = o.hasNptSelector[0].value;
-							}
-						});
-					break;
-					case OAC_NS.FragSelector:
-						$.each(tempstore, function(id, anno) {
-							if(anno.npt_start === i) {
-								npt = o.value[0].value.replace(/^t=/g, '');
-								anno.npt_start = o.hasNptSelector[0].value.replace(/\,[0-9]+/g, '');
-								anno.npt_end = o.hasNptSelector[0].value.replace(/^[0-9]+/g, '');
-							}
-						});
-					break;
-					case OAC_NS.SVGSelector:
-						$.each(tempstore, function(id, anno) {
-							if(anno.shapeType === i) {
-								anno.shapeType = $(o.chars[0].value)[0].nodeName;
-								anno.x = $(o.chars[0].value).attr('x');
-								anno.y = $(o.chars[0].value).attr('y');
-								anno.w = $(o.chars[0].value).attr('width');
-								anno.h = $(o.chars[0].value).attr('height');
-							}
-						});
-					break;
+			testprep = app.dataStore.canvas.prepare(['!type']);
+			console.log('annotations in store: ' + testprep.evaluate('Annotation'));
+			
+        };
+
+        // ### exportData
+        //
+        // Works backwards from the importData function for now.
+        //
+        // Parameters:
+        //
+        // * data - JSON Object of the original data used during import (Not stored locally during MITHGrid session)
+        //
+        // Returns:
+        //
+        // JSON Object that conforms to the
+        app.exportData = function(data) {
+            // Get all data from dataStore
+            var tempstore = {},
+            findAnnos = app.dataStore.canvas.prepare(['!type']),
+            annos,
+            obj,
+            temp,
+            tuid,
+            buid,
+            fgid,
+            svgid,
+            suid,
+            found,
+
+            // #### genBody (private)
+            //
+            // Generates the body oject and adds it to tempstore
+            //
+            // Parameters:
+			// * obj - DataStore item
+            // * id (optional) - create Body Object with specific ID
+            //
+            genBody = function(obj, id) {
+                
+                // Generating body element
+                tempstore[id] = {
+                    'type': [{
+                        'type': 'uri',
+                        'value': OAC_NS.Body
+                    }],
+                    'format': [{
+                        'type': 'literal',
+                        'value': 'text/plain'
+                    }],
+                    'characterEncoding': [{
+                        type: 'literal',
+                        value: 'utf-8'
+                    }],
+
+                    'chars': [{
+                        type: 'literal',
+                        value: obj.bodyContent[0]
+                    }]
+                };
+            },
+            // #### genTarget (private)
+            //
+            // Generates a JSON object representing a target and adds it to tempstore
+            //
+            // Parameters
+            // * obj - dataStore item
+            // * id (optional) - pass array of IDs to use as target ID, Selector ID, etc
+            //
+            genTarget = function(obj, id) {
+                // Unique Identifiers for pieces of Target
+                
+                // Generating target element
+                tempstore[id[0]] = {
+                    'type': [{
+                        'type': 'uri',
+                        'value': OAC_NS.SpTarget
+                    }],
+                    'hasSource': [{
+                        'type': 'uri',
+                        'value': obj.targetURI[0]
+                    }],
+                    'hasSelector': [{
+                        'type': 'bnode',
+                        'value': suid
+                    }]
+                };
+
+                // Selector element, which points to the SVG constraint and NPT constraint
+                tempstore[id[1]] = {
+                    'type': [{
+                        'type': 'uri',
+                        'value': OAC_NS.Selector
+                    }],
+                    'hasSelector': [{
+                        type: 'bnode',
+                        value: id[2]
+                    },
+                    {
+                        type: 'bnode',
+                        value: id[3]
+                    }]
+                };
+
+                // Targets have selectors, which then have svg and npt elements
+                tempstore[id[2]] = {
+                    'type': [{
+                        'type': 'uri',
+                        'value': OAC_NS.SVGConstraint
+                    }],
+                    'format': [{
+                        type: 'literal',
+                        value: 'text/svg+xml'
+                    }],
+
+                    'characterEncoding': [{
+                        type: 'literal',
+                        value: 'utf-8'
+                    }],
+
+                    'chars': [{
+                        type: 'literal',
+                        value: '<' + obj.shapeType[0].substring(0, 4).toLowerCase() +
+                        ' x="' + obj.x[0] + '" y="' + obj.y[0] + ' width="' + obj.w[0] + '" height="' + obj.h[0] + '" />'
+                    }]
+                };
+
+                tempstore[id[3]] = {
+                    'type': [{
+                        'type': 'uri',
+                        'value': OAC_NS.FragSelector
+                    }],
+                    'value': [{
+                        'type': 'literal',
+                        'value': 't=npt:' + obj.npt_start[0] + ',' + obj.npt_end[0]
+                    }]
+                };
+            },
+            // #### createJSONObjSeries (private)
+            //
+            // Creates the necessary series of objects to be inserted
+            // into the exported JSON. Only called if there isn't already a RDF:JSON object that was imported with a matching ID
+            //
+            // Parameters:
+            //
+            // * id - Array of Ids to use as:
+            // 0th - Annotation Object (required)
+            // 1st - Body Object (optional)
+            // 2nd - Target (optional)
+            // 3rd - Target Selector (optional)
+            // 4th - Target SVG (optional)
+            // 5th - Target NPT (optional)
+            createJSONObjSeries = function(id) {
+                obj = app.dataStore.canvas.getItem(id);
+				if (id.length > 1) {
+					annoid = id[0];
+					buid = id[1];
+					tuid = id[2];
+                    suid = id[3];
+                    svgid = id[4];
+                    fgid = id[5];
+				} else {
+					
+					buid = '_:b' + uuid();
+					tuid = '_:t' + uuid();
+					suid = '_:sel' + uuid();
+					svgid = '_:sel' + uuid();
+					fgid = '_:sel' + uuid();
 				}
-			});
-		};
-		
-		// ### exportData
-		// 
-		// Works backwards from the importData function for now. 
-		// 
-		// Parameters:
-		// 
-		// * data - JSON Object of the original data used during import (Not stored locally during MITHGrid session) 
-		// 
-		// Returns:
-		// 
-		// JSON Object that conforms to the 
-		app.exportData = function(data) {
-			// Get all data from dataStore
-			var tempstore = {}, 
-			findAnnos = app.dataStore.canvas.prepare(['!type']),
-			annos,
-			obj,
-			temp,
-			tuid,
-			buid,
-			fgid,
-			svgid,
-			suid,
-			// #### createJSONObjSeries (private)
-			// 
-			// Creates the necessary series of objects to be inserted
-			// into the exported JSON. Only called if there isn't already a RDF:JSON object that was imported with a matching ID
-			// 
-			// Parameters: 
-			// 
-			// * id - ID of the item to create in OAC:ASP JSON
-			// 
-			createJSONObjSeries = function(id) {
-				obj = app.dataStore.canvas.getItem(id);
-				buid = 'b' + uuid();
-				tuid = 't' + uuid();
-				suid = 's' + uuid(); // selector ID
-				svgid = 'svg' + uuid(); // SVG constraint ID
-				fgid = 'frag' + uuid(); // Fragment Idenitifier ID
-				tempstore[obj.id[0]] = {
-					'type' : [{
-						'type' : 'uri',
-						'value' : OAC_NS.Annotation
-					}],
-					'hasBody' : [{
-						type : 'bnode',
-						value : '_:' + buid
-					}],
-					'hasTarget' : [{
-						type : 'bnode',
-						value : '_:' + tuid
-					}]
-				};
-				// Generating body element
-				tempstore[buid] = {
-					'type' : [{
-						'type' : 'uri',
-						'value' : OAC_NS.Body
-					}],
-					'format' : [{
-						'type' : 'literal',
-						'value' : 'text/plain'
-					}],
-					'characterEncoding': [{ type: 'literal',    value: 'utf-8' }],
 
-					'chars':         [{ type: 'literal',    value: obj.bodyContent[0] }]
-				};
-				// Generating target element
-				tempstore[tuid] = {
-					'type' : [{
-						'type' : 'uri',
-						'value' : OAC_NS.SpTarget
-					}],
-					'hasSource' : [{
-						'type' : 'uri',
-						'value' : obj.targetURI[0]
-					}],
-					'hasSelector' : [{
-						'type' : 'bnode',
-						'value' : suid
-					}]
-				};
-				
-				// Selector element, which points to the SVG constraint and NPT constraint
-				tempstore[suid] = {
-					'type' : [{
-						'type' : 'uri',
-						'value' : OAC_NS.Selector
-					}],
-					'hasSvgSelector' : [{
-						type: 'bnode',    
-						value: svgid
-					}],
-					'hasNptSelector' : [{
-						type: 'bnode',    
-						value: fgid
-					}]
-				};
-				
-				// Targets have selectors, which then have svg and npt elements
-				tempstore[svgid] = {
-					'type' : [{
-						'type' : 'uri',
-						'value' : OAC_NS.SVGConstraint
-					}],
-					'dc:format':         [{ type: 'literal',    value: 'text/svg+xml' }],
+				console.log('tuid + buid: ' + tuid + ', ' + buid);
+                // Fragment Idenitifier ID
+                tempstore[id[0]] = {
+                    'type': [{
+                        'type': 'uri',
+                        'value': OAC_NS.Annotation
+                    }],
+                    'hasBody': [{
+                        type: 'bnode',
+                        value: buid
+                    }],
+                    'hasTarget': [{
+                        type: 'bnode',
+                        value: tuid
+                    }]
+                };
 
-					'cnt:characterEncoding': [{ type: 'literal',    value: 'utf-8' }],
+                genBody(obj, buid);
+                genTarget(obj, [tuid, suid, svgid, fgid]);
+            },
+            // #### mergeData (private)
+            //
+            // Takes an id of a dataStore object and merges the data
+            // in the object with what is in the (optionally) passed
+            // RDF:JSON object
+            //
+            // Parameters:
+            // * id - ID of object to merge
+            //
+            mergeData = function(id) {
+                obj = app.dataStore.canvas.getItem(id);
 
-					'cnt:chars':         [{ type: 'literal',    value: '<' + obj.shapeType[0].substring(0,4).toLowerCase() +
-								' x="' + obj.x[0] + '" y="' + obj.y[0] + ' width="' + obj.w[0] + '" height="' + obj.h[0] + '" />'}]
-				};
-				
-				tempstore[fgid] = {
-					'type' : [{
-						'type' : 'uri',
-						'value' : OAC_NS.FragSelector
-					}],
-					'value' : [{
-						'type' : 'literal',
-						'value' : 't=npt:' + obj.npt_start[0] + ',' + obj.npt_end[0]
-					}]
-				};
-			};
-			
-			annos = findAnnos.evaluate('Annotation');
-			$.each(annos, function(i, o) {
-				if(data === undefined) {
-					createJSONObjSeries(o);
-				}
-			});
-			
-			return tempstore;
-			
-		};
-		
+                // check where data merges
+                if (data[obj.id] !== undefined) {
+                    // go through annotation pointers in RDF:JSON to update body, target, etc
+                    $.each(data[obj.id],
+                    function(type, value) {
+                        switch (type) {
+                        case 'hasBody':
+                            buid = data[obj.id].hasBody[0].value;
+                            data[buid].chars[0].value = obj.bodyContent;
+                            break;
+                        case 'hasTarget':
+                            // If Target is undefined within ASP JSON, then it remains blank in RDF:JSON
+                            if (obj.targetURI[0] !== undefined && obj.x[0] !== undefined) {
+                                tuid = data[obj.id].hasTarget[0].value;
+                                // Using variable to check against whether object is found or not
+                                found = false;
+                                // Matching video URLs means matching Targets
+                                if (data[tuid].hasSource[0].value === obj.targetURI[0]) {
+                                    // matching sources - merging
+                                    suid = data[tuid].hasSelector[0].value;
+                                    found = true;
+                                    // Go through the selectors
+                                    $.each(data[suid],
+                                    function(seltype, selval) {
+                                        if (seltype === 'hasSelector') {
+                                            $.each(selval,
+                                            function(seli, selo) {
+                                                // is svg, npt?
+                                                if (data[selo.value].type[0].value === OAC_NS.SVGConstraint) {
+                                                    data[selo.value].chars = [{
+                                                        type: 'literal',
+                                                        value: '<' + obj.shapeType[0].substring(0, 4).toLowerCase() +
+                                                        ' x="' + obj.x[0] + '" y="' + obj.y[0] + ' width="' +
+                                                        obj.w[0] + '" height="' + obj.h[0] + '" />'
+                                                    }];
+                                                } else if (data[selo.value].type[0].value === OAC_NS.FragSelector) {
+                                                    data[selval].chars = [{
+                                                        'type': 'literal',
+                                                        'value': 't=npt:' + obj.npt_start[0] + ',' + obj.npt_end[0]
+                                                    }];
+                                                }
+                                            });
+                                        }
+                                    });
+                                }
+
+                                // If no target element found, create new one in RDF:JSON
+                                if (found === false) {
+                                    genTarget(obj);
+                                }
+                            }
+                            break;
+                        default:
+                            // do nothing
+                            break;
+                        };
+                    });
+                } else {
+                    createJSONObjSeries(obj.id);
+                }
+            };
+
+            data = data || {};
+
+            annos = findAnnos.evaluate('Annotation');
+            $.each(annos,
+            function(i, o) {
+                mergeData(o);
+            });
+
+            return tempstore;
+
+        };
+
         // ## Application Configuration
         //
         // The rest of this prepares the annotation application once it's in the up-and-running process.
@@ -2621,7 +2747,7 @@ OAC.Client.namespace("StreamingVideo");
             // specific to the video being annotated, so it doesn't make as much sense to change the video we're
             // annotating. Better to create a new applicaiton instance.
             app.events.onPlayerChange.addListener(function(playerobject) {
-				
+
                 app.setCurrentTime(playerobject.getPlayhead());
                 playerobject.onPlayheadUpdate(function(t) {
                     app.setCurrentTime((app.getCurrentTime() + 1));
@@ -2711,7 +2837,7 @@ OAC.Client.namespace("StreamingVideo");
             // Parameters:
             //
             // * container - the container holding the lens content
-			// 
+            //
             // * view - the presentation managing the collection of renderings
             //
             // * model - the data store or data view holding information abut the item to be rendered
@@ -2724,8 +2850,7 @@ OAC.Client.namespace("StreamingVideo");
             //
             lensRectangle = function(container, view, model, itemId) {
                 // Note: Rectangle measurements x,y start at CENTER
-
-				// Initiate object with super-class methods and variables
+                // Initiate object with super-class methods and variables
                 var that = app.initShapeLens(container, view, model, itemId),
                 item = model.getItem(itemId),
                 superUpdate,
@@ -2745,7 +2870,7 @@ OAC.Client.namespace("StreamingVideo");
 
                 // **FIXME:** may break with multiple videos if different annotations have the same ids in different
                 // sets of annotations.
-				// Should be fixed with UUID
+                // Should be fixed with UUID
                 $(c.node).attr('id', item.id[0]);
 
                 selectBinding = app.controller.selectShape.bind(c);
@@ -2787,20 +2912,23 @@ OAC.Client.namespace("StreamingVideo");
 
                 return that;
             };
-			
-			// Using addShapeType to add Rectangle to the array of possible SVG
-			// shapes
+
+            // Using addShapeType to add Rectangle to the array of possible SVG
+            // shapes
             app.addShapeType("Rectangle",
             {
                 calc: calcRectangle,
                 lens: lensRectangle
             });
-			
-			
-			// 
-			// 
-			// 
-			// 
+
+
+            // #### calcEllipse (private)
+            //
+            // Generates a JSON object containing the measurements for an
+            // ellipse object but only using x, y, w, h
+            //
+            // Returns:
+            // JSON object
             calcEllipse = function(coords) {
                 var attrs = {};
                 attrs.x = coords.x + (coords.width / 2);
@@ -2810,6 +2938,24 @@ OAC.Client.namespace("StreamingVideo");
                 return attrs;
             };
 
+            // #### lensEllipse
+            //
+            // Rendering Lens for the Ellipse SVG shape
+            //
+            // Parameters:
+            //
+            // * container - the container holding the lens content
+            //
+            // * view - the presentation managing the collection of renderings
+            //
+            // * model - the data store or data view holding information abut the item to be rendered
+            //
+            // * itemId - the item ID of the item to be rendered
+            //
+            // Returns:
+            //
+            // The rendering object.
+            //
             lensEllipse = function(container, view, model, itemId) {
                 var that = app.initShapeLens(container, view, model, itemId),
                 item = model.getItem(itemId),
@@ -2877,7 +3023,6 @@ OAC.Client.namespace("StreamingVideo");
 
 
             // Adding in button features for annotation creation
-
             rectButton = app.buttonFeature('buttongrouping', 'Shapes', 'Rectangle');
 
             ellipseButton = app.buttonFeature('buttongrouping', 'Shapes', 'Ellipse');

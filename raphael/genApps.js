@@ -12,7 +12,8 @@ var initPlugin = function() {
 	initStreamingVideoApp = function(playerobj) {
 		// Create Raphael canvas application controls
 		raphApp = OAC.Client.StreamingVideo.initApp("#content-container", {
-			playerWrapper: '#myplayer'
+			playerWrapper: '#myplayer',
+			videoURI: 'http://www.youtube.com/watch?v=HYLacuAp76U&feature=fvsr'
 		});
 		
 		// Adding a ready wrapper function to set the playerobject
@@ -37,6 +38,15 @@ var initPlugin = function() {
 				data = raphApp.exportData();
 				console.log('received exported data: ' + data);
 				$('.section-export-data > #export-text').val(JSON.stringify(data));
+			});
+			
+			// Setting up import button
+			// 
+			$('.section-export-data > #importJSONRDF').click(function() {
+				if($('.section-export-data > #export-text').val() !== '') {
+					data = $('.section-export-data > #export-text').val();
+					raphApp.importData(JSON.parse(data));
+				}
 			});
 		}, 10);
 	};
