@@ -13,7 +13,8 @@ var initPlugin = function() {
 		// Create Raphael canvas application controls
 		raphApp = OAC.Client.StreamingVideo.initApp("#content-container", {
 			playerWrapper: '#myplayer',
-			videoURI: 'http://www.youtube.com/watch?v=HYLacuAp76U&feature=fvsr'
+			url: 'http://www.youtube.com/watch?v=HYLacuAp76U&feature=fvsr',
+			easement: 5
 		});
 		
 		// Adding a ready wrapper function to set the playerobject
@@ -34,9 +35,7 @@ var initPlugin = function() {
 			// 
 			$('.section-export-data > #exportDataStore').click(function() {
 				// init exportData
-				console.log('exporting data');
 				data = raphApp.exportData();
-				console.log('received exported data: ' + data);
 				$('.section-export-data > #export-text').val(JSON.stringify(data));
 			});
 			

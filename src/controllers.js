@@ -1193,7 +1193,6 @@
             // * action - name of new mode
             //
             onCurrentModeChangeHandle = function(action) {
-
                 if (action === options.action) {
                     active = true;
                     $(buttonEl).addClass('active');

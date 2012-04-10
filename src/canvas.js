@@ -148,8 +148,7 @@
         },
         options)
         );
-
-
+		
         // ### #initShapeLens
         //
         // Initializes a basic shape lens. The default methods expect the Raphaël SVG shape object to
@@ -192,7 +191,6 @@
                 if (n < fstart || n > fend) {
                     return 0.0;
                 }
-
                 if (n < start) {
                     // fading in
                     val = (1 / (start - n));
@@ -211,9 +209,9 @@
             end = item.npt_end[0];
             fstart = start - app.getTimeEasement();
             fend = end + app.getTimeEasement();
-
+			
             opacity = calcOpacity(app.getCurrentTime());
-
+			
 
             // ### eventTimeEasementChange (private)
             //
@@ -231,6 +229,7 @@
             that.eventTimeEasementChange = function(v) {
                 fstart = start - v;
                 fend = end + v;
+
                 that.setOpacity(calcOpacity(app.getCurrentTime()));
             };
 
@@ -699,11 +698,11 @@
                 bodyType: "Text",
                 bodyContent: "This is an annotation for " + curMode,
                 shapeType: curMode,
-                targetURI: 'http://youtube.com',
+                targetURI: app.options.url,
                 // **FIXME: Needs to be changed to dynamic value
                 opacity: 0.5,
                 // Starts off with half-opacity, 1 is for in-focus
-                npt_start: npt_start,
+                npt_start: (npt_start<0)? 0:npt_start,
                 npt_end: npt_end
             };
 
@@ -727,61 +726,98 @@
             suid,
             svgid,
             nptid;
-			console.log('data received in importData: ' + JSON.stringify(data));
             $.each(data,
             function(i, o) {
                 // Singling out the Annotations from the rest of the RDF data so
                 // we can work down from just the Annotation object and its pointers
-                if (o.type[0].value === OAC_NS.Annotation && o.hasTarget !== undefined && o.hasBody !== undefined) {
-                    // Unique ID comes from the URI value of type
-                    temp = {
-                        id: i,
-                        type: "Annotation",
-                        bodyContent: '',
-                        bodyType: 'Text',
-                        shapeType: '',
-                        opacity: 0.5,
-                        npt_start: 0,
-                        npt_end: 0
-                    };
+                if (o.type[0].value === OAC_NS.Annotation) {
+					
+					// Logic chain to determine what kind of incoming annotation we're dealing with
+					// 
+					// Only interested in annotations that match our Video URI: are 'about' the video OR
+					// that do not yet have targets
+					if(o.hasTarget !== undefined) {
+						if(data[o.hasTarget[0].value].hasSource[0].value !== app.options.url) {
+							return 1; // Skip over this item (From $.each() docs)
+						} else if(data[o.hasTarget[0].value].hasSource[0].value === app.options.url) {
+							// Target source matches the URI of our video; generate an OAC dataStore model 
+							// to insert into canvas for this annotation series in the JSON:RDF data
+							
+							// Unique ID comes from the URI value of type
+		                    temp = {
+		                        id: i,
+		                        type: "Annotation",
+		                        bodyContent: '',
+		                        bodyType: 'Text',
+								targetURI: app.options.url,
+		                        shapeType: '',
+		                        opacity: 0.5,
+		                        npt_start: 0,
+		                        npt_end: 0
+		                    };
 
-                    //
-                    // Check to see if target is a CompoundSelection Resource
-                    // Right now, we don't care about things that are not Compound Resources made
-                    // up of a time fragment and an SVG Constraint
-                    //
-                    tuid = data[o.hasTarget[0].value];
+		                    //
+		                    // Check to see if target is a CompoundSelection Resource
+		                    // Right now, we don't care about things that are not Compound Resources made
+		                    // up of a time fragment and an SVG Constraint
+		                    //
+		                    tuid = data[o.hasTarget[0].value];
 
-                    if (tuid.hasSelector !== undefined && data[tuid.hasSelector[0].value].type[0].value === OAC_NS.Selector) {
-                        suid = data[tuid.hasSelector[0].value];
-                        svgid = data[suid.hasSelector[0].value];
-						
-                        // Fill in blanks for SVG
-                        temp.shapeType = $(svgid.chars[0].value)[0].nodeName;
-                        temp.x = $(svgid.chars[0].value).attr('x');
-                        temp.y = $(svgid.chars[0].value).attr('y');
-                        temp.w = $(svgid.chars[0].value).attr('width');
-                        temp.h = $(svgid.chars[0].value).attr('height');
+		                    if (tuid.hasSelector !== undefined && data[tuid.hasSelector[0].value].type[0].value === OAC_NS.Selector) {
+		                        suid = data[tuid.hasSelector[0].value];
+		                        svgid = data[suid.hasSelector[0].value];
 
-                        // Fill in blanks for the NPT constraint
-                        nptid = data[suid.hasSelector[1].value];
-                        npt = nptid.value[0].value.replace(/^t=/g, '');
-                        temp.npt_start = nptid.value[0].value.replace(/\,[0-9]+/g, '');
-                        temp.npt_end = nptid.value[0].value.replace(/^[0-9]+/g, '');
+		                        // Fill in blanks for SVG
+		                        temp.shapeType = $(svgid.chars[0].value)[0].nodeName;
+								// correct shape-type nodeName to full name for DataStore
+								if(temp.shapeType === 'RECT') {
+									temp.shapeType = 'Rectangle';
+								} else if(temp.shapeType === 'ELLI') {
+									temp.shapeType = 'Ellipse';
+								}
+		                        temp.x = parseInt($(svgid.chars[0].value).attr('x'),10);
+		                        temp.y = parseInt($(svgid.chars[0].value).attr('y'),10);
+		                        temp.w = parseInt($(svgid.chars[0].value).attr('width'),10);
+		                        temp.h = parseInt($(svgid.chars[0].value).attr('height'),10);
 
-                        // Fill in blanks for body
-                        temp.bodyContent = data[o.hasBody[0].value].chars[0].value;
+		                        // Fill in blanks for the NPT constraint
+		                        nptid = data[suid.hasSelector[1].value];
+		                        npt = nptid.value[0].value.replace(/^t=npt:/g, '');
+		                        temp.npt_start = parseInt(npt.replace(/\,[0-9]+/g, ''),10);
+		                        temp.npt_end = parseInt(npt.replace(/^[0-9]+\,/g, ''),10);
 
-                        tempstore.push(temp);
-                    }
+		                        // Fill in blanks for body
+		                        temp.bodyContent = data[o.hasBody[0].value].chars[0].value || '';
+		                        tempstore.push(temp);
+		                    }
+						}
+					} else {
+						//  No Target is created yet - create blank item to insert into dataStore
+							// Unique ID comes from the URI value of type
+		                    temp = {
+		                        id: i,
+		                        type: "Annotation",
+		                        bodyContent: '',
+		                        bodyType: 'Text',
+								targetURI: app.options.url,
+		                        shapeType: '',
+		                        opacity: 0.5,
+		                        npt_start: 0,
+		                        npt_end: 0
+		                    };
+		
+							if(o.hasBody !== undefined) {
+								temp.bodyContent = data[o.hasBody[0].value].chars[0];
+							}
+							
+							tempstore.push(temp);
+					}
+					
+                    
                 }
             });
             // insert into dataStore
             app.dataStore.canvas.loadItems(tempstore);
-			
-			testprep = app.dataStore.canvas.prepare(['!type']);
-			console.log('annotations in store: ' + testprep.evaluate('Annotation'));
-			
         };
 
         // ### exportData
@@ -902,7 +938,7 @@
                     'chars': [{
                         type: 'literal',
                         value: '<' + obj.shapeType[0].substring(0, 4).toLowerCase() +
-                        ' x="' + obj.x[0] + '" y="' + obj.y[0] + ' width="' + obj.w[0] + '" height="' + obj.h[0] + '" />'
+                        ' x="' + obj.x[0] + '" y="' + obj.y[0] + '" width="' + obj.w[0] + '" height="' + obj.h[0] + '" />'
                     }]
                 };
 
@@ -934,7 +970,6 @@
             createJSONObjSeries = function(id) {
                 obj = app.dataStore.canvas.getItem(id);
 				if (id.length > 1) {
-					annoid = id[0];
 					buid = id[1];
 					tuid = id[2];
                     suid = id[3];
@@ -949,7 +984,6 @@
 					fgid = '_:sel' + uuid();
 				}
 
-				console.log('tuid + buid: ' + tuid + ', ' + buid);
                 // Fragment Idenitifier ID
                 tempstore[id[0]] = {
                     'type': [{
@@ -1036,7 +1070,7 @@
                         default:
                             // do nothing
                             break;
-                        };
+                        }
                     });
                 } else {
                     createJSONObjSeries(obj.id);
@@ -1072,6 +1106,9 @@
             // of the current time.
             app.events.onCurrentTimeChange.addListener(function(t) {
                 app.dataView.currentAnnotations.setKeyRange(t - 5, t + 5);
+				// Making sure that none of the button items are still active while video is playing
+				// (Can't draw a shape while video is playing - force user to re-click item)
+				app.setCurrentMode('Watch');
             });
 
             // We currently have a Player variable that handles the current player object. This may change since
@@ -1191,7 +1228,7 @@
                 selectBinding,
                 c,
                 bbox;
-
+				
                 // Accessing the view.canvas Object that was created in MITHGrid.Presentation.RaphSVG
                 c = view.canvas.rect(item.x[0] - (item.w[0] / 2), item.y[0] - (item.h[0] / 2), item.w[0], item.h[0]);
 

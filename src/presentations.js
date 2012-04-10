@@ -279,7 +279,6 @@
                 editBoundingBoxBinding.attachRendering(that.getActiveRendering());
             }
         };
-        //console.log(that);
         return that;
     };
 
