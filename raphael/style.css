@@ -47,7 +47,7 @@ MITHGrid
 	background: transparent;
 	border: 2px solid red;
 	position: absolute;
-	z-index: 9999;
+	
 }
 .section-annotations {
 	background: #FFF;
