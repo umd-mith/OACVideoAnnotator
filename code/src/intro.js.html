@@ -1,0 +1,33 @@
+<!DOCTYPE html><html><head><title>intro.js</title><meta http-equiv="Content-Type" content="text/html" charset="UTF-8"><link rel="stylesheet" media="all" href="../docco.css"></head><body><div id="container"><div id="background"></div><div id="jump_to">Jump To &hellip;<div id="jump_wrapper"><div id="jump_page"><a href="../index.html" class="source"><span class="file_name">README</span></a><a href="../src/canvas.js.html" class="source "><span class="base_path">src / </span><span class="file_name">canvas.js</span></a><a href="../src/component.js.html" class="source "><span class="base_path">src / </span><span class="file_name">component.js</span></a><a href="../src/controllers.js.html" class="source "><span class="base_path">src / </span><span class="file_name">controllers.js</span></a><a href="../src/intro.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">intro.coffee</span></a><a href="../src/intro.js.html" class="source selected"><span class="base_path">src / </span><span class="file_name">intro.js</span></a><a href="../src/oac-dummy-player.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">oac-dummy-player.coffee</span></a><a href="../src/oac-dummy-player.js.html" class="source "><span class="base_path">src / </span><span class="file_name">oac-dummy-player.js</span></a><a href="../src/oac-player-framework.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">oac-player-framework.coffee</span></a><a href="../src/oac-player-framework.js.html" class="source "><span class="base_path">src / </span><span class="file_name">oac-player-framework.js</span></a><a href="../src/oac-youtube-player.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">oac-youtube-player.coffee</span></a><a href="../src/outro.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">outro.coffee</span></a><a href="../src/outro.js.html" class="source "><span class="base_path">src / </span><span class="file_name">outro.js</span></a><a href="../src/presentations.js.html" class="source "><span class="base_path">src / </span><span class="file_name">presentations.js</span></a></div></div></div><table cellpadding="0" cellspacing="0"><thead><tr><th class="docs"><h1>intro.js</h1><div class="filepath">src/</div></th><th class="code"></th></tr></thead><tbody><tr id="section-1"><td class="docs"><div class="pilwrap"><a href="#section-1" class="pilcrow">&#182;</a></div><p>OAC Video Annotation Tool v@VERSION</p>
+
+<p>The <strong>OAC Video Annotation Tool</strong> is a MITHGrid application providing annotation capabilities for streaming
+video embedded in a web page. </p>
+
+<p>Date: @DATE</p>
+
+<p>Educational Community License, Version 2.0</p>
+
+<p>Copyright 2011 University of Maryland. Licensed under the Educational
+Community License, Version 2.0 (the "License"); you may not use this file
+except in compliance with the License. You may obtain a copy of the License at</p>
+
+<p>http://www.osedu.org/licenses/ECL-2.0</p>
+
+<p>Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations under
+the License.</p>
+
+<p>Author: Grant Dickie</p>
+</td><td class="code"><div class="highlight"><pre></pre></div></td></tr><tr id="section-2"><td class="docs"><div class="pilwrap"><a href="#section-2" class="pilcrow">&#182;</a></div><h1>Initialization</h1>
+</td><td class="code"><div class="highlight"><pre></pre></div></td></tr><tr id="section-3"><td class="docs"><div class="pilwrap"><a href="#section-3" class="pilcrow">&#182;</a></div><p>We make sure certain globals are defined in case this library is loaded before MITHGrid,
+jQuery, or Raphaël.</p>
+</td><td class="code"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">MITHGrid</span> <span class="o">=</span> <span class="nx">MITHGrid</span> <span class="o">||</span> <span class="p">{};</span>
+<span class="kd">var</span> <span class="nx">jQuery</span> <span class="o">=</span> <span class="nx">jQuery</span> <span class="o">||</span> <span class="p">{};</span>
+<span class="kd">var</span> <span class="nx">Raphael</span> <span class="o">=</span> <span class="nx">Raphael</span> <span class="o">||</span> <span class="p">{};</span></pre></div></td></tr><tr id="section-4"><td class="docs"><div class="pilwrap"><a href="#section-4" class="pilcrow">&#182;</a></div><p>The plugin uses the OAC.Client.StreamingVideo namespace.</p>
+</td><td class="code"><div class="highlight"><pre><span class="kd">var</span> <span class="nx">OAC</span> <span class="o">=</span> <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">globalNamespace</span><span class="p">(</span><span class="s2">&quot;OAC&quot;</span><span class="p">);</span>
+<span class="nx">OAC</span><span class="p">.</span><span class="nx">namespace</span><span class="p">(</span><span class="s2">&quot;Client&quot;</span><span class="p">);</span>
+<span class="nx">OAC</span><span class="p">.</span><span class="nx">Client</span><span class="p">.</span><span class="nx">namespace</span><span class="p">(</span><span class="s2">&quot;StreamingVideo&quot;</span><span class="p">);</span>
+
+</pre></div></td></tr></tbody></table><div id="generated">generated Wed Apr 11 2012 09:27:00 GMT-0400 (EDT)  </div><div id="projectname"><a href="../index.html">OAC Video Annotation Client</a></div></div></body></html>

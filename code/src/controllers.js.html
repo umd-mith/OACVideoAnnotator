@@ -1,0 +1,1175 @@
+<!DOCTYPE html><html><head><title>controllers.js</title><meta http-equiv="Content-Type" content="text/html" charset="UTF-8"><link rel="stylesheet" media="all" href="../docco.css"></head><body><div id="container"><div id="background"></div><div id="jump_to">Jump To &hellip;<div id="jump_wrapper"><div id="jump_page"><a href="../index.html" class="source"><span class="file_name">README</span></a><a href="../src/canvas.js.html" class="source "><span class="base_path">src / </span><span class="file_name">canvas.js</span></a><a href="../src/component.js.html" class="source "><span class="base_path">src / </span><span class="file_name">component.js</span></a><a href="../src/controllers.js.html" class="source selected"><span class="base_path">src / </span><span class="file_name">controllers.js</span></a><a href="../src/intro.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">intro.coffee</span></a><a href="../src/intro.js.html" class="source "><span class="base_path">src / </span><span class="file_name">intro.js</span></a><a href="../src/oac-dummy-player.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">oac-dummy-player.coffee</span></a><a href="../src/oac-dummy-player.js.html" class="source "><span class="base_path">src / </span><span class="file_name">oac-dummy-player.js</span></a><a href="../src/oac-player-framework.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">oac-player-framework.coffee</span></a><a href="../src/oac-player-framework.js.html" class="source "><span class="base_path">src / </span><span class="file_name">oac-player-framework.js</span></a><a href="../src/oac-youtube-player.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">oac-youtube-player.coffee</span></a><a href="../src/outro.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">outro.coffee</span></a><a href="../src/outro.js.html" class="source "><span class="base_path">src / </span><span class="file_name">outro.js</span></a><a href="../src/presentations.js.html" class="source "><span class="base_path">src / </span><span class="file_name">presentations.js</span></a></div></div></div><table cellpadding="0" cellspacing="0"><thead><tr><th class="docs"><h1>controllers.js</h1><div class="filepath">src/</div></th><th class="code"></th></tr></thead><tbody><tr id="section-1"><td class="docs"><div class="pilwrap"><a href="#section-1" class="pilcrow">&#182;</a></div><h1>Controllers</h1>
+</td><td class="code"><div class="highlight"><pre><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">$</span><span class="p">,</span> <span class="nx">MITHGrid</span><span class="p">,</span> <span class="nx">OAC</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">Controller</span> <span class="o">=</span> <span class="nx">OAC</span><span class="p">.</span><span class="nx">Client</span><span class="p">.</span><span class="nx">StreamingVideo</span><span class="p">.</span><span class="nx">namespace</span><span class="p">(</span><span class="s1">&#39;Controller&#39;</span><span class="p">);</span></pre></div></td></tr><tr id="section-2"><td class="docs"><div class="pilwrap"><a href="#section-2" class="pilcrow">&#182;</a></div><h2>KeyboardListener</h2>
+
+<p>OAC.Client.StreamingVideo.Controller.KeyboardListener listens to keydown events on the DOM document
+level and translates them into delete events.</p>
+</td><td class="code"><div class="highlight"><pre>    <span class="nx">Controller</span><span class="p">.</span><span class="nx">namespace</span><span class="p">(</span><span class="s2">&quot;KeyboardListener&quot;</span><span class="p">);</span></pre></div></td></tr><tr id="section-3"><td class="docs"><div class="pilwrap"><a href="#section-3" class="pilcrow">&#182;</a></div><h3>KeyboardListener.initController</h3>
+
+<p>Parameters:</p>
+
+<ul>
+<li>options - object holding configuration options for the KeyboardListener object</li>
+</ul>
+
+<p>Returns:</p>
+
+<p>The configured KeyboardListener controller.</p>
+
+<p>Options:</p>
+
+<ul>
+<li>application - the application using this controller</li>
+<li>isAction - a function which returns true if keyboard events should be propagated</li>
+</ul>
+</td><td class="code"><div class="highlight"><pre>    <span class="nx">Controller</span><span class="p">.</span><span class="nx">KeyboardListener</span><span class="p">.</span><span class="nx">initController</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">options</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">that</span> <span class="o">=</span> <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">initController</span><span class="p">(</span><span class="s2">&quot;OAC.Client.StreamingVideo.Controller.KeyboardListener&quot;</span><span class="p">,</span> <span class="nx">options</span><span class="p">);</span>
+        <span class="nx">options</span> <span class="o">=</span> <span class="nx">that</span><span class="p">.</span><span class="nx">options</span><span class="p">;</span>
+
+        <span class="nx">that</span><span class="p">.</span><span class="nx">applyBindings</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">binding</span><span class="p">,</span> <span class="nx">opts</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">doc</span> <span class="o">=</span> <span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s1">&#39;doc&#39;</span><span class="p">),</span>
+            <span class="nx">activeId</span><span class="p">;</span>
+
+            <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onActiveAnnotationChange</span><span class="p">.</span><span class="nx">addListener</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">id</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">activeId</span> <span class="o">=</span> <span class="nx">id</span><span class="p">;</span>
+            <span class="p">});</span>
+
+            <span class="nx">$</span><span class="p">(</span><span class="nx">doc</span><span class="p">).</span><span class="nx">keydown</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">.</span><span class="nx">getCurrentMode</span><span class="p">()</span> <span class="o">===</span> <span class="s1">&#39;Editing&#39;</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">return</span><span class="p">;</span>
+                <span class="p">}</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">activeId</span> <span class="o">!==</span> <span class="kc">undefined</span> <span class="o">||</span> <span class="nx">activeId</span> <span class="o">!==</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="p">{</span></pre></div></td></tr><tr id="section-4"><td class="docs"><div class="pilwrap"><a href="#section-4" class="pilcrow">&#182;</a></div><p>If backspace or delete is pressed,
+then it is interpreted as a
+delete call.</p>
+</td><td class="code"><div class="highlight"><pre>                    <span class="k">if</span> <span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">keyCode</span> <span class="o">===</span> <span class="mi">8</span> <span class="o">||</span> <span class="nx">e</span><span class="p">.</span><span class="nx">keyCode</span> <span class="o">===</span> <span class="mi">46</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="nx">binding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onDelete</span><span class="p">.</span><span class="nx">fire</span><span class="p">(</span><span class="nx">activeId</span><span class="p">);</span>
+                        <span class="nx">activeId</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">;</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+            <span class="p">});</span>
+        <span class="p">};</span>
+
+        <span class="k">return</span> <span class="nx">that</span><span class="p">;</span>
+    <span class="p">};</span></pre></div></td></tr><tr id="section-5"><td class="docs"><div class="pilwrap"><a href="#section-5" class="pilcrow">&#182;</a></div><h2>Drag</h2>
+
+<p>Attaches to an SVG rendering and produces events at the start, middle, and end of a drag.</p>
+</td><td class="code"><div class="highlight"><pre>    <span class="nx">Controller</span><span class="p">.</span><span class="nx">namespace</span><span class="p">(</span><span class="s2">&quot;Drag&quot;</span><span class="p">);</span></pre></div></td></tr><tr id="section-6"><td class="docs"><div class="pilwrap"><a href="#section-6" class="pilcrow">&#182;</a></div><h3>Drag.initController</h3>
+</td><td class="code"><div class="highlight"><pre>    <span class="nx">Controller</span><span class="p">.</span><span class="nx">Drag</span><span class="p">.</span><span class="nx">initController</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">options</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">that</span> <span class="o">=</span> <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">initController</span><span class="p">(</span>
+        <span class="s2">&quot;OAC.Client.StreamingVideo.Controller.Drag&quot;</span><span class="p">,</span>
+        <span class="nx">options</span>
+        <span class="p">);</span>
+
+        <span class="nx">that</span><span class="p">.</span><span class="nx">applyBindings</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">binding</span><span class="p">,</span> <span class="nx">opts</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">el</span> <span class="o">=</span> <span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s1">&#39;raphael&#39;</span><span class="p">);</span>
+
+            <span class="nx">el</span><span class="p">.</span><span class="nx">drag</span><span class="p">(</span>
+            <span class="kd">function</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">binding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onUpdate</span><span class="p">.</span><span class="nx">fire</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">);</span>
+            <span class="p">},</span>
+            <span class="kd">function</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">,</span> <span class="nx">e</span><span class="p">)</span> <span class="p">{</span></pre></div></td></tr><tr id="section-7"><td class="docs"><div class="pilwrap"><a href="#section-7" class="pilcrow">&#182;</a></div><p><strong>FIXME</strong>: layerX and layerY are deprecated in WebKit</p>
+</td><td class="code"><div class="highlight"><pre>                <span class="nx">x</span> <span class="o">=</span> <span class="nx">e</span><span class="p">.</span><span class="nx">layerX</span><span class="p">;</span>
+                <span class="nx">y</span> <span class="o">=</span> <span class="nx">e</span><span class="p">.</span><span class="nx">layerY</span><span class="p">;</span>
+                <span class="nx">binding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onFocus</span><span class="p">.</span><span class="nx">fire</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">);</span>
+            <span class="p">},</span>
+            <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                <span class="nx">binding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onUnfocus</span><span class="p">.</span><span class="nx">fire</span><span class="p">();</span>
+            <span class="p">}</span>
+            <span class="p">);</span>
+        <span class="p">};</span>
+
+        <span class="k">return</span> <span class="nx">that</span><span class="p">;</span>
+    <span class="p">};</span></pre></div></td></tr><tr id="section-8"><td class="docs"><div class="pilwrap"><a href="#section-8" class="pilcrow">&#182;</a></div><h2>Select</h2>
+
+<p>Attaches a click handler to an SVG rendering and fires an onSelect event if the rendering is clicked AND
+the application is in a mode to select things.</p>
+</td><td class="code"><div class="highlight"><pre>    <span class="nx">Controller</span><span class="p">.</span><span class="nx">namespace</span><span class="p">(</span><span class="s2">&quot;Select&quot;</span><span class="p">);</span></pre></div></td></tr><tr id="section-9"><td class="docs"><div class="pilwrap"><a href="#section-9" class="pilcrow">&#182;</a></div><h3>Select.initController</h3>
+
+<p>Parameters:</p>
+
+<ul>
+<li>options - object holding configuration information</li>
+</ul>
+
+<p>Returns:</p>
+
+<p>The configured controller object.</p>
+
+<p>Configuration Options:</p>
+
+<ul>
+<li>isSelectable - function taking no arguments that should return "true" if the click should cause the
+             onSelect event to fire.</li>
+</ul>
+</td><td class="code"><div class="highlight"><pre>    <span class="nx">Controller</span><span class="p">.</span><span class="nx">Select</span><span class="p">.</span><span class="nx">initController</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">options</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">that</span> <span class="o">=</span> <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">initController</span><span class="p">(</span>
+        <span class="s2">&quot;OAC.Client.StreamingVideo.Controller.Select&quot;</span><span class="p">,</span>
+        <span class="nx">options</span>
+        <span class="p">);</span>
+        <span class="nx">options</span> <span class="o">=</span> <span class="nx">that</span><span class="p">.</span><span class="nx">options</span><span class="p">;</span>
+
+        <span class="nx">that</span><span class="p">.</span><span class="nx">applyBindings</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">binding</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">el</span> <span class="o">=</span> <span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s2">&quot;raphael&quot;</span><span class="p">);</span>
+
+            <span class="nx">el</span><span class="p">.</span><span class="nx">click</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">options</span><span class="p">.</span><span class="nx">isSelectable</span><span class="p">())</span> <span class="p">{</span>
+                    <span class="nx">binding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onSelect</span><span class="p">.</span><span class="nx">fire</span><span class="p">();</span>
+                <span class="p">}</span>
+            <span class="p">});</span>
+        <span class="p">};</span>
+
+        <span class="k">return</span> <span class="nx">that</span><span class="p">;</span>
+    <span class="p">};</span></pre></div></td></tr><tr id="section-10"><td class="docs"><div class="pilwrap"><a href="#section-10" class="pilcrow">&#182;</a></div><h2>AnnotationEditSelectionGrid</h2>
+
+<p>Attaches to an SVG lens and creates a green rectangle dashed box to
+act as the resize and drag tool. Only edits the SVG data - no annotation
+bodyContent data.</p>
+</td><td class="code"><div class="highlight"><pre>    <span class="nx">Controller</span><span class="p">.</span><span class="nx">namespace</span><span class="p">(</span><span class="s2">&quot;AnnotationEditSelectionGrid&quot;</span><span class="p">);</span></pre></div></td></tr><tr id="section-11"><td class="docs"><div class="pilwrap"><a href="#section-11" class="pilcrow">&#182;</a></div><h3>AnnotationEditSelectionGrid.initController</h3>
+
+<p>Initializes the AnnotationEditSelectionGrid controller object. This object may then be used to bind actions to
+the DOM.</p>
+
+<p>We create the bounding box once and keep it around. We then track which rendering is associated with
+the bounding box and draw it accordingly.
+We associate the bounding box with the SVG/Raphaël canvas holding the renderings we want to use it with.</p>
+
+<p>Each Raphaël canvas should have its own AnnotationEditSelectionGrid instance for binding renderings.</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li>options - object holding configuration information</li>
+</ul>
+
+<p>Returns:</p>
+
+<p>The initialized controller object.</p>
+
+<p><strong>FIXME:</strong></p>
+
+<p>The controller needs to be broken up a bit. The idea of providing a bounding box for renderings is something that
+should be handled in the presentation, not here. The controller should just generate events based on user interactions.
+The presentation should worry about which rendering is currently active and manage the translation of controller
+events to the rendering.</p>
+
+<p>For now, we'll refactor this into two pieces: the bounding box drawing (rendering), and translating events in the binding.</p>
+
+<p>We will eventually split this controller into two: bounding box resize controller and bounding box drag/move controller.</p>
+</td><td class="code"><div class="highlight"><pre>    <span class="nx">Controller</span><span class="p">.</span><span class="nx">AnnotationEditSelectionGrid</span><span class="p">.</span><span class="nx">initController</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">options</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">that</span> <span class="o">=</span> <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">initController</span><span class="p">(</span>
+        <span class="s2">&quot;OAC.Client.StreamingVideo.Controller.AnnotationEditSelectionGrid&quot;</span><span class="p">,</span>
+        <span class="nx">options</span>
+        <span class="p">),</span>
+        <span class="nx">dragController</span><span class="p">,</span>
+        <span class="nx">dirs</span> <span class="o">=</span> <span class="p">[];</span>
+
+        <span class="nx">options</span> <span class="o">=</span> <span class="nx">that</span><span class="p">.</span><span class="nx">options</span><span class="p">;</span>
+        <span class="nx">dirs</span> <span class="o">=</span> <span class="nx">that</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">dirs</span><span class="p">;</span></pre></div></td></tr><tr id="section-12"><td class="docs"><div class="pilwrap"><a href="#section-12" class="pilcrow">&#182;</a></div><p>|| ['ul', 'top', 'ur', 'lft', 'lr', 'btm', 'll', 'rgt', 'mid'];</p>
+</td><td class="code"><div class="highlight"><pre>        <span class="nx">dragController</span> <span class="o">=</span> <span class="nx">OAC</span><span class="p">.</span><span class="nx">Client</span><span class="p">.</span><span class="nx">StreamingVideo</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">Drag</span><span class="p">.</span><span class="nx">initController</span><span class="p">({});</span></pre></div></td></tr><tr id="section-13"><td class="docs"><div class="pilwrap"><a href="#section-13" class="pilcrow">&#182;</a></div><h4>AnnotationEditSelectionGrid #applyBindings</h4>
+</td><td class="code"><div class="highlight"><pre>        <span class="nx">that</span><span class="p">.</span><span class="nx">applyBindings</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">binding</span><span class="p">,</span> <span class="nx">opts</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">ox</span><span class="p">,</span>
+            <span class="nx">oy</span><span class="p">,</span>
+            <span class="nx">handleSet</span> <span class="o">=</span> <span class="p">{},</span>
+            <span class="nx">midDrag</span> <span class="o">=</span> <span class="p">{},</span>
+            <span class="nx">svgBBox</span> <span class="o">=</span> <span class="p">{},</span>
+            <span class="nx">itemMenu</span> <span class="o">=</span> <span class="p">{},</span>
+            <span class="nx">handles</span> <span class="o">=</span> <span class="p">{},</span>
+            <span class="nx">activeRendering</span><span class="p">,</span>
+            <span class="nx">deleteButton</span> <span class="o">=</span> <span class="p">{},</span>
+            <span class="nx">editButton</span> <span class="o">=</span> <span class="p">{},</span>
+            <span class="nx">menuContainer</span> <span class="o">=</span> <span class="p">{},</span>
+            <span class="nx">factors</span> <span class="o">=</span> <span class="p">{},</span>
+            <span class="nx">extents</span><span class="p">,</span>
+            <span class="nx">paper</span> <span class="o">=</span> <span class="nx">opts</span><span class="p">.</span><span class="nx">paper</span><span class="p">,</span>
+            <span class="nx">attrs</span> <span class="o">=</span> <span class="p">{},</span>
+            <span class="nx">padding</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+            <span class="nx">calcFactors</span><span class="p">,</span>
+            <span class="nx">calcHandles</span><span class="p">,</span>
+            <span class="nx">drawMenu</span><span class="p">,</span>
+            <span class="nx">itemDeleted</span><span class="p">,</span>
+            <span class="nx">handleIds</span> <span class="o">=</span> <span class="p">{},</span>
+            <span class="nx">drawHandles</span><span class="p">,</span>
+            <span class="nx">handleAttrs</span> <span class="o">=</span> <span class="p">{},</span>
+            <span class="nx">shapeAttrs</span> <span class="o">=</span> <span class="p">{},</span>
+            <span class="nx">menuAttrs</span> <span class="o">=</span> <span class="p">{},</span>
+            <span class="nx">cursor</span><span class="p">,</span>
+            <span class="nx">dAttrs</span> <span class="o">=</span> <span class="p">{},</span>
+            <span class="nx">eAttrs</span> <span class="o">=</span> <span class="p">{},</span>
+            <span class="nx">handleCalculationData</span> <span class="o">=</span> <span class="p">{},</span>
+            <span class="nx">el</span><span class="p">;</span></pre></div></td></tr><tr id="section-14"><td class="docs"><div class="pilwrap"><a href="#section-14" class="pilcrow">&#182;</a></div><h3>attachRendering</h3>
+
+<p>Function for applying a new shape to the bounding box</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li>newRendering -</li>
+</ul>
+</td><td class="code"><div class="highlight"><pre>            <span class="nx">binding</span><span class="p">.</span><span class="nx">attachRendering</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">newRendering</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">binding</span><span class="p">.</span><span class="nx">detachRendering</span><span class="p">();</span>
+
+                <span class="k">if</span> <span class="p">(</span><span class="nx">newRendering</span> <span class="o">===</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">return</span><span class="p">;</span>
+                <span class="p">}</span></pre></div></td></tr><tr id="section-15"><td class="docs"><div class="pilwrap"><a href="#section-15" class="pilcrow">&#182;</a></div><p>register the rendering</p>
+</td><td class="code"><div class="highlight"><pre>                <span class="nx">activeRendering</span> <span class="o">=</span> <span class="nx">newRendering</span><span class="p">;</span>
+                <span class="nx">calcFactors</span><span class="p">();</span>
+                <span class="nx">drawHandles</span><span class="p">();</span>
+            <span class="p">};</span></pre></div></td></tr><tr id="section-16"><td class="docs"><div class="pilwrap"><a href="#section-16" class="pilcrow">&#182;</a></div><p>Function to call in order to "de-activate" the edit box
+(i.e. make it hidden)</p>
+</td><td class="code"><div class="highlight"><pre>            <span class="nx">binding</span><span class="p">.</span><span class="nx">detachRendering</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">$</span><span class="p">.</span><span class="nx">isEmptyObject</span><span class="p">(</span><span class="nx">handleSet</span><span class="p">))</span> <span class="p">{</span>
+                    <span class="k">return</span><span class="p">;</span>
+                <span class="p">}</span>
+                <span class="nx">activeRendering</span> <span class="o">=</span> <span class="kc">undefined</span><span class="p">;</span>
+                <span class="nx">handleSet</span><span class="p">.</span><span class="nx">hide</span><span class="p">();</span>
+
+                <span class="nx">svgBBox</span><span class="p">.</span><span class="nx">hide</span><span class="p">();</span>
+                <span class="nx">midDrag</span><span class="p">.</span><span class="nx">hide</span><span class="p">();</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">itemMenu</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">itemMenu</span><span class="p">.</span><span class="nx">hide</span><span class="p">();</span>
+                <span class="p">}</span>
+            <span class="p">};</span></pre></div></td></tr><tr id="section-17"><td class="docs"><div class="pilwrap"><a href="#section-17" class="pilcrow">&#182;</a></div><h5>calcFactors (private)</h5>
+
+<p>Measures where the handles should be on mousemove.</p>
+
+<p>Parameters: None.</p>
+
+<p>Returns: Nothing.</p>
+</td><td class="code"><div class="highlight"><pre>            <span class="nx">calcFactors</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                <span class="nx">extents</span> <span class="o">=</span> <span class="nx">activeRendering</span><span class="p">.</span><span class="nx">getExtents</span><span class="p">();</span></pre></div></td></tr><tr id="section-18"><td class="docs"><div class="pilwrap"><a href="#section-18" class="pilcrow">&#182;</a></div><p>create offset factors for
+bounding box
+calculate width - height to be larger
+than shape</p>
+</td><td class="code"><div class="highlight"><pre>                <span class="nx">attrs</span><span class="p">.</span><span class="nx">width</span> <span class="o">=</span> <span class="nx">extents</span><span class="p">.</span><span class="nx">width</span> <span class="o">+</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="nx">padding</span><span class="p">);</span>
+                <span class="nx">attrs</span><span class="p">.</span><span class="nx">height</span> <span class="o">=</span> <span class="nx">extents</span><span class="p">.</span><span class="nx">height</span> <span class="o">+</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="nx">padding</span><span class="p">);</span>
+                <span class="nx">attrs</span><span class="p">.</span><span class="nx">x</span> <span class="o">=</span> <span class="p">(</span><span class="nx">extents</span><span class="p">.</span><span class="nx">x</span> <span class="o">-</span> <span class="p">(</span><span class="nx">padding</span> <span class="o">/</span> <span class="mi">8</span><span class="p">))</span> <span class="o">-</span> <span class="p">(</span><span class="nx">attrs</span><span class="p">.</span><span class="nx">width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">);</span>
+                <span class="nx">attrs</span><span class="p">.</span><span class="nx">y</span> <span class="o">=</span> <span class="p">(</span><span class="nx">extents</span><span class="p">.</span><span class="nx">y</span> <span class="o">-</span> <span class="p">(</span><span class="nx">padding</span> <span class="o">/</span> <span class="mi">8</span><span class="p">))</span> <span class="o">-</span> <span class="p">(</span><span class="nx">attrs</span><span class="p">.</span><span class="nx">height</span> <span class="o">/</span> <span class="mi">2</span><span class="p">);</span>
+                <span class="nx">calcHandles</span><span class="p">(</span><span class="nx">attrs</span><span class="p">);</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">itemMenu</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">drawMenu</span><span class="p">(</span><span class="nx">attrs</span><span class="p">);</span>
+                <span class="p">}</span>
+            <span class="p">};</span></pre></div></td></tr><tr id="section-19"><td class="docs"><div class="pilwrap"><a href="#section-19" class="pilcrow">&#182;</a></div><h4>drawHandles (private)</h4>
+
+<p>Draws the handles defined in dirs as SVG rectangles and draws the SVG bounding box</p>
+
+<p>Parameters: None.</p>
+
+<p>Returns: Nothing.</p>
+</td><td class="code"><div class="highlight"><pre>            <span class="nx">drawHandles</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                <span class="kd">var</span> <span class="nx">midDragDragBinding</span><span class="p">;</span>
+
+                <span class="k">if</span> <span class="p">(</span><span class="nx">$</span><span class="p">.</span><span class="nx">isEmptyObject</span><span class="p">(</span><span class="nx">handleSet</span><span class="p">))</span> <span class="p">{</span></pre></div></td></tr><tr id="section-20"><td class="docs"><div class="pilwrap"><a href="#section-20" class="pilcrow">&#182;</a></div><p>draw the corner and mid-point squares</p>
+</td><td class="code"><div class="highlight"><pre>                    <span class="nx">handleSet</span> <span class="o">=</span> <span class="nx">paper</span><span class="p">.</span><span class="nx">set</span><span class="p">();</span>
+                    <span class="nx">$</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">handles</span><span class="p">,</span>
+                    <span class="kd">function</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="nx">o</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="kd">var</span> <span class="nx">h</span><span class="p">;</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="nx">i</span> <span class="o">===</span> <span class="s1">&#39;mid&#39;</span><span class="p">)</span> <span class="p">{</span>
+                            <span class="nx">midDrag</span> <span class="o">=</span> <span class="nx">paper</span><span class="p">.</span><span class="nx">rect</span><span class="p">(</span><span class="nx">o</span><span class="p">.</span><span class="nx">x</span><span class="p">,</span> <span class="nx">o</span><span class="p">.</span><span class="nx">y</span><span class="p">,</span> <span class="nx">padding</span><span class="p">,</span> <span class="nx">padding</span><span class="p">);</span>
+                            <span class="nx">o</span><span class="p">.</span><span class="nx">id</span> <span class="o">=</span> <span class="nx">midDrag</span><span class="p">.</span><span class="nx">id</span><span class="p">;</span>
+
+                        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                            <span class="nx">h</span> <span class="o">=</span> <span class="nx">paper</span><span class="p">.</span><span class="nx">rect</span><span class="p">(</span><span class="nx">o</span><span class="p">.</span><span class="nx">x</span><span class="p">,</span> <span class="nx">o</span><span class="p">.</span><span class="nx">y</span><span class="p">,</span> <span class="nx">padding</span><span class="p">,</span> <span class="nx">padding</span><span class="p">);</span>
+                            <span class="nx">o</span><span class="p">.</span><span class="nx">id</span> <span class="o">=</span> <span class="nx">h</span><span class="p">.</span><span class="nx">id</span><span class="p">;</span>
+
+                            <span class="nx">h</span><span class="p">.</span><span class="nx">attr</span><span class="p">({</span>
+                                <span class="nx">cursor</span><span class="o">:</span> <span class="nx">o</span><span class="p">.</span><span class="nx">cursor</span>
+                            <span class="p">});</span>
+                            <span class="nx">handleSet</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">h</span><span class="p">);</span>
+                        <span class="p">}</span>
+                    <span class="p">});</span></pre></div></td></tr><tr id="section-21"><td class="docs"><div class="pilwrap"><a href="#section-21" class="pilcrow">&#182;</a></div><p>make them all similar looking</p>
+</td><td class="code"><div class="highlight"><pre>                    <span class="nx">handleSet</span><span class="p">.</span><span class="nx">attr</span><span class="p">({</span>
+                        <span class="nx">fill</span><span class="o">:</span> <span class="mi">990000</span><span class="p">,</span>
+                        <span class="nx">stroke</span><span class="o">:</span> <span class="s1">&#39;black&#39;</span>
+                    <span class="p">});</span>
+
+                    <span class="k">if</span> <span class="p">(</span><span class="o">!</span> <span class="p">(</span><span class="nx">$</span><span class="p">.</span><span class="nx">isEmptyObject</span><span class="p">(</span><span class="nx">midDrag</span><span class="p">)))</span> <span class="p">{</span>
+                        <span class="nx">midDrag</span><span class="p">.</span><span class="nx">attr</span><span class="p">({</span>
+                            <span class="nx">fill</span><span class="o">:</span> <span class="mi">990000</span><span class="p">,</span>
+                            <span class="nx">stroke</span><span class="o">:</span> <span class="s1">&#39;black&#39;</span><span class="p">,</span>
+                            <span class="nx">cursor</span><span class="o">:</span> <span class="s1">&#39;move&#39;</span>
+                        <span class="p">});</span>
+                    <span class="p">}</span></pre></div></td></tr><tr id="section-22"><td class="docs"><div class="pilwrap"><a href="#section-22" class="pilcrow">&#182;</a></div><p>drawing bounding box</p>
+</td><td class="code"><div class="highlight"><pre>                    <span class="nx">svgBBox</span> <span class="o">=</span> <span class="nx">paper</span><span class="p">.</span><span class="nx">rect</span><span class="p">(</span><span class="nx">attrs</span><span class="p">.</span><span class="nx">x</span><span class="p">,</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">y</span><span class="p">,</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">width</span><span class="p">,</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">height</span><span class="p">);</span>
+                    <span class="nx">svgBBox</span><span class="p">.</span><span class="nx">attr</span><span class="p">({</span>
+                        <span class="nx">stroke</span><span class="o">:</span> <span class="s1">&#39;green&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;stroke-dasharray&#39;</span><span class="o">:</span> <span class="p">[</span><span class="s2">&quot;--&quot;</span><span class="p">]</span>
+                    <span class="p">});</span></pre></div></td></tr><tr id="section-23"><td class="docs"><div class="pilwrap"><a href="#section-23" class="pilcrow">&#182;</a></div><p>Draw the accompanying menu that sits at top-right corner</p>
+</td><td class="code"><div class="highlight"><pre>                    <span class="nx">drawMenu</span><span class="p">(</span><span class="nx">attrs</span><span class="p">);</span>
+
+                    <span class="k">if</span> <span class="p">(</span><span class="o">!</span> <span class="p">(</span><span class="nx">$</span><span class="p">.</span><span class="nx">isEmptyObject</span><span class="p">(</span><span class="nx">midDrag</span><span class="p">)))</span> <span class="p">{</span></pre></div></td></tr><tr id="section-24"><td class="docs"><div class="pilwrap"><a href="#section-24" class="pilcrow">&#182;</a></div><p>Attaching listener to drag-only handle (midDrag)</p>
+</td><td class="code"><div class="highlight"><pre>                        <span class="nx">midDragDragBinding</span> <span class="o">=</span> <span class="nx">dragController</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="nx">midDrag</span><span class="p">);</span>
+
+                        <span class="nx">midDragDragBinding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onUpdate</span><span class="p">.</span><span class="nx">addListener</span><span class="p">(</span>
+                        <span class="kd">function</span><span class="p">(</span><span class="nx">dx</span><span class="p">,</span> <span class="nx">dy</span><span class="p">)</span> <span class="p">{</span></pre></div></td></tr><tr id="section-25"><td class="docs"><div class="pilwrap"><a href="#section-25" class="pilcrow">&#182;</a></div><p>dragging means that the svgBBox stays padding-distance
+away from the lens' shape and the lens shape gets updated
+in dataStore</p>
+</td><td class="code"><div class="highlight"><pre>                            <span class="nx">handleAttrs</span><span class="p">.</span><span class="nx">nx</span> <span class="o">=</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">x</span> <span class="o">+</span> <span class="nx">dx</span><span class="p">;</span>
+                            <span class="nx">handleAttrs</span><span class="p">.</span><span class="nx">ny</span> <span class="o">=</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">y</span> <span class="o">+</span> <span class="nx">dy</span><span class="p">;</span>
+                            <span class="nx">shapeAttrs</span><span class="p">.</span><span class="nx">x</span> <span class="o">=</span> <span class="nx">extents</span><span class="p">.</span><span class="nx">x</span> <span class="o">+</span> <span class="nx">dx</span><span class="p">;</span>
+                            <span class="nx">shapeAttrs</span><span class="p">.</span><span class="nx">y</span> <span class="o">=</span> <span class="nx">extents</span><span class="p">.</span><span class="nx">y</span> <span class="o">+</span> <span class="nx">dy</span><span class="p">;</span>
+
+                            <span class="nx">svgBBox</span><span class="p">.</span><span class="nx">attr</span><span class="p">({</span>
+                                <span class="nx">x</span><span class="o">:</span> <span class="nx">handleAttrs</span><span class="p">.</span><span class="nx">nx</span><span class="p">,</span>
+                                <span class="nx">y</span><span class="o">:</span> <span class="nx">handleAttrs</span><span class="p">.</span><span class="nx">ny</span>
+                            <span class="p">});</span>
+
+                            <span class="nx">calcHandles</span><span class="p">({</span>
+                                <span class="nx">x</span><span class="o">:</span> <span class="nx">handleAttrs</span><span class="p">.</span><span class="nx">nx</span><span class="p">,</span>
+                                <span class="nx">y</span><span class="o">:</span> <span class="nx">handleAttrs</span><span class="p">.</span><span class="nx">ny</span><span class="p">,</span>
+                                <span class="nx">width</span><span class="o">:</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">width</span><span class="p">,</span>
+                                <span class="nx">height</span><span class="o">:</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">height</span>
+                            <span class="p">});</span>
+                            <span class="k">if</span> <span class="p">(</span><span class="nx">itemMenu</span><span class="p">)</span> <span class="p">{</span>
+                                <span class="nx">drawMenu</span><span class="p">({</span>
+                                    <span class="nx">x</span><span class="o">:</span> <span class="nx">handleAttrs</span><span class="p">.</span><span class="nx">nx</span><span class="p">,</span>
+                                    <span class="nx">y</span><span class="o">:</span> <span class="nx">handleAttrs</span><span class="p">.</span><span class="nx">ny</span><span class="p">,</span>
+                                    <span class="nx">width</span><span class="o">:</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">width</span><span class="p">,</span>
+                                    <span class="nx">height</span><span class="o">:</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">height</span>
+                                <span class="p">});</span>
+                            <span class="p">}</span>
+                        <span class="p">}</span>
+                        <span class="p">);</span>
+
+                        <span class="nx">midDragDragBinding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onFocus</span><span class="p">.</span><span class="nx">addListener</span><span class="p">(</span>
+                        <span class="kd">function</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">)</span> <span class="p">{</span></pre></div></td></tr><tr id="section-26"><td class="docs"><div class="pilwrap"><a href="#section-26" class="pilcrow">&#182;</a></div><p>start</p>
+</td><td class="code"><div class="highlight"><pre>                            <span class="nx">ox</span> <span class="o">=</span> <span class="nx">x</span><span class="p">;</span>
+                            <span class="nx">oy</span> <span class="o">=</span> <span class="nx">y</span><span class="p">;</span>
+                            <span class="nx">calcFactors</span><span class="p">();</span>
+                            <span class="nx">activeRendering</span><span class="p">.</span><span class="nx">shape</span><span class="p">.</span><span class="nx">attr</span><span class="p">({</span>
+                                <span class="nx">cursor</span><span class="o">:</span> <span class="s1">&#39;move&#39;</span>
+                            <span class="p">});</span>
+                        <span class="p">}</span>
+                        <span class="p">);</span>
+
+                        <span class="nx">midDragDragBinding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onUnfocus</span><span class="p">.</span><span class="nx">addListener</span><span class="p">(</span>
+                        <span class="kd">function</span><span class="p">()</span> <span class="p">{</span></pre></div></td></tr><tr id="section-27"><td class="docs"><div class="pilwrap"><a href="#section-27" class="pilcrow">&#182;</a></div><p>end</p>
+</td><td class="code"><div class="highlight"><pre>                            <span class="kd">var</span> <span class="nx">pos</span> <span class="o">=</span> <span class="p">{</span>
+                                <span class="nx">x</span><span class="o">:</span> <span class="nx">shapeAttrs</span><span class="p">.</span><span class="nx">x</span><span class="p">,</span>
+                                <span class="nx">y</span><span class="o">:</span> <span class="nx">shapeAttrs</span><span class="p">.</span><span class="nx">y</span>
+                            <span class="p">};</span>
+
+                            <span class="nx">binding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onMove</span><span class="p">.</span><span class="nx">fire</span><span class="p">(</span><span class="nx">pos</span><span class="p">);</span></pre></div></td></tr><tr id="section-28"><td class="docs"><div class="pilwrap"><a href="#section-28" class="pilcrow">&#182;</a></div><p>activeRendering.shape.attr({
+cursor: 'default'
+});</p>
+</td><td class="code"><div class="highlight"><pre>                        <span class="p">}</span>
+                        <span class="p">);</span>
+                    <span class="p">}</span></pre></div></td></tr><tr id="section-29"><td class="docs"><div class="pilwrap"><a href="#section-29" class="pilcrow">&#182;</a></div><p>Attaching drag and resize handlers</p>
+</td><td class="code"><div class="highlight"><pre>                    <span class="nx">handleSet</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">handle</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="kd">var</span> <span class="nx">handleBinding</span> <span class="o">=</span> <span class="nx">dragController</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="nx">handle</span><span class="p">);</span>
+
+                        <span class="nx">handleBinding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onUpdate</span><span class="p">.</span><span class="nx">addListener</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">dx</span><span class="p">,</span> <span class="nx">dy</span><span class="p">)</span> <span class="p">{</span></pre></div></td></tr><tr id="section-30"><td class="docs"><div class="pilwrap"><a href="#section-30" class="pilcrow">&#182;</a></div><p>onmove function - handles dragging
+dragging here means that the shape is being resized;
+the factorial determines in which direction the
+shape is pulled</p>
+</td><td class="code"><div class="highlight"><pre>                            <span class="nx">shapeAttrs</span><span class="p">.</span><span class="nx">w</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">abs</span><span class="p">(</span><span class="nx">extents</span><span class="p">.</span><span class="nx">width</span> <span class="o">+</span> <span class="nx">dx</span> <span class="o">*</span> <span class="nx">factors</span><span class="p">.</span><span class="nx">x</span><span class="p">);</span>
+                            <span class="nx">shapeAttrs</span><span class="p">.</span><span class="nx">h</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">abs</span><span class="p">(</span><span class="nx">extents</span><span class="p">.</span><span class="nx">height</span> <span class="o">+</span> <span class="nx">dy</span> <span class="o">*</span> <span class="nx">factors</span><span class="p">.</span><span class="nx">y</span><span class="p">);</span>
+                            <span class="nx">handleAttrs</span><span class="p">.</span><span class="nx">nw</span> <span class="o">=</span> <span class="nx">shapeAttrs</span><span class="p">.</span><span class="nx">w</span> <span class="o">+</span> <span class="p">(</span><span class="nx">padding</span> <span class="o">*</span> <span class="mi">2</span><span class="p">);</span>
+                            <span class="nx">handleAttrs</span><span class="p">.</span><span class="nx">nh</span> <span class="o">=</span> <span class="nx">shapeAttrs</span><span class="p">.</span><span class="nx">h</span> <span class="o">+</span> <span class="p">(</span><span class="nx">padding</span> <span class="o">*</span> <span class="mi">2</span><span class="p">);</span>
+                            <span class="nx">handleAttrs</span><span class="p">.</span><span class="nx">nx</span> <span class="o">=</span> <span class="p">(</span><span class="nx">extents</span><span class="p">.</span><span class="nx">x</span> <span class="o">-</span> <span class="p">(</span><span class="nx">padding</span> <span class="o">/</span> <span class="mi">4</span><span class="p">))</span> <span class="o">-</span> <span class="p">(</span><span class="nx">handleAttrs</span><span class="p">.</span><span class="nx">nw</span> <span class="o">/</span> <span class="mi">2</span><span class="p">);</span>
+                            <span class="nx">handleAttrs</span><span class="p">.</span><span class="nx">ny</span> <span class="o">=</span> <span class="p">(</span><span class="nx">extents</span><span class="p">.</span><span class="nx">y</span> <span class="o">-</span> <span class="p">(</span><span class="nx">padding</span> <span class="o">/</span> <span class="mi">4</span><span class="p">))</span> <span class="o">-</span> <span class="p">(</span><span class="nx">handleAttrs</span><span class="p">.</span><span class="nx">nh</span> <span class="o">/</span> <span class="mi">2</span><span class="p">);</span>
+
+                            <span class="nx">svgBBox</span><span class="p">.</span><span class="nx">attr</span><span class="p">({</span>
+                                <span class="nx">x</span><span class="o">:</span> <span class="nx">handleAttrs</span><span class="p">.</span><span class="nx">nx</span><span class="p">,</span>
+                                <span class="nx">y</span><span class="o">:</span> <span class="nx">handleAttrs</span><span class="p">.</span><span class="nx">ny</span><span class="p">,</span>
+                                <span class="nx">width</span><span class="o">:</span> <span class="nx">handleAttrs</span><span class="p">.</span><span class="nx">nw</span><span class="p">,</span>
+                                <span class="nx">height</span><span class="o">:</span> <span class="nx">handleAttrs</span><span class="p">.</span><span class="nx">nh</span>
+                            <span class="p">});</span>
+                            <span class="nx">calcHandles</span><span class="p">({</span>
+                                <span class="nx">x</span><span class="o">:</span> <span class="nx">handleAttrs</span><span class="p">.</span><span class="nx">nx</span><span class="p">,</span>
+                                <span class="nx">y</span><span class="o">:</span> <span class="nx">handleAttrs</span><span class="p">.</span><span class="nx">ny</span><span class="p">,</span>
+                                <span class="nx">width</span><span class="o">:</span> <span class="nx">handleAttrs</span><span class="p">.</span><span class="nx">nw</span><span class="p">,</span>
+                                <span class="nx">height</span><span class="o">:</span> <span class="nx">handleAttrs</span><span class="p">.</span><span class="nx">nh</span>
+                            <span class="p">});</span>
+                            <span class="k">if</span> <span class="p">(</span><span class="nx">itemMenu</span><span class="p">)</span> <span class="p">{</span>
+                                <span class="nx">drawMenu</span><span class="p">({</span>
+                                    <span class="nx">x</span><span class="o">:</span> <span class="nx">handleAttrs</span><span class="p">.</span><span class="nx">nx</span><span class="p">,</span>
+                                    <span class="nx">y</span><span class="o">:</span> <span class="nx">handleAttrs</span><span class="p">.</span><span class="nx">ny</span><span class="p">,</span>
+                                    <span class="nx">width</span><span class="o">:</span> <span class="nx">handleAttrs</span><span class="p">.</span><span class="nx">nw</span><span class="p">,</span>
+                                    <span class="nx">height</span><span class="o">:</span> <span class="nx">handleAttrs</span><span class="p">.</span><span class="nx">nh</span>
+                                <span class="p">});</span>
+                            <span class="p">}</span>
+                        <span class="p">});</span>
+
+                        <span class="nx">handleBinding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onFocus</span><span class="p">.</span><span class="nx">addListener</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">)</span> <span class="p">{</span></pre></div></td></tr><tr id="section-31"><td class="docs"><div class="pilwrap"><a href="#section-31" class="pilcrow">&#182;</a></div><p>onstart function</p>
+</td><td class="code"><div class="highlight"><pre>                            <span class="kd">var</span> <span class="nx">px</span><span class="p">,</span>
+                            <span class="nx">py</span><span class="p">;</span>
+                            <span class="nx">extents</span> <span class="o">=</span> <span class="nx">activeRendering</span><span class="p">.</span><span class="nx">getExtents</span><span class="p">();</span>
+                            <span class="nx">ox</span> <span class="o">=</span> <span class="nx">x</span><span class="p">;</span>
+                            <span class="nx">oy</span> <span class="o">=</span> <span class="nx">y</span><span class="p">;</span></pre></div></td></tr><tr id="section-32"><td class="docs"><div class="pilwrap"><a href="#section-32" class="pilcrow">&#182;</a></div><p>change mode</p>
+</td><td class="code"><div class="highlight"><pre>                            <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">.</span><span class="nx">setCurrentMode</span><span class="p">(</span><span class="s1">&#39;Drag&#39;</span><span class="p">);</span></pre></div></td></tr><tr id="section-33"><td class="docs"><div class="pilwrap"><a href="#section-33" class="pilcrow">&#182;</a></div><p>extents: x, y, width, height</p>
+</td><td class="code"><div class="highlight"><pre>                            <span class="nx">px</span> <span class="o">=</span> <span class="p">(</span><span class="mi">8</span> <span class="o">*</span> <span class="p">(</span><span class="nx">ox</span> <span class="o">-</span> <span class="nx">extents</span><span class="p">.</span><span class="nx">x</span><span class="p">)</span> <span class="o">/</span> <span class="nx">extents</span><span class="p">.</span><span class="nx">width</span><span class="p">)</span> <span class="o">+</span> <span class="mi">4</span><span class="p">;</span>
+                            <span class="nx">py</span> <span class="o">=</span> <span class="p">(</span><span class="mi">8</span> <span class="o">*</span> <span class="p">(</span><span class="nx">oy</span> <span class="o">-</span> <span class="nx">extents</span><span class="p">.</span><span class="nx">y</span><span class="p">)</span> <span class="o">/</span> <span class="nx">extents</span><span class="p">.</span><span class="nx">height</span><span class="p">)</span> <span class="o">+</span> <span class="mi">4</span><span class="p">;</span>
+                            <span class="k">if</span> <span class="p">(</span><span class="nx">px</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">)</span> <span class="p">{</span>
+                                <span class="nx">factors</span><span class="p">.</span><span class="nx">x</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span><span class="p">;</span>
+                            <span class="p">}</span>
+                            <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">px</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">)</span> <span class="p">{</span>
+                                <span class="nx">factors</span><span class="p">.</span><span class="nx">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+                            <span class="p">}</span>
+                            <span class="k">else</span> <span class="p">{</span>
+                                <span class="nx">factors</span><span class="p">.</span><span class="nx">x</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+                            <span class="p">}</span>
+                            <span class="k">if</span> <span class="p">(</span><span class="nx">py</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">)</span> <span class="p">{</span>
+                                <span class="nx">factors</span><span class="p">.</span><span class="nx">y</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span><span class="p">;</span>
+                            <span class="p">}</span>
+                            <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">py</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">)</span> <span class="p">{</span>
+                                <span class="nx">factors</span><span class="p">.</span><span class="nx">y</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+                            <span class="p">}</span>
+                            <span class="k">else</span> <span class="p">{</span>
+                                <span class="nx">factors</span><span class="p">.</span><span class="nx">y</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+                            <span class="p">}</span>
+                            <span class="nx">calcFactors</span><span class="p">();</span>
+                        <span class="p">});</span>
+
+                        <span class="nx">handleBinding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onUnfocus</span><span class="p">.</span><span class="nx">addListener</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span></pre></div></td></tr><tr id="section-34"><td class="docs"><div class="pilwrap"><a href="#section-34" class="pilcrow">&#182;</a></div><p>onend function
+update</p>
+</td><td class="code"><div class="highlight"><pre>                            <span class="kd">var</span> <span class="nx">pos</span> <span class="o">=</span> <span class="p">{</span>
+                                <span class="nx">width</span><span class="o">:</span> <span class="nx">shapeAttrs</span><span class="p">.</span><span class="nx">w</span><span class="p">,</span>
+                                <span class="nx">height</span><span class="o">:</span> <span class="nx">shapeAttrs</span><span class="p">.</span><span class="nx">h</span>
+                            <span class="p">};</span>
+                            <span class="k">if</span> <span class="p">(</span><span class="nx">activeRendering</span> <span class="o">!==</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+                                <span class="nx">binding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onResize</span><span class="p">.</span><span class="nx">fire</span><span class="p">(</span><span class="nx">pos</span><span class="p">);</span>
+                            <span class="p">}</span></pre></div></td></tr><tr id="section-35"><td class="docs"><div class="pilwrap"><a href="#section-35" class="pilcrow">&#182;</a></div><p>change mode back</p>
+</td><td class="code"><div class="highlight"><pre>                            <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">.</span><span class="nx">setCurrentMode</span><span class="p">(</span><span class="s1">&#39;Select&#39;</span><span class="p">);</span>
+                        <span class="p">});</span>
+                    <span class="p">});</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="p">{</span></pre></div></td></tr><tr id="section-36"><td class="docs"><div class="pilwrap"><a href="#section-36" class="pilcrow">&#182;</a></div><p>show all the boxes and
+handles</p>
+</td><td class="code"><div class="highlight"><pre>                    <span class="nx">svgBBox</span><span class="p">.</span><span class="nx">show</span><span class="p">();</span></pre></div></td></tr><tr id="section-37"><td class="docs"><div class="pilwrap"><a href="#section-37" class="pilcrow">&#182;</a></div><p>adjust the SvgBBox to be around new
+shape</p>
+</td><td class="code"><div class="highlight"><pre>                    <span class="nx">svgBBox</span><span class="p">.</span><span class="nx">attr</span><span class="p">({</span>
+                        <span class="nx">x</span><span class="o">:</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">x</span><span class="p">,</span>
+                        <span class="nx">y</span><span class="o">:</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">y</span><span class="p">,</span>
+                        <span class="nx">width</span><span class="o">:</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">width</span><span class="p">,</span>
+                        <span class="nx">height</span><span class="o">:</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">height</span>
+                    <span class="p">});</span>
+                    <span class="nx">handleSet</span><span class="p">.</span><span class="nx">show</span><span class="p">();</span>
+                    <span class="nx">midDrag</span><span class="p">.</span><span class="nx">show</span><span class="p">().</span><span class="nx">toFront</span><span class="p">();</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nx">itemMenu</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="nx">itemMenu</span><span class="p">.</span><span class="nx">show</span><span class="p">();</span>
+                        <span class="nx">drawMenu</span><span class="p">(</span><span class="nx">attrs</span><span class="p">);</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+            <span class="p">};</span></pre></div></td></tr><tr id="section-38"><td class="docs"><div class="pilwrap"><a href="#section-38" class="pilcrow">&#182;</a></div><h4>drawMenu (private)</h4>
+
+<p>Draws menu that sits at the top-right corner of the shape.</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li>args - object holding the .x, .y, and .width properties</li>
+</ul>
+
+<p>Returns: Nothing.</p>
+</td><td class="code"><div class="highlight"><pre>            <span class="nx">drawMenu</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">args</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">$</span><span class="p">.</span><span class="nx">isEmptyObject</span><span class="p">(</span><span class="nx">itemMenu</span><span class="p">))</span> <span class="p">{</span>
+
+                    <span class="nx">menuAttrs</span><span class="p">.</span><span class="nx">x</span> <span class="o">=</span> <span class="nx">args</span><span class="p">.</span><span class="nx">x</span> <span class="o">+</span> <span class="p">(</span><span class="nx">args</span><span class="p">.</span><span class="nx">width</span><span class="p">);</span>
+                    <span class="nx">menuAttrs</span><span class="p">.</span><span class="nx">y</span> <span class="o">=</span> <span class="nx">args</span><span class="p">.</span><span class="nx">y</span> <span class="o">-</span> <span class="p">(</span><span class="nx">padding</span> <span class="o">*</span> <span class="mi">4</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span><span class="p">;</span>
+                    <span class="nx">menuAttrs</span><span class="p">.</span><span class="nx">w</span> <span class="o">=</span> <span class="mi">100</span><span class="p">;</span>
+                    <span class="nx">menuAttrs</span><span class="p">.</span><span class="nx">h</span> <span class="o">=</span> <span class="mi">20</span><span class="p">;</span></pre></div></td></tr><tr id="section-39"><td class="docs"><div class="pilwrap"><a href="#section-39" class="pilcrow">&#182;</a></div><p>Create separate attribute objects
+for each menu button/container</p>
+</td><td class="code"><div class="highlight"><pre>                    <span class="nx">eAttrs</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="nx">x</span><span class="o">:</span> <span class="nx">menuAttrs</span><span class="p">.</span><span class="nx">x</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+                        <span class="nx">y</span><span class="o">:</span> <span class="nx">menuAttrs</span><span class="p">.</span><span class="nx">y</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+                        <span class="nx">w</span><span class="o">:</span> <span class="nx">menuAttrs</span><span class="p">.</span><span class="nx">w</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">4</span><span class="p">,</span>
+                        <span class="nx">h</span><span class="o">:</span> <span class="nx">menuAttrs</span><span class="p">.</span><span class="nx">h</span> <span class="o">-</span> <span class="p">(</span><span class="nx">menuAttrs</span><span class="p">.</span><span class="nx">h</span> <span class="o">/</span> <span class="mi">8</span><span class="p">)</span>
+                    <span class="p">};</span>
+
+                    <span class="nx">dAttrs</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="nx">x</span><span class="o">:</span> <span class="p">(</span><span class="nx">eAttrs</span><span class="p">.</span><span class="nx">x</span> <span class="o">+</span> <span class="nx">eAttrs</span><span class="p">.</span><span class="nx">w</span> <span class="o">+</span> <span class="mi">2</span><span class="p">),</span>
+                        <span class="nx">y</span><span class="o">:</span> <span class="nx">menuAttrs</span><span class="p">.</span><span class="nx">y</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+                        <span class="nx">w</span><span class="o">:</span> <span class="nx">menuAttrs</span><span class="p">.</span><span class="nx">w</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">4</span><span class="p">,</span>
+                        <span class="nx">h</span><span class="o">:</span> <span class="nx">menuAttrs</span><span class="p">.</span><span class="nx">h</span> <span class="o">-</span> <span class="p">(</span><span class="nx">menuAttrs</span><span class="p">.</span><span class="nx">h</span> <span class="o">/</span> <span class="mi">8</span><span class="p">)</span>
+                    <span class="p">};</span>
+
+                    <span class="nx">itemMenu</span> <span class="o">=</span> <span class="nx">paper</span><span class="p">.</span><span class="nx">set</span><span class="p">();</span>
+                    <span class="nx">menuContainer</span> <span class="o">=</span> <span class="nx">paper</span><span class="p">.</span><span class="nx">rect</span><span class="p">(</span><span class="nx">menuAttrs</span><span class="p">.</span><span class="nx">x</span><span class="p">,</span> <span class="nx">menuAttrs</span><span class="p">.</span><span class="nx">y</span><span class="p">,</span> <span class="nx">menuAttrs</span><span class="p">.</span><span class="nx">w</span><span class="p">,</span> <span class="nx">menuAttrs</span><span class="p">.</span><span class="nx">h</span><span class="p">);</span>
+                    <span class="nx">menuContainer</span><span class="p">.</span><span class="nx">attr</span><span class="p">({</span>
+                        <span class="nx">fill</span><span class="o">:</span> <span class="s1">&#39;#FFFFFF&#39;</span><span class="p">,</span>
+                        <span class="nx">stroke</span><span class="o">:</span> <span class="s1">&#39;#000&#39;</span>
+                    <span class="p">});</span>
+
+                    <span class="nx">itemMenu</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">menuContainer</span><span class="p">);</span>
+
+                    <span class="nx">editButton</span> <span class="o">=</span> <span class="nx">paper</span><span class="p">.</span><span class="nx">rect</span><span class="p">(</span><span class="nx">eAttrs</span><span class="p">.</span><span class="nx">x</span><span class="p">,</span> <span class="nx">eAttrs</span><span class="p">.</span><span class="nx">y</span><span class="p">,</span> <span class="nx">eAttrs</span><span class="p">.</span><span class="nx">w</span><span class="p">,</span> <span class="nx">eAttrs</span><span class="p">.</span><span class="nx">h</span><span class="p">);</span>
+                    <span class="nx">editButton</span><span class="p">.</span><span class="nx">attr</span><span class="p">({</span>
+                        <span class="nx">fill</span><span class="o">:</span> <span class="mi">334009</span><span class="p">,</span>
+                        <span class="nx">cursor</span><span class="o">:</span> <span class="s1">&#39;pointer&#39;</span>
+                    <span class="p">});</span>
+
+                    <span class="nx">itemMenu</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">editButton</span><span class="p">);</span>
+
+                    <span class="nx">deleteButton</span> <span class="o">=</span> <span class="nx">paper</span><span class="p">.</span><span class="nx">rect</span><span class="p">(</span><span class="nx">dAttrs</span><span class="p">.</span><span class="nx">x</span><span class="p">,</span> <span class="nx">dAttrs</span><span class="p">.</span><span class="nx">y</span><span class="p">,</span> <span class="nx">dAttrs</span><span class="p">.</span><span class="nx">w</span><span class="p">,</span> <span class="nx">dAttrs</span><span class="p">.</span><span class="nx">h</span><span class="p">);</span>
+                    <span class="nx">deleteButton</span><span class="p">.</span><span class="nx">attr</span><span class="p">({</span>
+                        <span class="nx">fill</span><span class="o">:</span> <span class="mi">334009</span><span class="p">,</span>
+                        <span class="nx">cursor</span><span class="o">:</span> <span class="s1">&#39;pointer&#39;</span>
+                    <span class="p">});</span>
+
+                    <span class="nx">itemMenu</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">deleteButton</span><span class="p">);</span></pre></div></td></tr><tr id="section-40"><td class="docs"><div class="pilwrap"><a href="#section-40" class="pilcrow">&#182;</a></div><p>attach event firers</p>
+</td><td class="code"><div class="highlight"><pre>                    <span class="nx">editButton</span><span class="p">.</span><span class="nx">mousedown</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="nx">activeRendering</span> <span class="o">!==</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+                            <span class="nx">that</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onEdit</span><span class="p">.</span><span class="nx">fire</span><span class="p">(</span><span class="nx">activeRendering</span><span class="p">.</span><span class="nx">id</span><span class="p">);</span>
+                        <span class="p">}</span>
+                    <span class="p">});</span>
+                    <span class="nx">editButton</span><span class="p">.</span><span class="nx">hover</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                        <span class="nx">editButton</span><span class="p">.</span><span class="nx">attr</span><span class="p">({</span>
+                            <span class="nx">fill</span><span class="o">:</span> <span class="mi">443009</span>
+                        <span class="p">});</span>
+                    <span class="p">},</span>
+                    <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                        <span class="nx">editButton</span><span class="p">.</span><span class="nx">attr</span><span class="p">({</span>
+                            <span class="nx">fill</span><span class="o">:</span> <span class="mi">334009</span>
+                        <span class="p">});</span>
+                    <span class="p">});</span>
+
+
+                    <span class="nx">deleteButton</span><span class="p">.</span><span class="nx">mousedown</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="nx">activeRendering</span> <span class="o">!==</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+                            <span class="nx">binding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onDelete</span><span class="p">.</span><span class="nx">fire</span><span class="p">();</span>
+                            <span class="nx">itemDeleted</span><span class="p">();</span>
+                        <span class="p">}</span>
+                    <span class="p">});</span>
+                    <span class="nx">deleteButton</span><span class="p">.</span><span class="nx">hover</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                        <span class="nx">deleteButton</span><span class="p">.</span><span class="nx">attr</span><span class="p">({</span>
+                            <span class="nx">fill</span><span class="o">:</span> <span class="mi">443009</span>
+                        <span class="p">});</span>
+                    <span class="p">},</span>
+                    <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                        <span class="nx">deleteButton</span><span class="p">.</span><span class="nx">attr</span><span class="p">({</span>
+                            <span class="nx">fill</span><span class="o">:</span> <span class="mi">334009</span>
+                        <span class="p">});</span>
+                    <span class="p">});</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+
+
+                    <span class="nx">menuAttrs</span><span class="p">.</span><span class="nx">x</span> <span class="o">=</span> <span class="nx">args</span><span class="p">.</span><span class="nx">x</span> <span class="o">+</span> <span class="p">(</span><span class="nx">args</span><span class="p">.</span><span class="nx">width</span><span class="p">);</span>
+                    <span class="nx">menuAttrs</span><span class="p">.</span><span class="nx">y</span> <span class="o">=</span> <span class="nx">args</span><span class="p">.</span><span class="nx">y</span> <span class="o">-</span> <span class="p">(</span><span class="nx">padding</span> <span class="o">*</span> <span class="mi">4</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span><span class="p">;</span>
+
+                    <span class="nx">eAttrs</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="nx">x</span><span class="o">:</span> <span class="p">(</span><span class="nx">menuAttrs</span><span class="p">.</span><span class="nx">x</span> <span class="o">+</span> <span class="mi">2</span><span class="p">),</span>
+                        <span class="nx">y</span><span class="o">:</span> <span class="p">(</span><span class="nx">menuAttrs</span><span class="p">.</span><span class="nx">y</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
+                    <span class="p">};</span>
+
+                    <span class="nx">dAttrs</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="nx">x</span><span class="o">:</span> <span class="p">(</span><span class="nx">eAttrs</span><span class="p">.</span><span class="nx">x</span> <span class="o">+</span> <span class="nx">editButton</span><span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s1">&#39;width&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span><span class="p">),</span>
+                        <span class="nx">y</span><span class="o">:</span> <span class="nx">menuAttrs</span><span class="p">.</span><span class="nx">y</span> <span class="o">+</span> <span class="mi">2</span>
+                    <span class="p">};</span>
+                    <span class="nx">menuContainer</span><span class="p">.</span><span class="nx">attr</span><span class="p">({</span>
+                        <span class="nx">x</span><span class="o">:</span> <span class="nx">menuAttrs</span><span class="p">.</span><span class="nx">x</span><span class="p">,</span>
+                        <span class="nx">y</span><span class="o">:</span> <span class="nx">menuAttrs</span><span class="p">.</span><span class="nx">y</span>
+                    <span class="p">});</span>
+                    <span class="nx">editButton</span><span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="nx">eAttrs</span><span class="p">);</span>
+                    <span class="nx">deleteButton</span><span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="nx">dAttrs</span><span class="p">);</span>
+                <span class="p">}</span>
+            <span class="p">};</span>
+
+            <span class="nx">itemDeleted</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span></pre></div></td></tr><tr id="section-41"><td class="docs"><div class="pilwrap"><a href="#section-41" class="pilcrow">&#182;</a></div><p>set rendering to undefined</p>
+</td><td class="code"><div class="highlight"><pre>                <span class="nx">binding</span><span class="p">.</span><span class="nx">detachRendering</span><span class="p">();</span>
+                <span class="nx">activeRendering</span> <span class="o">=</span> <span class="kc">undefined</span><span class="p">;</span>
+
+                <span class="nx">itemMenu</span><span class="p">.</span><span class="nx">hide</span><span class="p">();</span>
+                <span class="nx">svgBBox</span><span class="p">.</span><span class="nx">hide</span><span class="p">();</span>
+                <span class="nx">handleSet</span><span class="p">.</span><span class="nx">hide</span><span class="p">();</span>
+                <span class="nx">midDrag</span><span class="p">.</span><span class="nx">hide</span><span class="p">();</span>
+            <span class="p">};</span>
+
+            <span class="nx">handleCalculationData</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="nx">ul</span><span class="o">:</span> <span class="p">[</span><span class="s1">&#39;nw&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                <span class="nx">top</span><span class="o">:</span> <span class="p">[</span><span class="s1">&#39;n&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                <span class="nx">ur</span><span class="o">:</span> <span class="p">[</span><span class="s1">&#39;ne&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                <span class="nx">rgt</span><span class="o">:</span> <span class="p">[</span><span class="s1">&#39;e&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                <span class="nx">lr</span><span class="o">:</span> <span class="p">[</span><span class="s1">&#39;se&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                <span class="nx">btm</span><span class="o">:</span> <span class="p">[</span><span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                <span class="nx">ll</span><span class="o">:</span> <span class="p">[</span><span class="s1">&#39;sw&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                <span class="nx">lft</span><span class="o">:</span> <span class="p">[</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                <span class="nx">mid</span><span class="o">:</span> <span class="p">[</span><span class="s1">&#39;pointer&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="p">};</span></pre></div></td></tr><tr id="section-42"><td class="docs"><div class="pilwrap"><a href="#section-42" class="pilcrow">&#182;</a></div><p>Goes through handle object array and
+sets each handle box coordinate</p>
+</td><td class="code"><div class="highlight"><pre>            <span class="nx">calcHandles</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">args</span><span class="p">)</span> <span class="p">{</span></pre></div></td></tr><tr id="section-43"><td class="docs"><div class="pilwrap"><a href="#section-43" class="pilcrow">&#182;</a></div><p>calculate where the resize handles
+will be located</p>
+</td><td class="code"><div class="highlight"><pre>                <span class="kd">var</span> <span class="nx">calcHandle</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">type</span><span class="p">,</span> <span class="nx">xn</span><span class="p">,</span> <span class="nx">xp</span><span class="p">,</span> <span class="nx">yn</span><span class="p">,</span> <span class="nx">yp</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">return</span> <span class="p">{</span>
+                        <span class="nx">x</span><span class="o">:</span> <span class="nx">args</span><span class="p">.</span><span class="nx">x</span> <span class="o">+</span> <span class="nx">xn</span> <span class="o">*</span> <span class="nx">args</span><span class="p">.</span><span class="nx">width</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="nx">xp</span> <span class="o">*</span> <span class="nx">padding</span><span class="p">,</span>
+                        <span class="nx">y</span><span class="o">:</span> <span class="nx">args</span><span class="p">.</span><span class="nx">y</span> <span class="o">+</span> <span class="nx">yn</span> <span class="o">*</span> <span class="nx">args</span><span class="p">.</span><span class="nx">height</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="nx">yp</span> <span class="o">*</span> <span class="nx">padding</span><span class="p">,</span>
+                        <span class="nx">cursor</span><span class="o">:</span> <span class="nx">type</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="o">?</span> <span class="nx">type</span><span class="o">:</span> <span class="nx">type</span> <span class="o">+</span> <span class="s2">&quot;-resize&quot;</span>
+                    <span class="p">};</span>
+                <span class="p">},</span>
+                <span class="nx">recalcHandle</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">info</span><span class="p">,</span> <span class="nx">xn</span><span class="p">,</span> <span class="nx">xp</span><span class="p">,</span> <span class="nx">yn</span><span class="p">,</span> <span class="nx">yp</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="kd">var</span> <span class="nx">el</span><span class="p">;</span>
+                    <span class="nx">info</span><span class="p">.</span><span class="nx">x</span> <span class="o">=</span> <span class="nx">args</span><span class="p">.</span><span class="nx">x</span> <span class="o">+</span> <span class="nx">xn</span> <span class="o">*</span> <span class="nx">args</span><span class="p">.</span><span class="nx">width</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="nx">xp</span> <span class="o">*</span> <span class="nx">padding</span><span class="p">;</span>
+                    <span class="nx">info</span><span class="p">.</span><span class="nx">y</span> <span class="o">=</span> <span class="nx">args</span><span class="p">.</span><span class="nx">y</span> <span class="o">+</span> <span class="nx">yn</span> <span class="o">*</span> <span class="nx">args</span><span class="p">.</span><span class="nx">height</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="nx">yp</span> <span class="o">*</span> <span class="nx">padding</span><span class="p">;</span>
+                    <span class="nx">el</span> <span class="o">=</span> <span class="nx">paper</span><span class="p">.</span><span class="nx">getById</span><span class="p">(</span><span class="nx">info</span><span class="p">.</span><span class="nx">id</span><span class="p">);</span>
+                    <span class="nx">el</span><span class="p">.</span><span class="nx">attr</span><span class="p">({</span>
+                        <span class="nx">x</span><span class="o">:</span> <span class="nx">info</span><span class="p">.</span><span class="nx">x</span><span class="p">,</span>
+                        <span class="nx">y</span><span class="o">:</span> <span class="nx">info</span><span class="p">.</span><span class="nx">y</span>
+                    <span class="p">});</span>
+                <span class="p">};</span>
+                <span class="nx">$</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">dirs</span><span class="p">,</span>
+                <span class="kd">function</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="nx">o</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="kd">var</span> <span class="nx">data</span> <span class="o">=</span> <span class="nx">handleCalculationData</span><span class="p">[</span><span class="nx">o</span><span class="p">];</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nx">data</span> <span class="o">===</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="k">return</span><span class="p">;</span>
+                    <span class="p">}</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nx">handles</span><span class="p">[</span><span class="nx">o</span><span class="p">]</span> <span class="o">===</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="nx">handles</span><span class="p">[</span><span class="nx">o</span><span class="p">]</span> <span class="o">=</span> <span class="nx">calcHandle</span><span class="p">(</span><span class="nx">data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nx">data</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nx">data</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="nx">data</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="nx">data</span><span class="p">[</span><span class="mi">4</span><span class="p">]);</span>
+                    <span class="p">}</span>
+                    <span class="k">else</span> <span class="p">{</span>
+                        <span class="nx">recalcHandle</span><span class="p">(</span><span class="nx">handles</span><span class="p">[</span><span class="nx">o</span><span class="p">],</span> <span class="nx">data</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nx">data</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="nx">data</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="nx">data</span><span class="p">[</span><span class="mi">4</span><span class="p">]);</span>
+                    <span class="p">}</span>
+                <span class="p">});</span>
+            <span class="p">};</span>
+        <span class="p">};</span>
+
+        <span class="k">return</span> <span class="nx">that</span><span class="p">;</span>
+    <span class="p">};</span></pre></div></td></tr><tr id="section-44"><td class="docs"><div class="pilwrap"><a href="#section-44" class="pilcrow">&#182;</a></div><h2>ShapeCreateBox</h2>
+
+<p>Creates an SVG shape with a dotted border to be used as a guide for drawing shapes. Listens for user mousedown, which
+activates the appearance of the box at the x,y where the mousedown coords are, then finishes when user mouseup call is made</p>
+</td><td class="code"><div class="highlight"><pre>    <span class="nx">Controller</span><span class="p">.</span><span class="nx">namespace</span><span class="p">(</span><span class="s1">&#39;ShapeCreateBox&#39;</span><span class="p">);</span>
+    <span class="nx">Controller</span><span class="p">.</span><span class="nx">ShapeCreateBox</span><span class="p">.</span><span class="nx">initController</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">options</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">that</span> <span class="o">=</span> <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">initController</span><span class="p">(</span><span class="s2">&quot;OAC.Client.StreamingVideo.Controller.ShapeCreateBox&quot;</span><span class="p">,</span> <span class="nx">options</span><span class="p">);</span>
+        <span class="nx">options</span> <span class="o">=</span> <span class="nx">that</span><span class="p">.</span><span class="nx">options</span><span class="p">;</span></pre></div></td></tr><tr id="section-45"><td class="docs"><div class="pilwrap"><a href="#section-45" class="pilcrow">&#182;</a></div><h4>ShapeCreateBox #applyBindings</h4>
+
+<p>Init function for Controller.</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li>binding - refers to Controller instance</li>
+<li>opts - copy of options passed through initController</li>
+</ul>
+
+<p>Creates the following methods:</p>
+</td><td class="code"><div class="highlight"><pre>        <span class="nx">that</span><span class="p">.</span><span class="nx">applyBindings</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">binding</span><span class="p">,</span> <span class="nx">opts</span><span class="p">)</span> <span class="p">{</span></pre></div></td></tr><tr id="section-46"><td class="docs"><div class="pilwrap"><a href="#section-46" class="pilcrow">&#182;</a></div><p>Bounding box is created once in memory - it should be bound to the
+canvas/paper object or something that contains more than 1 shape.</p>
+</td><td class="code"><div class="highlight"><pre>            <span class="kd">var</span> <span class="nx">ox</span><span class="p">,</span>
+            <span class="nx">oy</span><span class="p">,</span>
+            <span class="nx">svgBBox</span> <span class="o">=</span> <span class="p">{},</span>
+            <span class="nx">activeRendering</span><span class="p">,</span>
+            <span class="nx">factors</span> <span class="o">=</span> <span class="p">{},</span>
+            <span class="nx">paper</span> <span class="o">=</span> <span class="nx">opts</span><span class="p">.</span><span class="nx">paper</span><span class="p">,</span>
+            <span class="nx">attrs</span> <span class="o">=</span> <span class="p">{},</span>
+            <span class="nx">padding</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+            <span class="nx">drawMenu</span><span class="p">,</span>
+            <span class="nx">itemDeleted</span><span class="p">,</span>
+            <span class="nx">shapeAttrs</span> <span class="o">=</span> <span class="p">{},</span>
+            <span class="nx">cursor</span><span class="p">,</span>
+            <span class="nx">el</span><span class="p">;</span></pre></div></td></tr><tr id="section-47"><td class="docs"><div class="pilwrap"><a href="#section-47" class="pilcrow">&#182;</a></div><h4>createGuide</h4>
+
+<p>Creates the SVGBBOX which acts as a guide to the user
+of how big their shape will be once shapeDone is fired</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li>coords - object that has x,y coordinates for user mousedown. This is where the left and top of the box will start</li>
+</ul>
+</td><td class="code"><div class="highlight"><pre>            <span class="nx">binding</span><span class="p">.</span><span class="nx">createGuide</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">coords</span><span class="p">)</span> <span class="p">{</span></pre></div></td></tr><tr id="section-48"><td class="docs"><div class="pilwrap"><a href="#section-48" class="pilcrow">&#182;</a></div><p>coordinates are top x,y values</p>
+</td><td class="code"><div class="highlight"><pre>                <span class="nx">attrs</span><span class="p">.</span><span class="nx">x</span> <span class="o">=</span> <span class="nx">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+                <span class="nx">attrs</span><span class="p">.</span><span class="nx">y</span> <span class="o">=</span> <span class="nx">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+                <span class="nx">attrs</span><span class="p">.</span><span class="nx">width</span> <span class="o">=</span> <span class="p">(</span><span class="nx">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="nx">padding</span><span class="p">);</span>
+                <span class="nx">attrs</span><span class="p">.</span><span class="nx">height</span> <span class="o">=</span> <span class="p">(</span><span class="nx">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="nx">padding</span><span class="p">);</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">$</span><span class="p">.</span><span class="nx">isEmptyObject</span><span class="p">(</span><span class="nx">svgBBox</span><span class="p">))</span> <span class="p">{</span>
+                    <span class="nx">svgBBox</span> <span class="o">=</span> <span class="nx">paper</span><span class="p">.</span><span class="nx">rect</span><span class="p">(</span><span class="nx">attrs</span><span class="p">.</span><span class="nx">x</span><span class="p">,</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">y</span><span class="p">,</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">width</span><span class="p">,</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">height</span><span class="p">);</span>
+                    <span class="nx">svgBBox</span><span class="p">.</span><span class="nx">attr</span><span class="p">({</span>
+                        <span class="nx">stroke</span><span class="o">:</span> <span class="s1">&#39;green&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;stroke-dasharray&#39;</span><span class="o">:</span> <span class="p">[</span><span class="s2">&quot;--&quot;</span><span class="p">]</span>
+                    <span class="p">});</span>
+
+                <span class="p">}</span> <span class="k">else</span> <span class="p">{</span></pre></div></td></tr><tr id="section-49"><td class="docs"><div class="pilwrap"><a href="#section-49" class="pilcrow">&#182;</a></div><p>show all the boxes and
+handles</p>
+</td><td class="code"><div class="highlight"><pre>                    <span class="nx">svgBBox</span><span class="p">.</span><span class="nx">show</span><span class="p">();</span></pre></div></td></tr><tr id="section-50"><td class="docs"><div class="pilwrap"><a href="#section-50" class="pilcrow">&#182;</a></div><p>adjust the SvgBBox to be around new
+shape</p>
+</td><td class="code"><div class="highlight"><pre>                    <span class="nx">svgBBox</span><span class="p">.</span><span class="nx">attr</span><span class="p">({</span>
+                        <span class="nx">x</span><span class="o">:</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">x</span><span class="p">,</span>
+                        <span class="nx">y</span><span class="o">:</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">y</span><span class="p">,</span>
+                        <span class="nx">width</span><span class="o">:</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">width</span><span class="p">,</span>
+                        <span class="nx">height</span><span class="o">:</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">height</span>
+                    <span class="p">});</span>
+                <span class="p">}</span>
+
+            <span class="p">};</span></pre></div></td></tr><tr id="section-51"><td class="docs"><div class="pilwrap"><a href="#section-51" class="pilcrow">&#182;</a></div><h4>resizeGuide</h4>
+
+<p>Take passed x,y coords and set as bottom-right, not
+top left</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li>coords - array of x,y coordinates to use as bottom-right coords of the box</li>
+</ul>
+</td><td class="code"><div class="highlight"><pre>            <span class="nx">binding</span><span class="p">.</span><span class="nx">resizeGuide</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">coords</span><span class="p">)</span> <span class="p">{</span>
+
+                <span class="nx">attrs</span><span class="p">.</span><span class="nx">width</span> <span class="o">=</span> <span class="p">(</span><span class="nx">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">x</span><span class="p">);</span>
+                <span class="nx">attrs</span><span class="p">.</span><span class="nx">height</span> <span class="o">=</span> <span class="p">(</span><span class="nx">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">y</span><span class="p">);</span>
+
+                <span class="nx">svgBBox</span><span class="p">.</span><span class="nx">attr</span><span class="p">({</span>
+                    <span class="nx">width</span><span class="o">:</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">width</span><span class="p">,</span>
+                    <span class="nx">height</span><span class="o">:</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">height</span>
+                <span class="p">});</span>
+            <span class="p">};</span></pre></div></td></tr><tr id="section-52"><td class="docs"><div class="pilwrap"><a href="#section-52" class="pilcrow">&#182;</a></div><h4>completeShape</h4>
+
+<p>Take the saved coordinates and pass them back
+to the calling function</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li>coords - coordinates object with properties x, y, width, and height</li>
+</ul>
+
+<p>Returns:
+Coordinates object with properties x, y, width, and height</p>
+</td><td class="code"><div class="highlight"><pre>            <span class="nx">binding</span><span class="p">.</span><span class="nx">completeShape</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">coords</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">attrs</span><span class="p">.</span><span class="nx">width</span> <span class="o">=</span> <span class="nx">coords</span><span class="p">.</span><span class="nx">width</span><span class="p">;</span>
+                <span class="nx">attrs</span><span class="p">.</span><span class="nx">height</span> <span class="o">=</span> <span class="nx">coords</span><span class="p">.</span><span class="nx">height</span><span class="p">;</span>
+
+                <span class="nx">svgBBox</span><span class="p">.</span><span class="nx">attr</span><span class="p">({</span>
+                    <span class="nx">width</span><span class="o">:</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">width</span><span class="p">,</span>
+                    <span class="nx">height</span><span class="o">:</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">height</span>
+                <span class="p">});</span>
+                <span class="nx">svgBBox</span><span class="p">.</span><span class="nx">hide</span><span class="p">();</span>
+                <span class="k">return</span> <span class="p">{</span>
+                    <span class="nx">x</span><span class="o">:</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">x</span><span class="p">,</span>
+                    <span class="nx">y</span><span class="o">:</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">y</span><span class="p">,</span>
+                    <span class="nx">width</span><span class="o">:</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">width</span><span class="p">,</span>
+                    <span class="nx">height</span><span class="o">:</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">height</span>
+                <span class="p">};</span>
+            <span class="p">};</span>
+        <span class="p">};</span>
+
+        <span class="k">return</span> <span class="nx">that</span><span class="p">;</span>
+    <span class="p">};</span></pre></div></td></tr><tr id="section-53"><td class="docs"><div class="pilwrap"><a href="#section-53" class="pilcrow">&#182;</a></div><h2>TextBodyEditor</h2>
+
+<p>Handles HTML annotation lens for editing the bodyContent text.</p>
+</td><td class="code"><div class="highlight"><pre>    <span class="nx">Controller</span><span class="p">.</span><span class="nx">namespace</span><span class="p">(</span><span class="s2">&quot;TextBodyEditor&quot;</span><span class="p">);</span>
+    <span class="nx">Controller</span><span class="p">.</span><span class="nx">TextBodyEditor</span><span class="p">.</span><span class="nx">initController</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">options</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">that</span> <span class="o">=</span> <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">initController</span><span class="p">(</span><span class="s2">&quot;OAC.Client.StreamingVideo.Controller.TextBodyEditor&quot;</span><span class="p">,</span> <span class="nx">options</span><span class="p">);</span>
+        <span class="nx">options</span> <span class="o">=</span> <span class="nx">that</span><span class="p">.</span><span class="nx">options</span><span class="p">;</span></pre></div></td></tr><tr id="section-54"><td class="docs"><div class="pilwrap"><a href="#section-54" class="pilcrow">&#182;</a></div><h3>TextBodyEditor #applyBindings</h3>
+
+<p>Generates the following the methods:</p>
+</td><td class="code"><div class="highlight"><pre>        <span class="nx">that</span><span class="p">.</span><span class="nx">applyBindings</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">binding</span><span class="p">,</span> <span class="nx">opts</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">editStart</span><span class="p">,</span>
+            <span class="nx">editEnd</span><span class="p">,</span>
+            <span class="nx">editUpdate</span><span class="p">,</span>
+            <span class="nx">annoEl</span> <span class="o">=</span> <span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s1">&#39;annotation&#39;</span><span class="p">),</span>
+            <span class="nx">bodyContent</span> <span class="o">=</span> <span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s1">&#39;body&#39;</span><span class="p">),</span>
+            <span class="nx">allAnnos</span> <span class="o">=</span> <span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s1">&#39;annotations&#39;</span><span class="p">),</span>
+            <span class="nx">textArea</span> <span class="o">=</span> <span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s1">&#39;textarea&#39;</span><span class="p">),</span>
+            <span class="nx">editArea</span> <span class="o">=</span> <span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s1">&#39;editarea&#39;</span><span class="p">),</span>
+            <span class="nx">editButton</span> <span class="o">=</span> <span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s1">&#39;editbutton&#39;</span><span class="p">),</span>
+            <span class="nx">updateButton</span> <span class="o">=</span> <span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s1">&#39;updatebutton&#39;</span><span class="p">),</span>
+            <span class="nx">deleteButton</span> <span class="o">=</span> <span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s1">&#39;deletebutton&#39;</span><span class="p">),</span>
+            <span class="nx">bindingActive</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span>
+            <span class="nx">prevMode</span><span class="p">;</span></pre></div></td></tr><tr id="section-55"><td class="docs"><div class="pilwrap"><a href="#section-55" class="pilcrow">&#182;</a></div><h4>editStart (private)</h4>
+
+<p>displays editing area</p>
+</td><td class="code"><div class="highlight"><pre>            <span class="nx">editStart</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                <span class="nx">$</span><span class="p">(</span><span class="nx">editArea</span><span class="p">).</span><span class="nx">show</span><span class="p">();</span>
+                <span class="nx">$</span><span class="p">(</span><span class="nx">bodyContent</span><span class="p">).</span><span class="nx">hide</span><span class="p">();</span>
+                <span class="nx">bindingActive</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+                <span class="nx">binding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onClick</span><span class="p">.</span><span class="nx">fire</span><span class="p">(</span><span class="nx">opts</span><span class="p">.</span><span class="nx">itemId</span><span class="p">);</span>
+            <span class="p">};</span></pre></div></td></tr><tr id="section-56"><td class="docs"><div class="pilwrap"><a href="#section-56" class="pilcrow">&#182;</a></div><h4>editEnd (private)</h4>
+
+<p>Hides the editing area after the user has completed editing/canceled editing</p>
+</td><td class="code"><div class="highlight"><pre>            <span class="nx">editEnd</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                <span class="nx">$</span><span class="p">(</span><span class="nx">editArea</span><span class="p">).</span><span class="nx">hide</span><span class="p">();</span>
+                <span class="nx">$</span><span class="p">(</span><span class="nx">bodyContent</span><span class="p">).</span><span class="nx">show</span><span class="p">();</span>
+                <span class="nx">bindingActive</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+
+            <span class="p">};</span></pre></div></td></tr><tr id="section-57"><td class="docs"><div class="pilwrap"><a href="#section-57" class="pilcrow">&#182;</a></div><h4>editUpdate (private)</h4>
+
+<p>Called when the user sends new data to dataStore</p>
+</td><td class="code"><div class="highlight"><pre>            <span class="nx">editUpdate</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+                <span class="kd">var</span> <span class="nx">data</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="nx">textArea</span><span class="p">).</span><span class="nx">val</span><span class="p">();</span>
+                <span class="nx">e</span><span class="p">.</span><span class="nx">preventDefault</span><span class="p">();</span>
+                <span class="nx">binding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onUpdate</span><span class="p">.</span><span class="nx">fire</span><span class="p">(</span><span class="nx">opts</span><span class="p">.</span><span class="nx">itemId</span><span class="p">,</span> <span class="nx">data</span><span class="p">);</span>
+                <span class="nx">editEnd</span><span class="p">();</span>
+            <span class="p">};</span></pre></div></td></tr><tr id="section-58"><td class="docs"><div class="pilwrap"><a href="#section-58" class="pilcrow">&#182;</a></div><p>Annotation DOM element listens for a double-click to either
+display and become active or hide and become unactive</p>
+</td><td class="code"><div class="highlight"><pre>            <span class="nx">$</span><span class="p">(</span><span class="nx">annoEl</span><span class="p">).</span><span class="nx">bind</span><span class="p">(</span><span class="s1">&#39;dblclick&#39;</span><span class="p">,</span>
+            <span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">e</span><span class="p">.</span><span class="nx">preventDefault</span><span class="p">();</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">bindingActive</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">editEnd</span><span class="p">();</span>
+
+                    <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">.</span><span class="nx">setCurrentMode</span><span class="p">(</span><span class="nx">prevMode</span> <span class="o">||</span> <span class="s1">&#39;&#39;</span><span class="p">);</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                    <span class="nx">editStart</span><span class="p">();</span>
+                    <span class="nx">prevMode</span> <span class="o">=</span> <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">.</span><span class="nx">getCurrentMode</span><span class="p">();</span>
+                    <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">.</span><span class="nx">setCurrentMode</span><span class="p">(</span><span class="s1">&#39;TextEdit&#39;</span><span class="p">);</span>
+                <span class="p">}</span>
+            <span class="p">});</span></pre></div></td></tr><tr id="section-59"><td class="docs"><div class="pilwrap"><a href="#section-59" class="pilcrow">&#182;</a></div><p>Clicking once on the annotation DOM element will activate the attached SVG shape</p>
+</td><td class="code"><div class="highlight"><pre>            <span class="nx">$</span><span class="p">(</span><span class="nx">annoEl</span><span class="p">).</span><span class="nx">bind</span><span class="p">(</span><span class="s1">&#39;click&#39;</span><span class="p">,</span>
+            <span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span></pre></div></td></tr><tr id="section-60"><td class="docs"><div class="pilwrap"><a href="#section-60" class="pilcrow">&#182;</a></div><p>binding.events.onClick.fire(opts.itemId);</p>
+</td><td class="code"><div class="highlight"><pre>                <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">.</span><span class="nx">setActiveAnnotation</span><span class="p">(</span><span class="nx">opts</span><span class="p">.</span><span class="nx">itemId</span><span class="p">);</span>
+            <span class="p">});</span></pre></div></td></tr><tr id="section-61"><td class="docs"><div class="pilwrap"><a href="#section-61" class="pilcrow">&#182;</a></div><p>Attach binding to the update button which ends editing and updates the bodyContent of the attached
+annotation</p>
+</td><td class="code"><div class="highlight"><pre>            <span class="nx">$</span><span class="p">(</span><span class="nx">updateButton</span><span class="p">).</span><span class="nx">bind</span><span class="p">(</span><span class="s1">&#39;click&#39;</span><span class="p">,</span>
+            <span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">binding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onUpdate</span><span class="p">.</span><span class="nx">fire</span><span class="p">(</span><span class="nx">opts</span><span class="p">.</span><span class="nx">itemId</span><span class="p">,</span> <span class="nx">$</span><span class="p">(</span><span class="nx">textArea</span><span class="p">).</span><span class="nx">val</span><span class="p">());</span>
+                <span class="nx">editEnd</span><span class="p">();</span>
+                <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">.</span><span class="nx">setCurrentMode</span><span class="p">(</span><span class="nx">prevMode</span><span class="p">);</span>
+            <span class="p">});</span></pre></div></td></tr><tr id="section-62"><td class="docs"><div class="pilwrap"><a href="#section-62" class="pilcrow">&#182;</a></div><p>Attach binding to the delete button to delete the entire annotation - removes from dataStore</p>
+</td><td class="code"><div class="highlight"><pre>            <span class="nx">$</span><span class="p">(</span><span class="nx">deleteButton</span><span class="p">).</span><span class="nx">bind</span><span class="p">(</span><span class="s1">&#39;click&#39;</span><span class="p">,</span>
+            <span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">binding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onDelete</span><span class="p">.</span><span class="nx">fire</span><span class="p">(</span><span class="nx">opts</span><span class="p">.</span><span class="nx">itemId</span><span class="p">);</span></pre></div></td></tr><tr id="section-63"><td class="docs"><div class="pilwrap"><a href="#section-63" class="pilcrow">&#182;</a></div><p>remove DOM elements</p>
+</td><td class="code"><div class="highlight"><pre>                <span class="nx">$</span><span class="p">(</span><span class="nx">annoEl</span><span class="p">).</span><span class="nx">remove</span><span class="p">();</span>
+            <span class="p">});</span></pre></div></td></tr><tr id="section-64"><td class="docs"><div class="pilwrap"><a href="#section-64" class="pilcrow">&#182;</a></div><p>Listening for changes in active annotation so that annotation text lens stays current</p>
+</td><td class="code"><div class="highlight"><pre>            <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onActiveAnnotationChange</span><span class="p">.</span><span class="nx">addListener</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">id</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">id</span> <span class="o">!==</span> <span class="nx">opts</span><span class="p">.</span><span class="nx">id</span> <span class="o">&amp;&amp;</span> <span class="nx">bindingActive</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">editUpdate</span><span class="p">({</span>
+                        <span class="nx">preventDefault</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{}</span>
+                    <span class="p">});</span>
+                    <span class="nx">editEnd</span><span class="p">();</span>
+                <span class="p">}</span>
+            <span class="p">});</span></pre></div></td></tr><tr id="section-65"><td class="docs"><div class="pilwrap"><a href="#section-65" class="pilcrow">&#182;</a></div><p>Listens for changes in the mode in order to stay current with rest of the application</p>
+</td><td class="code"><div class="highlight"><pre>            <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onCurrentModeChange</span><span class="p">.</span><span class="nx">addListener</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">newMode</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">newMode</span> <span class="o">!==</span> <span class="s1">&#39;TextEdit&#39;</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">editEnd</span><span class="p">();</span>
+                <span class="p">}</span>
+            <span class="p">});</span>
+        <span class="p">};</span>
+        <span class="k">return</span> <span class="nx">that</span><span class="p">;</span>
+    <span class="p">};</span></pre></div></td></tr><tr id="section-66"><td class="docs"><div class="pilwrap"><a href="#section-66" class="pilcrow">&#182;</a></div><h2>CanvasClickController</h2>
+
+<p>Listens for all clicks on the canvas and connects shapes with the Edit controller above</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li>options - Object that includes:
+<em>* paper - RaphaelSVG canvas object generated by Raphael Presentation
+*</em> closeEnough - value for how close (In RaphaelSVG units) a mouse-click has to be in order to be considered
+'clicking' an object</li>
+</ul>
+</td><td class="code"><div class="highlight"><pre>    <span class="nx">Controller</span><span class="p">.</span><span class="nx">namespace</span><span class="p">(</span><span class="s2">&quot;CanvasClickController&quot;</span><span class="p">);</span>
+    <span class="nx">Controller</span><span class="p">.</span><span class="nx">CanvasClickController</span><span class="p">.</span><span class="nx">initController</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">options</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">that</span> <span class="o">=</span> <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">initController</span><span class="p">(</span><span class="s2">&quot;OAC.Client.StreamingVideo.Controller.CanvasClickController&quot;</span><span class="p">,</span> <span class="nx">options</span><span class="p">);</span>
+        <span class="nx">options</span> <span class="o">=</span> <span class="nx">that</span><span class="p">.</span><span class="nx">options</span><span class="p">;</span></pre></div></td></tr><tr id="section-67"><td class="docs"><div class="pilwrap"><a href="#section-67" class="pilcrow">&#182;</a></div><h4>CanvasClickController #applyBindings</h4>
+
+<p>Create the object passed back to the Presentation</p>
+</td><td class="code"><div class="highlight"><pre>        <span class="nx">that</span><span class="p">.</span><span class="nx">applyBindings</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">binding</span><span class="p">,</span> <span class="nx">opts</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">ox</span><span class="p">,</span>
+            <span class="nx">oy</span><span class="p">,</span>
+            <span class="nx">extents</span><span class="p">,</span>
+            <span class="nx">activeId</span><span class="p">,</span>
+            <span class="nx">closeEnough</span> <span class="o">=</span> <span class="nx">opts</span><span class="p">.</span><span class="nx">closeEnough</span><span class="p">,</span>
+            <span class="nx">dx</span><span class="p">,</span>
+            <span class="nx">dy</span><span class="p">,</span>
+            <span class="nx">x</span><span class="p">,</span>
+            <span class="nx">y</span><span class="p">,</span>
+            <span class="nx">w</span><span class="p">,</span>
+            <span class="nx">h</span><span class="p">,</span>
+            <span class="nx">curRendering</span><span class="p">,</span>
+            <span class="nx">renderings</span> <span class="o">=</span> <span class="p">{},</span>
+            <span class="nx">paper</span> <span class="o">=</span> <span class="nx">opts</span><span class="p">.</span><span class="nx">paper</span><span class="p">,</span>
+            <span class="nx">offset</span><span class="p">,</span></pre></div></td></tr><tr id="section-68"><td class="docs"><div class="pilwrap"><a href="#section-68" class="pilcrow">&#182;</a></div><h4>attachDragResize (private)</h4>
+
+<p>Find the passed rendering ID, set that rendering object
+as the current rendering</p>
+
+<p>Parameters:
+* id - ID of the rendering to set as active</p>
+</td><td class="code"><div class="highlight"><pre>            <span class="nx">attachDragResize</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">id</span><span class="p">)</span> <span class="p">{</span>
+                <span class="kd">var</span> <span class="nx">o</span><span class="p">;</span>
+                <span class="k">if</span> <span class="p">((</span><span class="nx">curRendering</span> <span class="o">!==</span> <span class="kc">undefined</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="nx">id</span> <span class="o">===</span> <span class="nx">curRendering</span><span class="p">.</span><span class="nx">id</span><span class="p">))</span> <span class="p">{</span>
+                    <span class="k">return</span><span class="p">;</span>
+                <span class="p">}</span>
+                <span class="nx">o</span> <span class="o">=</span> <span class="nx">renderings</span><span class="p">[</span><span class="nx">id</span><span class="p">];</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">o</span> <span class="o">===</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span></pre></div></td></tr><tr id="section-69"><td class="docs"><div class="pilwrap"><a href="#section-69" class="pilcrow">&#182;</a></div><p>de-activate rendering and all other listeners</p>
+</td><td class="code"><div class="highlight"><pre>                    <span class="nx">binding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onClick</span><span class="p">.</span><span class="nx">fire</span><span class="p">(</span><span class="kc">undefined</span><span class="p">);</span></pre></div></td></tr><tr id="section-70"><td class="docs"><div class="pilwrap"><a href="#section-70" class="pilcrow">&#182;</a></div><p>hide the editBox
+editBoxController.deActivateEditBox();</p>
+</td><td class="code"><div class="highlight"><pre>                    <span class="nx">curRendering</span> <span class="o">=</span> <span class="kc">undefined</span><span class="p">;</span>
+                    <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+                <span class="p">}</span>
+
+                <span class="nx">curRendering</span> <span class="o">=</span> <span class="nx">o</span><span class="p">;</span>
+
+            <span class="p">},</span></pre></div></td></tr><tr id="section-71"><td class="docs"><div class="pilwrap"><a href="#section-71" class="pilcrow">&#182;</a></div><h4>detachDragResize (private)</h4>
+
+<p>Make the current rendering or rendering that has matching ID <em>id</em> non-active</p>
+
+<p>Parameters:
+* id - ID of rendering to make non-active</p>
+</td><td class="code"><div class="highlight"><pre>            <span class="nx">detachDragResize</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">id</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">((</span><span class="nx">curRendering</span> <span class="o">!==</span> <span class="kc">undefined</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="nx">id</span> <span class="o">===</span> <span class="nx">curRendering</span><span class="p">.</span><span class="nx">id</span><span class="p">))</span> <span class="p">{</span>
+                    <span class="k">return</span><span class="p">;</span>
+                <span class="p">}</span>
+                <span class="kd">var</span> <span class="nx">o</span> <span class="o">=</span> <span class="nx">renderings</span><span class="p">[</span><span class="nx">id</span><span class="p">];</span>
+            <span class="p">},</span></pre></div></td></tr><tr id="section-72"><td class="docs"><div class="pilwrap"><a href="#section-72" class="pilcrow">&#182;</a></div><h4>drawShape (private)</h4>
+
+<p>Using two html elements: container is for
+registering the offset of the screen (.section-canvas) and
+the svgEl is for registering mouse clicks on the svg element (svg)</p>
+
+<p>Parameters:
+* container - DOM element that contains the canvas
+* svgEl - SVG shape element that will have mouse bindings attached to it</p>
+</td><td class="code"><div class="highlight"><pre>            <span class="nx">drawShape</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">container</span><span class="p">)</span> <span class="p">{</span></pre></div></td></tr><tr id="section-73"><td class="docs"><div class="pilwrap"><a href="#section-73" class="pilcrow">&#182;</a></div><p>Sets mousedown, mouseup, mousemove to draw a
+shape on the canvas.</p>
+</td><td class="code"><div class="highlight"><pre>                <span class="kd">var</span> <span class="nx">mouseMode</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="nx">topLeft</span> <span class="o">=</span> <span class="p">[],</span>
+                <span class="nx">bottomRight</span> <span class="o">=</span> <span class="p">[],</span>
+                <span class="nx">x</span><span class="p">,</span>
+                <span class="nx">y</span><span class="p">,</span>
+                <span class="nx">w</span><span class="p">,</span>
+                <span class="nx">h</span><span class="p">,</span>
+                <span class="nx">offset</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="nx">container</span><span class="p">).</span><span class="nx">offset</span><span class="p">();</span></pre></div></td></tr><tr id="section-74"><td class="docs"><div class="pilwrap"><a href="#section-74" class="pilcrow">&#182;</a></div><p>MouseMode cycles through three settings:
+* 0: stasis
+* 1: Mousedown and ready to drag
+* 2: Mouse being dragged</p>
+
+<p>remove all previous bindings</p>
+</td><td class="code"><div class="highlight"><pre>                <span class="nx">$</span><span class="p">(</span><span class="nx">container</span><span class="p">).</span><span class="nx">unbind</span><span class="p">();</span>
+
+                <span class="nx">$</span><span class="p">(</span><span class="nx">container</span><span class="p">).</span><span class="nx">mousedown</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nx">mouseMode</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="k">return</span><span class="p">;</span>
+                    <span class="p">}</span>
+                    <span class="nx">x</span> <span class="o">=</span> <span class="nx">e</span><span class="p">.</span><span class="nx">pageX</span> <span class="o">-</span> <span class="nx">offset</span><span class="p">.</span><span class="nx">left</span><span class="p">;</span>
+                    <span class="nx">y</span> <span class="o">=</span> <span class="nx">e</span><span class="p">.</span><span class="nx">pageY</span> <span class="o">-</span> <span class="nx">offset</span><span class="p">.</span><span class="nx">top</span><span class="p">;</span>
+                    <span class="nx">topLeft</span> <span class="o">=</span> <span class="p">[</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">];</span>
+                    <span class="nx">mouseMode</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+                    <span class="nx">binding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onShapeStart</span><span class="p">.</span><span class="nx">fire</span><span class="p">(</span><span class="nx">topLeft</span><span class="p">);</span>
+                <span class="p">});</span>
+
+                <span class="nx">$</span><span class="p">(</span><span class="nx">container</span><span class="p">).</span><span class="nx">mousemove</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nx">mouseMode</span> <span class="o">===</span> <span class="mi">2</span> <span class="o">||</span> <span class="nx">mouseMode</span> <span class="o">===</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="k">return</span><span class="p">;</span>
+                    <span class="p">}</span>
+                    <span class="nx">x</span> <span class="o">=</span> <span class="nx">e</span><span class="p">.</span><span class="nx">pageX</span> <span class="o">-</span> <span class="nx">offset</span><span class="p">.</span><span class="nx">left</span><span class="p">;</span>
+                    <span class="nx">y</span> <span class="o">=</span> <span class="nx">e</span><span class="p">.</span><span class="nx">pageY</span> <span class="o">-</span> <span class="nx">offset</span><span class="p">.</span><span class="nx">top</span><span class="p">;</span>
+                    <span class="nx">bottomRight</span> <span class="o">=</span> <span class="p">[</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">];</span>
+                    <span class="nx">binding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onShapeDrag</span><span class="p">.</span><span class="nx">fire</span><span class="p">(</span><span class="nx">bottomRight</span><span class="p">);</span>
+                <span class="p">});</span>
+
+                <span class="nx">$</span><span class="p">(</span><span class="nx">container</span><span class="p">).</span><span class="nx">mouseup</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nx">mouseMode</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="k">return</span><span class="p">;</span>
+                    <span class="p">}</span>
+                    <span class="nx">mouseMode</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nx">bottomRight</span> <span class="o">===</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="nx">bottomRight</span> <span class="o">=</span> <span class="p">[</span><span class="nx">x</span> <span class="o">+</span> <span class="mi">5</span><span class="p">,</span> <span class="nx">y</span> <span class="o">+</span> <span class="mi">5</span><span class="p">];</span>
+                    <span class="p">}</span>
+                    <span class="nx">binding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onShapeDone</span><span class="p">.</span><span class="nx">fire</span><span class="p">({</span>
+                        <span class="nx">x</span><span class="o">:</span> <span class="nx">topLeft</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                        <span class="nx">y</span><span class="o">:</span> <span class="nx">topLeft</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                        <span class="nx">width</span><span class="o">:</span> <span class="p">(</span><span class="nx">bottomRight</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="nx">topLeft</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+                        <span class="nx">height</span><span class="o">:</span> <span class="p">(</span><span class="nx">bottomRight</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="nx">topLeft</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="p">});</span>
+                <span class="p">});</span>
+            <span class="p">},</span></pre></div></td></tr><tr id="section-75"><td class="docs"><div class="pilwrap"><a href="#section-75" class="pilcrow">&#182;</a></div><h4>selectShape (private)</h4>
+
+<p>Creates a binding for the canvas to listen for mousedowns to select a shape</p>
+
+<p>Parameters:
+* container - HTML element housing the canvas</p>
+</td><td class="code"><div class="highlight"><pre>            <span class="nx">selectShape</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">container</span><span class="p">)</span> <span class="p">{</span></pre></div></td></tr><tr id="section-76"><td class="docs"><div class="pilwrap"><a href="#section-76" class="pilcrow">&#182;</a></div><p>Sets mousedown events to select shapes, not to draw
+them.</p>
+</td><td class="code"><div class="highlight"><pre>                <span class="nx">$</span><span class="p">(</span><span class="nx">container</span><span class="p">).</span><span class="nx">unbind</span><span class="p">();</span>
+                <span class="nx">$</span><span class="p">(</span><span class="nx">container</span><span class="p">).</span><span class="nx">bind</span><span class="p">(</span><span class="s1">&#39;mousedown&#39;</span><span class="p">,</span>
+                <span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span></pre></div></td></tr><tr id="section-77"><td class="docs"><div class="pilwrap"><a href="#section-77" class="pilcrow">&#182;</a></div><p>By default, nullifies all selections</p>
+</td><td class="code"><div class="highlight"><pre>                    <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">.</span><span class="nx">setActiveAnnotation</span><span class="p">(</span><span class="kc">undefined</span><span class="p">);</span>
+                    <span class="nx">activeId</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">;</span>
+                <span class="p">});</span>
+
+            <span class="p">};</span></pre></div></td></tr><tr id="section-78"><td class="docs"><div class="pilwrap"><a href="#section-78" class="pilcrow">&#182;</a></div><p>Attaches binding for active annotation change to attachDragResize</p>
+</td><td class="code"><div class="highlight"><pre>            <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onActiveAnnotationChange</span><span class="p">.</span><span class="nx">addListener</span><span class="p">(</span><span class="nx">attachDragResize</span><span class="p">);</span></pre></div></td></tr><tr id="section-79"><td class="docs"><div class="pilwrap"><a href="#section-79" class="pilcrow">&#182;</a></div><p>Change the mouse actions depending on what Mode the application is currently
+in</p>
+</td><td class="code"><div class="highlight"><pre>            <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onCurrentModeChange</span><span class="p">.</span><span class="nx">addListener</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">mode</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">mode</span> <span class="o">===</span> <span class="s1">&#39;Rectangle&#39;</span> <span class="o">||</span> <span class="nx">mode</span> <span class="o">===</span> <span class="s1">&#39;Ellipse&#39;</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">drawShape</span><span class="p">(</span><span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s1">&#39;svgwrapper&#39;</span><span class="p">));</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">mode</span> <span class="o">===</span> <span class="s1">&#39;Select&#39;</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">selectShape</span><span class="p">(</span><span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s1">&#39;svgwrapper&#39;</span><span class="p">));</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                    <span class="nx">$</span><span class="p">(</span><span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s1">&#39;svgwrapper&#39;</span><span class="p">)).</span><span class="nx">unbind</span><span class="p">();</span>
+                <span class="p">}</span>
+            <span class="p">});</span></pre></div></td></tr><tr id="section-80"><td class="docs"><div class="pilwrap"><a href="#section-80" class="pilcrow">&#182;</a></div><h4>registerRendering</h4>
+
+<p>Takes a rendering object and adds it to internal array for renderings</p>
+
+<p>Parameters:
+* newRendering - Rendering object for a shape annotation</p>
+</td><td class="code"><div class="highlight"><pre>            <span class="nx">binding</span><span class="p">.</span><span class="nx">registerRendering</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">newRendering</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">renderings</span><span class="p">[</span><span class="nx">newRendering</span><span class="p">.</span><span class="nx">id</span><span class="p">]</span> <span class="o">=</span> <span class="nx">newRendering</span><span class="p">;</span>
+            <span class="p">};</span></pre></div></td></tr><tr id="section-81"><td class="docs"><div class="pilwrap"><a href="#section-81" class="pilcrow">&#182;</a></div><h4>removeRendering</h4>
+
+<p>Removes rendering object from internal array - for when a shape is out of view or deleted.</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li>oldRendering - Rendering object for a shape annotation</li>
+</ul>
+</td><td class="code"><div class="highlight"><pre>            <span class="nx">binding</span><span class="p">.</span><span class="nx">removeRendering</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">oldRendering</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">delete</span> <span class="nx">renderings</span><span class="p">[</span><span class="nx">oldRendering</span><span class="p">.</span><span class="nx">id</span><span class="p">];</span>
+            <span class="p">};</span>
+        <span class="p">};</span>
+
+        <span class="k">return</span> <span class="nx">that</span><span class="p">;</span>
+    <span class="p">};</span></pre></div></td></tr><tr id="section-82"><td class="docs"><div class="pilwrap"><a href="#section-82" class="pilcrow">&#182;</a></div><h2>AnnotationCreationButton</h2>
+
+<p>Controls the Annotation Creation Tools set by app.buttonFeature</p>
+</td><td class="code"><div class="highlight"><pre>    <span class="nx">Controller</span><span class="p">.</span><span class="nx">namespace</span><span class="p">(</span><span class="s1">&#39;AnnotationCreationButton&#39;</span><span class="p">);</span>
+    <span class="nx">Controller</span><span class="p">.</span><span class="nx">AnnotationCreationButton</span><span class="p">.</span><span class="nx">initController</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">options</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">that</span> <span class="o">=</span> <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">initController</span><span class="p">(</span><span class="s2">&quot;OAC.Client.StreamingVideo.Controller.AnnotationCreationButton&quot;</span><span class="p">,</span> <span class="nx">options</span><span class="p">);</span>
+        <span class="nx">options</span> <span class="o">=</span> <span class="nx">that</span><span class="p">.</span><span class="nx">options</span><span class="p">;</span></pre></div></td></tr><tr id="section-83"><td class="docs"><div class="pilwrap"><a href="#section-83" class="pilcrow">&#182;</a></div><h4>AnnotationCreationButton #applyBindings</h4>
+</td><td class="code"><div class="highlight"><pre>        <span class="nx">that</span><span class="p">.</span><span class="nx">applyBindings</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">binding</span><span class="p">,</span> <span class="nx">opts</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">buttonEl</span><span class="p">,</span>
+            <span class="nx">active</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span>
+            <span class="nx">onCurrentModeChangeHandle</span><span class="p">,</span>
+            <span class="nx">id</span><span class="p">;</span></pre></div></td></tr><tr id="section-84"><td class="docs"><div class="pilwrap"><a href="#section-84" class="pilcrow">&#182;</a></div><p>Mousedown: activate button - set as active mode</p>
+
+<p>Mousedown #2: de-activate button - unset active mode</p>
+
+<p>onCurrentModeChange: if != id passed, deactivate, else do nothing</p>
+</td><td class="code"><div class="highlight"><pre>            <span class="nx">buttonEl</span> <span class="o">=</span> <span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s1">&#39;button&#39;</span><span class="p">);</span></pre></div></td></tr><tr id="section-85"><td class="docs"><div class="pilwrap"><a href="#section-85" class="pilcrow">&#182;</a></div><p>Attach binding to the mousedown</p>
+</td><td class="code"><div class="highlight"><pre>            <span class="nx">$</span><span class="p">(</span><span class="nx">buttonEl</span><span class="p">).</span><span class="nx">live</span><span class="p">(</span><span class="s1">&#39;mousedown&#39;</span><span class="p">,</span>
+            <span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">active</span> <span class="o">===</span> <span class="kc">false</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">active</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+                    <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">.</span><span class="nx">setCurrentMode</span><span class="p">(</span><span class="nx">opts</span><span class="p">.</span><span class="nx">action</span><span class="p">);</span>
+                    <span class="nx">$</span><span class="p">(</span><span class="nx">buttonEl</span><span class="p">).</span><span class="nx">addClass</span><span class="p">(</span><span class="s2">&quot;active&quot;</span><span class="p">);</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">active</span> <span class="o">===</span> <span class="kc">true</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">active</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+                    <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">.</span><span class="nx">setCurrentMode</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">);</span>
+                    <span class="nx">$</span><span class="p">(</span><span class="nx">buttonEl</span><span class="p">).</span><span class="nx">removeClass</span><span class="p">(</span><span class="s2">&quot;active&quot;</span><span class="p">);</span>
+                <span class="p">}</span>
+            <span class="p">});</span></pre></div></td></tr><tr id="section-86"><td class="docs"><div class="pilwrap"><a href="#section-86" class="pilcrow">&#182;</a></div><h4>onCurrentModeChangeHandle (private)</h4>
+
+<p>Handles when the mode is changed externally from controller</p>
+
+<p>Parameters:
+* action - name of new mode</p>
+</td><td class="code"><div class="highlight"><pre>            <span class="nx">onCurrentModeChangeHandle</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">action</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">action</span> <span class="o">===</span> <span class="nx">options</span><span class="p">.</span><span class="nx">action</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">active</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+                    <span class="nx">$</span><span class="p">(</span><span class="nx">buttonEl</span><span class="p">).</span><span class="nx">addClass</span><span class="p">(</span><span class="s1">&#39;active&#39;</span><span class="p">);</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                    <span class="nx">active</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+                    <span class="nx">$</span><span class="p">(</span><span class="nx">buttonEl</span><span class="p">).</span><span class="nx">removeClass</span><span class="p">(</span><span class="s2">&quot;active&quot;</span><span class="p">);</span>
+                <span class="p">}</span>
+            <span class="p">};</span>
+
+            <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onCurrentModeChange</span><span class="p">.</span><span class="nx">addListener</span><span class="p">(</span><span class="nx">onCurrentModeChangeHandle</span><span class="p">);</span>
+        <span class="p">};</span>
+
+        <span class="k">return</span> <span class="nx">that</span><span class="p">;</span>
+    <span class="p">};</span></pre></div></td></tr><tr id="section-87"><td class="docs"><div class="pilwrap"><a href="#section-87" class="pilcrow">&#182;</a></div><h2>sliderButton</h2>
+
+<p>Creates a jQuery UI slider for the current time in the video</p>
+</td><td class="code"><div class="highlight"><pre>    <span class="nx">Controller</span><span class="p">.</span><span class="nx">namespace</span><span class="p">(</span><span class="s1">&#39;sliderButton&#39;</span><span class="p">);</span>
+    <span class="nx">Controller</span><span class="p">.</span><span class="nx">sliderButton</span><span class="p">.</span><span class="nx">initController</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">options</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">that</span> <span class="o">=</span> <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">initController</span><span class="p">(</span><span class="s2">&quot;OAC.Client.StreamingVideo.Controller.sliderButton&quot;</span><span class="p">,</span> <span class="nx">options</span><span class="p">);</span>
+        <span class="nx">options</span> <span class="o">=</span> <span class="nx">that</span><span class="p">.</span><span class="nx">options</span><span class="p">;</span>
+
+        <span class="nx">that</span><span class="p">.</span><span class="nx">applyBindings</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">binding</span><span class="p">,</span> <span class="nx">opts</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">sliderElement</span><span class="p">,</span>
+            <span class="nx">displayElement</span><span class="p">,</span>
+            <span class="nx">sliderStart</span><span class="p">,</span>
+            <span class="nx">sliderMove</span><span class="p">,</span>
+            <span class="nx">localTime</span><span class="p">,</span>
+            <span class="nx">positionCheck</span><span class="p">;</span>
+            <span class="nx">displayElement</span> <span class="o">=</span> <span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s1">&#39;timedisplay&#39;</span><span class="p">);</span>
+            <span class="nx">positionCheck</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">t</span><span class="p">)</span> <span class="p">{</span></pre></div></td></tr><tr id="section-88"><td class="docs"><div class="pilwrap"><a href="#section-88" class="pilcrow">&#182;</a></div><p>if time is not equal to internal time, then
+reset the slider</p>
+</td><td class="code"><div class="highlight"><pre>                <span class="k">if</span> <span class="p">(</span><span class="nx">localTime</span> <span class="o">===</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">localTime</span> <span class="o">=</span> <span class="nx">t</span><span class="p">;</span>
+                    <span class="nx">$</span><span class="p">(</span><span class="nx">sliderElement</span><span class="p">).</span><span class="nx">slider</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">,</span> <span class="nx">localTime</span><span class="p">);</span>
+                <span class="p">}</span>
+            <span class="p">};</span>
+
+            <span class="nx">sliderStart</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">,</span> <span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">.</span><span class="nx">setCurrentTime</span><span class="p">(</span><span class="nx">ui</span><span class="p">.</span><span class="nx">value</span><span class="p">);</span>
+                <span class="nx">$</span><span class="p">(</span><span class="nx">displayElement</span><span class="p">).</span><span class="nx">text</span><span class="p">(</span><span class="s1">&#39;TIME: &#39;</span> <span class="o">+</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">value</span><span class="p">);</span>
+                <span class="nx">localTime</span> <span class="o">=</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">value</span><span class="p">;</span>
+            <span class="p">};</span>
+
+            <span class="nx">sliderMove</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">e</span><span class="p">,</span> <span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">ui</span> <span class="o">===</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">localTime</span> <span class="o">=</span> <span class="nx">e</span><span class="p">;</span>
+                    <span class="nx">$</span><span class="p">(</span><span class="nx">sliderElement</span><span class="p">).</span><span class="nx">slider</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">,</span> <span class="nx">e</span><span class="p">);</span>
+                <span class="p">}</span>
+
+                <span class="k">if</span> <span class="p">(</span><span class="nx">localTime</span> <span class="o">===</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">return</span><span class="p">;</span>
+                <span class="p">}</span>
+                <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">.</span><span class="nx">setCurrentTime</span><span class="p">(</span><span class="nx">ui</span><span class="p">.</span><span class="nx">value</span><span class="p">);</span>
+                <span class="nx">$</span><span class="p">(</span><span class="nx">displayElement</span><span class="p">).</span><span class="nx">text</span><span class="p">(</span><span class="s1">&#39;TIME: &#39;</span> <span class="o">+</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">value</span><span class="p">);</span>
+                <span class="nx">localTime</span> <span class="o">=</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">value</span><span class="p">;</span>
+            <span class="p">};</span>
+            <span class="nx">sliderElement</span> <span class="o">=</span> <span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s2">&quot;slider&quot;</span><span class="p">);</span>
+
+            <span class="nx">$</span><span class="p">(</span><span class="nx">sliderElement</span><span class="p">).</span><span class="nx">slider</span><span class="p">({</span>
+                <span class="nx">start</span><span class="o">:</span> <span class="nx">sliderStart</span><span class="p">,</span>
+                <span class="nx">slide</span><span class="o">:</span> <span class="nx">sliderMove</span>
+            <span class="p">});</span>
+
+
+        <span class="p">};</span>
+
+        <span class="k">return</span> <span class="nx">that</span><span class="p">;</span>
+    <span class="p">};</span></pre></div></td></tr><tr id="section-89"><td class="docs"><div class="pilwrap"><a href="#section-89" class="pilcrow">&#182;</a></div><h2>timeControl</h2>
+
+<p>Controller for manipulating the time sequence for an annotation.
+Currently, just a text box for user to enter basic time data</p>
+</td><td class="code"><div class="highlight"><pre>    <span class="nx">Controller</span><span class="p">.</span><span class="nx">namespace</span><span class="p">(</span><span class="s1">&#39;timeControl&#39;</span><span class="p">);</span>
+    <span class="nx">Controller</span><span class="p">.</span><span class="nx">timeControl</span><span class="p">.</span><span class="nx">initController</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">options</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">that</span> <span class="o">=</span> <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">initController</span><span class="p">(</span><span class="s2">&quot;OAC.Client.StreamingVideo.Controller.timeControl&quot;</span><span class="p">,</span> <span class="nx">options</span><span class="p">);</span>
+        <span class="nx">options</span> <span class="o">=</span> <span class="nx">that</span><span class="p">.</span><span class="nx">options</span><span class="p">;</span>
+        <span class="nx">that</span><span class="p">.</span><span class="nx">currentId</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">;</span></pre></div></td></tr><tr id="section-90"><td class="docs"><div class="pilwrap"><a href="#section-90" class="pilcrow">&#182;</a></div><h4>timeControl #applyBindings</h4>
+</td><td class="code"><div class="highlight"><pre>        <span class="nx">that</span><span class="p">.</span><span class="nx">applyBindings</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">binding</span><span class="p">,</span> <span class="nx">opts</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">timestart</span> <span class="o">=</span> <span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s1">&#39;timestart&#39;</span><span class="p">),</span>
+            <span class="nx">timeend</span> <span class="o">=</span> <span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s1">&#39;timeend&#39;</span><span class="p">),</span>
+            <span class="nx">submit</span> <span class="o">=</span> <span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s1">&#39;submit&#39;</span><span class="p">),</span>
+            <span class="nx">menudiv</span> <span class="o">=</span> <span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s1">&#39;menudiv&#39;</span><span class="p">),</span>
+            <span class="nx">start_time</span><span class="p">,</span>
+            <span class="nx">end_time</span><span class="p">;</span>
+
+            <span class="nx">$</span><span class="p">(</span><span class="nx">menudiv</span><span class="p">).</span><span class="nx">hide</span><span class="p">();</span>
+
+            <span class="nx">$</span><span class="p">(</span><span class="nx">submit</span><span class="p">).</span><span class="nx">bind</span><span class="p">(</span><span class="s1">&#39;click&#39;</span><span class="p">,</span>
+            <span class="kd">function</span><span class="p">()</span> <span class="p">{</span></pre></div></td></tr><tr id="section-91"><td class="docs"><div class="pilwrap"><a href="#section-91" class="pilcrow">&#182;</a></div><p><strong>FIXME:</strong> times can be in parts of seconds</p>
+</td><td class="code"><div class="highlight"><pre>                <span class="nx">start_time</span> <span class="o">=</span> <span class="nb">parseInt</span><span class="p">(</span><span class="nx">$</span><span class="p">(</span><span class="nx">timestart</span><span class="p">).</span><span class="nx">val</span><span class="p">(),</span> <span class="mi">10</span><span class="p">);</span>
+                <span class="nx">end_time</span> <span class="o">=</span> <span class="nb">parseInt</span><span class="p">(</span><span class="nx">$</span><span class="p">(</span><span class="nx">timeend</span><span class="p">).</span><span class="nx">val</span><span class="p">(),</span> <span class="mi">10</span><span class="p">);</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">binding</span><span class="p">.</span><span class="nx">currentId</span> <span class="o">!==</span> <span class="kc">undefined</span> <span class="o">&amp;&amp;</span> <span class="nx">start_time</span> <span class="o">!==</span> <span class="kc">undefined</span> <span class="o">&amp;&amp;</span> <span class="nx">end_time</span> <span class="o">!==</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span></pre></div></td></tr><tr id="section-92"><td class="docs"><div class="pilwrap"><a href="#section-92" class="pilcrow">&#182;</a></div><p>update core data</p>
+</td><td class="code"><div class="highlight"><pre>                    <span class="nx">binding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onUpdate</span><span class="p">.</span><span class="nx">fire</span><span class="p">(</span><span class="nx">binding</span><span class="p">.</span><span class="nx">currentId</span><span class="p">,</span> <span class="nx">start_time</span><span class="p">,</span> <span class="nx">end_time</span><span class="p">);</span>
+
+                    <span class="nx">$</span><span class="p">(</span><span class="nx">menudiv</span><span class="p">).</span><span class="nx">hide</span><span class="p">();</span>
+                <span class="p">}</span>
+            <span class="p">});</span>
+
+            <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onActiveAnnotationChange</span><span class="p">.</span><span class="nx">addListener</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">id</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">id</span> <span class="o">!==</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">$</span><span class="p">(</span><span class="nx">menudiv</span><span class="p">).</span><span class="nx">show</span><span class="p">();</span>
+                    <span class="nx">$</span><span class="p">(</span><span class="nx">timestart</span><span class="p">).</span><span class="nx">val</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">);</span>
+                    <span class="nx">$</span><span class="p">(</span><span class="nx">timeend</span><span class="p">).</span><span class="nx">val</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">);</span>
+                    <span class="nx">binding</span><span class="p">.</span><span class="nx">currentId</span> <span class="o">=</span> <span class="nx">id</span><span class="p">;</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">id</span> <span class="o">===</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">$</span><span class="p">(</span><span class="nx">menudiv</span><span class="p">).</span><span class="nx">hide</span><span class="p">();</span>
+                <span class="p">}</span>
+            <span class="p">});</span>
+        <span class="p">};</span>
+
+        <span class="k">return</span> <span class="nx">that</span><span class="p">;</span>
+    <span class="p">};</span></pre></div></td></tr><tr id="section-93"><td class="docs"><div class="pilwrap"><a href="#section-93" class="pilcrow">&#182;</a></div><h2>WindowResize</h2>
+
+<p>Emits an onResize event when the browser window is resized.</p>
+</td><td class="code"><div class="highlight"><pre>    <span class="nx">Controller</span><span class="p">.</span><span class="nx">namespace</span><span class="p">(</span><span class="s1">&#39;WindowResize&#39;</span><span class="p">);</span>
+    <span class="nx">Controller</span><span class="p">.</span><span class="nx">WindowResize</span><span class="p">.</span><span class="nx">initController</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">options</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">that</span> <span class="o">=</span> <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">initController</span><span class="p">(</span><span class="s2">&quot;OAC.Client.StreamingVideo.Controller.WindowResize&quot;</span><span class="p">,</span> <span class="nx">options</span><span class="p">);</span>
+        <span class="nx">options</span> <span class="o">=</span> <span class="nx">that</span><span class="p">.</span><span class="nx">options</span><span class="p">;</span>
+
+        <span class="nx">that</span><span class="p">.</span><span class="nx">applyBindings</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">binding</span><span class="p">,</span> <span class="nx">opts</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">w</span> <span class="o">=</span> <span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s1">&#39;resizeBox&#39;</span><span class="p">);</span>
+            <span class="nx">w</span><span class="p">.</span><span class="nx">resize</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                <span class="nx">setTimeout</span><span class="p">(</span><span class="nx">binding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onResize</span><span class="p">.</span><span class="nx">fire</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+            <span class="p">});</span>
+        <span class="p">};</span>
+
+        <span class="k">return</span> <span class="nx">that</span><span class="p">;</span>
+    <span class="p">};</span>
+<span class="p">}</span> <span class="p">(</span><span class="nx">jQuery</span><span class="p">,</span> <span class="nx">MITHGrid</span><span class="p">,</span> <span class="nx">OAC</span><span class="p">));</span>
+
+</pre></div></td></tr></tbody></table><div id="generated">generated Wed Apr 11 2012 09:27:00 GMT-0400 (EDT)  </div><div id="projectname"><a href="../index.html">OAC Video Annotation Client</a></div></div></body></html>

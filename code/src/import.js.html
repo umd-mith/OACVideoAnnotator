@@ -1,0 +1,596 @@
+<!DOCTYPE html><html><head><title>import.js</title><meta http-equiv="Content-Type" content="text/html" charset="UTF-8"><link rel="stylesheet" media="all" href="../docco.css"></head><body><div id="container"><div id="background"></div><div id="jump_to">Jump To &hellip;<div id="jump_wrapper"><div id="jump_page"><a href="../index.html" class="source"><span class="file_name">README</span></a><a href="../src/canvas.js.html" class="source "><span class="base_path">src / </span><span class="file_name">canvas.js</span></a><a href="../src/component.js.html" class="source "><span class="base_path">src / </span><span class="file_name">component.js</span></a><a href="../src/controllers.js.html" class="source "><span class="base_path">src / </span><span class="file_name">controllers.js</span></a><a href="../src/export.js.html" class="source "><span class="base_path">src / </span><span class="file_name">export.js</span></a><a href="../src/import.js.html" class="source selected"><span class="base_path">src / </span><span class="file_name">import.js</span></a><a href="../src/intro.js.html" class="source "><span class="base_path">src / </span><span class="file_name">intro.js</span></a><a href="../src/oac-dummy-player.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">oac-dummy-player.coffee</span></a><a href="../src/oac-dummy-player.js.html" class="source "><span class="base_path">src / </span><span class="file_name">oac-dummy-player.js</span></a><a href="../src/oac-player-framework.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">oac-player-framework.coffee</span></a><a href="../src/oac-player-framework.js.html" class="source "><span class="base_path">src / </span><span class="file_name">oac-player-framework.js</span></a><a href="../src/oac-youtube-player.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">oac-youtube-player.coffee</span></a><a href="../src/outro.js.html" class="source "><span class="base_path">src / </span><span class="file_name">outro.js</span></a><a href="../src/raphael_canvas.js.html" class="source "><span class="base_path">src / </span><span class="file_name">raphael_canvas.js</span></a></div></div></div><table cellpadding="0" cellspacing="0"><thead><tr><th class="docs"><h1>import.js</h1><div class="filepath">src/</div></th><th class="code"></th></tr></thead><tbody><tr id="section-1"><td class="docs"><div class="pilwrap"><a href="#section-1" class="pilcrow">&#182;</a></div><div class="dox"><div class="summary"><p>Related functions for importing<br />manifest data into MITHGrid and OAC</p></div><div class="body"><p>Converting: RDF -> JSON</p></div></div>
+</td><td class="code"><div class="highlight"><pre> <span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">OAC</span><span class="p">,</span> <span class="nx">MITHGrid</span><span class="p">,</span> <span class="nx">$</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">prefixes</span><span class="p">,</span>
+    <span class="nx">that</span><span class="p">,</span>
+    <span class="nx">rdfbase</span><span class="p">,</span>
+    <span class="nx">socket</span><span class="p">,</span>
+    <span class="nx">proxyRequests</span><span class="p">,</span>
+    <span class="nx">loadUri</span><span class="p">,</span>
+    <span class="nx">__indexOf</span><span class="p">,</span>
+    <span class="nx">urisDone</span> <span class="o">=</span> <span class="p">[],</span>
+    <span class="nx">requestId</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+    <span class="nx">__indexOf</span> <span class="o">=</span> <span class="nb">Array</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">indexOf</span> <span class="o">||</span>
+    <span class="kd">function</span><span class="p">(</span><span class="nx">item</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">l</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">l</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">===</span> <span class="nx">item</span><span class="p">)</span> <span class="k">return</span> <span class="nx">i</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="p">};</span>
+    <span class="nx">prefixes</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="nx">dc</span><span class="o">:</span> <span class="s1">&#39;http://purl.org/dc/elements/1.1/&#39;</span><span class="p">,</span>
+        <span class="nx">dcterms</span><span class="o">:</span> <span class="s1">&#39;http://purl.org/dc/terms/&#39;</span><span class="p">,</span>
+        <span class="nx">dctype</span><span class="o">:</span> <span class="s1">&#39;http://purl.org/dc/dcmitype/&#39;</span><span class="p">,</span>
+        <span class="nx">oac</span><span class="o">:</span> <span class="s1">&#39;http://www.openannotation.org/ns/&#39;</span><span class="p">,</span>
+        <span class="nx">cnt</span><span class="o">:</span> <span class="s1">&#39;http://www.w3.org/2008/content#&#39;</span><span class="p">,</span>
+        <span class="nx">dms</span><span class="o">:</span> <span class="s1">&#39;http://dms.stanford.edu/ns/&#39;</span><span class="p">,</span>
+        <span class="nx">rdf</span><span class="o">:</span> <span class="s1">&#39;http://www.w3.org/1999/02/22-rdf-syntax-ns#&#39;</span><span class="p">,</span>
+        <span class="nx">ore</span><span class="o">:</span> <span class="s1">&#39;http://www.openarchives.org/ore/terms/&#39;</span><span class="p">,</span>
+        <span class="nx">exif</span><span class="o">:</span> <span class="s1">&#39;http://www.w3.org/2003/12/exif/ns#&#39;</span>
+    <span class="p">};</span>
+
+    <span class="nx">OAC</span><span class="p">.</span><span class="nx">initManifest</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">options</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">that</span> <span class="o">=</span> <span class="p">{};</span>
+        <span class="nx">rdfbase</span> <span class="o">=</span> <span class="nx">$</span><span class="p">.</span><span class="nx">rdf</span><span class="p">();</span>
+
+        <span class="nx">$</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">prefixes</span><span class="p">,</span>
+        <span class="kd">function</span><span class="p">(</span><span class="nx">ns</span><span class="p">,</span> <span class="nx">href</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">rdfbase</span><span class="p">.</span><span class="nx">prefix</span><span class="p">(</span><span class="nx">ns</span><span class="p">,</span> <span class="nx">href</span><span class="p">);</span>
+        <span class="p">});</span></pre></div></td></tr><tr id="section-2"><td class="docs"><div class="pilwrap"><a href="#section-2" class="pilcrow">&#182;</a></div><div class="dox"><div class="summary"><h2>Goals for importing</h2>
+
+<pre><code>    * Get the raw data from remote source (NodeJS)
+    * Use RDFQuery to create a databank from raw
+    * Query/aggregate data from databank
+    * Form JSON from datadump
+    * Troll datadump and create dataStore
+
+    *
+</code></pre></div><div class="body"></div></div>
+</td><td class="code"><div class="highlight"><pre>        <span class="nx">socket</span> <span class="o">=</span> <span class="nx">io</span><span class="p">.</span><span class="nx">connect</span><span class="p">(</span><span class="nx">options</span><span class="p">.</span><span class="nx">proxy</span><span class="p">);</span>
+        <span class="nx">proxyRequests</span> <span class="o">=</span> <span class="p">{};</span>
+        <span class="nx">socket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;RESPONSE&#39;</span><span class="p">,</span>
+        <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">proxyRequests</span><span class="p">[</span><span class="nx">data</span><span class="p">.</span><span class="nx">id</span><span class="p">]</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">content</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">proxyRequests</span><span class="p">[</span><span class="nx">data</span><span class="p">.</span><span class="nx">id</span><span class="p">].</span><span class="nx">success</span><span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">content</span><span class="p">);</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                    <span class="nx">proxyRequests</span><span class="p">[</span><span class="nx">data</span><span class="p">.</span><span class="nx">id</span><span class="p">].</span><span class="nx">error</span><span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">error</span><span class="p">);</span>
+                <span class="p">}</span>
+                <span class="k">return</span> <span class="k">delete</span> <span class="nx">proxyRequests</span><span class="p">[</span><span class="nx">data</span><span class="p">.</span><span class="nx">id</span><span class="p">];</span>
+            <span class="p">}</span>
+        <span class="p">});</span>
+
+
+        <span class="nx">loadUri</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">uri</span><span class="p">,</span> <span class="nx">cb</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">__indexOf</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">urisDone</span><span class="p">,</span> <span class="nx">uri</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">cb</span><span class="p">();</span>
+            <span class="p">}</span>
+            <span class="nx">urisDone</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">uri</span><span class="p">);</span>
+            <span class="nx">proxyRequests</span><span class="p">[</span><span class="nx">requestId</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="nx">success</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="kd">var</span> <span class="nx">resp</span><span class="p">;</span>
+                    <span class="k">try</span> <span class="p">{</span>
+                        <span class="nx">resp</span> <span class="o">=</span> <span class="nx">rdfbase</span><span class="p">.</span><span class="nx">databank</span><span class="p">.</span><span class="nx">load</span><span class="p">(</span><span class="nx">$</span><span class="p">.</span><span class="nx">parseXML</span><span class="p">(</span><span class="nx">data</span><span class="p">));</span>
+                    <span class="p">}</span> <span class="k">catch</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="nx">alert</span><span class="p">(</span><span class="s2">&quot;Broken RDF/XML: &quot;</span> <span class="o">+</span> <span class="nx">e</span><span class="p">);</span>
+                    <span class="p">}</span>
+                    <span class="k">return</span> <span class="nx">cb</span><span class="p">();</span>
+                <span class="p">},</span>
+                <span class="nx">error</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">return</span> <span class="nx">alert</span><span class="p">(</span><span class="s2">&quot;Can not fetch data from &quot;</span> <span class="o">+</span> <span class="nx">uri</span><span class="p">);</span>
+                <span class="p">}</span>
+            <span class="p">};</span>
+            <span class="nx">socket</span><span class="p">.</span><span class="nx">emit</span><span class="p">(</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="p">{</span>
+                <span class="nx">id</span><span class="o">:</span> <span class="nx">requestId</span><span class="p">,</span>
+                <span class="nx">url</span><span class="o">:</span> <span class="nx">uri</span>
+            <span class="p">});</span>
+            <span class="k">return</span> <span class="nx">requestId</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+        <span class="p">};</span>
+        <span class="nx">that</span><span class="p">.</span><span class="nx">base</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">b</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">rdfbase</span><span class="p">.</span><span class="nx">base</span><span class="p">(</span><span class="nx">b</span><span class="p">);</span>
+        <span class="p">};</span>
+        <span class="nx">that</span><span class="p">.</span><span class="nx">prefix</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ns</span><span class="p">,</span> <span class="nx">href</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">rdfbase</span><span class="p">.</span><span class="nx">prefix</span><span class="p">(</span><span class="nx">ns</span><span class="p">,</span> <span class="nx">href</span><span class="p">);</span>
+        <span class="p">};</span>
+        <span class="nx">rdfToList</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">uri</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">firsts</span><span class="p">,</span>
+            <span class="nx">l</span><span class="p">,</span>
+            <span class="nx">nxt</span><span class="p">,</span>
+            <span class="nx">rests</span><span class="p">;</span>
+            <span class="nx">l</span> <span class="o">=</span> <span class="p">[];</span>
+            <span class="nx">firsts</span> <span class="o">=</span> <span class="p">{};</span>
+            <span class="nx">rests</span> <span class="o">=</span> <span class="p">{};</span>
+            <span class="nx">rdfbase</span><span class="p">.</span><span class="nx">where</span><span class="p">(</span><span class="s2">&quot;?what rdf:first ?frst&quot;</span><span class="p">).</span><span class="nx">where</span><span class="p">(</span><span class="s2">&quot;?what rdf:rest ?rst&quot;</span><span class="p">).</span><span class="nx">each</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                <span class="nx">firsts</span><span class="p">[</span><span class="k">this</span><span class="p">.</span><span class="nx">what</span><span class="p">.</span><span class="nx">value</span><span class="p">]</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">frst</span><span class="p">.</span><span class="nx">value</span><span class="p">;</span>
+                <span class="k">return</span> <span class="nx">rests</span><span class="p">[</span><span class="k">this</span><span class="p">.</span><span class="nx">what</span><span class="p">.</span><span class="nx">value</span><span class="p">]</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">rst</span><span class="p">.</span><span class="nx">value</span><span class="p">;</span>
+            <span class="p">}).</span><span class="nx">reset</span><span class="p">();</span>
+            <span class="nx">l</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">firsts</span><span class="p">[</span><span class="nx">uri</span><span class="p">]);</span>
+            <span class="nx">nxt</span> <span class="o">=</span> <span class="nx">rests</span><span class="p">[</span><span class="nx">uri</span><span class="p">];</span>
+            <span class="k">while</span> <span class="p">(</span><span class="nx">nxt</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">firsts</span><span class="p">[</span><span class="nx">nxt</span><span class="p">]</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">l</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">firsts</span><span class="p">[</span><span class="nx">nxt</span><span class="p">]);</span>
+                <span class="p">}</span>
+                <span class="nx">nxt</span> <span class="o">=</span> <span class="nx">rests</span><span class="p">[</span><span class="nx">nxt</span><span class="p">];</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="nx">l</span><span class="p">;</span>
+        <span class="p">};</span>
+        <span class="nx">parseNptItem</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">npt</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">arr</span><span class="p">,</span>
+            <span class="nx">hrs</span><span class="p">,</span>
+            <span class="nx">mins</span><span class="p">,</span>
+            <span class="nx">secs</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">__indexOf</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">npt</span><span class="p">,</span> <span class="s1">&#39;:&#39;</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">arr</span> <span class="o">=</span> <span class="nx">npt</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">);</span>
+                <span class="nx">secs</span> <span class="o">=</span> <span class="nb">parseFloat</span><span class="p">(</span><span class="nx">arr</span><span class="p">.</span><span class="nx">pop</span><span class="p">());</span>
+                <span class="nx">mins</span> <span class="o">=</span> <span class="nb">parseFloat</span><span class="p">(</span><span class="nx">arr</span><span class="p">.</span><span class="nx">pop</span><span class="p">());</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">arr</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">hrs</span> <span class="o">=</span> <span class="nb">parseInt</span><span class="p">(</span><span class="nx">arr</span><span class="p">.</span><span class="nx">pop</span><span class="p">(),</span> <span class="mi">10</span><span class="p">);</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                    <span class="nx">hrs</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+                <span class="p">}</span>
+                <span class="k">return</span> <span class="nx">secs</span> <span class="o">+</span> <span class="p">(</span><span class="nx">mins</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="nx">hrs</span> <span class="o">*</span> <span class="mi">3600</span><span class="p">);</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="nb">parseFloat</span><span class="p">(</span><span class="nx">npt</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">};</span>
+        <span class="nx">getRect</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">tgt</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">doc</span><span class="p">,</span>
+            <span class="nx">pth</span><span class="p">,</span>
+            <span class="nx">rect</span><span class="p">,</span>
+            <span class="nx">th</span><span class="p">,</span>
+            <span class="nx">tw</span><span class="p">,</span>
+            <span class="nx">tx</span><span class="p">,</span>
+            <span class="nx">ty</span><span class="p">,</span>
+            <span class="nx">_ref3</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">tgt</span><span class="p">.</span><span class="nx">constraint</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">pth</span> <span class="o">=</span> <span class="nx">$</span><span class="p">.</span><span class="nx">parseXML</span><span class="p">(</span><span class="nx">tgt</span><span class="p">.</span><span class="nx">constraint</span><span class="p">.</span><span class="nx">value</span><span class="p">);</span>
+                <span class="nx">doc</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="nx">pth</span><span class="p">);</span>
+                <span class="nx">rect</span> <span class="o">=</span> <span class="nx">doc</span><span class="p">.</span><span class="nx">children</span><span class="p">()[</span><span class="mi">0</span><span class="p">];</span>
+                <span class="nx">tx</span> <span class="o">=</span> <span class="nx">rect</span><span class="p">.</span><span class="nx">getAttribute</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">);</span>
+                <span class="nx">ty</span> <span class="o">=</span> <span class="nx">rect</span><span class="p">.</span><span class="nx">getAttribute</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">);</span>
+                <span class="nx">tw</span> <span class="o">=</span> <span class="nx">rect</span><span class="p">.</span><span class="nx">getAttribute</span><span class="p">(</span><span class="s1">&#39;width&#39;</span><span class="p">);</span>
+                <span class="nx">th</span> <span class="o">=</span> <span class="nx">rect</span><span class="p">.</span><span class="nx">getAttribute</span><span class="p">(</span><span class="s1">&#39;height&#39;</span><span class="p">);</span>
+                <span class="k">if</span> <span class="p">(</span><span class="o">!</span> <span class="p">((</span><span class="nx">tx</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="nx">ty</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">)))</span> <span class="p">{</span>
+                    <span class="k">return</span> <span class="kc">null</span><span class="p">;</span>
+                <span class="p">}</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">((</span><span class="nx">tgt</span><span class="p">.</span><span class="nx">fragmentInfo</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nx">tgt</span><span class="p">.</span><span class="nx">fragmentInfo</span><span class="p">.</span><span class="nx">length</span> <span class="o">===</span> <span class="mi">4</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">_ref3</span> <span class="o">=</span> <span class="nx">tgt</span><span class="p">.</span><span class="nx">fragmentInfo</span><span class="p">;</span>
+                <span class="nx">tx</span> <span class="o">=</span> <span class="nx">_ref3</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+                <span class="nx">ty</span> <span class="o">=</span> <span class="nx">_ref3</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+                <span class="nx">tw</span> <span class="o">=</span> <span class="nx">_ref3</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+                <span class="nx">th</span> <span class="o">=</span> <span class="nx">_ref3</span><span class="p">[</span><span class="mi">3</span><span class="p">];</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="kc">null</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="p">[</span><span class="nx">tx</span><span class="p">,</span> <span class="nx">ty</span><span class="p">,</span> <span class="nx">tw</span><span class="p">,</span> <span class="nx">th</span><span class="p">];</span>
+        <span class="p">};</span>
+        <span class="nx">getRemForAggr</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">uri</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">hshidx</span><span class="p">,</span>
+            <span class="nx">rem</span><span class="p">;</span>
+            <span class="nx">rem</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">uri</span><span class="p">.</span><span class="nx">toString</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">uri</span> <span class="o">=</span> <span class="nx">uri</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
+            <span class="p">}</span>
+            <span class="nx">rdfbase</span><span class="p">.</span><span class="nx">reset</span><span class="p">();</span>
+            <span class="nx">rdfbase</span><span class="p">.</span><span class="nx">where</span><span class="p">(</span><span class="s2">&quot;&lt;&quot;</span> <span class="o">+</span> <span class="nx">uri</span> <span class="o">+</span> <span class="s2">&quot;&gt; ore:isDescribedBy ?rem&quot;</span><span class="p">).</span><span class="nx">where</span><span class="p">(</span><span class="s1">&#39;?rem dc:format &quot;application/rdf+xml&quot;&#39;</span><span class="p">).</span><span class="nx">each</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="nx">rem</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">rem</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
+            <span class="p">});</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">rem</span> <span class="o">===</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">rdfbase</span><span class="p">.</span><span class="nx">reset</span><span class="p">();</span>
+                <span class="nx">rdfbase</span><span class="p">.</span><span class="nx">where</span><span class="p">(</span><span class="s2">&quot;&lt;&quot;</span> <span class="o">+</span> <span class="nx">uri</span> <span class="o">+</span> <span class="s2">&quot;&gt; ore:isDescribedBy ?rem&quot;</span><span class="p">).</span><span class="nx">where</span><span class="p">(</span><span class="s1">&#39;?rem dc:format &quot;application/rdf+xml&quot;&#39;</span><span class="p">).</span><span class="nx">each</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                    <span class="k">return</span> <span class="nx">rem</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">rem</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
+                <span class="p">});</span>
+            <span class="p">}</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">rem</span> <span class="o">===</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">hshidx</span> <span class="o">=</span> <span class="nx">uri</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">);</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">hshidx</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">return</span> <span class="nx">uri</span><span class="p">.</span><span class="nx">substr</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nx">hshidx</span><span class="p">);</span>
+                <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                    <span class="k">return</span> <span class="nx">uri</span> <span class="o">+</span> <span class="s1">&#39;.xml&#39;</span><span class="p">;</span>
+                <span class="p">}</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="nx">rem</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">};</span>
+        <span class="nx">textre</span> <span class="o">=</span> <span class="sr">/\/text\(\)$/</span><span class="p">;</span>
+        <span class="nx">slashs</span> <span class="o">=</span> <span class="sr">/^[\/]+/</span><span class="p">;</span>
+        <span class="nx">xptr</span> <span class="o">=</span> <span class="sr">/^#?xpointer\((.+)\)$/</span><span class="p">;</span>
+        <span class="nx">attrq</span> <span class="o">=</span> <span class="sr">/\[([^\]]+)=([^\]&quot;]+)\]/g</span><span class="p">;</span>
+        <span class="nx">strrng</span> <span class="o">=</span> <span class="sr">/^string-range\((.+),([0-9]+),([0-9]+)\)/</span><span class="p">;</span>
+        <span class="nx">trim</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="nx">x</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="sr">/^\s+|\s+$/g</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">);</span>
+        <span class="p">};</span>
+        <span class="nx">xpointerToJQuery</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">xp</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">end</span><span class="p">,</span>
+            <span class="nx">m</span><span class="p">,</span>
+            <span class="nx">start</span><span class="p">,</span>
+            <span class="nx">wantsText</span><span class="p">;</span>
+            <span class="nx">xp</span> <span class="o">=</span> <span class="nx">trim</span><span class="p">(</span><span class="nx">xp</span><span class="p">);</span>
+            <span class="nx">m</span> <span class="o">=</span> <span class="nx">xp</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="nx">xptr</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">m</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">xp</span> <span class="o">=</span> <span class="nx">m</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+            <span class="p">}</span>
+            <span class="nx">xp</span> <span class="o">=</span> <span class="nx">trim</span><span class="p">(</span><span class="nx">xp</span><span class="p">);</span>
+            <span class="nx">m</span> <span class="o">=</span> <span class="nx">xp</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="nx">strrng</span><span class="p">);</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">m</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">xp</span> <span class="o">=</span> <span class="nx">m</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+                <span class="nx">start</span> <span class="o">=</span> <span class="nb">parseInt</span><span class="p">(</span><span class="nx">m</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">10</span><span class="p">);</span>
+                <span class="nx">end</span> <span class="o">=</span> <span class="nb">parseInt</span><span class="p">(</span><span class="nx">m</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mi">10</span><span class="p">);</span>
+                <span class="nx">wantsText</span> <span class="o">=</span> <span class="p">[</span><span class="nx">start</span><span class="p">,</span> <span class="nx">end</span><span class="p">];</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="nx">wantsText</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+                <span class="nx">m</span> <span class="o">=</span> <span class="nx">xp</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="nx">textre</span><span class="p">);</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">m</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">xp</span> <span class="o">=</span> <span class="nx">x</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="nx">textre</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">);</span>
+                    <span class="nx">wantsText</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+            <span class="nx">xp</span> <span class="o">=</span> <span class="nx">xp</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="nx">slashs</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">).</span><span class="nx">replace</span><span class="p">(</span><span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="s1">&#39;//&#39;</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span><span class="p">),</span> <span class="s1">&#39; &#39;</span><span class="p">).</span><span class="nx">replace</span><span class="p">(</span><span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span><span class="p">),</span> <span class="s1">&#39; &gt; &#39;</span><span class="p">).</span><span class="nx">replace</span><span class="p">(</span><span class="nx">attrq</span><span class="p">,</span> <span class="s1">&#39;[$1=&quot;$2&quot;]&#39;</span><span class="p">).</span><span class="nx">replace</span><span class="p">(</span><span class="sr">/id\((.+)\)/g</span><span class="p">,</span> <span class="s1">&#39;#$1&#39;</span><span class="p">);</span>
+            <span class="nx">xp</span> <span class="o">=</span> <span class="nx">trim</span><span class="p">(</span><span class="nx">xp</span><span class="p">);</span>
+            <span class="k">return</span> <span class="p">[</span><span class="nx">xp</span><span class="p">,</span> <span class="nx">wantsText</span><span class="p">];</span>
+        <span class="p">};</span>
+        <span class="nx">importManifestToDataStore</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span> <span class="nx">cb</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">finishImport</span><span class="p">,</span>
+            <span class="nx">hasValue</span><span class="p">,</span>
+            <span class="nx">i</span><span class="p">,</span>
+            <span class="nx">info</span><span class="p">,</span>
+            <span class="nx">k</span><span class="p">,</span>
+            <span class="nx">kk</span><span class="p">,</span>
+            <span class="nx">r</span><span class="p">,</span>
+            <span class="nx">sync</span><span class="p">,</span>
+            <span class="nx">uris</span><span class="p">,</span>
+            <span class="nx">v</span><span class="p">,</span>
+            <span class="nx">_i</span><span class="p">,</span>
+            <span class="nx">_j</span><span class="p">,</span>
+            <span class="nx">_len</span><span class="p">,</span>
+            <span class="nx">_len2</span><span class="p">;</span>
+            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">data</span><span class="p">);</span>
+            <span class="nx">uris</span> <span class="o">=</span> <span class="p">[];</span>
+            <span class="nx">sync</span> <span class="o">=</span> <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">initSynchonizer</span><span class="p">({</span>
+                <span class="nx">done</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;Done with the fetching&quot;</span><span class="p">);</span>
+                    <span class="k">return</span> <span class="nx">finishImport</span><span class="p">();</span>
+                <span class="p">}</span>
+            <span class="p">});</span>
+            <span class="k">for</span> <span class="p">(</span><span class="nx">k</span> <span class="k">in</span> <span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">v</span> <span class="o">=</span> <span class="nx">data</span><span class="p">[</span><span class="nx">k</span><span class="p">];</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">k</span> <span class="o">===</span> <span class="s2">&quot;imgAnnos&quot;</span> <span class="o">||</span> <span class="nx">k</span> <span class="o">===</span> <span class="s2">&quot;textAnnos&quot;</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">for</span> <span class="p">(</span><span class="nx">kk</span> <span class="k">in</span> <span class="nx">v</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="nx">info</span> <span class="o">=</span> <span class="nx">v</span><span class="p">[</span><span class="nx">kk</span><span class="p">];</span>
+                        <span class="k">for</span> <span class="p">(</span><span class="nx">_i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">_len</span> <span class="o">=</span> <span class="nx">info</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">_i</span> <span class="o">&lt;</span> <span class="nx">_len</span><span class="p">;</span> <span class="nx">_i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+                            <span class="nx">i</span> <span class="o">=</span> <span class="nx">info</span><span class="p">[</span><span class="nx">_i</span><span class="p">];</span>
+                            <span class="nx">r</span> <span class="o">=</span> <span class="nx">getRemForAggr</span><span class="p">(</span><span class="nx">i</span><span class="p">);</span>
+                            <span class="k">if</span> <span class="p">(</span><span class="o">!</span> <span class="p">(</span><span class="nx">__indexOf</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">uris</span><span class="p">,</span> <span class="nx">r</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">))</span> <span class="p">{</span>
+                                <span class="nx">uris</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">r</span><span class="p">);</span>
+                            <span class="p">}</span>
+                        <span class="p">}</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+            <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;Loading&quot;</span><span class="p">,</span> <span class="nx">uris</span><span class="p">);</span>
+            <span class="nx">progressMeter</span><span class="p">.</span><span class="nx">setSection</span><span class="p">(</span><span class="s2">&quot;Fetch References&quot;</span><span class="p">);</span>
+            <span class="nx">progressMeter</span><span class="p">.</span><span class="nx">addTodo</span><span class="p">(</span><span class="nx">uris</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
+            <span class="k">for</span> <span class="p">(</span><span class="nx">_j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">_len2</span> <span class="o">=</span> <span class="nx">uris</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">_j</span> <span class="o">&lt;</span> <span class="nx">_len2</span><span class="p">;</span> <span class="nx">_j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">i</span> <span class="o">=</span> <span class="nx">uris</span><span class="p">[</span><span class="nx">_j</span><span class="p">];</span>
+                <span class="nx">sync</span><span class="p">.</span><span class="nx">increment</span><span class="p">();</span>
+                <span class="nx">loadUri</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span>
+                <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                    <span class="nx">progressMeter</span><span class="p">.</span><span class="nx">addDone</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+                    <span class="k">return</span> <span class="nx">sync</span><span class="p">.</span><span class="nx">decrement</span><span class="p">();</span>
+                <span class="p">});</span>
+            <span class="p">}</span>
+            <span class="nx">sync</span><span class="p">.</span><span class="nx">done</span><span class="p">();</span>
+            <span class="nx">hasValue</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">os</span><span class="p">,</span> <span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
+                <span class="kd">var</span> <span class="nx">o</span><span class="p">,</span>
+                <span class="nx">_k</span><span class="p">,</span>
+                <span class="nx">_len3</span><span class="p">;</span>
+                <span class="k">for</span> <span class="p">(</span><span class="nx">_k</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">_len3</span> <span class="o">=</span> <span class="nx">os</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">_k</span> <span class="o">&lt;</span> <span class="nx">_len3</span><span class="p">;</span> <span class="nx">_k</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">o</span> <span class="o">=</span> <span class="nx">os</span><span class="p">[</span><span class="nx">_k</span><span class="p">];</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nx">o</span><span class="p">.</span><span class="nx">value</span> <span class="o">===</span> <span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+                <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+            <span class="p">};</span>
+            <span class="k">return</span> <span class="nx">finishImport</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                <span class="kd">var</span> <span class="nx">b_ps</span><span class="p">,</span>
+                <span class="nx">bits</span><span class="p">,</span>
+                <span class="nx">body</span><span class="p">,</span>
+                <span class="nx">canvas</span><span class="p">,</span>
+                <span class="nx">dump</span><span class="p">,</span>
+                <span class="nx">items</span><span class="p">,</span>
+                <span class="nx">ps</span><span class="p">,</span>
+                <span class="nx">s</span><span class="p">,</span>
+                <span class="nx">src</span><span class="p">,</span>
+                <span class="nx">src_ps</span><span class="p">,</span>
+                <span class="nx">target</span><span class="p">,</span>
+                <span class="nx">type</span><span class="p">;</span>
+                <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;Starting RDF extraction&quot;</span><span class="p">);</span>
+                <span class="nx">items</span> <span class="o">=</span> <span class="p">[];</span>
+                <span class="nx">dump</span> <span class="o">=</span> <span class="nx">rdfbase</span><span class="p">.</span><span class="nx">databank</span><span class="p">.</span><span class="nx">dump</span><span class="p">();</span>
+                <span class="nx">ns</span> <span class="o">=</span> <span class="nx">rdfbase</span><span class="p">.</span><span class="nx">databank</span><span class="p">.</span><span class="nx">namespaces</span><span class="p">;</span>
+                <span class="k">for</span> <span class="p">(</span><span class="nx">s</span> <span class="k">in</span> <span class="nx">dump</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="nx">ps</span> <span class="o">=</span> <span class="nx">dump</span><span class="p">[</span><span class="nx">s</span><span class="p">];</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nx">ps</span><span class="p">[</span><span class="nx">ns</span><span class="p">.</span><span class="nx">rdf</span> <span class="o">+</span> <span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+                        <span class="nx">type</span> <span class="o">=</span> <span class="nx">ps</span><span class="p">[</span><span class="nx">ns</span><span class="p">.</span><span class="nx">rdf</span> <span class="o">+</span> <span class="s1">&#39;type&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">].</span><span class="nx">value</span><span class="p">;</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="nx">type</span> <span class="o">===</span> <span class="nx">ns</span><span class="p">.</span><span class="nx">dms</span> <span class="o">+</span> <span class="s1">&#39;Canvas&#39;</span><span class="p">)</span> <span class="p">{</span>
+                            <span class="nx">info</span> <span class="o">=</span> <span class="p">{</span>
+                                <span class="nx">type</span><span class="o">:</span> <span class="s1">&#39;Canvas&#39;</span><span class="p">,</span>
+                                <span class="nx">id</span><span class="o">:</span> <span class="nx">s</span>
+                            <span class="p">};</span>
+                            <span class="k">if</span> <span class="p">(</span><span class="nx">ps</span><span class="p">[</span><span class="nx">ns</span><span class="p">.</span><span class="nx">exif</span> <span class="o">+</span> <span class="s1">&#39;height&#39;</span><span class="p">]</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+                                <span class="nx">info</span><span class="p">.</span><span class="nx">height</span> <span class="o">=</span> <span class="nb">parseInt</span><span class="p">(</span><span class="nx">ps</span><span class="p">[</span><span class="nx">ns</span><span class="p">.</span><span class="nx">exif</span> <span class="o">+</span> <span class="s1">&#39;height&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">].</span><span class="nx">value</span><span class="p">,</span> <span class="mi">10</span><span class="p">);</span>
+                            <span class="p">}</span>
+                            <span class="k">if</span> <span class="p">(</span><span class="nx">ps</span><span class="p">[</span><span class="nx">ns</span><span class="p">.</span><span class="nx">exif</span> <span class="o">+</span> <span class="s1">&#39;width&#39;</span><span class="p">]</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+                                <span class="nx">info</span><span class="p">.</span><span class="nx">width</span> <span class="o">=</span> <span class="nb">parseInt</span><span class="p">(</span><span class="nx">ps</span><span class="p">[</span><span class="nx">ns</span><span class="p">.</span><span class="nx">exif</span> <span class="o">+</span> <span class="s1">&#39;width&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">].</span><span class="nx">value</span><span class="p">,</span> <span class="mi">10</span><span class="p">);</span>
+                            <span class="p">}</span>
+                            <span class="k">if</span> <span class="p">(</span><span class="nx">ps</span><span class="p">[</span><span class="nx">ns</span><span class="p">.</span><span class="nx">dc</span> <span class="o">+</span> <span class="s1">&#39;title&#39;</span><span class="p">]</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+                                <span class="nx">info</span><span class="p">.</span><span class="nx">title</span> <span class="o">=</span> <span class="nx">ps</span><span class="p">[</span><span class="nx">ns</span><span class="p">.</span><span class="nx">dc</span> <span class="o">+</span> <span class="s1">&#39;title&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">].</span><span class="nx">value</span><span class="p">;</span>
+                            <span class="p">}</span>
+                            <span class="nx">options</span><span class="p">.</span><span class="nx">dataStore</span><span class="p">.</span><span class="nx">loadItems</span><span class="p">([</span><span class="nx">info</span><span class="p">]);</span>
+                        <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">type</span> <span class="o">===</span> <span class="nx">ns</span><span class="p">.</span><span class="nx">dms</span> <span class="o">+</span> <span class="s1">&#39;TextAnnotation&#39;</span><span class="p">)</span> <span class="p">{</span>
+                            <span class="nx">info</span> <span class="o">=</span> <span class="p">{</span>
+                                <span class="nx">type</span><span class="o">:</span> <span class="s1">&#39;TextAnnotation&#39;</span><span class="p">,</span>
+                                <span class="nx">id</span><span class="o">:</span> <span class="nx">s</span>
+                            <span class="p">};</span>
+                            <span class="k">if</span> <span class="p">(</span><span class="nx">ps</span><span class="p">[</span><span class="nx">ns</span><span class="p">.</span><span class="nx">oac</span> <span class="o">+</span> <span class="s1">&#39;hasBody&#39;</span><span class="p">]</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+                                <span class="nx">body</span> <span class="o">=</span> <span class="nx">ps</span><span class="p">[</span><span class="nx">ns</span><span class="p">.</span><span class="nx">oac</span> <span class="o">+</span> <span class="s1">&#39;hasBody&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">].</span><span class="nx">value</span><span class="p">;</span>
+                                <span class="nx">b_ps</span> <span class="o">=</span> <span class="nx">dump</span><span class="p">[</span><span class="nx">body</span><span class="p">];</span>
+                                <span class="k">if</span> <span class="p">(</span><span class="nx">b_ps</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+                                    <span class="k">if</span> <span class="p">(</span><span class="nx">b_ps</span><span class="p">[</span><span class="nx">ns</span><span class="p">.</span><span class="nx">cnt</span> <span class="o">+</span> <span class="s1">&#39;chars&#39;</span><span class="p">]</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+                                        <span class="nx">info</span><span class="p">.</span><span class="nx">content</span> <span class="o">=</span> <span class="nx">b_ps</span><span class="p">[</span><span class="nx">ns</span><span class="p">.</span><span class="nx">cnt</span> <span class="o">+</span> <span class="s1">&#39;chars&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">].</span><span class="nx">value</span><span class="p">;</span>
+                                    <span class="p">}</span>
+                                <span class="p">}</span>
+                                <span class="k">if</span> <span class="p">((</span><span class="nx">info</span><span class="p">.</span><span class="nx">content</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="nx">ps</span><span class="p">[</span><span class="nx">ns</span><span class="p">.</span><span class="nx">oac</span> <span class="o">+</span> <span class="s1">&#39;hasTarget&#39;</span><span class="p">]</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">))</span> <span class="p">{</span>
+                                    <span class="nx">target</span> <span class="o">=</span> <span class="nx">ps</span><span class="p">[</span><span class="nx">ns</span><span class="p">.</span><span class="nx">oac</span> <span class="o">+</span> <span class="s1">&#39;hasTarget&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">].</span><span class="nx">value</span><span class="p">;</span>
+                                    <span class="nx">bits</span> <span class="o">=</span> <span class="nx">target</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">);</span>
+                                    <span class="k">if</span> <span class="p">(</span><span class="nx">bits</span><span class="p">.</span><span class="nx">length</span> <span class="o">===</span> <span class="mi">2</span><span class="p">)</span> <span class="p">{</span>
+                                        <span class="nx">canvas</span> <span class="o">=</span> <span class="nx">bits</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+                                        <span class="nx">info</span><span class="p">.</span><span class="nx">target</span> <span class="o">=</span> <span class="nx">canvas</span><span class="p">;</span>
+                                        <span class="k">if</span> <span class="p">(</span><span class="nx">bits</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="nx">substr</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="o">===</span> <span class="s2">&quot;xywh=&quot;</span><span class="p">)</span> <span class="p">{</span>
+                                            <span class="nx">bits</span> <span class="o">=</span> <span class="nx">bits</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">);</span>
+                                            <span class="nx">bits</span> <span class="o">=</span> <span class="nx">bits</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">);</span>
+                                            <span class="nx">info</span><span class="p">.</span><span class="nx">x</span> <span class="o">=</span> <span class="nb">parseInt</span><span class="p">(</span><span class="nx">bits</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">10</span><span class="p">);</span>
+                                            <span class="nx">info</span><span class="p">.</span><span class="nx">y</span> <span class="o">=</span> <span class="nb">parseInt</span><span class="p">(</span><span class="nx">bits</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">10</span><span class="p">);</span>
+                                            <span class="nx">info</span><span class="p">.</span><span class="nx">width</span> <span class="o">=</span> <span class="nb">parseInt</span><span class="p">(</span><span class="nx">bits</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">10</span><span class="p">);</span>
+                                            <span class="nx">info</span><span class="p">.</span><span class="nx">height</span> <span class="o">=</span> <span class="nb">parseInt</span><span class="p">(</span><span class="nx">bits</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mi">10</span><span class="p">);</span>
+                                        <span class="p">}</span>
+                                    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                                        <span class="nx">info</span><span class="p">.</span><span class="nx">target</span> <span class="o">=</span> <span class="nx">target</span><span class="p">;</span>
+                                    <span class="p">}</span>
+                                <span class="p">}</span>
+                            <span class="p">}</span>
+                            <span class="k">if</span> <span class="p">((</span><span class="nx">info</span><span class="p">.</span><span class="nx">content</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="nx">info</span><span class="p">.</span><span class="nx">target</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">))</span> <span class="p">{</span>
+                                <span class="nx">items</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">info</span><span class="p">);</span>
+                            <span class="p">}</span>
+                        <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">type</span> <span class="o">===</span> <span class="nx">ns</span><span class="p">.</span><span class="nx">dms</span> <span class="o">+</span> <span class="s1">&#39;ImageAnnotation&#39;</span><span class="p">)</span> <span class="p">{</span>
+                            <span class="nx">info</span> <span class="o">=</span> <span class="p">{</span>
+                                <span class="nx">type</span><span class="o">:</span> <span class="s1">&#39;ImageAnnotation&#39;</span><span class="p">,</span>
+                                <span class="nx">id</span><span class="o">:</span> <span class="nx">s</span>
+                            <span class="p">};</span>
+                            <span class="k">if</span> <span class="p">(</span><span class="nx">ps</span><span class="p">[</span><span class="nx">ns</span><span class="p">.</span><span class="nx">oac</span> <span class="o">+</span> <span class="s1">&#39;hasBody&#39;</span><span class="p">]</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+                                <span class="nx">src</span> <span class="o">=</span> <span class="nx">ps</span><span class="p">[</span><span class="nx">ns</span><span class="p">.</span><span class="nx">oac</span> <span class="o">+</span> <span class="s1">&#39;hasBody&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">].</span><span class="nx">value</span><span class="p">;</span>
+                                <span class="k">if</span> <span class="p">(</span><span class="nx">dump</span><span class="p">[</span><span class="nx">src</span><span class="p">]</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+                                    <span class="nx">src_ps</span> <span class="o">=</span> <span class="nx">dump</span><span class="p">[</span><span class="nx">src</span><span class="p">];</span>
+                                    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">src_ps</span><span class="p">);</span>
+                                    <span class="k">if</span> <span class="p">((</span><span class="nx">src_ps</span><span class="p">[</span><span class="nx">ns</span><span class="p">.</span><span class="nx">rdf</span> <span class="o">+</span> <span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nx">hasValue</span><span class="p">(</span><span class="nx">src_ps</span><span class="p">[</span><span class="nx">ns</span><span class="p">.</span><span class="nx">rdf</span> <span class="o">+</span> <span class="s1">&#39;type&#39;</span><span class="p">],</span> <span class="nx">ns</span><span class="p">.</span><span class="nx">dms</span> <span class="o">+</span> <span class="s1">&#39;ImageBody&#39;</span><span class="p">))</span> <span class="p">{</span>
+                                        <span class="k">if</span> <span class="p">(</span><span class="nx">src_ps</span><span class="p">[</span><span class="nx">ns</span><span class="p">.</span><span class="nx">exif</span> <span class="o">+</span> <span class="s1">&#39;width&#39;</span><span class="p">]</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+                                            <span class="nx">info</span><span class="p">.</span><span class="nx">width</span> <span class="o">=</span> <span class="nb">parseInt</span><span class="p">(</span><span class="nx">src_ps</span><span class="p">[</span><span class="nx">ns</span><span class="p">.</span><span class="nx">exif</span> <span class="o">+</span> <span class="s1">&#39;width&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">].</span><span class="nx">value</span><span class="p">,</span> <span class="mi">10</span><span class="p">);</span>
+                                        <span class="p">}</span>
+                                        <span class="k">if</span> <span class="p">(</span><span class="nx">src_ps</span><span class="p">[</span><span class="nx">ns</span><span class="p">.</span><span class="nx">exif</span> <span class="o">+</span> <span class="s1">&#39;height&#39;</span><span class="p">]</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+                                            <span class="nx">info</span><span class="p">.</span><span class="nx">height</span> <span class="o">=</span> <span class="nb">parseInt</span><span class="p">(</span><span class="nx">src_ps</span><span class="p">[</span><span class="nx">ns</span><span class="p">.</span><span class="nx">exif</span> <span class="o">+</span> <span class="s1">&#39;height&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">].</span><span class="nx">value</span><span class="p">,</span> <span class="mi">10</span><span class="p">);</span>
+                                        <span class="p">}</span>
+                                    <span class="p">}</span>
+                                    <span class="nx">info</span><span class="p">.</span><span class="nx">src</span> <span class="o">=</span> <span class="nx">src</span><span class="p">;</span>
+                                <span class="p">}</span>
+                            <span class="p">}</span>
+                            <span class="k">if</span> <span class="p">((</span><span class="nx">info</span><span class="p">.</span><span class="nx">src</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="nx">ps</span><span class="p">[</span><span class="nx">ns</span><span class="p">.</span><span class="nx">oac</span> <span class="o">+</span> <span class="s1">&#39;hasTarget&#39;</span><span class="p">]</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">))</span> <span class="p">{</span>
+                                <span class="nx">target</span> <span class="o">=</span> <span class="nx">ps</span><span class="p">[</span><span class="nx">ns</span><span class="p">.</span><span class="nx">oac</span> <span class="o">+</span> <span class="s1">&#39;hasTarget&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">].</span><span class="nx">value</span><span class="p">;</span>
+                                <span class="nx">bits</span> <span class="o">=</span> <span class="nx">target</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">);</span>
+                                <span class="k">if</span> <span class="p">(</span><span class="nx">bits</span><span class="p">.</span><span class="nx">length</span> <span class="o">===</span> <span class="mi">2</span><span class="p">)</span> <span class="p">{</span>
+                                    <span class="nx">canvas</span> <span class="o">=</span> <span class="nx">bits</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+                                    <span class="nx">info</span><span class="p">.</span><span class="nx">target</span> <span class="o">=</span> <span class="nx">canvas</span><span class="p">;</span>
+                                    <span class="k">if</span> <span class="p">(</span><span class="nx">bits</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="nx">substr</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="o">===</span> <span class="s2">&quot;xywh=&quot;</span><span class="p">)</span> <span class="p">{</span>
+                                        <span class="nx">bits</span> <span class="o">=</span> <span class="nx">bits</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">);</span>
+                                        <span class="nx">bits</span> <span class="o">=</span> <span class="nx">bits</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="nx">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">);</span>
+                                        <span class="nx">info</span><span class="p">.</span><span class="nx">x</span> <span class="o">=</span> <span class="nb">parseInt</span><span class="p">(</span><span class="nx">bits</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">10</span><span class="p">);</span>
+                                        <span class="nx">info</span><span class="p">.</span><span class="nx">y</span> <span class="o">=</span> <span class="nb">parseInt</span><span class="p">(</span><span class="nx">bits</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">10</span><span class="p">);</span>
+                                        <span class="nx">info</span><span class="p">.</span><span class="nx">width</span> <span class="o">=</span> <span class="nb">parseInt</span><span class="p">(</span><span class="nx">bits</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">10</span><span class="p">);</span>
+                                        <span class="nx">info</span><span class="p">.</span><span class="nx">height</span> <span class="o">=</span> <span class="nb">parseInt</span><span class="p">(</span><span class="nx">bits</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="mi">10</span><span class="p">);</span>
+                                    <span class="p">}</span>
+                                <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                                    <span class="nx">info</span><span class="p">.</span><span class="nx">target</span> <span class="o">=</span> <span class="nx">target</span><span class="p">;</span>
+                                <span class="p">}</span>
+                            <span class="p">}</span>
+                            <span class="k">if</span> <span class="p">((</span><span class="nx">info</span><span class="p">.</span><span class="nx">src</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="nx">info</span><span class="p">.</span><span class="nx">target</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">))</span> <span class="p">{</span>
+                                <span class="nx">options</span><span class="p">.</span><span class="nx">dataStore</span><span class="p">.</span><span class="nx">loadItems</span><span class="p">([</span><span class="nx">info</span><span class="p">]);</span>
+                            <span class="p">}</span>
+                        <span class="p">}</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+                <span class="nx">options</span><span class="p">.</span><span class="nx">dataStore</span><span class="p">.</span><span class="nx">loadItems</span><span class="p">(</span><span class="nx">items</span><span class="p">);</span>
+                <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;done loading items&quot;</span><span class="p">);</span>
+                <span class="k">return</span> <span class="nx">cb</span><span class="p">();</span>
+            <span class="p">};</span>
+        <span class="p">};</span>
+        <span class="nx">loadDataForCanvas</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">canvasId</span><span class="p">)</span> <span class="p">{};</span>
+        <span class="nx">that</span><span class="p">.</span><span class="nx">loadDataForCanvases</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">canvasIds</span><span class="p">)</span> <span class="p">{};</span>
+        <span class="nx">that</span><span class="p">.</span><span class="nx">loadManifest</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">remoteUri</span><span class="p">,</span> <span class="nx">manifestUri</span><span class="p">,</span> <span class="nx">cb</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span> <span class="p">(</span><span class="nx">cb</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">))</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nx">$</span><span class="p">.</span><span class="nx">isFunction</span><span class="p">(</span><span class="nx">manifestUri</span><span class="p">))</span> <span class="p">{</span>
+                    <span class="nx">cb</span> <span class="o">=</span> <span class="nx">manifestUri</span><span class="p">;</span>
+                    <span class="nx">manifestUri</span> <span class="o">=</span> <span class="nx">remoteUri</span><span class="p">;</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+            <span class="k">return</span> <span class="nx">loadUri</span><span class="p">(</span><span class="nx">remoteUri</span><span class="p">,</span>
+            <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="nx">processManifest</span><span class="p">(</span><span class="nx">manifestUri</span><span class="p">,</span> <span class="nx">cb</span><span class="p">);</span>
+            <span class="p">});</span>
+        <span class="p">};</span>
+        <span class="nx">extractCanvasSize</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">uri</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">h</span><span class="p">,</span>
+            <span class="nx">t</span><span class="p">,</span>
+            <span class="nx">w</span><span class="p">;</span>
+            <span class="nx">h</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+            <span class="nx">w</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+            <span class="nx">t</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">;</span>
+            <span class="nx">rdfbase</span><span class="p">.</span><span class="nx">where</span><span class="p">(</span><span class="s2">&quot;&lt;&quot;</span> <span class="o">+</span> <span class="nx">uri</span> <span class="o">+</span> <span class="s2">&quot;&gt; exif:height ?height&quot;</span><span class="p">).</span><span class="nx">where</span><span class="p">(</span><span class="s2">&quot;&lt;&quot;</span> <span class="o">+</span> <span class="nx">uri</span> <span class="o">+</span> <span class="s2">&quot;&gt; exif:width  ?width&quot;</span><span class="p">).</span><span class="nx">optional</span><span class="p">(</span><span class="s2">&quot;&lt;&quot;</span> <span class="o">+</span> <span class="nx">uri</span> <span class="o">+</span> <span class="s2">&quot;&gt; dc:title    ?title&quot;</span><span class="p">).</span><span class="nx">each</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                <span class="nx">h</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">height</span><span class="p">.</span><span class="nx">value</span><span class="p">;</span>
+                <span class="nx">w</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">width</span><span class="p">.</span><span class="nx">value</span><span class="p">;</span>
+                <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">title</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+                    <span class="k">return</span> <span class="nx">t</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">title</span><span class="p">.</span><span class="nx">value</span><span class="p">;</span>
+                <span class="p">}</span>
+            <span class="p">});</span>
+            <span class="k">return</span> <span class="p">[</span><span class="nx">h</span><span class="p">,</span> <span class="nx">w</span><span class="p">,</span> <span class="nx">t</span><span class="p">];</span>
+        <span class="p">};</span>
+        <span class="nx">processManifest</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">uri</span><span class="p">,</span> <span class="nx">cb</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">annoProcessor</span><span class="p">,</span>
+            <span class="nx">audioAnnos</span><span class="p">,</span>
+            <span class="nx">commentAnnos</span><span class="p">,</span>
+            <span class="nx">imgAnnos</span><span class="p">,</span>
+            <span class="nx">rangeAnnos</span><span class="p">,</span>
+            <span class="nx">ranges</span><span class="p">,</span>
+            <span class="nx">seqs</span><span class="p">,</span>
+            <span class="nx">textAnnos</span><span class="p">,</span>
+            <span class="nx">uri2</span><span class="p">,</span>
+            <span class="nx">zoneAnnos</span><span class="p">;</span>
+            <span class="nx">seqs</span> <span class="o">=</span> <span class="p">[];</span>
+            <span class="nx">textAnnos</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;*&#39;</span><span class="o">:</span> <span class="p">[]</span>
+            <span class="p">};</span>
+            <span class="nx">audioAnnos</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;*&#39;</span><span class="o">:</span> <span class="p">[]</span>
+            <span class="p">};</span>
+            <span class="nx">imgAnnos</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;*&#39;</span><span class="o">:</span> <span class="p">[]</span>
+            <span class="p">};</span>
+            <span class="nx">commentAnnos</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;*&#39;</span><span class="o">:</span> <span class="p">[]</span>
+            <span class="p">};</span>
+            <span class="nx">zoneAnnos</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;*&#39;</span><span class="o">:</span> <span class="p">[]</span>
+            <span class="p">};</span>
+            <span class="nx">rangeAnnos</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;*&#39;</span><span class="o">:</span> <span class="p">[]</span>
+            <span class="p">};</span>
+            <span class="nx">annoProcessor</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">list</span><span class="p">)</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                    <span class="kd">var</span> <span class="nx">c</span><span class="p">,</span>
+                    <span class="nx">what</span><span class="p">;</span>
+                    <span class="nx">c</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">canv</span> <span class="o">!==</span> <span class="kc">null</span> <span class="o">?</span> <span class="k">this</span><span class="p">.</span><span class="nx">canv</span><span class="p">.</span><span class="nx">value</span><span class="o">:</span> <span class="s1">&#39;*&#39;</span><span class="p">;</span>
+                    <span class="nx">what</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">seq</span><span class="p">.</span><span class="nx">value</span><span class="p">;</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nx">c</span> <span class="o">===</span> <span class="s1">&#39;*&#39;</span> <span class="o">||</span> <span class="p">(</span><span class="nx">list</span><span class="p">[</span><span class="nx">c</span><span class="p">]</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">))</span> <span class="p">{</span>
+                        <span class="k">return</span> <span class="nx">list</span><span class="p">[</span><span class="nx">c</span><span class="p">].</span><span class="nx">push</span><span class="p">(</span><span class="nx">what</span><span class="p">);</span>
+                    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                        <span class="k">return</span> <span class="nx">list</span><span class="p">[</span><span class="nx">c</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nx">what</span><span class="p">];</span>
+                    <span class="p">}</span>
+                <span class="p">};</span>
+            <span class="p">};</span>
+            <span class="nx">rdfbase</span><span class="p">.</span><span class="nx">where</span><span class="p">(</span><span class="s2">&quot;&lt;&quot;</span> <span class="o">+</span> <span class="nx">uri</span> <span class="o">+</span> <span class="s2">&quot;&gt; ore:describes  ?aggr&quot;</span><span class="p">).</span><span class="nx">where</span><span class="p">(</span><span class="s2">&quot;?aggr    ore:aggregates ?seq&quot;</span><span class="p">).</span><span class="nx">where</span><span class="p">(</span><span class="s2">&quot;?seq     rdf:type       dms:Sequence&quot;</span><span class="p">).</span><span class="nx">each</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="nx">seqs</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">seq</span><span class="p">.</span><span class="nx">value</span><span class="p">);</span>
+            <span class="p">}).</span><span class="nx">reset</span><span class="p">();</span>
+            <span class="nx">rdfbase</span><span class="p">.</span><span class="nx">where</span><span class="p">(</span><span class="s2">&quot;&lt;&quot;</span> <span class="o">+</span> <span class="nx">uri</span> <span class="o">+</span> <span class="s2">&quot;&gt; ore:describes  ?aggr&quot;</span><span class="p">).</span><span class="nx">where</span><span class="p">(</span><span class="s2">&quot;?aggr    ore:aggregates ?seq&quot;</span><span class="p">).</span><span class="nx">optional</span><span class="p">(</span><span class="s2">&quot;?seq     dms:forCanvas  ?canv&quot;</span><span class="p">).</span><span class="nx">where</span><span class="p">(</span><span class="s2">&quot;?seq     rdf:type       dms:ImageAnnotationList&quot;</span><span class="p">).</span><span class="nx">each</span><span class="p">(</span><span class="nx">annoProcessor</span><span class="p">(</span><span class="nx">imgAnnos</span><span class="p">)).</span><span class="nx">end</span><span class="p">().</span><span class="nx">where</span><span class="p">(</span><span class="s2">&quot;?seq     rdf:type       dms:Range&quot;</span><span class="p">).</span><span class="nx">each</span><span class="p">(</span><span class="nx">annoProcessor</span><span class="p">(</span><span class="nx">rangeAnnos</span><span class="p">)).</span><span class="nx">end</span><span class="p">().</span><span class="nx">where</span><span class="p">(</span><span class="s2">&quot;?seq rdf:type dms:TextAnnotationList&quot;</span><span class="p">).</span><span class="nx">each</span><span class="p">(</span><span class="nx">annoProcessor</span><span class="p">(</span><span class="nx">textAnnos</span><span class="p">)).</span><span class="nx">end</span><span class="p">().</span><span class="nx">where</span><span class="p">(</span><span class="s2">&quot;?seq rdf:type dms:AudioAnnotationList&quot;</span><span class="p">).</span><span class="nx">each</span><span class="p">(</span><span class="nx">annoProcessor</span><span class="p">(</span><span class="nx">audioAnnos</span><span class="p">)).</span><span class="nx">end</span><span class="p">().</span><span class="nx">where</span><span class="p">(</span><span class="s2">&quot;?seq rdf:type dms:ZoneAnnotationList&quot;</span><span class="p">).</span><span class="nx">each</span><span class="p">(</span><span class="nx">annoProcessor</span><span class="p">(</span><span class="nx">zoneAnnos</span><span class="p">)).</span><span class="nx">end</span><span class="p">().</span><span class="nx">where</span><span class="p">(</span><span class="s2">&quot;?seq rdf:type dms:CommentAnnotationList&quot;</span><span class="p">).</span><span class="nx">each</span><span class="p">(</span><span class="nx">annoProcessor</span><span class="p">(</span><span class="nx">commentAnnos</span><span class="p">)).</span><span class="nx">reset</span><span class="p">();</span>
+            <span class="nx">ranges</span> <span class="o">=</span> <span class="p">[];</span>
+            <span class="nx">rdfbase</span><span class="p">.</span><span class="nx">where</span><span class="p">(</span><span class="s2">&quot;?seq dcterms:hasPart ?rng&quot;</span><span class="p">).</span><span class="nx">where</span><span class="p">(</span><span class="s2">&quot;?rng a               dms:Range&quot;</span><span class="p">).</span><span class="nx">where</span><span class="p">(</span><span class="s2">&quot;?rng dc:title        ?title&quot;</span><span class="p">).</span><span class="nx">where</span><span class="p">(</span><span class="s2">&quot;?rng rdf:first       ?f&quot;</span><span class="p">).</span><span class="nx">each</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                <span class="k">return</span> <span class="nx">ranges</span><span class="p">.</span><span class="nx">push</span><span class="p">([</span><span class="k">this</span><span class="p">.</span><span class="nx">title</span><span class="p">.</span><span class="nx">value</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">f</span><span class="p">.</span><span class="nx">value</span><span class="p">]);</span>
+            <span class="p">}).</span><span class="nx">reset</span><span class="p">();</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">seqs</span><span class="p">.</span><span class="nx">length</span> <span class="o">===</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">uri2</span> <span class="o">=</span> <span class="nx">getRemForAggr</span><span class="p">(</span><span class="nx">seqs</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+                <span class="k">return</span> <span class="nx">loadUri</span><span class="p">(</span><span class="nx">uri2</span><span class="p">,</span>
+                <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                    <span class="k">return</span> <span class="nx">processSequence</span><span class="p">(</span><span class="nx">uri2</span><span class="p">,</span>
+                    <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                        <span class="k">return</span> <span class="nx">importManifestToDataStore</span><span class="p">({</span>
+                            <span class="nx">imgAnnos</span><span class="o">:</span> <span class="nx">imgAnnos</span><span class="p">,</span>
+                            <span class="nx">textAnnos</span><span class="o">:</span> <span class="nx">textAnnos</span><span class="p">,</span>
+                            <span class="nx">audioAnnos</span><span class="o">:</span> <span class="nx">audioAnnos</span><span class="p">,</span>
+                            <span class="nx">zoneAnnos</span><span class="o">:</span> <span class="nx">zoneAnnos</span><span class="p">,</span>
+                            <span class="nx">rangeAnnos</span><span class="o">:</span> <span class="nx">rangeAnnos</span><span class="p">,</span>
+                            <span class="nx">commentAnnos</span><span class="o">:</span> <span class="nx">commentAnnos</span>
+                        <span class="p">},</span>
+                        <span class="nx">cb</span><span class="p">);</span>
+                    <span class="p">});</span>
+                <span class="p">});</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="nx">rdfbase</span><span class="p">.</span><span class="nx">where</span><span class="p">(</span><span class="s2">&quot;?seq a dms:Sequence&quot;</span><span class="p">).</span><span class="nx">optional</span><span class="p">(</span><span class="s2">&quot;?seq dc:title ?title&quot;</span><span class="p">).</span><span class="nx">optional</span><span class="p">(</span><span class="s2">&quot;?seq dc:description ?desc&quot;</span><span class="p">).</span><span class="nx">each</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                    <span class="kd">var</span> <span class="nx">desc</span><span class="p">,</span>
+                    <span class="nx">ttl</span><span class="p">;</span>
+                    <span class="nx">ttl</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">title</span> <span class="o">!==</span> <span class="kc">null</span> <span class="o">?</span> <span class="k">this</span><span class="p">.</span><span class="nx">title</span><span class="p">.</span><span class="nx">value</span><span class="o">:</span> <span class="s1">&#39;&#39;</span><span class="p">;</span>
+                    <span class="nx">desc</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">desc</span> <span class="o">!==</span> <span class="kc">null</span> <span class="o">?</span> <span class="k">this</span><span class="p">.</span><span class="nx">desc</span><span class="p">.</span><span class="nx">value</span><span class="o">:</span> <span class="s1">&#39;&#39;</span><span class="p">;</span>
+                    <span class="nx">uri2</span> <span class="o">=</span> <span class="nx">getRemForAggr</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">seq</span><span class="p">.</span><span class="nx">value</span><span class="p">);</span>
+                    <span class="k">return</span> <span class="nx">loadUri</span><span class="p">(</span><span class="nx">uri2</span><span class="p">,</span>
+                    <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                        <span class="k">return</span> <span class="nx">processSequence</span><span class="p">(</span><span class="nx">uri2</span><span class="p">,</span>
+                        <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                            <span class="k">return</span> <span class="nx">options</span><span class="p">.</span><span class="nx">dataStore</span><span class="p">.</span><span class="nx">updateItems</span><span class="p">([</span>
+                            <span class="p">{</span>
+                                <span class="nx">id</span><span class="o">:</span> <span class="nx">uri2</span><span class="p">,</span>
+                                <span class="nx">title</span><span class="o">:</span> <span class="nx">ttl</span><span class="p">,</span>
+                                <span class="nx">description</span><span class="o">:</span> <span class="nx">desc</span>
+                            <span class="p">}</span>
+                            <span class="p">]);</span>
+                        <span class="p">});</span>
+                    <span class="p">});</span>
+                <span class="p">});</span>
+                <span class="k">return</span> <span class="nx">importManifestToDataStore</span><span class="p">({</span>
+                    <span class="nx">imgAnnos</span><span class="o">:</span> <span class="nx">imgAnnos</span><span class="p">,</span>
+                    <span class="nx">textAnnos</span><span class="o">:</span> <span class="nx">textAnnos</span><span class="p">,</span>
+                    <span class="nx">audioAnnos</span><span class="o">:</span> <span class="nx">audioAnnos</span><span class="p">,</span>
+                    <span class="nx">zoneAnnos</span><span class="o">:</span> <span class="nx">zoneAnnos</span><span class="p">,</span>
+                    <span class="nx">rangeAnnos</span><span class="o">:</span> <span class="nx">rangeAnnos</span><span class="p">,</span>
+                    <span class="nx">commentAnnos</span><span class="o">:</span> <span class="nx">commentAnnos</span>
+                <span class="p">},</span>
+                <span class="nx">cb</span><span class="p">);</span>
+            <span class="p">}</span>
+        <span class="p">};</span>
+        <span class="nx">processSequence</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">uri</span><span class="p">,</span> <span class="nx">cb</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">i</span><span class="p">,</span>
+            <span class="nx">l</span><span class="p">,</span>
+            <span class="nx">sequence</span><span class="p">,</span>
+            <span class="nx">top</span><span class="p">;</span>
+            <span class="nx">l</span> <span class="o">=</span> <span class="p">[];</span>
+            <span class="nx">top</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+            <span class="k">try</span> <span class="p">{</span>
+                <span class="nx">rdfbase</span><span class="p">.</span><span class="nx">where</span><span class="p">(</span><span class="s2">&quot;?seq rdf:type          dms:Sequence&quot;</span><span class="p">).</span><span class="nx">where</span><span class="p">(</span><span class="s2">&quot;?seq ore:isDescribedBy &lt;&quot;</span> <span class="o">+</span> <span class="nx">uri</span> <span class="o">+</span> <span class="s2">&quot;&gt;&quot;</span><span class="p">).</span><span class="nx">each</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                    <span class="k">return</span> <span class="nx">top</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">seq</span><span class="p">.</span><span class="nx">value</span><span class="p">;</span>
+                <span class="p">}).</span><span class="nx">reset</span><span class="p">();</span>
+                <span class="k">if</span> <span class="p">(</span><span class="o">!</span> <span class="p">(</span><span class="nx">top</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">))</span> <span class="p">{</span>
+                    <span class="nx">rdfbase</span><span class="p">.</span><span class="nx">where</span><span class="p">(</span><span class="s2">&quot;?seq rdf:type dms:Sequence&quot;</span><span class="p">).</span><span class="nx">each</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                        <span class="k">return</span> <span class="nx">top</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">seq</span><span class="p">.</span><span class="nx">value</span><span class="p">;</span>
+                    <span class="p">}).</span><span class="nx">reset</span><span class="p">();</span>
+                <span class="p">}</span>
+            <span class="p">}</span> <span class="k">catch</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">alert</span><span class="p">(</span><span class="nx">e</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">top</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">l</span> <span class="o">=</span> <span class="nx">rdfToList</span><span class="p">(</span><span class="nx">top</span><span class="p">);</span>
+                <span class="nx">sequence</span> <span class="o">=</span> <span class="nx">l</span><span class="p">;</span>
+                <span class="nx">options</span><span class="p">.</span><span class="nx">dataStore</span><span class="p">.</span><span class="nx">loadItems</span><span class="p">([</span>
+                <span class="p">{</span>
+                    <span class="nx">type</span><span class="o">:</span> <span class="s2">&quot;Sequence&quot;</span><span class="p">,</span>
+                    <span class="nx">id</span><span class="o">:</span> <span class="nx">uri</span><span class="p">,</span>
+                    <span class="nx">canvases</span><span class="o">:</span> <span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+                        <span class="kd">var</span> <span class="nx">_i</span><span class="p">,</span>
+                        <span class="nx">_len</span><span class="p">,</span>
+                        <span class="nx">_results</span><span class="p">;</span>
+                        <span class="nx">_results</span> <span class="o">=</span> <span class="p">[];</span>
+                        <span class="k">for</span> <span class="p">(</span><span class="nx">_i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">_len</span> <span class="o">=</span> <span class="nx">l</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">_i</span> <span class="o">&lt;</span> <span class="nx">_len</span><span class="p">;</span> <span class="nx">_i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+                            <span class="nx">i</span> <span class="o">=</span> <span class="nx">l</span><span class="p">[</span><span class="nx">_i</span><span class="p">];</span>
+                            <span class="nx">_results</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">i</span><span class="p">.</span><span class="nx">toString</span><span class="p">());</span>
+                        <span class="p">}</span>
+                        <span class="k">return</span> <span class="nx">_results</span><span class="p">;</span>
+                    <span class="p">})()</span>
+                <span class="p">}</span>
+                <span class="p">]);</span>
+                <span class="k">return</span> <span class="nx">cb</span><span class="p">();</span>
+            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+                <span class="nx">alert</span><span class="p">(</span><span class="s2">&quot;Could not find the sequence :(&quot;</span><span class="p">);</span>
+                <span class="k">return</span> <span class="nx">cb</span><span class="p">();</span>
+            <span class="p">}</span>
+        <span class="p">};</span>
+        <span class="k">return</span> <span class="nx">that</span><span class="p">;</span>
+    <span class="p">};</span>
+
+<span class="p">})(</span><span class="nx">OAC</span><span class="p">,</span> <span class="nx">MITHGrid</span><span class="p">,</span> <span class="nx">jQuery</span><span class="p">);</span>
+
+</pre></div></td></tr></tbody></table><div id="generated">generated Tue Apr 03 2012 15:11:52 GMT-0400 (EDT)  </div><div id="projectname"><a href="../index.html">OAC Stream Video Annotation Client</a></div></div></body></html>
