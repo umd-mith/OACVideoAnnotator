@@ -1,0 +1,38 @@
+<html>
+	<head>
+		<title>MITHGrid Unit Tests</title>
+		<script src="../lib/jquery.js" type="text/javascript"></script> 
+		<script src="../dist/videoanno.js" type="text/javascript"></script>
+		<script src="../lib/qunit.js" type="text/javascript"></script>
+		<script src="js/genApps.js"></script>
+		<link rel="stylesheet" href="qunit.css" type="text/css" />
+		<script src="js/streamingvideo.js" type="text/javascript"></script>
+	</head>
+	<body>
+		<h1 id="qunit-header">MITHGrid Unit Tests</h1>
+		<h2 id="qunit-banner"></h2>
+		<div id="qunit-testrunner-toolbar"></div>
+		<h2 id="qunit-userAgent"></h2>
+		<ol id="qunit-tests"></ol>
+		<div id="qunit-fixture">
+			<div id="main-container">
+				<div id="content-container">
+					<div id="myplayer" class="dummyplayer" style="width:300px; height:200px;"></div>
+						<div id="myplayer-controls">
+
+							<input type = "button" value="Play" onClick="OAC_Controller.player().play()" />
+							&nbsp;&nbsp;
+							<input type = "button" value="Pause" onClick="OAC_Controller.player().pause()" />
+							&nbsp;&nbsp;
+							<input type = "button" value="Rewind" onClick="$('#info_position').html(OAC_Controller.player().setPlayhead(OAC_Controller.player().getPlayhead() - 5))"/>
+							&nbsp;&nbsp;
+							<input type = "button" value="Forward" onClick="$('#info_position').html(OAC_Controller.player().setPlayhead(OAC_Controller.player().getPlayhead() + 5))"/>
+						</div>
+
+					</div>
+				</div>
+
+			</div>
+		</div>
+	</body>
+</html>
