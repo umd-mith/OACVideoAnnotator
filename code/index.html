@@ -1,0 +1,61 @@
+<!DOCTYPE html><html><head><title>README</title><meta http-equiv="Content-Type" content="text/html" charset="UTF-8"><link rel="stylesheet" media="all" href="./docco.css"></head><body><div id="container"><div id="background"></div><div id="jump_to">Jump To &hellip;<div id="jump_wrapper"><div id="jump_page"><a href="./index.html" class="source"><span class="file_name">README</span></a><a href="./src/canvas.js.html" class="source "><span class="base_path">src / </span><span class="file_name">canvas.js</span></a><a href="./src/component.js.html" class="source "><span class="base_path">src / </span><span class="file_name">component.js</span></a><a href="./src/controllers.js.html" class="source "><span class="base_path">src / </span><span class="file_name">controllers.js</span></a><a href="./src/intro.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">intro.coffee</span></a><a href="./src/intro.js.html" class="source "><span class="base_path">src / </span><span class="file_name">intro.js</span></a><a href="./src/oac-dummy-player.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">oac-dummy-player.coffee</span></a><a href="./src/oac-dummy-player.js.html" class="source "><span class="base_path">src / </span><span class="file_name">oac-dummy-player.js</span></a><a href="./src/oac-player-framework.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">oac-player-framework.coffee</span></a><a href="./src/oac-player-framework.js.html" class="source "><span class="base_path">src / </span><span class="file_name">oac-player-framework.js</span></a><a href="./src/oac-youtube-player.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">oac-youtube-player.coffee</span></a><a href="./src/outro.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">outro.coffee</span></a><a href="./src/outro.js.html" class="source "><span class="base_path">src / </span><span class="file_name">outro.js</span></a><a href="./src/presentations.js.html" class="source "><span class="base_path">src / </span><span class="file_name">presentations.js</span></a></div></div></div><table cellpadding="0" cellspacing="0"><thead><tr><th class="docs"></th><th class="code"></th></tr></thead><tbody><tr id="section"><td class="docs"><h1>OAC Video Annotation Client
+</h1><p>A JavaScript framework for providing annotation capabilities for embedded videos.</p><h3>Version</h3><p>0.0.1</p><h3>Author</h3><p>Maryland Institute for Technology in the Humanities (MITH)</p><h3>Contributors</h3><p>Grant Dickie</p><p>James Smith</p><h3>Repository</h3><p>git - git://github.com/umd-mith/OACVideoAnnotator.git</p><h3>Dependencies </h3><ul><li><b>jQuery </b><span>1.6.1</span></li><li><b>Raphael.js </b><span>1.5.2</span></li></ul><p><h3>Stats</h3><pre class="code_stats">
+http://cloc.sourceforge.net v 1.55  T=0.5 s (26.0 files/s, 9452.0 lines/s)
+-------------------------------------------------------------------------------
+Language                     files          blank        comment           code
+-------------------------------------------------------------------------------
+Javascript                       8            414           1221           2492
+CoffeeScript                     5             61            276            262
+-------------------------------------------------------------------------------
+SUM:                            13            475           1497           2754
+-------------------------------------------------------------------------------
+</pre></p></td><td id="content" class="code"><h1>OAC Video Annotation Tool</h1>
+
+<p>for use in the Alexander Street Press online streaming video window. </p>
+
+<p>Authors:</p>
+
+<ul>
+<li>Grant Dickie</li>
+<li>Jim Smith</li>
+</ul>
+
+<p>See license.txt for licensing details</p>
+
+<h2>Setting up the OAC Annotation Tool</h2>
+
+<h2>What you will need for your site</h2>
+
+<p>The following code libraries are required and are listed in the order
+in which to include them:</p>
+
+<ul>
+<li>jQuery</li>
+<li>Infusion</li>
+<li>RaphaelJS</li>
+<li>MITHGrid </li>
+</ul>
+
+<h2>What you will need for building OAC Video Annotator</h2>
+
+<p>A Makefile has been included with this distribution to allow for running system-level commands to minimize the code and provide a distribution directory <code>dist/</code> with two files, <code>videoanno.js</code> which is the full, human-readable version of the Javascript code, and <code>videoanno.min.js</code>, which is a compressed version of the core code library intended for quick-loading in the browser. The minified version is, of course, much less readable than the full version.</p>
+
+<p>In order to perform this build process, you need to have GNU make 3.81 or later, Node.js 0.5 or later, and git 1.7 or later.  Earlier versions might work, but they have not been tested.</p>
+
+<p>Mac OS users should install Xcode, either from the Mac OS install DVD or from the Apple Mac OS App Store.  Node.js can be installed by one of the UNIX package managers available for the Mac OS.</p>
+
+<p>Linux/BSD users should use their appropriate package managers to install make, git, and node.</p>
+
+<h2>How to build your own OAC Video Annotator</h2>
+
+<p>First, use the <em>git</em> command <em>git clone</em> to copy the remote repository to your directory, like so: <code>git clone git://github.com/umd_mith/OACVideoAnnotator.git</code>.</p>
+
+<p>Then, to get a complete, minified, jslinted version of the OACVideoAnnotator, <code>cd</code> to the directory containing the files for OACVideoAnnotator and type <code>make</code>.  If you don't have Node installed and/or want to make a basic, uncompressed, unlinted version of OACVideoAnnotator, use <code>make videoanno</code> instead of <code>make</code>.</p>
+
+<p>The built version of OACVideoAnnotator will be in the <code>dist/</code> subdirectory.</p>
+
+<p>To remove all built files, run <code>make clean</code>.</p>
+
+<h2>Testing the OAC Video Annotator</h2>
+
+<p>Direct your browser to <code>/your installation directory/tests/</code> and it will display the QUnit tests that have been set up with this release. For more information on QUnit and how you can set up your own tests, visit <a href="http://docs.jquery.com/Qunit">the QUnit documentation</a> </p>  </td></tr></tbody></table><div id="generated">generated Wed Apr 11 2012 09:27:00 GMT-0400 (EDT)  </div><div id="projectname"><a href="./index.html">OAC Video Annotation Client</a></div></div></body></html>

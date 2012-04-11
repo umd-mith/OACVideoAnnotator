@@ -1,0 +1,239 @@
+<!DOCTYPE html><html><head><title>raphael_canvas.js</title><meta http-equiv="Content-Type" content="text/html" charset="UTF-8"><link rel="stylesheet" media="all" href="../docco.css"></head><body><div id="container"><div id="background"></div><div id="jump_to">Jump To &hellip;<div id="jump_wrapper"><div id="jump_page"><a href="../index.html" class="source"><span class="file_name">README</span></a><a href="../src/canvas.js.html" class="source "><span class="base_path">src / </span><span class="file_name">canvas.js</span></a><a href="../src/component.js.html" class="source "><span class="base_path">src / </span><span class="file_name">component.js</span></a><a href="../src/controllers.js.html" class="source "><span class="base_path">src / </span><span class="file_name">controllers.js</span></a><a href="../src/export.js.html" class="source "><span class="base_path">src / </span><span class="file_name">export.js</span></a><a href="../src/import.js.html" class="source "><span class="base_path">src / </span><span class="file_name">import.js</span></a><a href="../src/intro.js.html" class="source "><span class="base_path">src / </span><span class="file_name">intro.js</span></a><a href="../src/oac-dummy-player.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">oac-dummy-player.coffee</span></a><a href="../src/oac-dummy-player.js.html" class="source "><span class="base_path">src / </span><span class="file_name">oac-dummy-player.js</span></a><a href="../src/oac-player-framework.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">oac-player-framework.coffee</span></a><a href="../src/oac-player-framework.js.html" class="source "><span class="base_path">src / </span><span class="file_name">oac-player-framework.js</span></a><a href="../src/oac-youtube-player.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">oac-youtube-player.coffee</span></a><a href="../src/outro.js.html" class="source "><span class="base_path">src / </span><span class="file_name">outro.js</span></a><a href="../src/raphael_canvas.js.html" class="source selected"><span class="base_path">src / </span><span class="file_name">raphael_canvas.js</span></a></div></div></div><table cellpadding="0" cellspacing="0"><thead><tr><th class="docs"><h1>raphael_canvas.js</h1><div class="filepath">src/</div></th><th class="code"></th></tr></thead><tbody><tr id="section-1"><td class="docs"><div class="pilwrap"><a href="#section-1" class="pilcrow">&#182;</a></div>
+</td><td class="code"><div class="highlight"><pre></pre></div></td></tr><tr id="section-2"><td class="docs"><div class="pilwrap"><a href="#section-2" class="pilcrow">&#182;</a></div><h1>Presentations</h1>
+
+<p>TODO: rename file to presentation.js</p>
+
+<p>Presentations for canvas.js
+@author Grant Dickie</p>
+</td><td class="code"><div class="highlight"><pre><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">$</span><span class="p">,</span> <span class="nx">MITHGrid</span><span class="p">,</span> <span class="nx">OAC</span><span class="p">)</span> <span class="p">{</span></pre></div></td></tr><tr id="section-3"><td class="docs"><div class="pilwrap"><a href="#section-3" class="pilcrow">&#182;</a></div><h2>AnnotationList</h2>
+
+<p>Presentation that extends SimpleText in order to add new 
+functionality for Annotation HTML lens</p>
+</td><td class="code"><div class="highlight"><pre>  <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">Presentation</span><span class="p">.</span><span class="nx">namespace</span><span class="p">(</span><span class="s2">&quot;AnnotationList&quot;</span><span class="p">);</span>
+  <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">Presentation</span><span class="p">.</span><span class="nx">AnnotationList</span><span class="p">.</span><span class="nx">initPresentation</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">container</span><span class="p">,</span> <span class="nx">options</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">that</span> <span class="o">=</span> <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">Presentation</span><span class="p">.</span><span class="nx">initPresentation</span><span class="p">(</span><span class="s2">&quot;MITHGrid.Presentation.AnnotationList&quot;</span><span class="p">,</span> <span class="nx">container</span><span class="p">,</span> <span class="nx">options</span><span class="p">);</span>
+
+    <span class="k">return</span> <span class="nx">that</span><span class="p">;</span>
+  <span class="p">};</span></pre></div></td></tr><tr id="section-4"><td class="docs"><div class="pilwrap"><a href="#section-4" class="pilcrow">&#182;</a></div><h2>RaphaelCanvas</h2>
+
+<p>Presentation for the Canvas area - area that the Raphael canvas is drawn on</p>
+</td><td class="code"><div class="highlight"><pre>  <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">Presentation</span><span class="p">.</span><span class="nx">namespace</span><span class="p">(</span><span class="s2">&quot;RaphaelCanvas&quot;</span><span class="p">);</span>
+  <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">Presentation</span><span class="p">.</span><span class="nx">RaphaelCanvas</span><span class="p">.</span><span class="nx">initPresentation</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">container</span><span class="p">,</span> <span class="nx">options</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">that</span> <span class="o">=</span> <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">Presentation</span><span class="p">.</span><span class="nx">initPresentation</span><span class="p">(</span><span class="s2">&quot;MITHGrid.Presentation.RaphaelCanvas&quot;</span><span class="p">,</span> <span class="nx">container</span><span class="p">,</span> <span class="nx">options</span><span class="p">),</span>
+    <span class="nx">id</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="nx">container</span><span class="p">).</span><span class="nx">attr</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">),</span>
+    <span class="nx">h</span><span class="p">,</span>
+    <span class="nx">w</span><span class="p">,</span>
+    <span class="nx">x</span><span class="p">,</span>
+    <span class="nx">y</span><span class="p">,</span>
+    <span class="nx">canvasController</span><span class="p">,</span>
+    <span class="nx">keyBoardController</span><span class="p">,</span>
+    <span class="nx">editBoxController</span><span class="p">,</span>
+    <span class="nx">superRender</span><span class="p">,</span>
+    <span class="nx">canvasBinding</span><span class="p">,</span>
+    <span class="nx">keyboardBinding</span><span class="p">,</span>
+    <span class="nx">shapeCreateController</span><span class="p">,</span>
+    <span class="nx">shapeCreateBinding</span><span class="p">,</span>
+    <span class="nx">windowResizeController</span><span class="p">,</span>
+    <span class="nx">windowResizeBinding</span><span class="p">,</span>
+    <span class="nx">changeCanvasCoordinates</span><span class="p">,</span>
+    <span class="nx">e</span><span class="p">,</span>
+    <span class="nx">superEventFocusChange</span><span class="p">,</span>
+    <span class="nx">editBoundingBoxBinding</span><span class="p">,</span>
+    <span class="nx">eventCurrentTimeChange</span><span class="p">,</span>
+    <span class="nx">searchAnnos</span><span class="p">,</span>
+    <span class="nx">allAnnosModel</span><span class="p">,</span>
+    <span class="nx">initCanvas</span><span class="p">,</span>
+    <span class="nx">cachedRendering</span><span class="p">,</span> <span class="nx">xy</span><span class="p">,</span> <span class="nx">wh</span><span class="p">;</span>
+
+    <span class="nx">options</span> <span class="o">=</span> <span class="nx">that</span><span class="p">.</span><span class="nx">options</span><span class="p">;</span>
+    
+
+
+    <span class="nx">canvasController</span> <span class="o">=</span> <span class="nx">options</span><span class="p">.</span><span class="nx">controllers</span><span class="p">.</span><span class="nx">canvas</span><span class="p">;</span>
+    <span class="nx">keyBoardController</span> <span class="o">=</span> <span class="nx">options</span><span class="p">.</span><span class="nx">controllers</span><span class="p">.</span><span class="nx">keyboard</span><span class="p">;</span>
+    <span class="nx">editBoxController</span> <span class="o">=</span> <span class="nx">options</span><span class="p">.</span><span class="nx">controllers</span><span class="p">.</span><span class="nx">shapeEditBox</span><span class="p">;</span>
+    <span class="nx">shapeCreateController</span> <span class="o">=</span> <span class="nx">options</span><span class="p">.</span><span class="nx">controllers</span><span class="p">.</span><span class="nx">shapeCreateBox</span><span class="p">;</span>
+    <span class="nx">windowResizeController</span> <span class="o">=</span> <span class="nx">options</span><span class="p">.</span><span class="nx">controllers</span><span class="p">.</span><span class="nx">windowResize</span><span class="p">;</span>
+    
+    <span class="nx">x</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="nx">container</span><span class="p">).</span><span class="nx">css</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">);</span>
+    <span class="nx">y</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="nx">container</span><span class="p">).</span><span class="nx">css</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">);</span>
+
+    
+    <span class="nx">w</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="nx">container</span><span class="p">).</span><span class="nx">width</span><span class="p">();</span></pre></div></td></tr><tr id="section-5"><td class="docs"><div class="pilwrap"><a href="#section-5" class="pilcrow">&#182;</a></div><p>measure the div space and make the canvas
+to fit</p>
+</td><td class="code"><div class="highlight"><pre>    <span class="nx">h</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="nx">container</span><span class="p">).</span><span class="nx">height</span><span class="p">();</span></pre></div></td></tr><tr id="section-6"><td class="docs"><div class="pilwrap"><a href="#section-6" class="pilcrow">&#182;</a></div><p><strong>FIXME:</strong> We need to change this. If we have multiple videos on a page, this will break.</p>
+</td><td class="code"><div class="highlight"><pre>    <span class="nx">keyboardBinding</span> <span class="o">=</span> <span class="nx">keyBoardController</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="nx">$</span><span class="p">(</span><span class="s1">&#39;body&#39;</span><span class="p">),</span> <span class="p">{});</span>
+
+    <span class="nx">that</span><span class="p">.</span><span class="nx">events</span> <span class="o">=</span> <span class="nx">$</span><span class="p">.</span><span class="nx">extend</span><span class="p">(</span><span class="kc">true</span><span class="p">,</span> <span class="nx">that</span><span class="p">.</span><span class="nx">events</span><span class="p">,</span> <span class="nx">keyboardBinding</span><span class="p">.</span><span class="nx">events</span><span class="p">);</span></pre></div></td></tr><tr id="section-7"><td class="docs"><div class="pilwrap"><a href="#section-7" class="pilcrow">&#182;</a></div><p>init RaphaelJS canvas
+Parameters for Raphael:
+* @x: value for top left corner
+* @y: value for top left corner
+* @w: Integer value for width of the SVG canvas
+* @h: Integer value for height of the SVG canvas
+Create canvas at xy and width height</p>
+</td><td class="code"><div class="highlight"><pre>    <span class="nx">that</span><span class="p">.</span><span class="nx">canvas</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Raphael</span><span class="p">(</span><span class="nx">$</span><span class="p">(</span><span class="nx">container</span><span class="p">),</span> <span class="nx">w</span><span class="p">,</span> <span class="nx">h</span><span class="p">);</span>
+  </pre></div></td></tr><tr id="section-8"><td class="docs"><div class="pilwrap"><a href="#section-8" class="pilcrow">&#182;</a></div><p>attach binding
+<strong>FIXME:</strong> We need to change this. If we have multiple videos on a page, this will break.</p>
+</td><td class="code"><div class="highlight"><pre>    <span class="nx">canvasBinding</span> <span class="o">=</span> <span class="nx">canvasController</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="nx">$</span><span class="p">(</span><span class="s1">&#39;body&#39;</span><span class="p">),</span> <span class="p">{</span>
+      <span class="nx">closeEnough</span><span class="o">:</span> <span class="mi">5</span><span class="p">,</span>
+      <span class="nx">paper</span><span class="o">:</span> <span class="nx">that</span><span class="p">.</span><span class="nx">canvas</span>
+    <span class="p">});</span>
+
+    <span class="nx">editBoundingBoxBinding</span> <span class="o">=</span> <span class="nx">editBoxController</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="nx">$</span><span class="p">(</span><span class="nx">container</span><span class="p">),</span> <span class="p">{</span>
+      <span class="nx">paper</span><span class="o">:</span> <span class="nx">that</span><span class="p">.</span><span class="nx">canvas</span>
+    <span class="p">});</span>
+
+    <span class="nx">shapeCreateBinding</span> <span class="o">=</span> <span class="nx">shapeCreateController</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="nx">$</span><span class="p">(</span><span class="nx">container</span><span class="p">),</span> <span class="p">{</span>
+      <span class="nx">paper</span><span class="o">:</span> <span class="nx">that</span><span class="p">.</span><span class="nx">canvas</span>
+    <span class="p">});</span>
+    </pre></div></td></tr><tr id="section-9"><td class="docs"><div class="pilwrap"><a href="#section-9" class="pilcrow">&#182;</a></div><p><strong>FIXME:</strong> We need to change this. If we have multiple videos on a page, this will break.</p>
+</td><td class="code"><div class="highlight"><pre>    <span class="nx">windowResizeBinding</span> <span class="o">=</span> <span class="nx">windowResizeController</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="nb">window</span><span class="p">);</span>
+    
+    <span class="nx">editBoundingBoxBinding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onResize</span><span class="p">.</span><span class="nx">addListener</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">pos</span><span class="p">)</span> <span class="p">{</span>
+      <span class="kd">var</span> <span class="nx">activeRendering</span> <span class="o">=</span> <span class="nx">that</span><span class="p">.</span><span class="nx">getActiveRendering</span><span class="p">();</span>
+      <span class="k">if</span><span class="p">(</span><span class="nx">activeRendering</span> <span class="o">!==</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="nx">activeRendering</span><span class="p">.</span><span class="nx">eventResize</span> <span class="o">!==</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">activeRendering</span><span class="p">.</span><span class="nx">eventResize</span><span class="p">(</span><span class="nx">pos</span><span class="p">);</span>
+      <span class="p">}</span>
+    <span class="p">});</span>
+    
+    <span class="nx">editBoundingBoxBinding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onMove</span><span class="p">.</span><span class="nx">addListener</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">pos</span><span class="p">)</span> <span class="p">{</span>
+      <span class="kd">var</span> <span class="nx">activeRendering</span> <span class="o">=</span> <span class="nx">that</span><span class="p">.</span><span class="nx">getActiveRendering</span><span class="p">();</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nx">activeRendering</span> <span class="o">!==</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="nx">activeRendering</span><span class="p">.</span><span class="nx">eventMove</span> <span class="o">!==</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">activeRendering</span><span class="p">.</span><span class="nx">eventMove</span><span class="p">(</span><span class="nx">pos</span><span class="p">);</span>
+      <span class="p">}</span>
+    <span class="p">});</span>
+
+    <span class="nx">editBoundingBoxBinding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onDelete</span><span class="p">.</span><span class="nx">addListener</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+      <span class="kd">var</span> <span class="nx">activeRendering</span> <span class="o">=</span> <span class="nx">that</span><span class="p">.</span><span class="nx">getActiveRendering</span><span class="p">();</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nx">activeRendering</span> <span class="o">!==</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="nx">activeRendering</span><span class="p">.</span><span class="nx">eventDelete</span> <span class="o">!==</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">activeRendering</span><span class="p">.</span><span class="nx">eventDelete</span><span class="p">();</span>
+        <span class="nx">editBoundingBoxBinding</span><span class="p">.</span><span class="nx">detachRendering</span><span class="p">();</span>
+      <span class="p">}</span>
+    <span class="p">});</span>
+    
+    <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onCurrentModeChange</span><span class="p">.</span><span class="nx">addListener</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">newMode</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nx">newMode</span> <span class="o">!==</span> <span class="s1">&#39;Select&#39;</span> <span class="o">&amp;&amp;</span> <span class="nx">newMode</span> <span class="o">!==</span> <span class="s1">&#39;Drag&#39;</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">editBoundingBoxBinding</span><span class="p">.</span><span class="nx">detachRendering</span><span class="p">();</span>
+      <span class="p">}</span>
+    <span class="p">});</span>
+  
+    <span class="nx">windowResizeBinding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onResize</span><span class="p">.</span><span class="nx">addListener</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+      <span class="kd">var</span> <span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">,</span> <span class="nx">w</span><span class="p">,</span> <span class="nx">h</span><span class="p">,</span> <span class="nx">containerEl</span><span class="p">,</span> <span class="nx">canvasEl</span><span class="p">,</span> <span class="nx">htmlWrapper</span><span class="p">;</span></pre></div></td></tr><tr id="section-10"><td class="docs"><div class="pilwrap"><a href="#section-10" class="pilcrow">&#182;</a></div><p>the following elements should be parts of this presentation</p>
+</td><td class="code"><div class="highlight"><pre>      <span class="nx">canvasEl</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;body&#39;</span><span class="p">).</span><span class="nx">find</span><span class="p">(</span><span class="s1">&#39;svg&#39;</span><span class="p">);</span>
+      <span class="nx">containerEl</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;body&#39;</span><span class="p">).</span><span class="nx">find</span><span class="p">(</span><span class="s1">&#39;#myplayer&#39;</span><span class="p">);</span>
+      <span class="nx">htmlWrapper</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;body&#39;</span><span class="p">).</span><span class="nx">find</span><span class="p">(</span><span class="s1">&#39;.section-canvas&#39;</span><span class="p">);</span>
+      <span class="nx">x</span> <span class="o">=</span> <span class="nb">parseInt</span><span class="p">(</span><span class="nx">$</span><span class="p">(</span><span class="nx">containerEl</span><span class="p">).</span><span class="nx">offset</span><span class="p">().</span><span class="nx">left</span><span class="p">,</span> <span class="mi">10</span><span class="p">);</span>
+      <span class="nx">y</span> <span class="o">=</span> <span class="nb">parseInt</span><span class="p">(</span><span class="nx">$</span><span class="p">(</span><span class="nx">containerEl</span><span class="p">).</span><span class="nx">offset</span><span class="p">().</span><span class="nx">top</span><span class="p">,</span> <span class="mi">10</span><span class="p">);</span>
+      <span class="nx">w</span> <span class="o">=</span> <span class="nb">parseInt</span><span class="p">(</span><span class="nx">$</span><span class="p">(</span><span class="nx">containerEl</span><span class="p">).</span><span class="nx">width</span><span class="p">(),</span> <span class="mi">10</span><span class="p">);</span>
+      <span class="nx">h</span> <span class="o">=</span> <span class="nb">parseInt</span><span class="p">(</span><span class="nx">$</span><span class="p">(</span><span class="nx">containerEl</span><span class="p">).</span><span class="nx">height</span><span class="p">(),</span> <span class="mi">10</span><span class="p">);</span>
+
+      <span class="nx">$</span><span class="p">(</span><span class="nx">canvasEl</span><span class="p">).</span><span class="nx">css</span><span class="p">({</span>
+        <span class="nx">left</span><span class="o">:</span> <span class="nx">x</span> <span class="o">+</span> <span class="s1">&#39;px&#39;</span><span class="p">,</span>
+        <span class="nx">top</span><span class="o">:</span> <span class="nx">y</span> <span class="o">+</span> <span class="s1">&#39;px&#39;</span><span class="p">,</span>
+        <span class="nx">width</span><span class="o">:</span> <span class="nx">w</span> <span class="o">+</span> <span class="s1">&#39;px&#39;</span><span class="p">,</span>
+        <span class="nx">height</span><span class="o">:</span> <span class="nx">h</span> <span class="o">+</span> <span class="s1">&#39;px&#39;</span>
+      <span class="p">});</span>
+      
+      <span class="nx">$</span><span class="p">(</span><span class="nx">htmlWrapper</span><span class="p">).</span><span class="nx">css</span><span class="p">({</span>
+        <span class="nx">left</span><span class="o">:</span> <span class="nx">x</span> <span class="o">+</span> <span class="s1">&#39;px&#39;</span><span class="p">,</span>
+        <span class="nx">top</span><span class="o">:</span> <span class="nx">y</span> <span class="o">+</span> <span class="s1">&#39;px&#39;</span><span class="p">,</span>
+        <span class="nx">width</span><span class="o">:</span> <span class="nx">w</span> <span class="o">+</span> <span class="s1">&#39;px&#39;</span><span class="p">,</span>
+        <span class="nx">height</span><span class="o">:</span> <span class="nx">h</span> <span class="o">+</span> <span class="s1">&#39;px&#39;</span>
+      <span class="p">});</span>
+    <span class="p">});</span>
+    
+    <span class="nx">windowResizeBinding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onResize</span><span class="p">.</span><span class="nx">fire</span><span class="p">();</span> <span class="c1">// to make sure we get things set up right</span>
+    </pre></div></td></tr><tr id="section-11"><td class="docs"><div class="pilwrap"><a href="#section-11" class="pilcrow">&#182;</a></div><p>Registering canvas special events for start, drag, stop</p>
+</td><td class="code"><div class="highlight"><pre>    <span class="nx">canvasBinding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onShapeStart</span><span class="p">.</span><span class="nx">addListener</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">coords</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">shapeCreateBinding</span><span class="p">.</span><span class="nx">createGuide</span><span class="p">(</span><span class="nx">coords</span><span class="p">);</span>
+    <span class="p">});</span>
+
+    <span class="nx">canvasBinding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onShapeDrag</span><span class="p">.</span><span class="nx">addListener</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">coords</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">shapeCreateBinding</span><span class="p">.</span><span class="nx">resizeGuide</span><span class="p">(</span><span class="nx">coords</span><span class="p">);</span>
+    <span class="p">});</span>
+
+    <span class="nx">canvasBinding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onShapeDone</span><span class="p">.</span><span class="nx">addListener</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">coords</span><span class="p">)</span> <span class="p">{</span></pre></div></td></tr><tr id="section-12"><td class="docs"><div class="pilwrap"><a href="#section-12" class="pilcrow">&#182;</a></div><p>Adjust x,y in order to fit data store 
+model</p>
+</td><td class="code"><div class="highlight"><pre>      <span class="kd">var</span> <span class="nx">shape</span> <span class="o">=</span> <span class="nx">shapeCreateBinding</span><span class="p">.</span><span class="nx">completeShape</span><span class="p">(</span><span class="nx">coords</span><span class="p">);</span>
+      <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">.</span><span class="nx">insertShape</span><span class="p">(</span><span class="nx">shape</span><span class="p">);</span>
+    <span class="p">});</span>
+    
+    </pre></div></td></tr><tr id="section-13"><td class="docs"><div class="pilwrap"><a href="#section-13" class="pilcrow">&#182;</a></div><p>Called whenever a player is set by the Application. 
+Assumes that said player object has getcoordinates() and 
+getsize() as valid methods that return arrays.</p>
+</td><td class="code"><div class="highlight"><pre>    <span class="nx">changeCanvasCoordinates</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">args</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nx">args</span> <span class="o">!==</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+        </pre></div></td></tr><tr id="section-14"><td class="docs"><div class="pilwrap"><a href="#section-14" class="pilcrow">&#182;</a></div><p>player passes args of x,y and width, height</p>
+</td><td class="code"><div class="highlight"><pre>        <span class="nx">xy</span> <span class="o">=</span> <span class="nx">args</span><span class="p">.</span><span class="nx">getcoordinates</span><span class="p">();</span>
+        <span class="nx">wh</span> <span class="o">=</span> <span class="nx">args</span><span class="p">.</span><span class="nx">getsize</span><span class="p">();</span></pre></div></td></tr><tr id="section-15"><td class="docs"><div class="pilwrap"><a href="#section-15" class="pilcrow">&#182;</a></div><p>move container and change size</p>
+</td><td class="code"><div class="highlight"><pre>        <span class="nx">$</span><span class="p">(</span><span class="nx">container</span><span class="p">).</span><span class="nx">css</span><span class="p">({</span>
+          <span class="nx">left</span><span class="o">:</span> <span class="p">(</span><span class="nb">parseInt</span><span class="p">(</span><span class="nx">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">10</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;px&#39;</span><span class="p">),</span>
+          <span class="nx">top</span><span class="o">:</span> <span class="p">(</span><span class="nb">parseInt</span><span class="p">(</span><span class="nx">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">10</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;px&#39;</span><span class="p">),</span>
+          <span class="nx">width</span><span class="o">:</span> <span class="nx">wh</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+          <span class="nx">height</span><span class="o">:</span> <span class="nx">wh</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="p">});</span></pre></div></td></tr><tr id="section-16"><td class="docs"><div class="pilwrap"><a href="#section-16" class="pilcrow">&#182;</a></div><p>Move canvas SVG to this location</p>
+</td><td class="code"><div class="highlight"><pre>        <span class="nx">$</span><span class="p">(</span><span class="s1">&#39;svg&#39;</span><span class="p">).</span><span class="nx">css</span><span class="p">({</span>
+          <span class="nx">left</span><span class="o">:</span> <span class="p">(</span><span class="nb">parseInt</span><span class="p">(</span><span class="nx">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">10</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;px&#39;</span><span class="p">),</span>
+          <span class="nx">top</span><span class="o">:</span> <span class="p">(</span><span class="nb">parseInt</span><span class="p">(</span><span class="nx">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">10</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;px&#39;</span><span class="p">),</span>
+          <span class="nx">width</span><span class="o">:</span> <span class="nx">wh</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+          <span class="nx">height</span><span class="o">:</span> <span class="nx">wh</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="p">});</span>
+
+      <span class="p">}</span>
+    <span class="p">};</span></pre></div></td></tr><tr id="section-17"><td class="docs"><div class="pilwrap"><a href="#section-17" class="pilcrow">&#182;</a></div><p>Called when the time change event is fired. Makes sure
+that the present annotations are queued and have the correct
+opacity (Fades as it comes into play and fades as it goes out
+of play)</p>
+
+<div class="dox"><div class="summary"><p>eventCurrentTimeChange = function(npt) {<br />            that.visitRenderings(function(id, rendering) {<br />                if(rendering.eventCurrentTimeChange !== undefined) {<br />                    rendering.eventCurrentTimeChange(npt);<br />                }<br />            });<br />        };</p></div><div class="body"></div></div>
+</td><td class="code"><div class="highlight"><pre>    <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onCurrentTimeChange</span><span class="p">.</span><span class="nx">addListener</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">npt</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">that</span><span class="p">.</span><span class="nx">visitRenderings</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">id</span><span class="p">,</span> <span class="nx">rendering</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span><span class="p">(</span><span class="nx">rendering</span><span class="p">.</span><span class="nx">eventCurrentTimeChange</span> <span class="o">!==</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+          <span class="nx">rendering</span><span class="p">.</span><span class="nx">eventCurrentTimeChange</span><span class="p">(</span><span class="nx">npt</span><span class="p">);</span>
+        <span class="p">}</span>
+      <span class="p">});</span>
+    <span class="p">});</span>
+    <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onTimeEasementChange</span><span class="p">.</span><span class="nx">addListener</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">te</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">that</span><span class="p">.</span><span class="nx">visitRenderings</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">id</span><span class="p">,</span> <span class="nx">rendering</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span><span class="p">(</span><span class="nx">rendering</span><span class="p">.</span><span class="nx">eventTimeEasementChange</span> <span class="o">!==</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+          <span class="nx">rendering</span><span class="p">.</span><span class="nx">eventTimeEasementChange</span><span class="p">(</span><span class="nx">te</span><span class="p">);</span>
+        <span class="p">}</span>
+      <span class="p">});</span>
+    <span class="p">});</span>
+    <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onPlayerChange</span><span class="p">.</span><span class="nx">addListener</span><span class="p">(</span><span class="nx">changeCanvasCoordinates</span><span class="p">);</span>
+    <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">.</span><span class="nx">dataStore</span><span class="p">.</span><span class="nx">canvas</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onModelChange</span><span class="p">.</span><span class="nx">addListener</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+      <span class="nx">editBoundingBoxBinding</span><span class="p">.</span><span class="nx">detachRendering</span><span class="p">();</span>
+    <span class="p">});</span>
+    
+    <span class="nx">superRender</span> <span class="o">=</span> <span class="nx">that</span><span class="p">.</span><span class="nx">render</span><span class="p">;</span>
+    
+    <span class="nx">that</span><span class="p">.</span><span class="nx">render</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">c</span><span class="p">,</span> <span class="nx">m</span><span class="p">,</span> <span class="nx">i</span><span class="p">)</span> <span class="p">{</span>
+      <span class="kd">var</span> <span class="nx">rendering</span> <span class="o">=</span> <span class="nx">superRender</span><span class="p">(</span><span class="nx">c</span><span class="p">,</span> <span class="nx">m</span><span class="p">,</span> <span class="nx">i</span><span class="p">),</span>
+      <span class="nx">tempStore</span><span class="p">;</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nx">rendering</span> <span class="o">!==</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
+
+        <span class="nx">tempStore</span> <span class="o">=</span> <span class="nx">m</span><span class="p">;</span>
+        <span class="k">while</span> <span class="p">(</span><span class="nx">tempStore</span><span class="p">.</span><span class="nx">dataStore</span><span class="p">)</span> <span class="p">{</span>
+
+          <span class="nx">tempStore</span> <span class="o">=</span> <span class="nx">tempStore</span><span class="p">.</span><span class="nx">dataStore</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="nx">allAnnosModel</span> <span class="o">=</span> <span class="nx">tempStore</span><span class="p">;</span>
+        <span class="nx">searchAnnos</span> <span class="o">=</span> <span class="nx">options</span><span class="p">.</span><span class="nx">dataView</span><span class="p">.</span><span class="nx">prepare</span><span class="p">([</span><span class="s1">&#39;!type&#39;</span><span class="p">]);</span>
+        
+        <span class="nx">canvasBinding</span><span class="p">.</span><span class="nx">registerRendering</span><span class="p">(</span><span class="nx">rendering</span><span class="p">);</span>
+      <span class="p">}</span>
+      <span class="k">return</span> <span class="nx">rendering</span><span class="p">;</span>
+    <span class="p">};</span>
+
+    <span class="nx">superEventFocusChange</span> <span class="o">=</span> <span class="nx">that</span><span class="p">.</span><span class="nx">eventFocusChange</span><span class="p">;</span>
+
+    <span class="nx">that</span><span class="p">.</span><span class="nx">eventFocusChange</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">id</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">.</span><span class="nx">getCurrentMode</span><span class="p">()</span> <span class="o">===</span> <span class="s1">&#39;Select&#39;</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">superEventFocusChange</span><span class="p">(</span><span class="nx">id</span><span class="p">);</span>
+        <span class="nx">editBoundingBoxBinding</span><span class="p">.</span><span class="nx">attachRendering</span><span class="p">(</span><span class="nx">that</span><span class="p">.</span><span class="nx">getActiveRendering</span><span class="p">());</span>
+      <span class="p">}</span>
+    <span class="p">};</span></pre></div></td></tr><tr id="section-18"><td class="docs"><div class="pilwrap"><a href="#section-18" class="pilcrow">&#182;</a></div><p>console.log(that);</p>
+</td><td class="code"><div class="highlight"><pre>    <span class="k">return</span> <span class="nx">that</span><span class="p">;</span>
+  <span class="p">};</span>
+<span class="p">}</span> <span class="p">(</span><span class="nx">jQuery</span><span class="p">,</span> <span class="nx">MITHGrid</span><span class="p">,</span> <span class="nx">OAC</span><span class="p">));</span></pre></div></td></tr><tr id="section-19"><td class="docs"><div class="pilwrap"><a href="#section-19" class="pilcrow">&#182;</a></div><p>End of Presentation constructors</p>
+</td><td class="code"><div class="highlight"><pre></pre></div></td></tr></tbody></table><div id="generated">generated Tue Apr 03 2012 15:11:53 GMT-0400 (EDT)  </div><div id="projectname"><a href="../index.html">OAC Stream Video Annotation Client</a></div></div></body></html>
