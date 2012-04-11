@@ -1,10 +1,10 @@
 (function() {
   var initPlugin;
 
-  initPlugin = function() {
+  initPlugin = function(raphApp) {
     var initStreamingVideoApp;
     initStreamingVideoApp = function(playerObj) {
-      var callback, callback2, raphApp;
+      var callback, callback2;
       raphApp = OAC.Client.StreamingVideo.initApp("#content-container", {
         playerWrapper: '#myplayer',
         url: 'http://www.youtube.com/watch?v=HYLacuAp76U&feature=fvsr',
@@ -24,8 +24,8 @@
     return OAC_Controller.on_new_player(initStreamingVideoApp);
   };
 
-  $(document).ready(function() {
-    return initPlugin();
-  });
+  $(document).ready = function(app) {
+    return initPlugin(app);
+  };
 
 }).call(this);
