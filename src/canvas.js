@@ -242,6 +242,7 @@
             // *n: current time of the video player
             //
             that.eventCurrentTimeChange = function(n) {
+				console.log('event current time change in shape');
                 that.setOpacity(calcOpacity(n));
             };
 
@@ -262,10 +263,10 @@
             that.setOpacity = function(o) {
                 if (o !== null && o !== undefined) {
                     opacity = o;
+					that.shape.attr({
+	                    opacity: (focused ? 1.0: 0.5) * opacity
+	                });
                 }
-                that.shape.attr({
-                    opacity: (focused ? 1.0: 0.5) * opacity
-                });
             };
 
             // #### #eventFocus
@@ -1251,6 +1252,7 @@
 
                 superUpdate = that.update;
                 that.update = function(newItem) {
+					console.log('update reached in rectangl lens');
                     // receiving the Object passed through
                     // model.updateItems in move()
                     item = newItem;
