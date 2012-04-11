@@ -4,7 +4,7 @@
 // The **OAC Video Annotation Tool** is a MITHGrid application providing annotation capabilities for streaming
 // video embedded in a web page. 
 //  
-// Date: Tue Apr 10 16:51:14 2012 -0400
+// Date: Wed Apr 11 13:28:12 2012 -0400
 //  
 // Educational Community License, Version 2.0
 // 
@@ -1011,7 +1011,7 @@ OAC.Client.namespace("StreamingVideo");
             curRendering,
             renderings = {},
             paper = opts.paper,
-            offset,
+            offsetEl = opts.offsetEl,
             // #### attachDragResize (private)
             //
             // Find the passed rendering ID, set that rendering object
@@ -1073,7 +1073,7 @@ OAC.Client.namespace("StreamingVideo");
                 y,
                 w,
                 h,
-                offset = $(container).offset();
+                offset = $(offsetEl).offset();
 
                 //
                 // MouseMode cycles through three settings:
@@ -1461,11 +1461,28 @@ OAC.Client.namespace("StreamingVideo");
         // Create canvas at xy and width height
         that.canvas = new Raphael($(container), w, h);
 
+		// In order to avoid multiple SVG canvases overlapping their 
+		// mouse events, we attach a customized ID to the SVG element that
+		// RaphaelJS automatically generates
+		// 
+		// This searches for which SVG element does NOT have an ID
+		// then attaches an ID to it
+		// 
+		$('svg').each(function(i, el) {
+			if($(el).attr('id') === undefined) {
+				$(el).attr('id', 'canvasfor' + id);
+			}
+		});
+
         // attach binding
         // **FIXME:** We need to change this. If we have multiple videos on a page, this will break.
-        canvasBinding = canvasController.bind($(container), {
+		// 
+		// Passing as a container the SVG element. For making sure the Browser x,y coords are lined up
+		// with the SVG units, we also pass as an option property the element to use as an offset
+        canvasBinding = canvasController.bind($('#canvasfor' + id), {
             closeEnough: 5,
-            paper: that.canvas
+            paper: that.canvas,
+			offsetEl: $(container)
         });
 
         editBoundingBoxBinding = editBoxController.bind($(container), {
@@ -2916,6 +2933,7 @@ OAC.Client.namespace("StreamingVideo");
 
                 superUpdate = that.update;
                 that.update = function(newItem) {
+					console.log('update reached in rectangl lens');
                     // receiving the Object passed through
                     // model.updateItems in move()
                     item = newItem;

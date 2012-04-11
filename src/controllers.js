@@ -974,7 +974,7 @@
             curRendering,
             renderings = {},
             paper = opts.paper,
-            offset,
+            offsetEl = opts.offsetEl,
             // #### attachDragResize (private)
             //
             // Find the passed rendering ID, set that rendering object
@@ -1036,7 +1036,7 @@
                 y,
                 w,
                 h,
-                offset = $(container).offset();
+                offset = $(offsetEl).offset();
 
                 //
                 // MouseMode cycles through three settings:
