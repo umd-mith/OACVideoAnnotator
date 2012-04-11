@@ -13,7 +13,7 @@ OAC_FRAMEWORK_DIR = ${PREFIX}/oacframework/oac-player-integration/js
 JS_ENGINE ?= `which node nodejs`
 COMPILER = ${JS_ENGINE} ${BUILD_DIR}/uglify.js --unsafe
 POST_COMPILER = ${JS_ENGINE} ${BUILD_DIR}/post-compile.js
-DOCCO ?= `which docco`
+DOCCO ?= `which docco-husky`
 
 BASE_FILES = ${SRC_DIR}/controllers.js \
 	${SRC_DIR}/presentations.js \
@@ -37,7 +37,7 @@ ${DIST_DIR}:
 		@@mkdir -p ${DIST_DIR}
 
 docs: ${MG}
-		@@${DOCCO} ${MG}
+		@@${DOCCO} ${SRC_DIR}
 
 videoanno: ${MG}
 

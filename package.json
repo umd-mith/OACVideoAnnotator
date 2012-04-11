@@ -1,0 +1,35 @@
+{
+  "name": "OAC Video Annotation Client",
+  "description": "A JavaScript framework for providing annotation capabilities for embedded videos.",
+  "bugs": {
+     "url": "https://github.com/umd-mith/OACVideoAnnotator/issues"
+  },
+  "contributors": [
+    "Grant Dickie",
+    "James Smith"
+  ],
+  "author": "Maryland Institute for Technology in the Humanities (MITH)",
+  "version": "0.0.1",
+  "licenses": [{
+    "type": "ECL2",
+    "url": "http://opensource.org/licenses/ECL2"
+  }],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/umd-mith/OACVideoAnnotator.git"
+  },
+  "dependencies": {
+    "jQuery": "1.6.1",
+    "Raphael.js": "1.5.2",
+    "MITHgrid": "latest"
+  },
+  "optionalDependencies": {
+  },
+  "devDependencies": {
+    "coffee-script": "latest"
+  },
+  "docco_husky": {
+    "output_dir": "compiled_docs",
+    "project_name": "OAC Video Annotation Client"
+  }
+}
