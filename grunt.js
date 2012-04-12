@@ -4,10 +4,10 @@ module.exports = function(grunt) {
   // Project configuration.
   grunt.initConfig({
     lint: {
-      files: ['grunt.js', 'lib/**/*.js', 'tests/**/*.js']
+      files: ['grunt.js', 'lib/*.js', 'tests/js/*.js']
     },
     qunit: {
-      files: ['tests/**/*.html']
+      files: ['tests/*.html']
     },
     watch: {
       files: '<config:lint.files>',
@@ -28,7 +28,9 @@ module.exports = function(grunt) {
         browser: true
       },
       globals: {
-        jQuery: true
+        jQuery: true,
+		Raphael: true,
+		
       }
     }
   });
