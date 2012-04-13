@@ -2,7 +2,7 @@
 # based on the Makefile for jquery
 
 SRC_DIR = src
-TEST_DIR = test
+TEST_DIR = tests
 BUILD_DIR = build
 
 
@@ -30,8 +30,12 @@ DATE=$(shell git log --pretty=format:%ad | head -1)
 
 all: core docs
 
-core: videoanno min lint
+core: videoanno min lint test
 		@@echo "videoanno build complete"
+
+test: 
+	@@echo 'compiling coffee scripts in ' ${TEST_DIR} 
+	@@coffee -o ${TEST_DIR}/js/ -c ${TEST_DIR}/*.coffee 
 
 ${DIST_DIR}:
 		@@mkdir -p ${DIST_DIR}

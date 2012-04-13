@@ -241,15 +241,6 @@
         // opacity (Fades as it comes into play and fades as it goes out
         // of play)
         //
-        /*
-		eventCurrentTimeChange = function(npt) {
-			that.visitRenderings(function(id, rendering) {
-				if(rendering.eventCurrentTimeChange !== undefined) {
-					rendering.eventCurrentTimeChange(npt);
-				}
-			});
-		};*/
-
         options.application.events.onCurrentTimeChange.addListener(function(npt) {
             that.visitRenderings(function(id, rendering) {
                 if (rendering.eventCurrentTimeChange !== undefined) {

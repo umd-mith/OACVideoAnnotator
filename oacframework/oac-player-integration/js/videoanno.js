@@ -4,7 +4,7 @@
 // The **OAC Video Annotation Tool** is a MITHGrid application providing annotation capabilities for streaming
 // video embedded in a web page. 
 //  
-// Date: Wed Apr 11 13:28:12 2012 -0400
+// Date: Thu Apr 12 15:15:21 2012 -0400
 //  
 // Educational Community License, Version 2.0
 // 
@@ -1617,15 +1617,6 @@ OAC.Client.namespace("StreamingVideo");
         // opacity (Fades as it comes into play and fades as it goes out
         // of play)
         //
-        /*
-		eventCurrentTimeChange = function(npt) {
-			that.visitRenderings(function(id, rendering) {
-				if(rendering.eventCurrentTimeChange !== undefined) {
-					rendering.eventCurrentTimeChange(npt);
-				}
-			});
-		};*/
-
         options.application.events.onCurrentTimeChange.addListener(function(npt) {
             that.visitRenderings(function(id, rendering) {
                 if (rendering.eventCurrentTimeChange !== undefined) {
@@ -1867,21 +1858,21 @@ OAC.Client.namespace("StreamingVideo");
             // * n - the current time of the play head
             //
             calcOpacity = function(n) {
-                var val = 0;
+                var val = 0, opac = (focused === true)? 1 : 0.5;
 
                 if (n < fstart || n > fend) {
                     return 0.0;
                 }
                 if (n < start) {
                     // fading in
-                    val = (1 / (start - n));
-                    val = val.toFixed(3);
+                    val = (opac / (start - n));
+                    val = val.toFixed(1);
                 } else if (n > end) {
                     // fading out
-                    val = (1 / (n - end));
-                    val = val.toFixed(3);
+                    val = (opac / (n - end));
+                    val = val.toFixed(1);
                 } else {
-                    val = 1;
+                    val = opac;
                 }
                 return val;
             };
@@ -1923,7 +1914,6 @@ OAC.Client.namespace("StreamingVideo");
             // *n: current time of the video player
             //
             that.eventCurrentTimeChange = function(n) {
-				console.log('event current time change in shape');
                 that.setOpacity(calcOpacity(n));
             };
 
@@ -1947,6 +1937,12 @@ OAC.Client.namespace("StreamingVideo");
 					that.shape.attr({
 	                    opacity: (focused ? 1.0: 0.5) * opacity
 	                });
+					// Update the model
+					model.updateItems([{
+						id: that.id,
+						type: 'Annotation',
+						opacity: opacity
+					}]);
                 }
             };
 
@@ -2933,11 +2929,11 @@ OAC.Client.namespace("StreamingVideo");
 
                 superUpdate = that.update;
                 that.update = function(newItem) {
-					console.log('update reached in rectangl lens');
                     // receiving the Object passed through
                     // model.updateItems in move()
                     item = newItem;
                     superUpdate(item);
+					
                     try {
                         if (item.x !== undefined && item.y !== undefined && item.w !== undefined && item.h !== undefined) {
                             c.attr({
