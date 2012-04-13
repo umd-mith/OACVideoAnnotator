@@ -181,8 +181,8 @@
       stop();
       app.events.onCurrentTimeChange.removeListener(changeListen);
       changeListen = function(id) {
-        ok(id = obj.id[0] != null, "ID passed in activeAnnotationChange same as expected");
-        return ok(obj.opacity[0] = 1.0 != null, "Opacity now set to 1");
+        equal(id, obj.id[0], "ID passed in activeAnnotationChange same as expected");
+        return equal(obj.opacity[0], 1.0, "Opacity now set to 1");
       };
       app.setCurrentTime(3);
       app.events.onActiveAnnotationChange.addListener(changeListen);
@@ -192,8 +192,9 @@
       changeListen = function(view, items) {
         start();
         obj = app.dataStore.canvas.getItem(items[0]);
-        ok(obj.opacity[0] = 1, "Opacity is " + obj.opacity[0]);
-        return ok(obj.npt_start[0] = app.getCurrentTime() - 5, "npt_start " + obj.npt_start[0]);
+        ok(obj.opacity[0] === 1, "Opacity is " + obj.opacity[0]);
+        ok(obj.npt_start[0] === (app.getCurrentTime() - 5), "npt_start " + obj.npt_start[0]);
+        return ok(app.presentation.raphsvg.renderingFor(obj.id[0]) != null, "Rendering is present in presentation");
       };
       app.dataView.currentAnnotations.events.onModelChange.addListener(changeListen);
       app.setCurrentTime(20);

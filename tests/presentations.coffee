@@ -68,6 +68,9 @@ $(document).ready ->
 		npt_end: 40
 	}]
 	
+	# Setting up the application object -- to be used in each test 
+	# as each test is a closure
+	# 
 	setupApp = ->
 		app = OAC.Client.StreamingVideo.initApp('#content-container', {
 			url: 'http://youtube.com/',
@@ -110,6 +113,10 @@ $(document).ready ->
 			
 		app.dataView.currentAnnotations.events.onModelChange.addListener(checkEventTrigger)
 		
+		# expectAnnos
+		#
+		# Object of 'expected id' : 'expected return value from contains()'
+		#
 		expectAnnos = {
 			'anno1' : true
 			'anno2' : false
@@ -194,7 +201,6 @@ $(document).ready ->
 		app.setCurrentTime(28)
 		stop()
 		opac = obj.opacity[0]
-		# decreasing the opacity values
 		app.events.onCurrentTimeChange.removeListener(changeListen)
 		changeListen = (n) ->
 			# is opacity changed?
@@ -202,6 +208,7 @@ $(document).ready ->
 			ok obj.opacity[0] < opac, "opacity is now " + obj.opacity[0] + " formerly: " + opac
 		
 		app.events.onCurrentTimeChange.addListener(changeListen)
+		# decreasing the opacity values each time now
 		
 		app.setCurrentTime(50)
 		stop()
@@ -217,8 +224,8 @@ $(document).ready ->
 		# checking the use of focus
 		# If eventfocus is called, object we passed must be in focus
 		changeListen = (id) ->
-			ok id = obj.id[0]?, "ID passed in activeAnnotationChange same as expected"
-			ok obj.opacity[0] = 1.0?, "Opacity now set to 1"
+			equal id, obj.id[0], "ID passed in activeAnnotationChange same as expected"
+			equal obj.opacity[0], 1.0, "Opacity now set to 1"
 		
 		app.setCurrentTime(3)
 		app.events.onActiveAnnotationChange.addListener(changeListen)
@@ -234,17 +241,23 @@ $(document).ready ->
 			start()
 			obj = app.dataStore.canvas.getItem(items[0])
 			# check correctness of npt times and opacity
-			ok obj.opacity[0] = 1, "Opacity is " + obj.opacity[0]
-			ok obj.npt_start[0] = (app.getCurrentTime() - 5), "npt_start " + obj.npt_start[0]
+			ok obj.opacity[0] == 1, "Opacity is " + obj.opacity[0]
+			ok obj.npt_start[0] == (app.getCurrentTime() - 5), "npt_start " + obj.npt_start[0]
+			# Checking to see if the rendering got captured in presentation
+			ok app.presentation.raphsvg.renderingFor(obj.id[0])?, "Rendering is present in presentation"
 			
-		
+			
 		app.dataView.currentAnnotations.events.onModelChange.addListener(changeListen)
+			
 		# set time
 		app.setCurrentTime(20)
 		# set up curMode
 		app.setCurrentMode('Rectangle')
 		
-		# insert shape
+		# insert shape -- only inserting what would be inserted
+		# via the Controllers and presentation talking with the 
+		# application
+		# 
 		coords = {
 			'x' : 10
 			'y' : 3

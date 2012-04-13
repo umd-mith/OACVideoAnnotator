@@ -193,11 +193,11 @@
                 }
                 if (n < start) {
                     // fading in
-                    val = (opac / (start - n));
+                    val = (1 / (start - n));
                     val = val.toFixed(1);
                 } else if (n > end) {
                     // fading out
-                    val = (opac / (n - end));
+                    val = (1 / (n - end));
                     val = val.toFixed(1);
                 } else {
                     val = opac;

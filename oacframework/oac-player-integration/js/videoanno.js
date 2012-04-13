@@ -4,7 +4,7 @@
 // The **OAC Video Annotation Tool** is a MITHGrid application providing annotation capabilities for streaming
 // video embedded in a web page. 
 //  
-// Date: Thu Apr 12 15:15:21 2012 -0400
+// Date: Fri Apr 13 15:40:36 2012 -0400
 //  
 // Educational Community License, Version 2.0
 // 
@@ -1865,11 +1865,11 @@ OAC.Client.namespace("StreamingVideo");
                 }
                 if (n < start) {
                     // fading in
-                    val = (opac / (start - n));
+                    val = (1 / (start - n));
                     val = val.toFixed(1);
                 } else if (n > end) {
                     // fading out
-                    val = (opac / (n - end));
+                    val = (1 / (n - end));
                     val = val.toFixed(1);
                 } else {
                     val = opac;
@@ -2364,7 +2364,7 @@ OAC.Client.namespace("StreamingVideo");
             npt_end = parseFloat(app.getCurrentTime()) + 5,
             curMode = app.getCurrentMode(),
             shape;
-
+			
             // Insert into local array of ShapeTypes
             //
             shape = shapeTypes[curMode].calc(coords);
