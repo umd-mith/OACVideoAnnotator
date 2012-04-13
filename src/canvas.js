@@ -186,7 +186,7 @@
             // * n - the current time of the play head
             //
             calcOpacity = function(n) {
-                var val = 0;
+                var val = 0, opac = (focused === true)? 1 : 0.5;
 
                 if (n < fstart || n > fend) {
                     return 0.0;
@@ -194,13 +194,13 @@
                 if (n < start) {
                     // fading in
                     val = (1 / (start - n));
-                    val = val.toFixed(3);
+                    val = val.toFixed(1);
                 } else if (n > end) {
                     // fading out
                     val = (1 / (n - end));
-                    val = val.toFixed(3);
+                    val = val.toFixed(1);
                 } else {
-                    val = 1;
+                    val = opac;
                 }
                 return val;
             };
@@ -242,7 +242,6 @@
             // *n: current time of the video player
             //
             that.eventCurrentTimeChange = function(n) {
-				console.log('event current time change in shape');
                 that.setOpacity(calcOpacity(n));
             };
 
@@ -266,6 +265,12 @@
 					that.shape.attr({
 	                    opacity: (focused ? 1.0: 0.5) * opacity
 	                });
+					// Update the model
+					model.updateItems([{
+						id: that.id,
+						type: 'Annotation',
+						opacity: opacity
+					}]);
                 }
             };
 
@@ -687,7 +692,7 @@
             npt_end = parseFloat(app.getCurrentTime()) + 5,
             curMode = app.getCurrentMode(),
             shape;
-
+			
             // Insert into local array of ShapeTypes
             //
             shape = shapeTypes[curMode].calc(coords);
@@ -1252,11 +1257,11 @@
 
                 superUpdate = that.update;
                 that.update = function(newItem) {
-					console.log('update reached in rectangl lens');
                     // receiving the Object passed through
                     // model.updateItems in move()
                     item = newItem;
                     superUpdate(item);
+					
                     try {
                         if (item.x !== undefined && item.y !== undefined && item.w !== undefined && item.h !== undefined) {
                             c.attr({
