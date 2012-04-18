@@ -4,6 +4,7 @@
 SRC_DIR = src
 TEST_DIR = tests
 BUILD_DIR = build
+COMPILED_DOCS_DIR = ${PREFIX}/compiled_docs
 
 
 PREFIX = .
@@ -13,78 +14,99 @@ OAC_FRAMEWORK_DIR = ${PREFIX}/oacframework/oac-player-integration/js
 JS_ENGINE ?= `which node nodejs`
 COMPILER = ${JS_ENGINE} ${BUILD_DIR}/uglify.js --unsafe
 POST_COMPILER = ${JS_ENGINE} ${BUILD_DIR}/post-compile.js
-DOCCO ?= `which docco`
+DOCCO ?= `which docco-husky`
+GRUNT ?= `which grunt`
+COFFEE ?= `which coffee`
 
-BASE_FILES = ${SRC_DIR}/controllers.js \
-	${SRC_DIR}/presentations.js \
-	${SRC_DIR}/canvas.js
+BASE_FILES = ${SRC_DIR}/controllers.coffee \
+	${SRC_DIR}/presentations.coffee \
+	${SRC_DIR}/canvas.coffee
 
-MG = ${DIST_DIR}/videoanno.js
-MG_MIN = ${DIST_DIR}/videoanno.min.js
-MG_OAC = ${OAC_FRAMEWORK_DIR}/videoanno.js
+MODULES = ${SRC_DIR}/intro.coffee \
+	${BASE_FILES} \
+	${SRC_DIR}/outro.coffee
 
-MG_VER = $(shell cat version.txt)
+OAC = ${DIST_DIR}/videoanno.js
+OAC_MIN = ${DIST_DIR}/videoanno.min.js
+OAC_C = ${DIST_DIR}/videoanno.coffee
+
+
+OAC_VER = $(shell cat version.txt)
 VER = sed "s/@VERSION/${MG_VER}/"
 
 DATE=$(shell git log --pretty=format:%ad | head -1)
 
 all: core docs
 
-core: videoanno min lint test
-		@@echo "videoanno build complete"
+core: videoanno min lint
+	@@echo "videoanno build complete"
 
 test: 
 	@@echo 'compiling coffee scripts in ' ${TEST_DIR} 
 	@@coffee -o ${TEST_DIR}/js/ -c ${TEST_DIR}/*.coffee 
 
 ${DIST_DIR}:
-		@@mkdir -p ${DIST_DIR}
+	@@mkdir -p ${DIST_DIR}
 
-docs: ${MG}
-		@@${DOCCO} ${MG}
+${COMPILED_DOCS_DIR}/src:
+	@@mkdir -p ${COMPILED_DOCS_DIR}/src
 
-videoanno: ${MG}
+docs: ${MODULES} ${COMPILED_DOCS_DIR}/src README.md
+	@@${DOCCO} ${SRC_DIR}
 
-#| \
-#sed 's/.function....MITHGrid..{//' | \
-#sed 's/}..jQuery..MITHGrid.;//' > ${MG}.tmp;
+test: videoanno
+	@@if test ! -z ${GRUNT}; then \
+		echo "Testing videoanno"; \
+		${COFFEE} -c ${TEST_DIR}; \
+		${GRUNT} qunit; \
+	else \
+		echo "You must have grunt installed in order to test videoanno."; \
+	fi
 
-${MG}: ${DIST_DIR} ${SRC_DIR}/intro.js ${BASE_FILES} ${SRC_DIR}/outro.js
-		@@echo "Building" ${MG}
-		
-		@@cat ${BASE_FILES} > ${MG}.tmp
-		
-		@@cat ${SRC_DIR}/intro.js ${MG}.tmp ${SRC_DIR}/outro.js | \
-			sed 's/@DATE/'"${DATE}"'/' | \
-			${VER} > ${MG};
-		
-		@@cp ${MG} ${MG_OAC};
-		
-		@@rm -f ${MG}.tmp;
-		
+videoanno: ${OAC}
+
+${OAC_C}: ${MODULES} ${DIST_DIR}
+	@@echo "Building" ${OAC_C}
+	@@rm -f ${OAC_C}.tmp
+	@@for i in ${BASE_FILES}; do \
+		cat $$i | sed 's/^/	/' >> ${OAC_C}.tmp; \
+		echo >> ${OAC_C}.tmp; \
+		done	
+	@@cat ${SRC_DIR}/intro.coffee ${OAC_C}.tmp ${SRC_DIR}/outro.coffee | \
+		sed 's/@DATE/'"${DATE}"'/' | \
+		${VER} > ${OAC_C};
+	@@rm -f ${OAC_C}.tmp;
+
+${OAC}:	${OAC_C}
+	@@${COFFEE} -c ${OAC_C}
+
 lint: videoanno
-		@@if test ! -z ${JS_ENGINE}; then \
-				echo "Checking videoanno code against JSLint..."; \
-				${JS_ENGINE} build/jslint-check.js; \
-		else \
-				echo "You must have NodeJS installed in order to test videoanno against JSLint."; \
-		fi
+	@@if test ! -z ${JS_ENGINE}; then \
+		echo "Checking videoanno code against JSLint..."; \
+		${JS_ENGINE} build/jslint-check.js; \
+	else \
+		echo "You must have NodeJS installed in order to test videoanno against JSLint."; \
+	fi
 
-min: videoanno ${MG_MIN}
+min: videoanno ${OAC_MIN}
 
-${MG_MIN}: ${MG}
-		@@if test ! -z ${JS_ENGINE}; then \
-				echo "Minifying videoanno" ${MG_MIN}; \
-				${COMPILER} ${MG} > ${MG_MIN}.tmp; \
-				${POST_COMPILER} ${MG_MIN}.tmp > ${MG_MIN}; \
-				rm -f ${MG_MIN}.tmp; \
-		else \
-				echo "You must have NodeJS installed in order to minify OAC VideoAnnotator."; \
-		fi
+${OAC_MIN}: ${OAC}
+	@@if test ! -z ${JS_ENGINE}; then \
+		echo "Minifying videoanno" ${OAC_MIN}; \
+		${COMPILER} ${OAC} > ${OAC_MIN}.tmp; \
+		${POST_COMPILER} ${OAC_MIN}.tmp > ${OAC_MIN}; \
+		rm -f ${OAC_MIN}.tmp; \
+	else \
+		echo "You must have NodeJS installed in order to minify videoanno."; \
+	fi
 
 clean:
-		@@echo "Removing Distribution directory:" ${DIST_DIR}
-		@@rm -rf ${DIST_DIR}
+	@@echo "Removing Distribution directory:" ${DIST_DIR}
+	@@rm -rf ${DIST_DIR}
+	@@echo "Removing compiled test scripts:" ${TEST_DIR}/*.js
+	@@rm -f ${TEST_DIR}/*.js
+	@@echo "Removing compiled documentation: " ${COMPILED_DOCS_DIR}
+	@@rm -rf ${COMPILED_DOCS_DIR}
 
 distclean: clean
 

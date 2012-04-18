@@ -20,7 +20,6 @@ The following code libraries are required and are listed in the order
 in which to include them:
 
 * jQuery
-* Infusion
 * RaphaelJS
 * MITHGrid 
 

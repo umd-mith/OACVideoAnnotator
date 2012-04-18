@@ -7,103 +7,81 @@ $(document).ready ->
 		ok OAC.Client.StreamingVideo?, "OAC.Client.StreamingVideo"
 	
 	test "Check construction", ->
-		expect 37
+		expect 19
+		app = OAC.Client.StreamingVideo.initApp "#content-container",
+			playerWrapper: '#myplayer'
+			url: 'http://www.youtube.com/watch?v=HYLacuAp76U&feature=fvsr'
+			easement: 5
+
+		ok $.isFunction(app.setActiveAnnotation), "setActiveAnnotation"
+		ok $.isFunction(app.getActiveAnnotation), "getActiveAnnotation"
 		
-		# Generates an app object (OAC.Client.StreamingVideo) to be used in tests
-		# 
-		initPlugin = (raphApp) ->
-			initStreamingVideoApp = (playerObj) -> 
-				# Create Raphael canvas application controls
-				raphApp = OAC.Client.StreamingVideo.initApp "#content-container", {
-					playerWrapper: '#myplayer',
-					url: 'http://www.youtube.com/watch?v=HYLacuAp76U&feature=fvsr',
-					easement: 5
-				}
-
-				# Adding a ready wrapper function to set the playerobject
-				callback = (playerobj) ->
-					raphApp.ready ->
-						raphApp.setPlayer(playerobj)
-
-				setTimeout callback, 1
-
-				callback2 = () ->
-					raphApp.run()
-					start()
-
-				# creating Raphael canvas application
-				setTimeout callback2, 10
-				stop()
-				# Going through the getters and setters, as well as events
-				# Only making sure that: Getter returns what setter is passed, and that
-				# the event is triggered
-				
-				ok $.isFunction(raphApp.setActiveAnnotation)?, "setActiveAnnotation"
-				ok $.isFunction(raphApp.getActiveAnnotation)?, "getActiveAnnotation"
-				ok raphApp.events.onActiveAnnotationChange?, "Event set: active annotation"
-				
-				ok $.isFunction(raphApp.setCurrentTime)?, "setCurrentTime"
-				ok $.isFunction(raphApp.getCurrentTime)?, "getCurrentTime"
-				ok raphApp.events.onCurrentTimeChange?, "Event set: current time"
-
-				ok $.isFunction(raphApp.setTimeEasement)?, "setTimeEasement"
-				ok $.isFunction(raphApp.getTimeEasement)?, "getTimeEasement"
-				ok raphApp.events.onTimeEasementChange?, "Event set: time easement"
-				
-				ok $.isFunction(raphApp.setCurrentMode)?, "setCurrentMode"
-				ok $.isFunction(raphApp.getCurrentMode)?, "getCurrentMode"
-				ok raphApp.events.onCurrentModeChange?, "Event set: current mode"
-				
-				ok $.isFunction(raphApp.setPlayer)?, "setPlayer"
-				ok $.isFunction(raphApp.getPlayer)?, "getPlayer"
-				ok raphApp.events.onPlayerChange?, "Event set: player"
-				
-				# attach all event handlers
-				eveTester = ->
-					start()
-					ok true, "Event called"
-					
-					
-				eveHandler = (eve, obj) ->
-					obj.addListener(eveTester)
-				
-				$.each(raphApp.events, eveHandler)
-				
-				val = 'anno9008-9000-0112b'
-				raphApp.setActiveAnnotation(val)
-				stop()
-				ok raphApp.getActiveAnnotation = val?, "getActiveAnnotation returned correct value"
-				val = 4
-				raphApp.setCurrentTime(val)
-				stop()
-				ok raphApp.getCurrentTime = val?, "getCurrentTime returned correct value"
-				val = 2
-				raphApp.setTimeEasement(val)
-				stop()
-				ok raphApp.getTimeEasement = val?, "getTimeEasement returned correct value"
-				val = 'Watch'
-				raphApp.setCurrentMode(val)
-				stop()
-				ok raphApp.getCurrentMode = val?, "getCurrentMode returned correct value"
+		ok $.isFunction(app.setCurrentTime), "setCurrentTime"
+		ok $.isFunction(app.getCurrentTime), "getCurrenTime"
+		
+		ok $.isFunction(app.setTimeEasement), "setTimeEasement"
+		ok $.isFunction(app.getTimeEasement), "getTimeEasement"
+		ok $.isFunction(app.setCurrentMode), "setCurrentMode"
+		ok $.isFunction(app.getCurrentMode), "getCurrentMode"
+		ok $.isFunction(app.setPlayer), "setPlayer"
+		ok $.isFunction(app.getPlayer), "getPlayer"
+		
+		ok $.isFunction(app.initShapeLens), "initShapeLens"
+		ok $.isFunction(app.initTextLens), "initTextLens"
+		ok $.isFunction(app.buttonFeature), "buttonFeature"
+		ok $.isFunction(app.addShape), "addShape"
+		ok $.isFunction(app.addBody), "addBody"
+		ok $.isFunction(app.addShapeType), "addShapeType"
+		ok $.isFunction(app.insertShape), "insertShape"
+		ok $.isFunction(app.importData), "importData"
+		ok $.isFunction(app.exportData), "exportData"
+		
+	test "Check annotation management", ->
+		expect 12
+		
+		# We want to put a few annotations in
+		app = OAC.Client.StreamingVideo.initApp "#content-container",
+			playerWrapper: '#myplayer'
+			url: 'http://www.youtube.com/watch?v=HYLacuAp76U&feature=fvsr'
+			easement: 5
+		app.run();
+		
+		app.setCurrentMode 'Rectangle'
+		equal app.getCurrentMode(), 'Rectangle', "Setting mode to 'Rectangle' works"
+		
+		equal app.dataStore.canvas.items().length, 0, "Right number of items in data store"
+		
+		app.insertShape
+			x: 100
+			y: 100
+			width: 50
+			height: 50
+		
+		equal app.dataStore.canvas.items().length, 1, "Right number of items in data store"
+		equal app.dataView.currentAnnotations.items().length, 1, "Right number of items in the data view"
 			
-				raphApp.setPlayer(playerObj)
-				stop()
-				ok raphApp.getPlayer = playerObj?, "getPlayer returned correct value"
-				
-				
-				ok $.isFunction(raphApp.initShapeLens)?, "initShapeLens"
-				ok $.isFunction(raphApp.initTextLens)?, "initTextLens"
-				ok $.isFunction(raphApp.buttonFeature)?, "buttonFeature"
-				ok $.isFunction(raphApp.addShape)?, "addShape"
-				ok $.isFunction(raphApp.addBody)?, "addBody"
-				ok $.isFunction(raphApp.addShapeType)?, "addShapeType"
-				ok $.isFunction(raphApp.insertShape)?, "insertShape"
-				ok $.isFunction(raphApp.importData)?, "importData"
-				ok $.isFunction(raphApp.exportData)?, "exportData"
-				
-			# setting up listener for when a new player is created
-			OAC_Controller.on_new_player initStreamingVideoApp;
-
-		app = {}
-		# Create the app as an OAC instance to use in this module
-		initPlugin(app)
+		# move the time around
+		app.setCurrentTime(20)
+		# see which annotations are rendered
+		equal app.getCurrentTime(), 20, "Time set"
+		equal app.dataStore.canvas.items().length, 1, "Right number of items in data store"
+		equal app.dataView.currentAnnotations.items().length, 0, "Right number of items in the data view"
+		
+		
+		# move time back
+		app.setCurrentTime(0)
+		equal app.getCurrentTime(), 0, "Time set"
+		equal app.dataStore.canvas.items().length, 1, "Right number of items in data store"
+		equal app.dataView.currentAnnotations.items().length, 1, "Right number of items in the data view"
+		
+		app.setCurrentMode 'Rectangle'
+		
+		# add another annotation
+		app.insertShape
+			x:200
+			y:200
+			width:25
+			height:25
+		
+		equal app.dataStore.canvas.items().length, 2, "Right number of items in data store"
+		equal app.dataView.currentAnnotations.items().length, 2, "Right number of items in the data view"
