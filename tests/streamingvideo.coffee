@@ -85,4 +85,3 @@ $(document).ready ->
 		
 		equal app.dataStore.canvas.items().length, 2, "Right number of items in data store"
 		equal app.dataView.currentAnnotations.items().length, 2, "Right number of items in the data view"
-		

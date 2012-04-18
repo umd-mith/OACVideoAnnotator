@@ -41,6 +41,10 @@ all: core docs
 core: videoanno min lint
 	@@echo "videoanno build complete"
 
+test: 
+	@@echo 'compiling coffee scripts in ' ${TEST_DIR} 
+	@@coffee -o ${TEST_DIR}/js/ -c ${TEST_DIR}/*.coffee 
+
 ${DIST_DIR}:
 	@@mkdir -p ${DIST_DIR}
 

@@ -1,0 +1,40 @@
+info it worked if it ends with ok
+verbose cli [ 'node', '/usr/local/bin/npm', 'install', 'phantomjs' ]
+info using npm@1.1.0-3
+info using node@v0.6.9
+verbose config file /Users/grantd/.npmrc
+verbose config file /usr/local/etc/npmrc
+verbose config file /usr/local/lib/node_modules/npm/npmrc
+verbose caching /Users/grantd/node_modules/socket.io/package.json
+verbose loadDefaults socket.io@0.9.2
+verbose cache add [ 'phantomjs', null ]
+silly cache add: name, spec, args [ undefined, 'phantomjs', [ 'phantomjs', null ] ]
+verbose parsed url { pathname: 'phantomjs', path: 'phantomjs', href: 'phantomjs' }
+verbose addNamed [ 'phantomjs', '' ]
+verbose addNamed [ null, '' ]
+silly name, range, hasData [ 'phantomjs', '', false ]
+verbose raw, before any munging phantomjs
+verbose url resolving [ 'https://registry.npmjs.org/', './phantomjs' ]
+verbose url resolved https://registry.npmjs.org/phantomjs
+http GET https://registry.npmjs.org/phantomjs
+http 404 https://registry.npmjs.org/phantomjs
+silly get cb [ 404,
+silly get cb   { server: 'CouchDB/1.2.0 (Erlang OTP/R15B)',
+silly get cb     date: 'Thu, 12 Apr 2012 14:28:14 GMT',
+silly get cb     'content-type': 'application/json',
+silly get cb     'content-length': '52',
+silly get cb     'cache-control': 'must-revalidate' } ]
+ERR! 404 'phantomjs' is not in the npm registry.
+ERR! 404 You should bug the author to publish it
+ERR! 404 Note that you can also install from a
+ERR! 404 tarball, folder, or http url, or git url.
+ERR! 
+ERR! System Darwin 10.8.0
+ERR! command "node" "/usr/local/bin/npm" "install" "phantomjs"
+ERR! cwd /Users/grantd/Aptana/OACVideoAnnotator
+ERR! node -v v0.6.9
+ERR! npm -v 1.1.0-3
+ERR! code E404
+ERR! message 404 Not Found: phantomjs
+ERR! errno {}
+verbose exit [ 1, true ]
