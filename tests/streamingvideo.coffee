@@ -8,25 +8,80 @@ $(document).ready ->
 	
 	test "Check construction", ->
 		expect 19
-		ok $.isFunction(app.setActiveAnnotation)?, "setActiveAnnotation"
-		ok $.isFunction(app.getActiveAnnotation)?, "getActiveAnnotation"
+		app = OAC.Client.StreamingVideo.initApp "#content-container",
+			playerWrapper: '#myplayer'
+			url: 'http://www.youtube.com/watch?v=HYLacuAp76U&feature=fvsr'
+			easement: 5
+
+		ok $.isFunction(app.setActiveAnnotation), "setActiveAnnotation"
+		ok $.isFunction(app.getActiveAnnotation), "getActiveAnnotation"
 		
-		ok $.isFunction(app.setCurrentTime)?, "setCurrentTime"
-		ok $.isFunction(app.getCurrentTime)?, "getCurrenTime"
+		ok $.isFunction(app.setCurrentTime), "setCurrentTime"
+		ok $.isFunction(app.getCurrentTime), "getCurrenTime"
 		
-		ok $.isFunction(app.setTimeEasement)?, "setTimeEasement"
-		ok $.isFunction(app.getTimeEasement)?, "getTimeEasement"
-		ok $.isFunction(app.setCurrentMode)?, "setCurrentMode"
-		ok $.isFunction(app.getCurrentMode)?, "getCurrentMode"
-		ok $.isFunction(app.setPlayer)?, "setPlayer"
-		ok $.isFunction(app.getPlayer)?, "getPlayer"
+		ok $.isFunction(app.setTimeEasement), "setTimeEasement"
+		ok $.isFunction(app.getTimeEasement), "getTimeEasement"
+		ok $.isFunction(app.setCurrentMode), "setCurrentMode"
+		ok $.isFunction(app.getCurrentMode), "getCurrentMode"
+		ok $.isFunction(app.setPlayer), "setPlayer"
+		ok $.isFunction(app.getPlayer), "getPlayer"
 		
-		ok $.isFunction(app.initShapeLens)?, "initShapeLens"
-		ok $.isFunction(app.initTextLens)?, "initTextLens"
-		ok $.isFunction(app.buttonFeature)?, "buttonFeature"
-		ok $.isFunction(app.addShape)?, "addShape"
-		ok $.isFunction(app.addBody)?, "addBody"
-		ok $.isFunction(app.addShapeType)?, "addShapeType"
-		ok $.isFunction(app.insertShape)?, "insertShape"
-		ok $.isFunction(app.importData)?, "importData"
-		ok $.isFunction(app.exportData)?, "exportData"
+		ok $.isFunction(app.initShapeLens), "initShapeLens"
+		ok $.isFunction(app.initTextLens), "initTextLens"
+		ok $.isFunction(app.buttonFeature), "buttonFeature"
+		ok $.isFunction(app.addShape), "addShape"
+		ok $.isFunction(app.addBody), "addBody"
+		ok $.isFunction(app.addShapeType), "addShapeType"
+		ok $.isFunction(app.insertShape), "insertShape"
+		ok $.isFunction(app.importData), "importData"
+		ok $.isFunction(app.exportData), "exportData"
+		
+	test "Check annotation management", ->
+		expect 12
+		
+		# We want to put a few annotations in
+		app = OAC.Client.StreamingVideo.initApp "#content-container",
+			playerWrapper: '#myplayer'
+			url: 'http://www.youtube.com/watch?v=HYLacuAp76U&feature=fvsr'
+			easement: 5
+		
+		app.run();
+		
+		app.setCurrentMode 'Rectangle'
+		equal app.getCurrentMode(), 'Rectangle', "Setting mode to 'Rectangle' works"
+		
+		equal app.dataStore.canvas.items().length, 0, "Right number of items in data store"
+		
+		app.insertShape
+			x: 100
+			y: 100
+			width: 50
+			height: 50
+		
+		equal app.dataStore.canvas.items().length, 1, "Right number of items in data store"
+		equal app.dataView.currentAnnotations.items().length, 1, "Right number of items in the data view"
+			
+		# move the time around
+		app.setCurrentTime(20)
+		# see which annotations are rendered
+		equal app.getCurrentTime(), 20, "Time set"
+		equal app.dataStore.canvas.items().length, 1, "Right number of items in data store"
+		equal app.dataView.currentAnnotations.items().length, 0, "Right number of items in the data view"
+		
+		
+		# move time back
+		app.setCurrentTime(0)
+		equal app.getCurrentTime(), 0, "Time set"
+		equal app.dataStore.canvas.items().length, 1, "Right number of items in data store"
+		equal app.dataView.currentAnnotations.items().length, 1, "Right number of items in the data view"
+		
+		# add another annotation
+		app.insertShape
+			x:200
+			y:200
+			width:25
+			height:25
+		
+		equal app.dataStore.canvas.items().length, 2, "Right number of items in data store"
+		equal app.dataView.currentAnnotations.items().length, 2, "Right number of items in the data view"
+		

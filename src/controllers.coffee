@@ -28,7 +28,7 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
 				options = that.options
 
 				that.applyBindings = (binding, opts) ->
-					var doc = binding.locate('doc')
+					doc = binding.locate('doc')
 
 					options.application.events.onActiveAnnotationChange.addListener (id) ->
 						activeId = id
@@ -645,11 +645,12 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
 							height: attrs.height
 
 						svgBBox.hide()
-						return
+						return {
 							x: attrs.x
 							y: attrs.y
 							width: attrs.width
 							height: attrs.height
+						}
 
 	# ## TextBodyEditor
 	#

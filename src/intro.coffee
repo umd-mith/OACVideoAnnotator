@@ -28,9 +28,9 @@
 # We make sure certain globals are defined in case this library is loaded before MITHGrid,
 # jQuery, or Raphaël.
 
-MITHGrid = MITHGrid or {}
-jQuery = jQuery or {}
-Raphael = Raphael or {}
+#MITHGrid = MITHGrid or {}
+#jQuery = jQuery or {}
+#Raphael = Raphael or {}
 
 # The plugin uses the OAC.Client.StreamingVideo namespace.
 OAC = MITHGrid.globalNamespace("OAC")

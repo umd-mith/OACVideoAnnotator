@@ -1,4 +1,6 @@
 
+	#OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance
+	
 )(jQuery, MITHGrid, OAC)
 
 # # Default Configurations
@@ -13,9 +15,9 @@
 # - onShapeDrag
 # - onShapeDone
 MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.CanvasClickController",
-    bind:
-        events:
-            onClick: null
+	bind:
+		events:
+			onClick: null
 			onShapeStart: null
 			onShapeDrag: null
 			onShapeDone: null
@@ -28,11 +30,11 @@ MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.CanvasClickController",
 # - onDelete
 # - onUpdate
 MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.TextBodyEditor",
-    bind:
-        events:
-            onClick: null
-            onDelete: null
-            onUpdate: null
+	bind:
+		events:
+			onClick: null
+			onDelete: null
+			onUpdate: null
 
 # ## Controller.AnnotationEditSelectionGrid
 #
@@ -45,12 +47,12 @@ MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.TextBodyEditor",
 # - onCurrentModeChange
 MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.AnnotationEditSelectionGrid"
 	dirs: ['ul', 'top', 'ur', 'lft', 'lr', 'btm', 'll', 'rgt', 'mid']
-    bind:
+	bind:
 		events:
-	        onResize: null
-	        onMove: null
-	        onEdit: null
-	        onDelete: null
+			onResize: null
+			onMove: null
+			onEdit: null
+			onDelete: null
 			onCurrentModeChange: null
 
 # ## Controller.KeyboardListener
@@ -59,9 +61,9 @@ MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.AnnotationEditSelectionG
 #
 # - onDelete
 MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.KeyboardListener",
-    bind:
-        events:
-            onDelete: ["preventable", "unicast"]
+	bind:
+		events:
+			onDelete: ["preventable", "unicast"]
 
 # ## Controller.AnnotationCreationButton
 #
