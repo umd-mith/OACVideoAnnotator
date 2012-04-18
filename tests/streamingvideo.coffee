@@ -44,7 +44,6 @@ $(document).ready ->
 			playerWrapper: '#myplayer'
 			url: 'http://www.youtube.com/watch?v=HYLacuAp76U&feature=fvsr'
 			easement: 5
-		
 		app.run();
 		
 		app.setCurrentMode 'Rectangle'
@@ -74,6 +73,8 @@ $(document).ready ->
 		equal app.getCurrentTime(), 0, "Time set"
 		equal app.dataStore.canvas.items().length, 1, "Right number of items in data store"
 		equal app.dataView.currentAnnotations.items().length, 1, "Right number of items in the data view"
+		
+		app.setCurrentMode 'Rectangle'
 		
 		# add another annotation
 		app.insertShape
