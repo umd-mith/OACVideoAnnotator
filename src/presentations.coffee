@@ -12,7 +12,7 @@
 #
 MITHGrid.Presentation.namespace "AnnotationList", (AnnotationList) ->
 	AnnotationList.initPresentation = (args...) ->
-		MITHGrid.Presentation.initPresentation "MITHGrid.Presentation.AnnotationList", args..., (that, container) ->
+		MITHGrid.Presentation.initPresentation "MITHGrid.Presentation.AnnotationList", args..., ->
 
 # ## RaphaelCanvas
 #
