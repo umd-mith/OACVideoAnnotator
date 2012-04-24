@@ -55,25 +55,6 @@ MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.TextBodyEditor",
 			onDelete: null
 			onUpdate: null
 
-# ## Controller.AnnotationEditSelectionGrid
-#
-# Bindings created by this controller will have the following events:
-#
-# - onResize
-# - onMove
-# - onEdit
-# - onDelete
-# - onCurrentModeChange
-MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.AnnotationEditSelectionGrid"
-	dirs: ['ul', 'top', 'ur', 'lft', 'lr', 'btm', 'll', 'rgt', 'mid']
-	bind:
-		events:
-			onResize: null
-			onMove: null
-			onEdit: null
-			onDelete: null
-			onCurrentModeChange: null
-
 # ## Controller.KeyboardListener
 #
 # Bindings created by this controller will have the following events:
@@ -148,8 +129,6 @@ MITHGrid.defaults "OAC.Client.StreamingVideo",
 			type: OAC.Client.StreamingVideo.Controller.KeyboardListener
 			selectors:
 				doc: ''
-		shapeEditBox:
-			type: OAC.Client.StreamingVideo.Controller.AnnotationEditSelectionGrid
 		shapeCreateBox:
 			type: OAC.Client.StreamingVideo.Controller.ShapeCreateBox
 		canvas:

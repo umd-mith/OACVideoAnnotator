@@ -30,7 +30,6 @@ MITHGrid.Presentation.namespace "RaphaelCanvas", (RaphaelCanvas) ->
 			# Setting up local names for the assigned presentation controllers
 			canvasController = options.controllers.canvas
 			keyBoardController = options.controllers.keyboard
-			editBoxController = options.controllers.shapeEditBox
 			shapeCreateController = options.controllers.shapeCreateBox
 			windowResizeController = options.controllers.windowResize
 
@@ -56,9 +55,6 @@ MITHGrid.Presentation.namespace "RaphaelCanvas", (RaphaelCanvas) ->
 			# **FIXME:** We need to change this. If we have multiple videos on a page, this will break.
 			canvasBinding = canvasController.bind $(container),
 				closeEnough: 5
-				paper: that.canvas
-
-			editBoundingBoxBinding = editBoxController.bind $(container),
 				paper: that.canvas
 
 			shapeCreateBinding = shapeCreateController.bind $(container),
@@ -162,20 +158,20 @@ MITHGrid.Presentation.namespace "RaphaelCanvas", (RaphaelCanvas) ->
 						width: wh[0],
 						height: wh[1]
 
-			options.application.events.onCurrentTimeChange.addListener (npt) ->
+			app.events.onCurrentTimeChange.addListener (npt) ->
 				that.visitRenderings (id, rendering) ->
 					if rendering.eventCurrentTimeChange?
 						rendering.eventCurrentTimeChange npt
 
-			options.application.events.onTimeEasementChange.addListener (te) ->
+			app.events.onTimeEasementChange.addListener (te) ->
 				that.visitRenderings (id, rendering) ->
 					if rendering.eventTimeEasementChange?
 						rendering.eventTimeEasementChange te
 
-			options.application.events.onPlayerChange.addListener changeCanvasCoordinates
+			app.events.onPlayerChange.addListener changeCanvasCoordinates
 		
-			options.application.dataStore.canvas.events.onModelChange.addListener () ->
-				editBoundingBoxBinding.detachRendering()
+			#app.dataStore.canvas.events.onModelChange.addListener () ->
+			#	boundingBoxComponent.detachFromRendering()
 
 			superRender = that.render
 
