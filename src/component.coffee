@@ -10,10 +10,21 @@ OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
 
 		BoundingBox.initInstance = (args...) ->
 			MITHGrid.initInstance "OAC.Client.StreamingVideo.Component.BoundingBox", args..., (that, paper) ->
+				options = that.options
 				dragController = OAC.Client.StreamingVideo.Controller.Drag.initController {}
 				handleSet = {}
+				handles = {}
 				activeRendering = null
 				attrs = {}
+				shapeAttrs = {}
+				handleAttrs = {}
+				extents = {}
+				factors = {}
+				svgBBox = null
+				midDrag = null
+				padding = 10
+				dirs = options.dirs
+				app = options.application
 	
 				handleCalculationData =
 					ul:  ['nw', 0,  0, 0,  0]
@@ -189,7 +200,7 @@ OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
 								oy = y
 
 								# change mode
-								options.application.setCurrentMode('Drag')
+								app.setCurrentMode('Drag')
 								# extents: x, y, width, height
 								px = (8 * (ox - extents.x) / extents.width) + 4
 								py = (8 * (oy - extents.y) / extents.height) + 4

@@ -64,7 +64,8 @@ MITHGrid.Presentation.namespace "RaphaelCanvas", (RaphaelCanvas) ->
 			shapeCreateBinding = shapeCreateController.bind $(container),
 				paper: that.canvas
 			
-			boundingBoxComponent = OAC.Client.StreamingVideo.Component.BoundingBox.initInstance that.canvas
+			boundingBoxComponent = OAC.Client.StreamingVideo.Component.BoundingBox.initInstance that.canvas,
+				application: app
 
 			# **FIXME:** We need to change this. If we have multiple videos on a page, this will break.
 			windowResizeBinding = windowResizeController.bind window
@@ -197,6 +198,6 @@ MITHGrid.Presentation.namespace "RaphaelCanvas", (RaphaelCanvas) ->
 			that.eventFocusChange = (id) ->
 				if options.application.getCurrentMode() == 'Select'
 					superEventFocusChange id
-					boundingBoxComponent.attachRendering that.getFocusedRendering()
+					boundingBoxComponent.attachToRendering that.getFocusedRendering()
 
 		# End of Presentation constructors
