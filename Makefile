@@ -19,6 +19,7 @@ GRUNT ?= `which grunt`
 COFFEE ?= `which coffee`
 
 BASE_FILES = ${SRC_DIR}/controllers.coffee \
+	${SRC_DIR}/component.coffee \
 	${SRC_DIR}/presentations.coffee \
 	${SRC_DIR}/canvas.coffee
 
