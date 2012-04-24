@@ -24,6 +24,8 @@ MITHGrid.Presentation.namespace "RaphaelCanvas", (RaphaelCanvas) ->
 			id = $(container).attr('id')
 		
 			options = that.options
+			
+			app = options.application
 
 			# Setting up local names for the assigned presentation controllers
 			canvasController = options.controllers.canvas
@@ -36,17 +38,11 @@ MITHGrid.Presentation.namespace "RaphaelCanvas", (RaphaelCanvas) ->
 			x = $(container).css('x')
 			y = $(container).css('y')
 
-
 			w = $(container).width()
 			# measure the div space and make the canvas
 			# to fit
 			h = $(container).height()
-
-			# Keyboard binding attached to container to avoid multiple-keyboard events from firing
-			keyboardBinding = keyBoardController.bind $(container), {}
-
-			that.events = $.extend true, that.events, keyboardBinding.events
-
+			
 			# init RaphaelJS canvas
 			# Parameters for Raphael:
 			# * @x: value for top left corner
@@ -67,29 +63,35 @@ MITHGrid.Presentation.namespace "RaphaelCanvas", (RaphaelCanvas) ->
 
 			shapeCreateBinding = shapeCreateController.bind $(container),
 				paper: that.canvas
+			
+			boundingBoxComponent = OAC.Client.StreamingVideo.Component.BoundingBox.initInstance that.canvas
 
 			# **FIXME:** We need to change this. If we have multiple videos on a page, this will break.
 			windowResizeBinding = windowResizeController.bind window
+			# Keyboard binding attached to container to avoid multiple-keyboard events from firing
+			keyboardBinding = keyBoardController.bind $(container), {}
 
-			editBoundingBoxBinding.events.onResize.addListener (pos) ->
-				activeRendering = that.getActiveRendering()
+			that.events = $.extend true, that.events, keyboardBinding.events
+
+			boundingBoxComponent.events.onResize.addListener (pos) ->
+				activeRendering = that.getFocusedRendering()
 				if activeRendering? and activeRendering.eventResize?
 					activeRendering.eventResize(pos)
 
-			editBoundingBoxBinding.events.onMove.addListener (pos) ->
-				activeRendering = that.getActiveRendering()
+			boundingBoxComponent.events.onMove.addListener (pos) ->
+				activeRendering = that.getFocusedRendering()
 				if activeRendering? and activeRendering.eventMove?
 					activeRendering.eventMove(pos)
 
-			editBoundingBoxBinding.events.onDelete.addListener ->
-				activeRendering = that.getActiveRendering()
+			boundingBoxComponent.events.onDelete.addListener ->
+				activeRendering = that.getFocusedRendering()
 				if activeRendering? and activeRendering.eventDelete?
 					activeRendering.eventDelete()
-					editBoundingBoxBinding.detachRendering()
+					boundingBoxComponent.detachFromRendering()
 
-			options.application.events.onCurrentModeChange.addListener (newMode) ->
+			app.events.onCurrentModeChange.addListener (newMode) ->
 				if newMode not in ["Select", "Drag"]
-					editBoundingBoxBinding.detachRendering()
+					boundingBoxComponent.detachFromRendering()
 
 			# Adjusts the canvas area, canvas wrapper to fall directly over the
 			# player area
@@ -195,6 +197,6 @@ MITHGrid.Presentation.namespace "RaphaelCanvas", (RaphaelCanvas) ->
 			that.eventFocusChange = (id) ->
 				if options.application.getCurrentMode() == 'Select'
 					superEventFocusChange id
-					editBoundingBoxBinding.attachRendering that.getActiveRendering()
+					boundingBoxComponent.attachRendering that.getFocusedRendering()
 
 		# End of Presentation constructors

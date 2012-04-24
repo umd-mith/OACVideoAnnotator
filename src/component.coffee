@@ -728,7 +728,6 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
 					attrs = {}
 					padding = 10
 					shapeAttrs = {}
-					console.log "applying bindings for ShapeCreateBox"
 
 					# #### createGuide
 					#
@@ -741,7 +740,6 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
 					#
 					binding.createGuide = (coords) ->
 						# coordinates are top x,y values
-						console.log "createGuide", coords
 						attrs.x = coords[0]
 						attrs.y = coords[1]
 						attrs.width = (coords[0] + padding)
@@ -773,7 +771,6 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
 					# * coords - array of x,y coordinates to use as bottom-right coords of the box
 					#
 					binding.resizeGuide = (coords) ->
-						console.log "resizeGuide", coords
 						attrs.width = (coords[0] - attrs.x)
 						attrs.height = (coords[1] - attrs.y)
 

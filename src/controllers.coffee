@@ -234,7 +234,6 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
 					closeEnough = opts.closeEnough
 					renderings = {}
 					paper = opts.paper
-					console.log "applyBindings for CanvasClickController"
 					
 					# #### attachDragResize (private)
 					#
@@ -296,7 +295,6 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
 					# * svgEl - SVG shape element that will have mouse bindings attached to it
 					#
 					drawShape = (container) ->
-						console.log "drawShape", paper
 						#
 						# Sets mousedown, mouseup, mousemove to draw a
 						# shape on the canvas.
@@ -342,7 +340,6 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
 							binding.events.onShapeDrag.fire(bottomRight)
 
 						overlay.mouseup (e) ->
-							console.log "mouseup with mode #{mouseMode}"
 							if mouseMode < 1
 								return
 
@@ -383,7 +380,6 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
 					# **FIXME:** We shouldn't depend on the shape name being drawn - will break when a third
 					# shape is added
 					options.application.events.onCurrentModeChange.addListener (mode) ->
-						console.log "CanvasClickController mode change", mode
 						if mode in ["Rectangle", "Ellipse"]
 							drawShape binding.locate('svgwrapper')
 						else if mode == 'Select'

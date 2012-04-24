@@ -44,7 +44,7 @@ canvasId = 1
 # * playerWrapper: [Required] DOM path to the top-level element of the video player
 #
 OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (args...) ->
-	shapeTypes = {}
+	app = {}
 	shapeAnnotationId = 0
 	myCanvasId = 'OAC-Client-StreamingVideo-SVG-Canvas-' + canvasId
 	xy = []
@@ -107,6 +107,8 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 
 	MITHGrid.Application.initInstance klass, container, extendedOpts, (appOb) ->
 		app = appOb
+
+		shapeTypes = {}
 
 	
 		# ### #initShapeLens
@@ -565,8 +567,7 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 			lensF = args.lens
 			button = app.buttonFeature('Shapes', type)
 
-			shapeTypes[type] =
-				calc: calcF
+			shapeTypes[type] = args
 
 			app.addShape(type, lensF)
 
@@ -642,16 +643,16 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 			for i, o in data
 				# Singling out the Annotations from the rest of the RDF data so
 				# we can work down from just the Annotation object and its pointers
-				if NS.OA + "Annotation" in o[NS.RDF + "type"]
+				if "#{NS.OA}Annotation" in o["#{NS.RDF}type"]
 				
 					# Logic chain to determine what kind of incoming annotation we're dealing with
 					# 
 					# Only interested in annotations that match our Video URI: are 'about' the video OR
 					# that do not yet have targets
-					if o[NS.OA+"hasTarget"]?
-						for hasTarget in o[NS.OA+"hasTarget"]
-							if data[hasTarget.value]? and data[hasTarget.value][NS.OA+"hasSource"]?
-								if app.options.url in (s.value for s in data[hasTarget.value][NS.OA+"hasSource"])
+					if o["#{NS.OA}hasTarget"]?
+						for hasTarget in o["#{NS.OA}hasTarget"]
+							if data[hasTarget.value]? and data[hasTarget.value]["#{NS.OA}hasSource"]?
+								if app.options.url in (s.value for s in data[hasTarget.value]["#{NS.OA}hasSource"])
 									# Target source matches the URI of our video; generate an OAC dataStore model 
 									# to insert into canvas for this annotation series in the JSON:RDF data
 						
@@ -673,8 +674,8 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 									#
 									tuid = data[hasTarget.value]
 								
-									for hasSelector in tuid[NS.OA+"hasSelector"]
-										if data[hasSelector.value]? and NS.OAX+"CompoundSelector" in (t.value for t in data[hasSelector.value][NS.RDF+"type"])
+									for hasSelector in tuid["#{NS.OA}hasSelector"]
+										if data[hasSelector.value]? and "#{NS.OAX}CompoundSelector" in (t.value for t in data[hasSelector.value]["#{NS.RDF}type"])
 
 											suid = data[hasSelector.value]
 											svgid = data[suid.hasSelector[0].value]
@@ -716,8 +717,8 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 							npt_start: 0
 							npt_end: 0
 
-						if o[NS.OA + "hasBody"]?
-							temp.bodyContent = data[o[NS.OA+"hasBody"][0].value][NS.CNT + "chars"][0]
+						if o["#{NS.OA}hasBody"]?
+							temp.bodyContent = data[o["#{NS.OA}hasBody"][0].value]["#{NS.OA}chars"][0]
 					
 						tempstore.push temp
 			# insert into dataStore
@@ -780,24 +781,26 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 				# Unique Identifiers for pieces of Target
 			
 				# Generating target element
-				uri   id[0], NS.RDF, "type",       "#{NS.OA}ConstrainedTarget"
+				uri   id[0], NS.RDF, "type",       "#{NS.OA}SpecificResource"
 				uri   id[0], NS.OA,  "hasSource",  obj.targetURI[0]
 				bnode id[0], NS.OA,  "hasSelector", id[1]
 
 				# Selector element, which points to the SVG constraint and NPT constraint
-				uri   id[1], NS.RDF, "type",       "#{NS.OA}CompoundSelector"
+				uri   id[1], NS.RDF, "type",       "#{NS.OAX}CompositeSelector"
 				bnode id[1], NS.OA,  "hasSelector", id[2]
 				bnode id[1], NS.OA,  "hasSelector", id[3]
+				
+				if obj.shapeType?
+					svglens = shapeTypes[obj.shapeType[0]]?.renderAsSVG
 
-				# Targets have selectors, which then have svg and npt elements
-				# **FIXME:** This should be provided by the shape management info - render to SVG just as
-				# we render to the presentation
-				uri     id[2], NS.RDF, "type",              "#{NS.OAX}SVGConstraint"
-				literal id[2], NS.DC,  "format",            "text/svg+xml"
-				literal id[2], NS.CNT, "characterEncoding", "utf-8"
-				literal id[2], NS.CNT, "chars",             '<' + obj.shapeType[0].substring(0, 4).toLowerCase() +
-				                                            ' x="' + obj.x[0] + '" y="' + obj.y[0] + 
-				                                            '" width="' + obj.w[0] + '" height="' + obj.h[0] + '" />'
+				if svglens?
+					# Targets have selectors, which then have svg and npt elements
+					# **FIXME:** This should be provided by the shape management info - render to SVG just as
+					# we render to the presentation
+					uri     id[2], NS.RDF, "type",              "#{NS.OAX}SvgSelector"
+					literal id[2], NS.DC,  "format",            "text/svg+xml"
+					literal id[2], NS.CNT, "characterEncoding", "utf-8"
+					literal id[2], NS.CNT, "chars",             svglens(app.dataStore.canvas, obj.id[0])
 		
 				# This is inserted regardless of the shape type - it's a function of this being a
 				# streaming video annotation client
@@ -937,7 +940,7 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 
 				app.setCurrentTime playerobject.getPlayhead()
 				playerobject.onPlayheadUpdate (t) ->
-					app.setCurrentTime((app.getCurrentTime() + 1))
+					app.setCurrentTime( app.getCurrentTime() + 1 )
 
 				app.events.onCurrentModeChange.addListener (nmode) ->
 					if nmode != 'Watch'
@@ -993,6 +996,24 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 					y: coords.y + (coords.height / 2)
 					w: coords.width
 					h: coords.height
+					
+				#
+				# Renders the SVG <rect/> element representing the rectangle
+				#
+				# Parameters:
+				#
+				# * model - the data store or data view holding information abut the item to be rendered
+				#
+				# * itemId - the item ID of the item to be rendered
+				# 
+				renderAsSVG: (model, itemId) ->
+					item = model.getItem itemId
+					"<rect x='#{item.x[0]}' y='#{item.y[0]}' width='#{item.w[0]}' height='#{item.h[0]}' />"
+
+				rootSVGElement: "rect"
+				
+				extractFromSVG: (svg) ->
+				
 				#
 				# Renders the rectangular constraint on the video target.
 				#
@@ -1068,6 +1089,24 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 					y: coords.y + (coords.height / 2)
 					w: coords.width
 					h: coords.height
+					
+				#
+				# Renders the SVG <rect/> element representing the rectangle
+				#
+				# Parameters:
+				#
+				# * model - the data store or data view holding information abut the item to be rendered
+				#
+				# * itemId - the item ID of the item to be rendered
+				# 
+				renderAsSVG: (model, itemId) ->
+					item = model.getItem itemId
+					"<elli x='#{item.x[0]}' y='#{item.y[0]}' width='#{item.w[0]}' height='#{item.h[0]}' />"
+					
+				rootSVGElement: "elli"
+				
+				extractFromSVG: (svg) ->
+					
 				#
 				# Rendering Lens for the Ellipse SVG shape
 				#

@@ -6,6 +6,25 @@
 # # Default Configurations
 #
 
+# ## Component.BoundingBox
+#
+# Bindings created by this controller will have the following events:
+#
+# - onResize
+# - onMove
+# - onEdit
+# - onDelete
+# - onCurrentModeChange
+MITHGrid.defaults "OAC.Client.StreamingVideo.Component.BoundingBox"
+	dirs: ['ul', 'top', 'ur', 'lft', 'lr', 'btm', 'll', 'rgt', 'mid']
+	events:
+		onResize: null
+		onMove: null
+		onEdit: null
+		onDelete: null
+		onCurrentModeChange: null
+
+
 # ## Controller.CanvasClickController
 #
 # Bindings created by this controller will have the following events:
