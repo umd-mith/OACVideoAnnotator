@@ -86,7 +86,7 @@ MITHGrid.Presentation.namespace "RaphaelCanvas", (RaphaelCanvas) ->
 
 			# Adjusts the canvas area, canvas wrapper to fall directly over the
 			# player area
-			MITHGrid.events.onWindowResize.addListener ->
+			updateLocation = ->
 				# the following elements should be parts of this presentation
 				canvasEl = $('body').find('svg')
 				containerEl = $(options.playerWrapper)
@@ -108,7 +108,9 @@ MITHGrid.Presentation.namespace "RaphaelCanvas", (RaphaelCanvas) ->
 					width: w + 'px'
 					height: h + 'px'
 
-			MITHGrid.events.onWindowResize.fire()
+			MITHGrid.events.onWindowResize.addListener updateLocation
+			updateLocation()
+			
 			# to make sure we get things set up right
 			#
 			# Registering canvas special events for start, drag, stop
@@ -159,6 +161,8 @@ MITHGrid.Presentation.namespace "RaphaelCanvas", (RaphaelCanvas) ->
 						top: parseInt(xy[1], 10) + 'px'
 						width: wh[0],
 						height: wh[1]
+				
+					updateLocation()
 
 			superEventFocusChange = that.eventFocusChange
 
