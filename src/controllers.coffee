@@ -342,6 +342,7 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
 							x = pos.x
 							y = pos.y
 							topLeft = [x, y]
+							bottomRight = [x, y]
 							mouseDown = true
 							binding.events.onShapeStart.fire(topLeft)
 
@@ -360,14 +361,8 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
 								return
 
 							mouseDown = false
-							if !bottomRight?
-								bottomRight = [x + 5, y + 5]
 
-							binding.events.onShapeDone.fire
-								x: topLeft[0]
-								y: topLeft[1]
-								width: (bottomRight[0] - topLeft[0])
-								height: (bottomRight[1] - topLeft[1])
+							binding.events.onShapeDone.fire bottomRight
 							uncaptureMouse()
 							overlay.toFront()
 								

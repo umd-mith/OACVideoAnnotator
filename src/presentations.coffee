@@ -113,19 +113,18 @@ MITHGrid.Presentation.namespace "RaphaelCanvas", (RaphaelCanvas) ->
 			#
 			# Registering canvas special events for start, drag, stop
 			#
-			canvasBinding.events.onShapeStart.addListener (coords) ->
-				shapeCreateBoxComponent.createGuide(coords)
+			canvasBinding.events.onShapeStart.addListener shapeCreateBoxComponent.createGuide 
 
-			canvasBinding.events.onShapeDrag.addListener (coords) ->
-				shapeCreateBoxComponent.resizeGuide(coords)
+			canvasBinding.events.onShapeDrag.addListener shapeCreateBoxComponent.resizeGuide
 
 			canvasBinding.events.onShapeDone.addListener (coords) ->
 				#
 				# Adjust x,y in order to fit data store
 				# model
 				#
-				shape = shapeCreateBoxComponent.completeShape(coords)
-				options.application.insertShape(shape)
+				shape = shapeCreateBoxComponent.completeShape coords
+				if shape.height > 1 and shape.width > 1
+					app.insertShape shape
 
 
 			#

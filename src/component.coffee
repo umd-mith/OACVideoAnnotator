@@ -328,9 +328,31 @@ OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
 					attrs.width = (coords[0] - attrs.x)
 					attrs.height = (coords[1] - attrs.y)
 
-					svgBBox.attr
-						width: attrs.width
-						height: attrs.height
+					if attrs.width < 0
+						if attrs.height < 0
+							svgBBox.attr
+								width: -attrs.width
+								height: -attrs.height
+								x: attrs.x + attrs.width
+								y: attrs.y + attrs.height
+						else
+							svgBBox.attr
+								width: -attrs.width
+								height: attrs.height
+								x: attrs.x + attrs.width
+								y: attrs.y
+					else if attrs.height < 0
+						svgBBox.attr
+							width: attrs.width
+							height: -attrs.height
+							x: attrs.x
+							y: attrs.y + attrs.height
+					else
+						svgBBox.attr
+							width: attrs.width
+							height: attrs.height
+							x: attrs.x
+							y: attrs.y
 
 				# #### completeShape
 				#
@@ -345,14 +367,16 @@ OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
 				# Coordinates object with properties x, y, width, and height
 				#
 				that.completeShape = (coords) ->
-					attrs.width = coords.width
-					attrs.height = coords.height
-
-					svgBBox.attr
-						width: attrs.width
-						height: attrs.height
+					that.resizeGuide coords
 
 					svgBBox.hide()
+					
+					if attrs.width < 0
+						attrs.x += attrs.width
+						attrs.width = -attrs.width
+					if attrs.height < 0
+						attrs.y += attrs.height
+						attrs.height = -attrs.height
 					return {
 						x: attrs.x
 						y: attrs.y
