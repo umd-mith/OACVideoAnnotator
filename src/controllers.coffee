@@ -66,8 +66,8 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
 		# ### Drag.initController
 		#
 		Drag.initController = (args...) ->
-			MITHGrid.Controller.initController "OAC.Client.StreamingVideo.Controller.Drag", args..., (that) ->
-				that.applyBindings = (binding, opts) ->
+			MITHGrid.Controller.Raphael.initInstance "OAC.Client.StreamingVideo.Controller.Drag", args..., (that) ->
+				that.applyBindings = (binding) ->
 					el = binding.locate('raphael')
 
 					dstart = (x, y, e) ->
@@ -81,6 +81,11 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
 					
 					el.drag dmid, dstart, dend
 
+				that.removeBindings = (binding) ->
+					el = binding.locate('raphael')
+					
+					el.undrag
+					
 	# ## Select
 	#
 	# Attaches a click handler to an SVG rendering and fires an onSelect event if the rendering is clicked AND
@@ -104,7 +109,7 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
 		#				   onSelect event to fire.
 		#
 		Select.initController = (args...) ->
-			MITHGrid.Controller.initController "OAC.Client.StreamingVideo.Controller.Select", args..., (that) ->
+			MITHGrid.Controller.Raphael.initInstance "OAC.Client.StreamingVideo.Controller.Select", args..., (that) ->
 				options = that.options
 
 				that.applyBindings = (binding) ->
@@ -283,6 +288,23 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
 							overlay.unmouseup()
 							overlay.unmousemove()
 							overlay.remove()
+						if mouseCaptured?
+							MITHGrid.mouse.uncapture()
+							mouseCaptured = false
+					
+					mouseCaptured = false
+					
+					captureMouse = (handlers) ->
+						if !mouseCaptured
+							mouseCaptured = true
+							MITHGrid.mouse.capture (eType) ->
+								if handlers[eType]?
+									handlers[eType](this)
+					
+					uncaptureMouse = ->
+						if mouseCaptured
+							MITHGrid.mouse.uncapture()
+							mouseCaptured = false
 
 					# #### drawShape (private)
 					#
@@ -299,38 +321,32 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
 						# Sets mousedown, mouseup, mousemove to draw a
 						# shape on the canvas.
 						#
-						mouseMode = 0
+						mouseDown = false
+						mouseCaptured = false
 						topLeft = []
 						bottomRight = []
 						container = $(container)
 						drawOverlay()
 						offset = container.offset()
 
-						#
-						# MouseMode cycles through three settings:
-						# * 0: stasis
-						# * 1: Mousedown and ready to drag
-						# * 2: Mouse being dragged
-						#
 						# remove all previous bindings
-						#container.unbind()
 						overlay.unmousedown()
 						overlay.unmouseup()
 						overlay.unmousemove()
-						overlay.mousedown (e) ->
-							if mouseMode > 0
+						
+						mousedown = (e) ->
+							if mouseDown
 								return
 
 							pos = relativeCoords overlay.node, e
 							x = pos.x
 							y = pos.y
 							topLeft = [x, y]
-							mouseMode = 1
+							mouseDown = true
 							binding.events.onShapeStart.fire(topLeft)
 
-						overlay.mousemove (e) ->
-							
-							if mouseMode in [2, 0]
+						mousemove = (e) ->
+							if !mouseDown
 								return
 
 							pos = relativeCoords overlay.node, e
@@ -339,11 +355,11 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
 							bottomRight = [x, y]
 							binding.events.onShapeDrag.fire(bottomRight)
 
-						overlay.mouseup (e) ->
-							if mouseMode < 1
+						mouseup = (e) ->
+							if !mouseDown
 								return
 
-							mouseMode = 0
+							mouseDown = false
 							if !bottomRight?
 								bottomRight = [x + 5, y + 5]
 
@@ -352,6 +368,17 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
 								y: topLeft[1]
 								width: (bottomRight[0] - topLeft[0])
 								height: (bottomRight[1] - topLeft[1])
+							uncaptureMouse()
+							overlay.toFront()
+								
+						overlay.mousedown mousedown
+						overlay.mousemove mousemove
+						overlay.mouseup   mouseup
+						
+						captureMouse
+							mousedown: mousedown
+							mouseup: mouseup
+							mousemove: mousemove
 						
 					# #### selectShape (private)
 					#
@@ -370,6 +397,7 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
 							# By default, nullifies all selections
 							options.application.setActiveAnnotation(undefined)
 							activeId = null
+							overlay.toBack()
 						overlay.toBack()
 
 					# Attaches binding for active annotation change to attachDragResize
@@ -380,12 +408,12 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
 					# **FIXME:** We shouldn't depend on the shape name being drawn - will break when a third
 					# shape is added
 					options.application.events.onCurrentModeChange.addListener (mode) ->
+						removeOverlay()
 						if mode in ["Rectangle", "Ellipse"]
 							drawShape binding.locate('svgwrapper')
 						else if mode == 'Select'
 							selectShape binding.locate('svgwrapper')
 						else
-							removeOverlay()
 							$(binding.locate('svgwrapper')).unbind()
 
 					# #### registerRendering
@@ -538,17 +566,3 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
 							binding.currentId = id
 						else
 							$(menudiv).hide()
-
-	# ## WindowResize
-	#
-	# Emits an onResize event when the browser window is resized.
-	#
-	Controller.namespace 'WindowResize', (WindowResize) ->
-		WindowResize.initController = (args...) ->
-			MITHGrid.Controller.initController "OAC.Client.StreamingVideo.Controller.WindowResize", args..., (that) ->
-				options = that.options
-
-				that.applyBindings = (binding, opts) ->
-					w = binding.locate('resizeBox')
-					w.resize ->
-						setTimeout(binding.events.onResize.fire, 0)

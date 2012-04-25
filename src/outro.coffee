@@ -6,7 +6,7 @@
 # # Default Configurations
 #
 
-# ## Component.BoundingBox
+# ## Component.ShapeEditBox
 #
 # Bindings created by this controller will have the following events:
 #
@@ -15,7 +15,7 @@
 # - onEdit
 # - onDelete
 # - onCurrentModeChange
-MITHGrid.defaults "OAC.Client.StreamingVideo.Component.BoundingBox"
+MITHGrid.defaults "OAC.Client.StreamingVideo.Component.ShapeEditBox"
 	dirs: ['ul', 'top', 'ur', 'lft', 'lr', 'btm', 'll', 'rgt', 'mid']
 	events:
 		onResize: null
@@ -129,8 +129,6 @@ MITHGrid.defaults "OAC.Client.StreamingVideo",
 			type: OAC.Client.StreamingVideo.Controller.KeyboardListener
 			selectors:
 				doc: ''
-		shapeCreateBox:
-			type: OAC.Client.StreamingVideo.Controller.ShapeCreateBox
 		canvas:
 			type: OAC.Client.StreamingVideo.Controller.CanvasClickController
 			selectors:
@@ -162,10 +160,6 @@ MITHGrid.defaults "OAC.Client.StreamingVideo",
 			type: OAC.Client.StreamingVideo.Controller.Select
 			selectors:
 				raphael: ''
-		windowResize:
-			type: OAC.Client.StreamingVideo.Controller.WindowResize
-			selectors:
-				resizeBox: ''
 	variables:
 		# **ActiveAnnotation** holds the item ID of the annotation currently receiving selection focus.
 		#

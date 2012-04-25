@@ -30,8 +30,6 @@ MITHGrid.Presentation.namespace "RaphaelCanvas", (RaphaelCanvas) ->
 			# Setting up local names for the assigned presentation controllers
 			canvasController = options.controllers.canvas
 			keyBoardController = options.controllers.keyboard
-			shapeCreateController = options.controllers.shapeCreateBox
-			windowResizeController = options.controllers.windowResize
 
 			# x,y,w, and h coordinates are set through the CSS of the container passed in the constructor
 			x = $(container).css('x')
@@ -56,15 +54,11 @@ MITHGrid.Presentation.namespace "RaphaelCanvas", (RaphaelCanvas) ->
 			canvasBinding = canvasController.bind $(container),
 				closeEnough: 5
 				paper: that.canvas
-
-			shapeCreateBinding = shapeCreateController.bind $(container),
-				paper: that.canvas
 			
-			boundingBoxComponent = OAC.Client.StreamingVideo.Component.BoundingBox.initInstance that.canvas,
-				application: app
+			boundingBoxComponent = OAC.Client.StreamingVideo.Component.ShapeEditBox.initInstance that.canvas
+						
+			shapeCreateBoxComponent = OAC.Client.StreamingVideo.Component.ShapeCreateBox.initInstance that.canvas
 
-			# **FIXME:** We need to change this. If we have multiple videos on a page, this will break.
-			windowResizeBinding = windowResizeController.bind window
 			# Keyboard binding attached to container to avoid multiple-keyboard events from firing
 			keyboardBinding = keyBoardController.bind $(container), {}
 
@@ -92,7 +86,7 @@ MITHGrid.Presentation.namespace "RaphaelCanvas", (RaphaelCanvas) ->
 
 			# Adjusts the canvas area, canvas wrapper to fall directly over the
 			# player area
-			windowResizeBinding.events.onResize.addListener ->
+			MITHGrid.events.onWindowResize.addListener ->
 				# the following elements should be parts of this presentation
 				canvasEl = $('body').find('svg')
 				containerEl = $(options.playerWrapper)
@@ -114,23 +108,23 @@ MITHGrid.Presentation.namespace "RaphaelCanvas", (RaphaelCanvas) ->
 					width: w + 'px'
 					height: h + 'px'
 
-			windowResizeBinding.events.onResize.fire()
+			MITHGrid.events.onWindowResize.fire()
 			# to make sure we get things set up right
 			#
 			# Registering canvas special events for start, drag, stop
 			#
 			canvasBinding.events.onShapeStart.addListener (coords) ->
-				shapeCreateBinding.createGuide(coords)
+				shapeCreateBoxComponent.createGuide(coords)
 
 			canvasBinding.events.onShapeDrag.addListener (coords) ->
-				shapeCreateBinding.resizeGuide(coords)
+				shapeCreateBoxComponent.resizeGuide(coords)
 
 			canvasBinding.events.onShapeDone.addListener (coords) ->
 				#
 				# Adjust x,y in order to fit data store
 				# model
 				#
-				shape = shapeCreateBinding.completeShape(coords)
+				shape = shapeCreateBoxComponent.completeShape(coords)
 				options.application.insertShape(shape)
 
 
