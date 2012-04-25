@@ -217,7 +217,7 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 			
 				if that.shape?
 					that.shape.attr
-						opacity: (if focused then 1.0 else 0.5) * opacity
+						opacity: (if focused then 0.5 else 0.25) * opacity
 		
 			that.getOpacity = -> opacity
 			
@@ -1043,7 +1043,8 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 					that.shape = c
 					# fill and set opacity
 					c.attr
-						fill: "red"
+						fill: "silver"
+						border: "grey"
 					that.setOpacity()
 
 					# **FIXME:** may break with multiple videos if different annotations have the same ids in different
@@ -1134,7 +1135,8 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 
 					# fill shape
 					c.attr
-						fill: "red"
+						fill: "silver"
+						border: "grey"
 					that.setOpacity()
 
 					selectBinding = app.controller.selectShape.bind c
