@@ -239,40 +239,6 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
 					closeEnough = opts.closeEnough
 					renderings = {}
 					paper = opts.paper
-					
-					# #### attachDragResize (private)
-					#
-					# Find the passed rendering ID, set that rendering object
-					# as the current rendering
-					#
-					# Parameters:
-					# * id - ID of the rendering to set as active
-					#
-					attachDragResize = (id) ->
-						if curRendering? and id == curRendering.id
-							return
-
-						o = renderings[id]
-						if o?
-							curRendering = o
-						else
-							# de-activate rendering and all other listeners
-							binding.events.onClick.fire(undefined)
-							# hide the editBox
-							# editBoxController.deActivateEditBox();
-							curRendering = undefined
-
-					# #### detachDragResize (private)
-					#
-					# Make the current rendering or rendering that has matching ID *id* non-active
-					#
-					# Parameters:
-					# * id - ID of rendering to make non-active
-					#
-					detachDragResize = (id) ->
-						if curRendering? and id == curRendering.id
-							return
-						o = renderings[id]
 						
 					drawOverlay = ->
 						removeOverlay()
@@ -394,9 +360,6 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
 							activeId = null
 							overlay.toBack()
 						overlay.toBack()
-
-					# Attaches binding for active annotation change to attachDragResize
-					options.application.events.onActiveAnnotationChange.addListener attachDragResize
 					
 					# Change the mouse actions depending on what Mode the application is currently
 					# in
@@ -410,27 +373,10 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
 							selectShape binding.locate('svgwrapper')
 						else
 							$(binding.locate('svgwrapper')).unbind()
-
-					# #### registerRendering
-					#
-					# Takes a rendering object and adds it to internal array for renderings
-					#
-					# Parameters:
-					# * newRendering - Rendering object for a shape annotation
-					#
-					binding.registerRendering = (newRendering) ->
-						renderings[newRendering.id] = newRendering
-
-					# #### removeRendering
-					#
-					# Removes rendering object from internal array - for when a shape is out of view or deleted.
-					#
-					# Parameters:
-					#
-					# * oldRendering - Rendering object for a shape annotation
-					#
-					binding.removeRendering = (oldRendering) ->
-						delete renderings[oldRendering.id]
+					
+					binding.toBack = ->
+						if overlay?
+							overlay.toBack()
 
 	# ## AnnotationCreationButton
 	#

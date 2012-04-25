@@ -126,17 +126,26 @@ MITHGrid.Presentation.namespace "RaphaelCanvas", (RaphaelCanvas) ->
 				if shape.height > 1 and shape.width > 1
 					app.insertShape shape
 
+			app.events.onCurrentTimeChange.addListener (npt) ->
+				that.visitRenderings (id, rendering) ->
+					if rendering.eventCurrentTimeChange?
+						rendering.eventCurrentTimeChange npt
+
+			app.events.onTimeEasementChange.addListener (te) ->
+				that.visitRenderings (id, rendering) ->
+					if rendering.eventTimeEasementChange?
+						rendering.eventTimeEasementChange te
 
 			#
 			# Called whenever a player is set by the Application.
 			# Assumes that said player object has getcoordinates() and
 			# getsize() as valid methods that return arrays.
 			#
-			changeCanvasCoordinates = (args) ->
-				if args?
+			app.events.onPlayerChange.addListener (player) ->
+				if player?
 					# player passes args of x,y and width, height
-					xy = args.getcoordinates()
-					wh = args.getsize()
+					xy = player.getcoordinates()
+					wh = player.getsize()
 					# move container and change size
 					$(container).css
 						left: parseInt(xy[0], 10) + 'px'
@@ -151,42 +160,12 @@ MITHGrid.Presentation.namespace "RaphaelCanvas", (RaphaelCanvas) ->
 						width: wh[0],
 						height: wh[1]
 
-			app.events.onCurrentTimeChange.addListener (npt) ->
-				that.visitRenderings (id, rendering) ->
-					if rendering.eventCurrentTimeChange?
-						rendering.eventCurrentTimeChange npt
-
-			app.events.onTimeEasementChange.addListener (te) ->
-				that.visitRenderings (id, rendering) ->
-					if rendering.eventTimeEasementChange?
-						rendering.eventTimeEasementChange te
-
-			app.events.onPlayerChange.addListener changeCanvasCoordinates
-		
-			#app.dataStore.canvas.events.onModelChange.addListener () ->
-			#	boundingBoxComponent.detachFromRendering()
-
-			superRender = that.render
-
-			that.render = (c, m, i) ->
-				rendering = superRender(c, m, i)
-
-				if rendering?
-					tempStore = m
-					while tempStore.dataStore
-						tempStore = tempStore.dataStore
-
-					allAnnosModel = tempStore
-					searchAnnos = options.dataView.prepare ['!type']
-
-					canvasBinding.registerRendering rendering
-				rendering
-
 			superEventFocusChange = that.eventFocusChange
 
 			that.eventFocusChange = (id) ->
-				if options.application.getCurrentMode() == 'Select'
+				if app.getCurrentMode() == 'Select'
 					superEventFocusChange id
 					boundingBoxComponent.attachToRendering that.getFocusedRendering()
+					canvasBinding.toBack()
 
 		# End of Presentation constructors

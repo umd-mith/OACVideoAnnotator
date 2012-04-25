@@ -222,10 +222,13 @@ OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
 								that.events.onResize.fire
 									width: shapeAttrs.w,
 									height: shapeAttrs.h
+							svgBBox.toFront()
+							handleSet.toFront()
+							midDrag.toFront()
 					else
 						# show all the boxes and
 						# handles
-						svgBBox.show()
+						svgBBox.show().toFront()
 						# adjust the SvgBBox to be around new
 						# shape
 						svgBBox.attr
@@ -233,9 +236,8 @@ OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
 							y: attrs.y
 							width: attrs.width
 							height: attrs.height
-						handleSet.show()
+						handleSet.show().toFront()
 						midDrag.show().toFront()
-	
 	
 				that.show = ->
 					calcFactors()
@@ -261,7 +263,7 @@ OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
 				# (i.e. make it hidden)
 				that.detachFromRendering = () ->
 					activeRendering = null
-					that.hide()					
+					that.hide()
 
 	# ## ShapeCreateBox
 	#
