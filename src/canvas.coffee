@@ -940,7 +940,7 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 
 				app.setCurrentTime playerobject.getPlayhead()
 				playerobject.onPlayheadUpdate (t) ->
-					app.setCurrentTime( app.getCurrentTime() + 1 )
+					app.setCurrentTime( playerobject.getPlayhead() )
 
 				app.events.onCurrentModeChange.addListener (nmode) ->
 					if nmode != 'Watch'
