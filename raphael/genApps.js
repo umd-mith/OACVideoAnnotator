@@ -51,7 +51,8 @@ var initPlugin = function() {
 	};
 	
 	// setting up listener for when a new player is created
-	OAC_Controller.on_new_player(initStreamingVideoApp);
+	//OAC_Controller.on_new_player(initStreamingVideoApp);
+	OAC.Client.StreamingVideo.Player.onNewPlayer(initStreamingVideoApp);
 };
 
 $(function() {
