@@ -44,7 +44,7 @@ canvasId = 1
 # * playerWrapper: [Required] DOM path to the top-level element of the video player
 #
 OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (args...) ->
-	shapeTypes = {}
+	app = {}
 	shapeAnnotationId = 0
 	myCanvasId = 'OAC-Client-StreamingVideo-SVG-Canvas-' + canvasId
 	xy = []
@@ -108,6 +108,8 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 	MITHGrid.Application.initInstance klass, container, extendedOpts, (appOb) ->
 		app = appOb
 
+		shapeTypes = {}
+
 	
 		# ### #initShapeLens
 		#
@@ -129,6 +131,12 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 				id: itemId
 			item = model.getItem itemId
 
+			focused = false
+			start = item.npt_start[0]
+			end = item.npt_end[0]
+			fstart = start - app.getTimeEasement()
+			fend = end + app.getTimeEasement()
+			
 			# ### #calcOpacity (private)
 			#
 			# Calculate the opacity of the annotation shape rendering over the video.
@@ -138,28 +146,23 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 			# * n - the current time of the play head
 			#
 			calcOpacity = (n) ->
-				val = 0
+				val = 0.0
 
-				if n < fstart or n > fend
-					return 0.0
-				if n < start
-					# fading in
-					val = 1 / (start - n)
-					val = val.toFixed(3)
-				else if n > end
-					# fading out
-					val = 1 / (n - end)
-					val = val.toFixed(3)
-				else
-					val = 1
+				if n >= fstart and n < fend
+					e = app.getTimeEasement()
+					if e > 0
+						if n < start
+							# fading in
+							val = (e - start + n) / e
+						else if n > end
+							# fading out
+							val = (e + end - n) / e
+						else
+							val = 1.0
+					else
+						val = 1.0
 				val
-
-			start = item.npt_start[0]
-			end = item.npt_end[0]
-			fstart = start - app.getTimeEasement()
-			fend = end + app.getTimeEasement()
-		
-			opacity = calcOpacity app.getCurrentTime()
+			
 		
 
 			# ### eventTimeEasementChange (private)
@@ -178,9 +181,9 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 			that.eventTimeEasementChange = (v) ->
 				fstart = start - v
 				fend = end + v
-
+				
 				that.setOpacity calcOpacity(app.getCurrentTime())
-
+			
 			# ### eventCurrentTimeChange (private)
 			#
 			# Handles when application advances the time
@@ -191,7 +194,9 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 			#
 			that.eventCurrentTimeChange = (n) ->
 				that.setOpacity calcOpacity(n)
-
+			
+			opacity = 0.0
+		
 			# #### #setOpacity
 			#
 			# Sets the opacity for the SVG shape. This is moderated by the renderings focus. If in focus, then
@@ -209,33 +214,38 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 			that.setOpacity = (o) ->
 				if o?
 					opacity = o
-				
-				that.shape.attr
-					opacity: (focused ? 1.0: 0.5) * opacity
-
+			
+				if that.shape?
+					that.shape.attr
+						opacity: (if focused then 0.5 else 0.25) * opacity
+		
+			that.getOpacity = -> opacity
+			
+			that.setOpacity(calcOpacity app.getCurrentTime())
+			
 			# #### #eventFocus
 			#
 			# Called when this rendering receives the selection focus. The default implementation brings the rendering
 			# to the front and makes it opaque.
 			#
-			that.eventFocus = () ->
-				focused = 1
+			that.eventFocus = ->
+				focused = true
 				that.setOpacity()
 				that.shape.toFront()
 				# **FIXME:** This should be handled in the view instead of by adding/removing listeners like this
 				view.events.onDelete.addListener that.eventDelete
-
+			
 			# #### #eventUnfocus
 			#
 			# Called when this rendering loses the selection focus. The default implementation pushes the rendering
 			# to the back and makes it semi-transparent.
 			#
-			that.eventUnfocus = () ->
-				focused = 0
+			that.eventUnfocus = ->
+				focused = false
 				that.setOpacity()
 				that.shape.toBack()
 				view.events.onDelete.removeListener that.eventDelete
-
+			
 			# #### #eventDelete
 			#
 			# Called when the data item represented by this rendering is to be deleted. The default implementation
@@ -245,7 +255,7 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 			#
 			# Returns: Nothing.
 			#
-			that.eventDelete = () -> model.removeItems [itemId]
+			that.eventDelete = -> model.removeItems [itemId]
 
 
 			# #### #eventResize
@@ -264,7 +274,7 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 					w: pos.width
 					h: pos.height
 				]
-
+			
 			# #### #eventMove
 			#
 			# Called when the bounding box of the rendering is moved.
@@ -281,7 +291,7 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 					x: pos.x
 					y: pos.y
 				]
-
+			
 			# #### #update
 			#
 			# Updates the rendering's opacity based on the current time and the time extent of the annotation.
@@ -293,15 +303,15 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 					fstart = start - app.getTimeEasement()
 					fend = end + app.getTimeEasement()
 					that.setOpacity calcOpacity(app.getCurrentTime())
-
+			
 			# #### #remove
 			#
 			# Called to remove the rendering from the presentation.
 			#
 			that.remove = (item) -> that.shape.remove()
-
+			
 			that
-
+			
 		# ### #initTextLens
 		#
 		# Initializes a basic text lens.
@@ -355,14 +365,14 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 			# Called when this rendering receives the selection focus. The default implementation adds the
 			# .selected CSS class.
 			#
-			that.eventFocus = () -> itemEl.addClass 'selected'
+			that.eventFocus = -> itemEl.addClass 'selected'
 
 			# #### #eventUnfocus
 			#
 			# Called when this rendering loses the selection focus. The default implementation removes the
 			# .selected CSS class.
 			#
-			that.eventUnfocus = () -> itemEl.removeClass 'selected'
+			that.eventUnfocus = -> itemEl.removeClass 'selected'
 
 			# #### #eventUpdate
 			#
@@ -423,7 +433,7 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 			#
 			# Called to remove the rendering from the presentation.
 			#
-			that.remove = () -> $(itemEl).remove()
+			that.remove = -> $(itemEl).remove()
 
 			# #### UI events
 			#
@@ -557,8 +567,7 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 			lensF = args.lens
 			button = app.buttonFeature('Shapes', type)
 
-			shapeTypes[type] =
-				calc: calcF
+			shapeTypes[type] = args
 
 			app.addShape(type, lensF)
 
@@ -572,7 +581,9 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 		#
 		# * coords - the coordinates of the center of the shape in the .x, .y, .width, and .height properties.
 		#
-		# Returns: Nothing.
+		# Returns:
+		#
+		# The item id of the inserted annotation item.
 		#
 		# **FIXME:** We should ensure that we don't have clashing IDs. We need to use UUIDs when possible.
 		#  : Using uuid() to generate local UUIDs - not truly a UUID, but close enough for now.
@@ -599,7 +610,8 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 					npt_start: if(npt_start<0) then 0 else npt_start
 					npt_end: npt_end
 
-				app.dataStore.canvas.loadItems [$.extend(true, shapeItem, shape)]
+				app.dataStore.canvas.loadItems [t = $.extend(true, shapeItem, shape)]
+				shapeItem.id
 
 		# ### importData
 		#
@@ -615,12 +627,6 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 		# in import/export
 		#
 		OAC_NS =
-			root: 'http:#www.openannotation.org/ns/'
-			Annotation: 'http:#www.openannotation.org/ns/Annotation'
-			Body: 'http:#www.openannotation.org/ns/Body'
-			Target: 'http:#www.openannotation.org/ns/Target'
-			SpTarget: 'http:#www.openannotation.org/ns/ConstrainedTarget'
-			Selector: 'http:#www.w3.org/ns/openannotation/core/CompoundSelector'
 			FragSelector: 'http:#www.w3.org/ns/openannotation/core/FragmentSelector'
 			SVGConstraint: 'http:#www.w3.org/ns/openannotation/extensions/SvgSelector'
 	
@@ -637,16 +643,16 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 			for i, o in data
 				# Singling out the Annotations from the rest of the RDF data so
 				# we can work down from just the Annotation object and its pointers
-				if NS.OA + "Annotation" in o[NS.RDF + "type"]
+				if "#{NS.OA}Annotation" in o["#{NS.RDF}type"]
 				
 					# Logic chain to determine what kind of incoming annotation we're dealing with
 					# 
 					# Only interested in annotations that match our Video URI: are 'about' the video OR
 					# that do not yet have targets
-					if o[NS.OA+"hasTarget"]?
-						for hasTarget in o[NS.OA+"hasTarget"]
-							if data[hasTarget.value]? and data[hasTarget.value][NS.OA+"hasSource"]?
-								if app.options.url in (s.value for s in data[hasTarget.value][NS.OA+"hasSource"])
+					if o["#{NS.OA}hasTarget"]?
+						for hasTarget in o["#{NS.OA}hasTarget"]
+							if data[hasTarget.value]? and data[hasTarget.value]["#{NS.OA}hasSource"]?
+								if app.options.url in (s.value for s in data[hasTarget.value]["#{NS.OA}hasSource"])
 									# Target source matches the URI of our video; generate an OAC dataStore model 
 									# to insert into canvas for this annotation series in the JSON:RDF data
 						
@@ -668,8 +674,8 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 									#
 									tuid = data[hasTarget.value]
 								
-									for hasSelector in tuid[NS.OA+"hasSelector"]
-										if data[hasSelector.value]? and NS.OAX+"CompoundSelector" in (t.value for t in data[hasSelector.value][NS.RDF+"type"])
+									for hasSelector in tuid["#{NS.OA}hasSelector"]
+										if data[hasSelector.value]? and "#{NS.OAX}CompoundSelector" in (t.value for t in data[hasSelector.value]["#{NS.RDF}type"])
 
 											suid = data[hasSelector.value]
 											svgid = data[suid.hasSelector[0].value]
@@ -711,8 +717,8 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 							npt_start: 0
 							npt_end: 0
 
-						if o[NS.OA + "hasBody"]?
-							temp.bodyContent = data[o[NS.OA+"hasBody"][0].value][NS.CNT + "chars"][0]
+						if o["#{NS.OA}hasBody"]?
+							temp.bodyContent = data[o["#{NS.OA}hasBody"][0].value]["#{NS.OA}chars"][0]
 					
 						tempstore.push temp
 			# insert into dataStore
@@ -775,23 +781,29 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 				# Unique Identifiers for pieces of Target
 			
 				# Generating target element
-				uri   id[0], NS.RDF, "type",       "#{NS.OA}ConstrainedTarget"
+				uri   id[0], NS.RDF, "type",       "#{NS.OA}SpecificResource"
 				uri   id[0], NS.OA,  "hasSource",  obj.targetURI[0]
 				bnode id[0], NS.OA,  "hasSelector", id[1]
 
 				# Selector element, which points to the SVG constraint and NPT constraint
-				uri   id[1], NS.RDF, "type",       "#{NS.OA}CompoundSelector"
+				uri   id[1], NS.RDF, "type",       "#{NS.OAX}CompositeSelector"
 				bnode id[1], NS.OA,  "hasSelector", id[2]
 				bnode id[1], NS.OA,  "hasSelector", id[3]
+				
+				if obj.shapeType?
+					svglens = shapeTypes[obj.shapeType[0]]?.renderAsSVG
 
-				# Targets have selectors, which then have svg and npt elements
-				uri     id[2], NS.RDF, "type",              "#{NS.OAX}SVGConstraint"
-				literal id[2], NS.DC,  "format",            "text/svg+xml"
-				literal id[2], NS.CNT, "characterEncoding", "utf-8"
-				literal id[2], NS.CNT, "chars",             '<' + obj.shapeType[0].substring(0, 4).toLowerCase() +
-				                                            ' x="' + obj.x[0] + '" y="' + obj.y[0] + 
-				                                            '" width="' + obj.w[0] + '" height="' + obj.h[0] + '" />'
+				if svglens?
+					# Targets have selectors, which then have svg and npt elements
+					# **FIXME:** This should be provided by the shape management info - render to SVG just as
+					# we render to the presentation
+					uri     id[2], NS.RDF, "type",              "#{NS.OAX}SvgSelector"
+					literal id[2], NS.DC,  "format",            "text/svg+xml"
+					literal id[2], NS.CNT, "characterEncoding", "utf-8"
+					literal id[2], NS.CNT, "chars",             svglens(app.dataStore.canvas, obj.id[0])
 		
+				# This is inserted regardless of the shape type - it's a function of this being a
+				# streaming video annotation client
 				uri     id[3], NS.RDF, "type",  "#{NS.OA}FragSelector"
 				literal id[3], NS.RDF, "value", 't=npt:' + obj.npt_start[0] + ',' + obj.npt_end[0]
 
@@ -916,7 +928,7 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 				app.dataView.currentAnnotations.setKeyRange(t - 5, t + 5)
 				# Making sure that none of the button items are still active while video is playing
 				# (Can't draw a shape while video is playing - force user to re-click item)
-				app.setCurrentMode('Watch')
+				#app.setCurrentMode('Watch')
 
 			# We currently have a Player variable that handles the current player object. This may change since
 			# we intend for the annotation client to be bound to a particular video stream on the page.
@@ -928,7 +940,7 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 
 				app.setCurrentTime playerobject.getPlayhead()
 				playerobject.onPlayheadUpdate (t) ->
-					app.setCurrentTime((app.getCurrentTime() + 1))
+					app.setCurrentTime( playerobject.getPlayhead() )
 
 				app.events.onCurrentModeChange.addListener (nmode) ->
 					if nmode != 'Watch'
@@ -984,6 +996,24 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 					y: coords.y + (coords.height / 2)
 					w: coords.width
 					h: coords.height
+					
+				#
+				# Renders the SVG <rect/> element representing the rectangle
+				#
+				# Parameters:
+				#
+				# * model - the data store or data view holding information abut the item to be rendered
+				#
+				# * itemId - the item ID of the item to be rendered
+				# 
+				renderAsSVG: (model, itemId) ->
+					item = model.getItem itemId
+					"<rect x='#{item.x[0]}' y='#{item.y[0]}' width='#{item.w[0]}' height='#{item.h[0]}' />"
+
+				rootSVGElement: "rect"
+				
+				extractFromSVG: (svg) ->
+				
 				#
 				# Renders the rectangular constraint on the video target.
 				#
@@ -1013,7 +1043,8 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 					that.shape = c
 					# fill and set opacity
 					c.attr
-						fill: "red"
+						fill: "silver"
+						border: "grey"
 					that.setOpacity()
 
 					# **FIXME:** may break with multiple videos if different annotations have the same ids in different
@@ -1059,6 +1090,24 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 					y: coords.y + (coords.height / 2)
 					w: coords.width
 					h: coords.height
+					
+				#
+				# Renders the SVG <rect/> element representing the rectangle
+				#
+				# Parameters:
+				#
+				# * model - the data store or data view holding information abut the item to be rendered
+				#
+				# * itemId - the item ID of the item to be rendered
+				# 
+				renderAsSVG: (model, itemId) ->
+					item = model.getItem itemId
+					"<elli x='#{item.x[0]}' y='#{item.y[0]}' width='#{item.w[0]}' height='#{item.h[0]}' />"
+					
+				rootSVGElement: "elli"
+				
+				extractFromSVG: (svg) ->
+					
 				#
 				# Rendering Lens for the Ellipse SVG shape
 				#
@@ -1086,7 +1135,8 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 
 					# fill shape
 					c.attr
-						fill: "red"
+						fill: "silver"
+						border: "grey"
 					that.setOpacity()
 
 					selectBinding = app.controller.selectShape.bind c

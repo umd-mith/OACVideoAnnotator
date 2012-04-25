@@ -6,6 +6,25 @@
 # # Default Configurations
 #
 
+# ## Component.ShapeEditBox
+#
+# Bindings created by this controller will have the following events:
+#
+# - onResize
+# - onMove
+# - onEdit
+# - onDelete
+# - onCurrentModeChange
+MITHGrid.defaults "OAC.Client.StreamingVideo.Component.ShapeEditBox"
+	dirs: ['ul', 'top', 'ur', 'lft', 'lr', 'btm', 'll', 'rgt', 'mid']
+	events:
+		onResize: null
+		onMove: null
+		onEdit: null
+		onDelete: null
+		onCurrentModeChange: null
+
+
 # ## Controller.CanvasClickController
 #
 # Bindings created by this controller will have the following events:
@@ -35,25 +54,6 @@ MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.TextBodyEditor",
 			onClick: null
 			onDelete: null
 			onUpdate: null
-
-# ## Controller.AnnotationEditSelectionGrid
-#
-# Bindings created by this controller will have the following events:
-#
-# - onResize
-# - onMove
-# - onEdit
-# - onDelete
-# - onCurrentModeChange
-MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.AnnotationEditSelectionGrid"
-	dirs: ['ul', 'top', 'ur', 'lft', 'lr', 'btm', 'll', 'rgt', 'mid']
-	bind:
-		events:
-			onResize: null
-			onMove: null
-			onEdit: null
-			onDelete: null
-			onCurrentModeChange: null
 
 # ## Controller.KeyboardListener
 #
@@ -129,10 +129,6 @@ MITHGrid.defaults "OAC.Client.StreamingVideo",
 			type: OAC.Client.StreamingVideo.Controller.KeyboardListener
 			selectors:
 				doc: ''
-		shapeEditBox:
-			type: OAC.Client.StreamingVideo.Controller.AnnotationEditSelectionGrid
-		shapeCreateBox:
-			type: OAC.Client.StreamingVideo.Controller.ShapeCreateBox
 		canvas:
 			type: OAC.Client.StreamingVideo.Controller.CanvasClickController
 			selectors:
@@ -164,10 +160,6 @@ MITHGrid.defaults "OAC.Client.StreamingVideo",
 			type: OAC.Client.StreamingVideo.Controller.Select
 			selectors:
 				raphael: ''
-		windowResize:
-			type: OAC.Client.StreamingVideo.Controller.WindowResize
-			selectors:
-				resizeBox: ''
 	variables:
 		# **ActiveAnnotation** holds the item ID of the annotation currently receiving selection focus.
 		#
