@@ -944,7 +944,6 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 			# specific to the video being annotated, so it doesn't make as much sense to change the video we're
 			# annotating. Better to create a new applicaiton instance.
 			app.events.onPlayerChange.addListener (playerobject) ->
-
 				app.setCurrentTime playerobject.getPlayhead()
 				playerobject.onPlayheadUpdate (t) ->
 					app.setCurrentTime( playerobject.getPlayhead() )

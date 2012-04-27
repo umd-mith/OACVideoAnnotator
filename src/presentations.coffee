@@ -89,24 +89,28 @@ MITHGrid.Presentation.namespace "RaphaelCanvas", (RaphaelCanvas) ->
 			updateLocation = ->
 				# the following elements should be parts of this presentation
 				canvasEl = $('body').find('svg')
-				containerEl = $(options.playerWrapper)
+				#containerEl = $(options.playerWrapper)
 				htmlWrapper = $(container)
-				x = parseInt($(containerEl).offset().left, 10)
-				y = parseInt($(containerEl).offset().top, 10)
-				w = parseInt($(containerEl).width(), 10)
-				h = parseInt($(containerEl).height(), 10)
+				playerObj = app.getPlayer()
+				if playerObj?
+					[x, y] = playerObj.getcoordinates()
+					[w, h] = playerObj.getsize()
+					#x = parseInt($(containerEl).offset().left, 10)
+					#y = parseInt($(containerEl).offset().top, 10)
+					#w = parseInt($(containerEl).width(), 10)
+					#h = parseInt($(containerEl).height(), 10)
 
-				$(canvasEl).css
-					left: x + 'px'
-					top: y + 'px'
-					width: w + 'px'
-					height: h + 'px'
+					$(canvasEl).css
+						left: x + 'px'
+						top: y + 'px'
+						width: w + 'px'
+						height: h + 'px'
 
-				$(htmlWrapper).css
-					left: x + 'px'
-					top: y + 'px'
-					width: w + 'px'
-					height: h + 'px'
+					$(htmlWrapper).css
+						left: x + 'px'
+						top: y + 'px'
+						width: w + 'px'
+						height: h + 'px'
 
 			MITHGrid.events.onWindowResize.addListener updateLocation
 			updateLocation()
@@ -145,24 +149,25 @@ MITHGrid.Presentation.namespace "RaphaelCanvas", (RaphaelCanvas) ->
 			#
 			app.events.onPlayerChange.addListener (player) ->
 				if player?
+					updateLocation()
 					# player passes args of x,y and width, height
-					xy = player.getcoordinates()
-					wh = player.getsize()
+					#xy = player.getcoordinates()
+					#wh = player.getsize()
 					# move container and change size
-					$(container).css
-						left: parseInt(xy[0], 10) + 'px'
-						top: parseInt(xy[1], 10) + 'px'
-						width: wh[0]
-						height: wh[1]
+					#$(container).css
+					#	left: parseInt(xy[0], 10) + 'px'
+					#	top: parseInt(xy[1], 10) + 'px'
+					#	width: wh[0]
+					#	height: wh[1]
 
 					# Move canvas SVG to this location
-					$('svg').css
-						left: parseInt(xy[0], 10) + 'px'
-						top: parseInt(xy[1], 10) + 'px'
-						width: wh[0],
-						height: wh[1]
+					#$('svg').css
+					#	left: parseInt(xy[0], 10) + 'px'
+					#	top: parseInt(xy[1], 10) + 'px'
+					#	width: wh[0],
+					#	height: wh[1]
 				
-					updateLocation()
+					#updateLocation()
 
 			superEventFocusChange = that.eventFocusChange
 

@@ -21,6 +21,7 @@ COFFEE ?= `which coffee`
 BASE_FILES = ${SRC_DIR}/controllers.coffee \
 	${SRC_DIR}/driver-framework.coffee \
 	${SRC_DIR}/drivers/dummy.coffee \
+	${SRC_DIR}/drivers/html5.coffee \
 	${SRC_DIR}/component.coffee \
 	${SRC_DIR}/presentations.coffee \
 	${SRC_DIR}/canvas.coffee
