@@ -623,89 +623,96 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 		# * data - Object housing the data for application
 		#
 	
-		# **FIXME:** May want to tease this out as a configurable option or as a global
-		#
-		# For now, putting namespaces of Annotations, bodies, targets, contraints here in order to be used
-		# in import/export
-		#
-		OAC_NS =
-			FragSelector: 'http:#www.w3.org/ns/openannotation/core/FragmentSelector'
-			SVGConstraint: 'http:#www.w3.org/ns/openannotation/extensions/SvgSelector'
-	
 		NS = 
 			OA: "http://www.w3.org/ns/openannotation/core"
 			OAX: "http://www.w3.org/ns/openannotation/extensions"
 			RDF: "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 			CNT: "http://www.w3.org/2008/content#"
 			DC: "http://purl.org/dc/elements/1.1/"
+		
+		parseNPT = (npt) ->
+			if npt.indexOf(':') == -1
+				seconds = parseFloat npt
+				minutes = 0
+				hours = 0
+			else
+				bits = ((parseFloat b) for b in npt.split(':'))
+				seconds = bits.pop()
+				if bits.length > 0
+					minutes = bits.pop()
+				else
+					minutes = 0
+				if bits.length > 0
+					hours = bits.pop()
+				else
+					hours = 0
+			(hours * 60 + minutes) * 60 + seconds
 		 
 		app.importData = (data) ->
 			# ingest data and put it into dataStore
 			tempstore = []
-			for i, o in data
+			for i, o of data
 				# Singling out the Annotations from the rest of the RDF data so
 				# we can work down from just the Annotation object and its pointers
-				if "#{NS.OA}Annotation" in o["#{NS.RDF}type"]
-				
+				if "#{NS.OA}Annotation" in (t.value for t in o["#{NS.RDF}type"])
+					temp = 
+						id: i
+						type: "Annotation"
+						bodyContent: ''
+						bodyType: 'Text'
+						targetURI: app.options.url
 					# Logic chain to determine what kind of incoming annotation we're dealing with
 					# 
 					# Only interested in annotations that match our Video URI: are 'about' the video OR
 					# that do not yet have targets
+					if o["#{NS.OA}hasBody"]? and o["#{NS.OA}hasBody"][0]? and data[o["#{NS.OA}hasBody"][0].value]?
+						temp.bodyContent = data[o["#{NS.OA}hasBody"][0].value]["#{NS.CNT}chars"][0].value
 					if o["#{NS.OA}hasTarget"]?
-						for hasTarget in o["#{NS.OA}hasTarget"]
-							if data[hasTarget.value]? and data[hasTarget.value]["#{NS.OA}hasSource"]?
-								if app.options.url in (s.value for s in data[hasTarget.value]["#{NS.OA}hasSource"])
+						for hasTarget in (v.value for v in o["#{NS.OA}hasTarget"])
+							if data[hasTarget]? and data[hasTarget]["#{NS.OA}hasSource"]?
+								refd = (app.options.url in (s.value for s in data[hasTarget]["#{NS.OA}hasSource"]))
+								if refd
 									# Target source matches the URI of our video; generate an OAC dataStore model 
 									# to insert into canvas for this annotation series in the JSON:RDF data
 						
 									# Unique ID comes from the URI value of type
-									temp = 
-										id: i
-										type: "Annotation"
-										bodyContent: ''
-										bodyType: 'Text'
-										targetURI: app.options.url
-										shapeType: ''
-										npt_start: 0
-										npt_end: 0
 
 									#
-									# Check to see if target is a CompoundSelection Resource
+									# Check to see if target is a CompositeSelector Resource
 									# Right now, we don't care about things that are not Compound Resources made
 									# up of a time fragment and an SVG Constraint
-									#
-									tuid = data[hasTarget.value]
-								
-									for hasSelector in tuid["#{NS.OA}hasSelector"]
-										if data[hasSelector.value]? and "#{NS.OAX}CompoundSelector" in (t.value for t in data[hasSelector.value]["#{NS.RDF}type"])
-
-											suid = data[hasSelector.value]
-											svgid = data[suid.hasSelector[0].value]
-
-											# Fill in blanks for SVG
-											# **FIXME:** This needs to parse the chars using the XML parser, not the DOM node creator
-											temp.shapeType = $(svgid.chars[0].value)[0].nodeName
-											# correct shape-type nodeName to full name for DataStore
-											if temp.shapeType == 'RECT'
-												temp.shapeType = 'Rectangle'
-											else if temp.shapeType == 'ELLI'
-												temp.shapeType = 'Ellipse'
-											
-											temp.x = parseInt $(svgid.chars[0].value).attr('x'),10
-											temp.y = parseInt $(svgid.chars[0].value).attr('y'),10
-											temp.w = parseInt $(svgid.chars[0].value).attr('width'),10
-											temp.h = parseInt $(svgid.chars[0].value).attr('height'),10
-
-											# Fill in blanks for the NPT constraint
-											nptid = data[suid.hasSelector[1].value]
-											npt = nptid.value[0].value.replace(/^t=npt:/g, '')
-											temp.npt_start = parseInt npt.replace(/\,[0-9]+/g, ''),10
-											temp.npt_end = parseInt npt.replace(/^[0-9]+\,/g, ''),10
-
-											# Fill in blanks for body
-											temp.bodyContent = data[o.hasBody[0].value].chars[0].value or ''
-											tempstore.push temp
-
+									#								
+									for hasSelector in (v.value for v in data[hasTarget]["#{NS.OA}hasSelector"])
+										refd = ("#{NS.OAX}CompositeSelector" in (t.value for t in data[hasSelector]["#{NS.RDF}type"]))
+										if data[hasSelector]? and refd
+											for hasSubSelector in (v.value for v in data[hasSelector]["#{NS.OA}hasSelector"])
+												if data[hasSubSelector]?
+													types = (t.value for t in data[hasSubSelector]["#{NS.RDF}type"])
+													if "#{NS.OAX}SvgSelector" in types
+														# extract SVG stuff
+														if data[hasSubSelector]["#{NS.CNT}chars"]? and data[hasSubSelector]["#{NS.CNT}chars"][0]?
+															svg = data[hasSubSelector]["#{NS.CNT}chars"][0].value
+															dom = $.parseXML svg
+															# based on the root element, we interogate the shape info to see
+															# which one wants to handle extracting the extents/etc. from the svg
+															if dom?
+																doc = dom.documentElement
+																rootName = doc.nodeName
+																for t, info of shapeTypes
+																	if info.extractFromSVG? and rootName in info.rootSVGElement
+																		shapeInfo = info.extractFromSVG doc
+																		if shapeInfo?
+																			$.extend(temp, shapeInfo)
+																			temp.shapeType = t
+															
+													if "#{NS.OA}FragSelector" in types
+														# extract media fragment stuff
+														if data[hasSubSelector]["#{NS.RDF}value"]? and data[hasSubSelector]["#{NS.RDF}value"][0]?
+															fragment = data[hasSubSelector]["#{NS.RDF}value"][0].value
+															fragment = fragment.replace(/^t=npt:/, '')
+															bits = fragment.split(',')
+															temp.npt_start = parseNPT bits[0]
+															temp.npt_end   = parseNPT bits[1]	
 					else
 						#  No Target is created yet - create blank item to insert into dataStore
 						# Unique ID comes from the URI value of type
@@ -718,10 +725,8 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 							shapeType: ''
 							npt_start: 0
 							npt_end: 0
-
-						if o["#{NS.OA}hasBody"]?
-							temp.bodyContent = data[o["#{NS.OA}hasBody"][0].value]["#{NS.OA}chars"][0]
 					
+					if temp.npt_start? or temp.npt_end? or temp.shapeType?
 						tempstore.push temp
 			# insert into dataStore
 			app.dataStore.canvas.loadItems tempstore
@@ -1012,9 +1017,15 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 					item = model.getItem itemId
 					"<rect x='#{item.x[0]}' y='#{item.y[0]}' width='#{item.w[0]}' height='#{item.h[0]}' />"
 
-				rootSVGElement: "rect"
+				rootSVGElement: ["rect"]
 				
 				extractFromSVG: (svg) ->
+					info = {}
+					info.w = parseFloat svg.getAttribute('width')
+					info.h = parseFloat svg.getAttribute('height')
+					info.x = parseFloat svg.getAttribute('x')
+					info.y = parseFloat svg.getAttribute('y')
+					info
 				
 				#
 				# Renders the rectangular constraint on the video target.
@@ -1106,10 +1117,15 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 					item = model.getItem itemId
 					"<elli x='#{item.x[0]}' y='#{item.y[0]}' width='#{item.w[0]}' height='#{item.h[0]}' />"
 					
-				rootSVGElement: "elli"
+				rootSVGElement: ["elli"]
 				
 				extractFromSVG: (svg) ->
-					
+					info = {}
+					info.w = parseFloat svg.getAttribute('width')
+					info.h = parseFloat svg.getAttribute('height')
+					info.x = parseFloat svg.getAttribute('x')
+					info.y = parseFloat svg.getAttribute('y')
+					info
 				#
 				# Rendering Lens for the Ellipse SVG shape
 				#
