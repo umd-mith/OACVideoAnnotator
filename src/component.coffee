@@ -27,16 +27,48 @@ OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
 				dirs = options.dirs
 	
 				handleCalculationData =
-					ul:  ['nw', 0, -1, 0, -1]
-					top: ['n',  1,  0, 0, -1]
-					ur:  ['ne', 2, -1, 0, -1]
-					rgt: ['e',  2, -1, 1,  0]
-					lr:  ['se', 2, -1, 2, -1]
-					btm: ['s',  1,  0, 2, -1]
-					ll:  ['sw', 0, -1, 2, -1]
-					lft: ['w',  0, -1, 1,  0]
-					mid: ['pointer', 1, 0, 1, 0]
+					ul:  ['nw', 0, 0]
+					top: ['n',  1, 0]
+					ur:  ['ne', 2, 0]
+					rgt: ['e',  2, 1]
+					lr:  ['se', 2, 2]
+					btm: ['s',  1, 2]
+					ll:  ['sw', 0, 2]
+					lft: ['w',  0, 1]
+					mid: ['pointer', 1, 1]
 
+				calcXYHeightWidth = (args) ->
+					brx = args.brx
+					tlx = args.tlx
+					bry = args.bry
+					tly = args.tly
+					if factors.x == 0 and factors.y == 0
+						tlx += args.dx
+						brx += args.dx
+						tly += args.dy
+						bry += args.dy
+					else 
+						if factors.x < 0
+							tlx += args.dx
+						else if factors.x > 0
+							brx += args.dx
+						if factors.y < 0
+							tly += args.dy
+						else if factors.y > 0
+							bry += args.dy
+					if brx > tlx
+						args.x = tlx
+					else
+						args.x = brx
+					if bry > tly
+						args.y = tly
+					else
+						args.y = bry
+				
+					args.width = Math.abs(brx - tlx)
+					args.height = Math.abs(bry - tly)
+					args
+					
 				#
 				# Goes through handle object array and
 				# sets each handle box coordinate
@@ -44,14 +76,16 @@ OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
 				calcHandles = (args) ->
 					# calculate where the resize handles
 					# will be located
-					calcHandle = (type, xn, xp, yn, yp) ->
-						x: args.x + xn * args.width / 2 + xp * padding / 2
-						y: args.y + yn * args.height / 2 + yp * padding / 2
+					calcXYHeightWidth args
+					
+					calcHandle = (type, xn, yn) ->
+						x: args.x + xn * args.width / 2 - padding / 2
+						y: args.y + yn * args.height / 2 - padding / 2
 						cursor: if type.length > 2 then type else type + "-resize"
 
-					recalcHandle = (info, xn, xp, yn, yp) ->
-						info.x = args.x + xn * args.width / 2 + xp * padding / 2
-						info.y = args.y + yn * args.height / 2 + yp * padding / 2
+					recalcHandle = (info, xn, yn) ->
+						info.x = args.x + xn * args.width / 2 - padding / 2
+						info.y = args.y + yn * args.height / 2 - padding / 2
 						info.el.attr
 							x: info.x
 							y: info.y
@@ -60,9 +94,9 @@ OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
 						data = handleCalculationData[o]
 						if data?
 							if handles[o]?
-								recalcHandle(handles[o], data[1], data[2], data[3], data[4])
+								recalcHandle(handles[o], data[1], data[2])
 							else
-								handles[o] = calcHandle(data[0], data[1], data[2], data[3], data[4])
+								handles[o] = calcHandle(data[0], data[1], data[2])
 				
 				# ##### calcFactors (private)
 				#
@@ -79,10 +113,13 @@ OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
 					# calculate width - height to be larger
 					# than shape
 					attrs =
-						width: extents.width
-						height: extents.height
-					attrs.x = (extents.x) - (attrs.width / 2)
-					attrs.y = (extents.y) - (attrs.height / 2)
+						tlx: (extents.x) - (extents.width / 2)
+						tly: (extents.y) - (extents.height / 2)
+						brx: (extents.x) + (extents.width / 2)
+						bry: (extents.y) + (extents.height / 2)
+						dx: 0
+						dy: 0
+						
 					calcHandles attrs
 	
 				# #### drawHandles (private)
@@ -123,6 +160,7 @@ OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
 								cursor: 'move'
 
 						# drawing bounding box
+						calcXYHeightWidth attrs
 						svgBBox = paper.rect(attrs.x, attrs.y, attrs.width, attrs.height)
 						svgBBox.attr
 							stroke: '#333333'
@@ -137,34 +175,29 @@ OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
 								# dragging means that the svgBBox stays padding-distance
 								# away from the lens' shape and the lens shape gets updated
 								# in dataStore
-								handleAttrs.nx = attrs.x + dx
-								handleAttrs.ny = attrs.y + dy
-								shapeAttrs.x = extents.x + dx
-								shapeAttrs.y = extents.y + dy
+								attrs.dx = dx
+								attrs.dy = dy
 
-								svgBBox.attr
-									x: handleAttrs.nx
-									y: handleAttrs.ny
-
-								calcHandles
-									x: handleAttrs.nx
-									y: handleAttrs.ny
-									width: attrs.width
-									height: attrs.height
+								calcHandles attrs
 				
+								svgBBox.attr
+									x: attrs.x
+									y: attrs.y
+
 							midDragDragBinding.events.onFocus.addListener (x, y) ->
 									# start
-									ox = x
-									oy = y
+									factors.x = 0
+									factors.y = 0
 									calcFactors()
 									activeRendering.shape.attr
 										cursor: 'move'
 				
 							midDragDragBinding.events.onUnfocus.addListener ->
 									# end
+									calcXYHeightWidth attrs
 									that.events.onMove.fire
-										x: shapeAttrs.x
-										y: shapeAttrs.y
+										x: attrs.x + attrs.width/2
+										y: attrs.y + attrs.height/2
 
 						# Attaching drag and resize handlers
 						handleSet.forEach (handle) ->
@@ -173,55 +206,51 @@ OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
 							handleBinding.events.onUpdate.addListener (dx, dy) ->
 								# onmove function - handles dragging
 								# dragging here means that the shape is being resized;
-								# the factorial determines in which direction the
+								# the factor determines in which direction the
 								# shape is pulled
-								shapeAttrs.w = Math.abs(extents.width + dx * factors.x)
-								shapeAttrs.h = Math.abs(extents.height + dy * factors.y)
-								handleAttrs.nw = shapeAttrs.w
-								handleAttrs.nh = shapeAttrs.h
-								handleAttrs.nx = (extents.x - (padding / 4)) - (handleAttrs.nw / 2)
-								handleAttrs.ny = (extents.y - (padding / 4)) - (handleAttrs.nh / 2)
-
+								attrs.dx = dx
+								attrs.dy = dy
+								
+								calcHandles attrs
+								
 								svgBBox.attr
-									x: handleAttrs.nx
-									y: handleAttrs.ny
-									width: handleAttrs.nw
-									height: handleAttrs.nh
-								calcHandles
-									x: handleAttrs.nx
-									y: handleAttrs.ny
-									width: handleAttrs.nw
-									height: handleAttrs.nh
+									x: attrs.x
+									y: attrs.y
+									width: attrs.width
+									height: attrs.height
+
 				
 							handleBinding.events.onFocus.addListener (x, y) ->
 								# onstart function
 								extents = activeRendering.getExtents()
-								ox = x
-								oy = y
 
 								# extents: x, y, width, height
-								px = (8 * (ox - extents.x) / extents.width) + 4
-								py = (8 * (oy - extents.y) / extents.height) + 4
+								px = (8 * (x - extents.x) / extents.width) + 4
+								py = (8 * (y - extents.y) / extents.height) + 4
 								if px < 3
-									factors.x = -2
+									factors.x = -1
 								else if px < 5
 									factors.x = 0
 								else
-									factors.x = 2
+									factors.x = 1
 								if py < 3
-									factors.y = -2
+									factors.y = -1
 								else if py < 5
 									factors.y = 0
 								else
-									factors.y = 2
+									factors.y = 1
 								calcFactors()
 				
 							handleBinding.events.onUnfocus.addListener ->
 								# onend function
 								# update
+								calcXYHeightWidth attrs
+								
 								that.events.onResize.fire
-									width: shapeAttrs.w,
-									height: shapeAttrs.h
+									x: attrs.x + attrs.width/2
+									y: attrs.y + attrs.height/2
+									width: attrs.width
+									height: attrs.height
 							svgBBox.toFront()
 							handleSet.toFront()
 							midDrag.toFront()

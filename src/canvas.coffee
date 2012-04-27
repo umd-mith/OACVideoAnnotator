@@ -271,6 +271,8 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 			that.eventResize = (pos) ->
 				model.updateItems [
 					id: itemId
+					x: pos.x
+					y: pos.y
 					w: pos.width
 					h: pos.height
 				]
