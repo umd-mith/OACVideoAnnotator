@@ -26,6 +26,12 @@ initHTML5PlayerDrv = ->
 	
 	driver.bindPlayer = (domObj) ->
 		OAC.Client.StreamingVideo.Player.DriverBinding.initInstance (that) ->
+			$(domObj).bind 'loadedmetadata', ->
+				that.events.onResize.fire that.getsize()
+			
+			$(domObj).bind 'timeupdate', ->
+				that.events.onPlayheadUpdate.fire domObj.currentTime
+
 			#
 		    # Function: onplayheadupdate
 		    #	Customizable callback to set a function that is going to be called on each second.
@@ -56,8 +62,8 @@ initHTML5PlayerDrv = ->
 			#
 			that.getsize = -> 
 				[
-					$(domObj).width()
-					$(domObj).height()
+					$(domObj).width() - 2
+					$(domObj).height() - 2
 				]
 	
 			#

@@ -86,12 +86,14 @@ MITHGrid.Presentation.namespace "RaphaelCanvas", (RaphaelCanvas) ->
 
 			# Adjusts the canvas area, canvas wrapper to fall directly over the
 			# player area
+			playerObj = app.getPlayer()
+			
 			updateLocation = ->
 				# the following elements should be parts of this presentation
 				canvasEl = $('body').find('svg')
 				#containerEl = $(options.playerWrapper)
 				htmlWrapper = $(container)
-				playerObj = app.getPlayer()
+				#playerObj = app.getPlayer()
 				if playerObj?
 					[x, y] = playerObj.getcoordinates()
 					[w, h] = playerObj.getsize()
@@ -113,6 +115,10 @@ MITHGrid.Presentation.namespace "RaphaelCanvas", (RaphaelCanvas) ->
 						height: h + 'px'
 
 			MITHGrid.events.onWindowResize.addListener updateLocation
+			
+			if playerObj?
+				playerObj.events.onResize.addListener updateLocation
+			
 			updateLocation()
 			
 			# to make sure we get things set up right
@@ -147,9 +153,9 @@ MITHGrid.Presentation.namespace "RaphaelCanvas", (RaphaelCanvas) ->
 			# Assumes that said player object has getcoordinates() and
 			# getsize() as valid methods that return arrays.
 			#
-			app.events.onPlayerChange.addListener (player) ->
-				if player?
-					updateLocation()
+			#app.events.onPlayerChange.addListener (player) ->
+			#	if player?
+			#		updateLocation()
 					# player passes args of x,y and width, height
 					#xy = player.getcoordinates()
 					#wh = player.getsize()

@@ -11,22 +11,17 @@ var initPlugin = function() {
 	
 	initStreamingVideoApp = function(playerobj) {
 		// Create Raphael canvas application controls
-		raphApp = OAC.Client.StreamingVideo.initApp("#content-container", {
-			playerWrapper: '#myplayer',
-			url: 'http://www.youtube.com/watch?v=HYLacuAp76U&feature=fvsr',
-			easement: 5
-		});
 		
 		// Adding a ready wrapper function to set the playerobject
-		setTimeout(function() {
-			raphApp.ready(function() {
-				raphApp.setPlayer(playerobj);
-			});
-		}, 1);
+		raphApp = OAC.Client.StreamingVideo.initApp("#content-container", {
+			player: playerobj,
+			playerWrapper: '#myplayer',
+			url: 'http://html5demos.com/assets/dizzy',
+			easement: 5
+		});
 
 	
 		// creating Raphael canvas application
-		setTimeout(function() {
 			raphApp.run();
 	
 			// Creating handler for the export area 
@@ -47,7 +42,6 @@ var initPlugin = function() {
 					raphApp.importData(JSON.parse(data));
 				}
 			});
-		}, 10);
 	};
 	
 	// setting up listener for when a new player is created

@@ -107,9 +107,16 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 
 	MITHGrid.Application.initInstance klass, container, extendedOpts, (appOb) ->
 		app = appOb
-
 		shapeTypes = {}
+		
+		
+		options = app.options
 
+		# We isolate the player object through a closure so it won't change on us.
+		# We expect one application instance per player.
+		playerObj = options.player
+
+		app.getPlayer = -> playerObj
 	
 		# ### #initShapeLens
 		#
@@ -933,6 +940,7 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 			# of the current time.
 			app.events.onCurrentTimeChange.addListener (t) ->
 				app.dataView.currentAnnotations.setKeyRange(t - 5, t + 5)
+				playerObj.setPlayhead t
 				# Making sure that none of the button items are still active while video is playing
 				# (Can't draw a shape while video is playing - force user to re-click item)
 				#app.setCurrentMode('Watch')
@@ -943,16 +951,14 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 			# **TODO:** This may be better done as an option when the app object is initialized. Annotations are
 			# specific to the video being annotated, so it doesn't make as much sense to change the video we're
 			# annotating. Better to create a new applicaiton instance.
-			app.events.onPlayerChange.addListener (playerobject) ->
-				app.setCurrentTime playerobject.getPlayhead()
-				playerobject.onPlayheadUpdate (t) ->
-					app.setCurrentTime( playerobject.getPlayhead() )
+			app.setCurrentTime playerObj.getPlayhead()
+			playerObj.events.onPlayheadUpdate.addListener app.setCurrentTime
 
-				app.events.onCurrentModeChange.addListener (nmode) ->
-					if nmode != 'Watch'
-						playerobject.pause()
-					else if nmode == 'Watch'
-						playerobject.play()
+			app.events.onCurrentModeChange.addListener (nmode) ->
+				if nmode != 'Watch'
+					playerObj.pause()
+				else if nmode == 'Watch'
+					playerObj.play()
 
 		# We want to populate the available shapes with the rectangle and ellipse. These are considered stock
 		# shapes for annotations.

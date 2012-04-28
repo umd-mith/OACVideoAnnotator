@@ -6,6 +6,11 @@
 # # Default Configurations
 #
 
+MITHGrid.defaults "OAC.Client.StreamingVideo.Player.DriverBinding",
+	events:
+		onResize: null
+		onPlayheadUpdate: null
+
 # ## Component.ShapeEditBox
 #
 # Bindings created by this controller will have the following events:
@@ -15,7 +20,7 @@
 # - onEdit
 # - onDelete
 # - onCurrentModeChange
-MITHGrid.defaults "OAC.Client.StreamingVideo.Component.ShapeEditBox"
+MITHGrid.defaults "OAC.Client.StreamingVideo.Component.ShapeEditBox",
 	dirs: ['ul', 'top', 'ur', 'lft', 'lr', 'btm', 'll', 'rgt', 'mid']
 	events:
 		onResize: null
@@ -201,8 +206,8 @@ MITHGrid.defaults "OAC.Client.StreamingVideo",
 		# - setPlayer(player) sets the current video player driver instance
 		# - getPlayer() returns the current video player driver instance
 		# - events.onPlayerChange fires when the Player value changes
-		Player:
-			is: 'rw'
+		#Player:
+		#	is: 'rw'
 
 	dataViews:
 		# **currentAnnotations** pages a range of times through the annotation store selecting those
