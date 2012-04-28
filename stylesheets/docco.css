@@ -41,7 +41,8 @@ h1, h2, h3, h4, h5, h6 {
   position: fixed;
   font-size: 18px;
   left: 50px;
-  background-color: white;      
+  background-color: white;   
+  display: none;   
 }
   #projectname a {
     text-decoration: none;
