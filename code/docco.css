@@ -282,3 +282,54 @@ body .vg { color: #19469D }                     /* Name.Variable.Global */
 body .vi { color: #19469D }                     /* Name.Variable.Instance */
 body .il { color: #666666 }                     /* Literal.Number.Integer.Long */
 
+#top {
+	background-color: black;
+	margin-bottom: 1em;
+	padding-bottom: 2em;
+	padding-left: 0.5em;
+}
+
+#bottom {
+	clear: both;
+	background-color: black;
+	margin-top: 1em;
+	padding-top: 1em;
+	padding-left: 1em;
+	padding-right: 1em;
+	color: #aaa;
+	font-weight: bolder;
+	text-align: right;
+	padding-bottom: 1em;
+}
+
+#bottom p {
+	padding: 0px;
+	margin: 0px;
+}
+
+#bottom p a {
+	font-weight: bolder;
+	
+}
+
+#title {
+	text-shadow: 0 0 3px #222;
+	font-weight: bold;
+	width: 860px;
+	margin: 0 auto;
+}
+
+#title h1, #description {
+	padding: 0.5em 0 0;
+	margin: 0;
+	color: #aaa;
+}
+
+#title h1 {
+	font-size: 48px;
+}
+
+#description {
+	font-size: 14px;
+	font-style: italic;
+}
