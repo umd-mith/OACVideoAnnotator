@@ -1,7 +1,8 @@
 @import url(https://fonts.googleapis.com/css?family=Lato:300italic,700italic,300,700);
 
 body {
-  padding:50px;
+  padding-left:50px;
+  padding-right: 50px;
   font:14px/1.5 Lato, "Helvetica Neue", Helvetica, Arial, sans-serif;
   color:#777;
   font-weight:300;
@@ -98,10 +99,10 @@ img {
 header {
   width:270px;
   float:left;
-  position:fixed;
+  /* position:fixed; */
 }
 
-header ul {
+ul.downloads {
   list-style:none;
   height:40px;
   
@@ -121,14 +122,14 @@ header ul {
   width:270px;
 }
 
-header li {
+ul.downloads li {
   width:89px;
   float:left;
   border-right:1px solid #d2d2d2;
   height:40px;
 }
 
-header ul a {
+ul.downloads a {
   line-height:1;
   font-size:11px;
   color:#999;
@@ -143,17 +144,17 @@ strong {
   font-weight:700;
 }
 
-header ul li + li {
+ul.downloads li + li {
   width:88px;
   border-left:1px solid #fff;
 }
 
-header ul li + li + li {
+ul.downloads li + li + li {
   border-right:none;
   width:89px;
 }
 
-header ul a strong {
+ul.downloads a strong {
   font-size:14px;
   display:block;
   color:#222;
@@ -171,7 +172,7 @@ small {
 
 hr {
   border:0;
-  background:#e5e5e5;
+  background:#aaa;
   height:1px;
   margin:0 0 20px;
 }
@@ -179,13 +180,50 @@ hr {
 footer {
   width:270px;
   float:left;
-  position:fixed;
+  /* position:fixed; */
   bottom:50px;
+}
+
+#top {
+	background-color: black;
+	margin-bottom: 1em;
+	padding-bottom: 2em;
+	padding-left: 0.5em;
+}
+
+#bottom {
+	clear: both;
+	background-color: black;
+	margin-top: 1em;
+	padding-top: 2em;
+	padding-left: 0.5em;
+}
+
+#title {
+	text-shadow: 0 0 3px #222;
+	font-weight: bold;
+	width: 860px;
+	margin: 0 auto;
+}
+
+#title h1, #description {
+	padding: 0.5em 0 0;
+	margin: 0;
+	color: #aaa;
+}
+
+#title h1 {
+	font-size: 48px;
+}
+
+#description {
+	font-size: 14px;
+	font-style: italic;
 }
 
 @media print, screen and (max-width: 960px) {
   
-  div.wrapper {
+  div.wrapper, #title, #bottom {
     width:auto;
     margin:0;
   }
@@ -211,10 +249,10 @@ footer {
     display:inline;
   }
   
-  header ul {
+  ul.downloads {
     position:absolute;
-    right:50px;
-    top:52px;
+    right:75px;
+    top:30px;
   }
 }
 
@@ -227,12 +265,8 @@ footer {
     padding:0;
   }
   
-  header ul, header p.view {
+  ul.downloads, header p.view {
     position:static;
-  }
-  
-  pre, code {
-    word-wrap:normal;
   }
 }
 
@@ -241,7 +275,7 @@ footer {
     padding:15px;
   }
   
-  header ul {
+  ul.downloads {
     display:none;
   }
 }
