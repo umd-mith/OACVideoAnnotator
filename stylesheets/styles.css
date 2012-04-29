@@ -46,6 +46,10 @@ a small {
   display:block;
 }
 
+a.user-mention {
+  font-weight: bolder;
+}
+
 .wrapper {
   padding-left:50px;
   padding-right: 50px;
