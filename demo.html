@@ -1,0 +1,39 @@
+---
+layout: demo
+title: Demo
+---
+<video preload="metadata" controls data-oac-target="http://html5demos.com/assets/dizzy">
+    <!-- TODO: use a different video that we host or have in our github repo -->
+    <source src="http://html5demos.com/assets/dizzy.mp4" type="video/mp4" />
+    <source src="http://html5demos.com/assets/dizzy.webm" type="video/webm" />
+    <source src="http://html5demos.com/assets/dizzy.ogv" type="video/ogv" />
+</video>
+
+<div class="export-data">
+    <textarea id="export-text" cols="80" rows="10"></textarea>
+    <button id="export-button"></button>
+    <button id="import-button"></button>
+</div>
+
+<script type="text/javascript">//<!--
+  $(document).ready(function() {
+    OAC.Client.StreamingVideo.Player.onNewPlayer(function(playerobj) {
+      var app = OAC.Client.StreamingVideo.initInstance({
+        player: playerobj
+      });
+      app.run();
+    });
+
+    $("#export-button").click(function() {
+      var data = app.exportData();
+      $("#export-text").val(JSON.stringify(data));
+    });
+
+    $("#import-button").click(function() {
+      var str = $("#export-text").val();
+      if(str != "") {
+        app.importData(JSON.parse(str));
+      }
+    });
+  });
+// --></script>
