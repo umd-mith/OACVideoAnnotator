@@ -98,7 +98,7 @@ img {
   max-width:100%;
 }
 
-header, section#contributors {
+header, section#meta {
   width:270px;
   float:left;
   /* position:fixed; */
@@ -162,7 +162,7 @@ ul.downloads a strong {
   color:#222;
 }
 
-section#contributors ul {
+section#meta ul {
 	list-style: none;
 	padding: 0px;
 }
@@ -170,7 +170,7 @@ section#contributors ul {
 section {
   width:500px;
   float:right;
-  padding-bottom:50px;
+  /* padding-bottom:50px; */
 }
 
 small {
@@ -250,13 +250,13 @@ footer {
     margin:0;
   }
   
-  header, section, footer, section#contributors {
+  header, section, footer, section#meta {
     float:none;
     position:static;
     width:auto;
   }
   
-  header, section#contributors {
+  header, section#meta {
     padding-right:320px;
   }
   
@@ -283,7 +283,7 @@ footer {
     word-wrap:break-word;
   }
   
-  header, section#contributors {
+  header, section#meta {
     padding:0;
   }
   
