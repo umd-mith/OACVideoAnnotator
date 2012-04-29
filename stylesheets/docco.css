@@ -337,6 +337,7 @@ body .il { color: #666666 }                     /* Literal.Number.Integer.Long *
 
 #title h1 {
 	font-size: 48px;
+	line-height: 1.1;
 }
 
 #description {
