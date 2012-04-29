@@ -164,6 +164,7 @@ ul.downloads a strong {
 
 section#contributors ul {
 	list-style: none;
+	padding: 0px;
 }
 
 section {
