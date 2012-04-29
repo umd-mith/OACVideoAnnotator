@@ -314,6 +314,7 @@ body .il { color: #666666 }                     /* Literal.Number.Integer.Long *
 #bottom p a {
 	font-weight: bolder;
 	color: #39c;
+	text-decoration: none;
 }
 
 #title {
