@@ -162,6 +162,10 @@ ul.downloads a strong {
   color:#222;
 }
 
+section#contributors ul {
+	list-style: none;
+}
+
 section {
   width:500px;
   float:right;
