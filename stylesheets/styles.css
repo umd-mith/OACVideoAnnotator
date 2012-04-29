@@ -98,7 +98,7 @@ img {
   max-width:100%;
 }
 
-header {
+header, section#contributors {
   width:270px;
   float:left;
   /* position:fixed; */
@@ -245,19 +245,19 @@ footer {
     margin:0;
   }
   
-  header, section, footer {
+  header, section, footer, section#contributors {
     float:none;
     position:static;
     width:auto;
   }
   
-  header {
+  header, section#contributors {
     padding-right:320px;
   }
   
   section {
-    border:1px solid #e5e5e5;
-    border-width:1px 0;
+    /* border:1px solid #e5e5e5;
+    border-width:1px 0; */
     padding:20px 0;
     margin:0 0 20px;
   }
@@ -278,7 +278,7 @@ footer {
     word-wrap:break-word;
   }
   
-  header {
+  header, section#contributors {
     padding:0;
   }
   
@@ -289,7 +289,7 @@ footer {
 
 @media print, screen and (max-width: 480px) {
   body {
-    padding:15px;
+    /* padding:15px; */
   }
   
   ul.downloads {
