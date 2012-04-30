@@ -5,6 +5,14 @@ title: Events
 Video Annotator uses events to notify components of changes in data or application state. For example, the video driver will fire
 events notifying components about the progress of the video as it plays, allowing annotations to be brought in and out of view.
 
+Each event object has two methods: `#addListener`, to add a callback function that is called when the event fires, 
+and `#fire`, to fire the event. See [the MITHgrid documentation on events for more details](/mithgrid/docs/events/).
+
+In the following list of events, the top-level heading is the namespace holding the initInstance function that creates an object
+of that type. Each instance will have the listed events as properties of the instance's `events` property. For example, if
+`app` is an instance of `OAC.Client.StreamingVideo`, then you would use `app.events.onActiveAnnotationChange.addListener(...)`
+to add a function that gets called when the active annotation changes for the `app` application instance.
+
 ## OAC.Client.StreamingVideo
 
 ### Events
@@ -83,6 +91,8 @@ events notifying components about the progress of the video as it plays, allowin
 #### onNewPlayer
 
 ## OAC.Client.StreamingVideo.Player.DriverBinding
+
+Each binding of a video player driver to a video player has the following events.
 
 ### Events
 
