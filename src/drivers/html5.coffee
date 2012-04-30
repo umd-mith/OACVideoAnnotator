@@ -55,7 +55,13 @@ initHTML5PlayerDrv = ->
 					$(domObj).width() - 2
 					$(domObj).height() - 2
 				]
-	
+			
+			#
+			# Function: getTargetURI
+			#
+			# Returns the targetURI that should be used in an OAC annotation.
+			#
+			that.getTargetURI = -> $(domObj).data('oatarget')
 			#
 		    # Function: play
 		    #	Plays video.

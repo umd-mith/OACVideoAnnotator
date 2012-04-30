@@ -104,12 +104,14 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 		app = appOb
 		shapeTypes = {}
 		
-		
 		options = app.options
+		
 
 		# We isolate the player object through a closure so it won't change on us.
 		# We expect one application instance per player.
 		playerObj = options.player
+		
+		options.url = options.url or playerObj.getTargetURI()
 
 		app.getPlayer = -> playerObj
 	

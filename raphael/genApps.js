@@ -11,14 +11,13 @@ $(function() {
 		
 		// Adding a ready wrapper function to set the playerobject
 		var raphApp = OAC.Client.StreamingVideo.initApp({
-			player: playerobj,
-			url: 'http://html5demos.com/assets/dizzy'
+			player: playerobj//,
+			//url: 'http://html5demos.com/assets/dizzy'
 		});
 
 	
 		// creating Raphael canvas application
 		raphApp.run();
-		console.log(raphApp);
 		
 		// have a plain HTML presentation of annotation bodies
         var annotations = MITHGrid.Presentation.initPresentation('#annotation-list', {
