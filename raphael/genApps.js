@@ -29,6 +29,33 @@ $(function() {
 	        return raphApp.initTextLens(container, view, model, itemId) 
 	    });
 		raphApp.events.onActiveAnnotationChange.addListener(annotations.eventFocusChange);
+		
+		//rectButton = app.buttonFeature 'buttongrouping', 'Shapes', 'Rectangle'
+
+		//ellipseButton = app.buttonFeature 'buttongrouping', 'Shapes', 'Ellipse'
+
+		//selectButton = app.buttonFeature 'buttongrouping', 'General', 'Select'
+
+		//watchButton = app.buttonFeature 'buttongrouping', 'General', 'Watch'
+		
+		// create mode buttons
+		OAC.Client.StreamingVideo.Component.AnnotationCreationButton.initInstance("#modeRectangle", {
+			mode: "Rectangle",
+			application: raphApp
+		});
+		OAC.Client.StreamingVideo.Component.AnnotationCreationButton.initInstance("#modeEllipse", {
+			mode: "Ellipse",
+			application: raphApp
+		});
+		OAC.Client.StreamingVideo.Component.AnnotationCreationButton.initInstance("#modeSelect", {
+			mode: "Select",
+			application: raphApp
+		});
+		OAC.Client.StreamingVideo.Component.AnnotationCreationButton.initInstance("#modeWatch", {
+			mode: "Watch",
+			application: raphApp
+		});
+		
 		// Creating handler for the export area 
 		// 
 		// May need to bring this into the application? 

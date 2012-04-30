@@ -150,10 +150,10 @@ MITHGrid.defaults "OAC.Client.StreamingVideo",
 				textarea: '.editArea > textarea'
 				updatebutton: '.button.update'
 				deletebutton: '.button.delete'
-		buttonActive:
-			type: OAC.Client.StreamingVideo.Controller.AnnotationCreationButton
-			selectors:
-				button: ''
+		#buttonActive:
+		#	type: OAC.Client.StreamingVideo.Controller.AnnotationCreationButton
+		#	selectors:
+		#		button: ''
 		timecontrol:
 			type: OAC.Client.StreamingVideo.Controller.timeControl
 			selectors:

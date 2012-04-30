@@ -476,7 +476,7 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 		# of the event to fire when button is clicked
 		#
 		app.buttonFeature = (area, grouping, action) ->
-
+			return
 			# Check to make sure button isn't already present
 			# **FIXME:** make sure the id is unique in the page since we can have multiple instances of the
 			# annotation client (one per video)
@@ -1163,13 +1163,13 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 
 			# Adding in button features for annotation creation
 			# These will be taken care of elsewhere
-			rectButton = app.buttonFeature 'buttongrouping', 'Shapes', 'Rectangle'
+			#rectButton = app.buttonFeature 'buttongrouping', 'Shapes', 'Rectangle'
 
-			ellipseButton = app.buttonFeature 'buttongrouping', 'Shapes', 'Ellipse'
+			#ellipseButton = app.buttonFeature 'buttongrouping', 'Shapes', 'Ellipse'
 
-			selectButton = app.buttonFeature 'buttongrouping', 'General', 'Select'
+			#selectButton = app.buttonFeature 'buttongrouping', 'General', 'Select'
 
-			watchButton = app.buttonFeature 'buttongrouping', 'General', 'Watch'
+			#watchButton = app.buttonFeature 'buttongrouping', 'General', 'Watch'
 
 			app.setCurrentTime 0
 

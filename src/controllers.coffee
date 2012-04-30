@@ -379,56 +379,6 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
 						if overlay?
 							overlay.toBack()
 
-	# ## AnnotationCreationButton
-	#
-	# Controls the Annotation Creation Tools set by app.buttonFeature
-	#
-	Controller.namespace 'AnnotationCreationButton', (AnnotationCreationButton) ->
-		AnnotationCreationButton.initController = (args...) ->
-			MITHGrid.Controller.initController "OAC.Client.StreamingVideo.Controller.AnnotationCreationButton", args..., (that) ->
-				options = that.options
-
-				# #### AnnotationCreationButton #applyBindings
-				that.applyBindings = (binding, opts) ->
-					active = false
-
-					#
-					# Mousedown: activate button - set as active mode
-					#
-					# Mousedown #2: de-activate button - unset active mode
-					#
-					# onCurrentModeChange: if != id passed, deactivate, else do nothing
-					#
-					buttonEl = binding.locate('button')
-
-					# Attach binding to the mousedown
-					$(buttonEl).live 'mousedown', (e) ->
-						if active == false
-							active = true
-							options.application.setCurrentMode(opts.action)
-							$(buttonEl).addClass("active")
-						else if active == true
-							active = false
-							options.application.setCurrentMode('')
-							$(buttonEl).removeClass("active")
-
-					# #### onCurrentModeChangeHandle (private)
-					#
-					# Handles when the mode is changed externally from controller
-					#
-					# Parameters:
-					# * action - name of new mode
-					#
-					onCurrentModeChangeHandle = (action) ->
-						if action == options.action
-							active = true
-							$(buttonEl).addClass('active')
-						else
-							active = false
-							$(buttonEl).removeClass("active")
-
-					options.application.events.onCurrentModeChange.addListener onCurrentModeChangeHandle
-
 	# ## sliderButton
 	#
 	# Creates a jQuery UI slider for the current time in the video

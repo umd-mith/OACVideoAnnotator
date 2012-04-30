@@ -2,6 +2,52 @@
 #
 OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
 
+	# ## AnnotationCreationButton
+	#
+	# Controls the Annotation Creation Tools set by app.buttonFeature
+	#
+	Component.namespace 'AnnotationCreationButton', (AnnotationCreationButton) ->
+		AnnotationCreationButton.initInstance = (args...) ->
+			MITHGrid.Controller.initController "OAC.Client.StreamingVideo.Component.AnnotationCreationButton", args..., (that, buttonEl) ->
+				options = that.options
+
+				# #### AnnotationCreationButton #applyBindings
+				active = false
+
+				#
+				# Mousedown: activate button - set as active mode
+				#
+				# Mousedown #2: de-activate button - unset active mode
+				#
+				# onCurrentModeChange: if != id passed, deactivate, else do nothing
+				#
+				
+				# Attach binding to the mousedown
+				$(buttonEl).mousedown (e) ->
+					if active == false
+						active = true
+						options.application.setCurrentMode(options.mode)
+						$(buttonEl).addClass("active")
+					else if active == true
+						active = false
+						options.application.setCurrentMode(undefined)
+						$(buttonEl).removeClass("active")
+
+				# #### onCurrentModeChangeHandle (private)
+				#
+				# Handles when the mode is changed externally from controller
+				#
+				# Parameters:
+				# * action - name of new mode
+				#
+				options.application.events.onCurrentModeChange.addListener (action) ->
+					if action == options.mode
+						active = true
+						$(buttonEl).addClass('active')
+					else
+						active = false
+						$(buttonEl).removeClass("active")
+
 # ## BoundingBox
 #
 # Creates and manages a SVG bounding box with resize handles and center drag handle.
