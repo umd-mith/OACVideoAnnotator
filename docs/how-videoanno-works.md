@@ -1,4 +1,4 @@
 ---
 layout: docs
-Title: How Video Annotator Works
+title: How Video Annotator Works
 ---
