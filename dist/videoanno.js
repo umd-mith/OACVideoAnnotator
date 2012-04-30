@@ -253,14 +253,12 @@
                 }
               };
               drawShape = function(container) {
-                var bottomRight, mouseDown, mousedown, mousemove, mouseup, offset, topLeft;
+                var bottomRight, mouseDown, mousedown, mousemove, mouseup, topLeft;
                 mouseDown = false;
                 mouseCaptured = false;
                 topLeft = [];
                 bottomRight = [];
-                container = $(container);
                 drawOverlay();
-                offset = container.offset();
                 overlay.unmousedown();
                 overlay.unmouseup();
                 overlay.unmousemove();
@@ -1028,17 +1026,13 @@
         var args, _ref;
         args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
         return (_ref = MITHGrid.Presentation).initPresentation.apply(_ref, ["MITHGrid.Presentation.RaphaelCanvas"].concat(__slice.call(args), [function(that, container) {
-          var app, boundingBoxComponent, canvasBinding, canvasController, h, id, keyBoardController, keyboardBinding, options, playerObj, shapeCreateBoxComponent, superEventFocusChange, updateLocation, w, x, y;
+          var app, boundingBoxComponent, canvasBinding, canvasController, id, keyBoardController, keyboardBinding, options, playerObj, shapeCreateBoxComponent, superEventFocusChange, updateLocation;
           id = $(container).attr('id');
           options = that.options;
           app = options.application;
           canvasController = options.controllers.canvas;
           keyBoardController = options.controllers.keyboard;
-          x = $(container).css('x');
-          y = $(container).css('y');
-          w = $(container).width();
-          h = $(container).height();
-          that.canvas = new Raphael($(container), w, h);
+          that.canvas = new Raphael($(container), 10, 10);
           canvasBinding = canvasController.bind($(container), {
             closeEnough: 5,
             paper: that.canvas
@@ -1076,9 +1070,8 @@
           });
           playerObj = app.getPlayer();
           updateLocation = function() {
-            var canvasEl, htmlWrapper, _ref, _ref2;
+            var canvasEl, h, w, x, y, _ref, _ref2;
             canvasEl = $('body').find('svg');
-            htmlWrapper = $(container);
             if (playerObj != null) {
               _ref = playerObj.getCoordinates(), x = _ref[0], y = _ref[1];
               _ref2 = playerObj.getSize(), w = _ref2[0], h = _ref2[1];
@@ -1088,12 +1081,7 @@
                 width: w + 'px',
                 height: h + 'px'
               });
-              return $(htmlWrapper).css({
-                left: x + 'px',
-                top: y + 'px',
-                width: w + 'px',
-                height: h + 'px'
-              });
+              return that.canvas.setSize(w, h);
             }
           };
           MITHGrid.events.onWindowResize.addListener(updateLocation);
