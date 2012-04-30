@@ -72,16 +72,6 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 		#		 We'll put together a demo page that does have all of the parts working together.
 		viewSetup: """
 			<div id="#{myCanvasId}" class="section-canvas"></div>
-			<div class="mithgrid-bottomarea">
-				<div class="timeselect">
-					<p>Enter start time:</p>
-					<input id="timestart" type="text" />
-					<p>Enter end time:</p>
-					<input id="timeend" type="text" />
-					<div id="submittime" class="button">Confirm time settings</div>
-				</div>
-				<div id="sidebar#{myCanvasId}" class="section-controls"></div>
-			</div>
 		"""
 		# We make the isActive() function available to the keyboard controller to let it know if
 		# the keyboard should be considered active.
@@ -459,75 +449,6 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 
 			that
 
-		# ### app.buttonFeature
-		#
-		# Creates an HTML div that acts as a button
-		#
-		# **FIXME: Tease this out from the rest of the application and work on better parameters
-		#
-		# Parameters:
-		#
-		# * area - Classname of the div where the button should go; so far, this can be either 'buttongrouping', where all
-		#  general buttons go, or 'slidergrouping', where a jQuery UI slider can be placed
-		#
-		# * grouping - Name to be given to the inner div inside the area div
-		#
-		# * action - Name to be given to the ID of the clickable HTML button and the name
-		# of the event to fire when button is clicked
-		#
-		app.buttonFeature = (area, grouping, action) ->
-			return
-			# Check to make sure button isn't already present
-			# **FIXME:** make sure the id is unique in the page since we can have multiple instances of the
-			# annotation client (one per video)
-			if $('#' + action + myCanvasId).length != 0
-				return false # Abort
-
-			that = {}
-			buttons = $(".button")
-			container = $("#sidebar" + myCanvasId)
-
-			switch area
-				when 'buttongrouping'
-					#
-					# Set the group element where this button should go in. If no group
-					#element is yet created, create that group element with name *grouping*
-					#
-					if $(container).find('#' + grouping + myCanvasId).length == 0
-						$(container).append('<div id="' + grouping + myCanvasId + '" class="buttongrouping"></div>')
-
-					groupEl = $("#" + grouping + myCanvasId)
-
-					#
-					# generate HTML for button, then attach the callback. action
-					# refers to ID and also the title of the button
-					#
-					item = '<div id="' + action + myCanvasId + '" class="button">' + action + '</div>'
-
-					$(groupEl).append(item)
-
-					that.element = $("#" + action + myCanvasId)
-
-					buttonBinding = app.controller.buttonActive.bind that.element,
-						action: action
-				when 'slidergrouping'
-					if $(container).find('#' + grouping + myCanvasId).length == 0
-						$(container).append('<div id="' + grouping + myCanvasId + '" class="slidergrouping"></div>')
-
-					groupEl = $("#" + grouping + myCanvasId)
-
-					#
-					# HTML for slider button
-					#
-					item = '<div id="' + action + myCanvasId + '"><div class="header">' + action + myCanvasId + '</div>' +
-					'<div id="slider"></div><div class="timedisplay"></div></div>'
-					$(groupEl).append(item)
-					that.element = $("#" + action + myCanvasId)
-
-					buttonBinding = app.controller.slider.bind that.element,
-						action: action
-			that
-
 		# ### #addShape
 		#
 		# Adds a shape lens to the SVG overlay presentation.
@@ -571,7 +492,6 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 		app.addShapeType = (type, args) ->
 			calcF = args.calc
 			lensF = args.lens
-			button = app.buttonFeature('Shapes', type)
 
 			shapeTypes[type] = args
 
@@ -1160,16 +1080,6 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 						height: (c.attr("ry") * 2)
 
 					that
-
-			# Adding in button features for annotation creation
-			# These will be taken care of elsewhere
-			#rectButton = app.buttonFeature 'buttongrouping', 'Shapes', 'Rectangle'
-
-			#ellipseButton = app.buttonFeature 'buttongrouping', 'Shapes', 'Ellipse'
-
-			#selectButton = app.buttonFeature 'buttongrouping', 'General', 'Select'
-
-			#watchButton = app.buttonFeature 'buttongrouping', 'General', 'Watch'
 
 			app.setCurrentTime 0
 

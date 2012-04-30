@@ -292,9 +292,7 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
 						mouseCaptured = false
 						topLeft = []
 						bottomRight = []
-						container = $(container)
 						drawOverlay()
-						offset = container.offset()
 
 						# remove all previous bindings
 						overlay.unmousedown()

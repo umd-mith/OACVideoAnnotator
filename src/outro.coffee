@@ -75,7 +75,7 @@ MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.KeyboardListener",
 # Bindings created by this controller will have the following events:
 #
 # - onCurrentModeChange
-MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.AnnotationCreationButton",
+MITHGrid.defaults "OAC.Client.StreamingVideo.Component.AnnotationCreationButton",
 	bind:
 		events:
 			onCurrentModeChange: null
@@ -85,15 +85,6 @@ MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.AnnotationCreationButton
 MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.ShapeCreateBox",
 	bind:
 		events: { }
-
-# ## Controller.WindowResize
-#
-MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.WindowResize",
-	bind:
-		events:
-			onResize: null
-	selectors:
-		'': ''
 
 # ## Controller.Drag
 #
@@ -200,14 +191,6 @@ MITHGrid.defaults "OAC.Client.StreamingVideo",
 		# - events.onCurrentModeChange fires when the CurrentMode value changes
 		CurrentMode:
 			is: 'rw'
-
-		# **Player** holds the current video player driver instance.
-		#
-		# - setPlayer(player) sets the current video player driver instance
-		# - getPlayer() returns the current video player driver instance
-		# - events.onPlayerChange fires when the Player value changes
-		#Player:
-		#	is: 'rw'
 
 	dataViews:
 		# **currentAnnotations** pages a range of times through the annotation store selecting those

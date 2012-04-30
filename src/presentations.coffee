@@ -31,23 +31,7 @@ MITHGrid.Presentation.namespace "RaphaelCanvas", (RaphaelCanvas) ->
 			canvasController = options.controllers.canvas
 			keyBoardController = options.controllers.keyboard
 
-			# x,y,w, and h coordinates are set through the CSS of the container passed in the constructor
-			x = $(container).css('x')
-			y = $(container).css('y')
-
-			w = $(container).width()
-			# measure the div space and make the canvas
-			# to fit
-			h = $(container).height()
-			
-			# init RaphaelJS canvas
-			# Parameters for Raphael:
-			# * @x: value for top left corner
-			# * @y: value for top left corner
-			# * @w: Integer value for width of the SVG canvas
-			# * @h: Integer value for height of the SVG canvas
-			# Create canvas at xy and width height
-			that.canvas = new Raphael($(container), w, h)
+			that.canvas = new Raphael($(container), 10, 10)
 
 			# attach binding
 			# **FIXME:** We need to change this. If we have multiple videos on a page, this will break.
@@ -90,25 +74,17 @@ MITHGrid.Presentation.namespace "RaphaelCanvas", (RaphaelCanvas) ->
 			
 			updateLocation = ->
 				# the following elements should be parts of this presentation
-				canvasEl = $('body').find('svg')
-				#containerEl = $(options.playerWrapper)
-				htmlWrapper = $(container)
-				#playerObj = app.getPlayer()
 				if playerObj?
 					[x, y] = playerObj.getCoordinates()
 					[w, h] = playerObj.getSize()
 
-					$(canvasEl).css
+					$(that.canvas.canvas).css
 						left: x + 'px'
 						top: y + 'px'
-						width: w + 'px'
-						height: h + 'px'
-
-					$(htmlWrapper).css
-						left: x + 'px'
-						top: y + 'px'
-						width: w + 'px'
-						height: h + 'px'
+						#width: w + 'px'
+						#height: h + 'px'
+						
+					that.canvas.setSize w, h
 
 			MITHGrid.events.onWindowResize.addListener updateLocation
 			
