@@ -22,18 +22,17 @@ title: Demo
         player: playerobj
       });
       app.run();
-    });
+      $("#export-button").click(function() {
+        var data = app.exportData();
+        $("#export-text").val(JSON.stringify(data));
+      });
 
-    $("#export-button").click(function() {
-      var data = app.exportData();
-      $("#export-text").val(JSON.stringify(data));
-    });
-
-    $("#import-button").click(function() {
-      var str = $("#export-text").val();
-      if(str != "") {
-        app.importData(JSON.parse(str));
-      }
+      $("#import-button").click(function() {
+        var str = $("#export-text").val();
+        if(str != "") {
+          app.importData(JSON.parse(str));
+        }
+      });
     });
   });
 // --></script>
