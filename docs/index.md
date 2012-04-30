@@ -5,7 +5,7 @@ title: Main Page
 ## Getting Started
 
 * [Downloading Video Annotator](/OACVideoAnnotator/docs/downloading.html)
-* [How Video Annotator Works](/OACVideoAnnotator/docs/how-mithgrid-works.html)
+* [How Video Annotator Works](/OACVideoAnnotator/docs/how-videoanno-works.html)
 * [Frequently Asked Questions](/OACVideoAnnotator/docs/faq.html)
 
 ## Video Annotator API Reference

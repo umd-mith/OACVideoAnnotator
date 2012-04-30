@@ -1070,16 +1070,13 @@
           });
           playerObj = app.getPlayer();
           updateLocation = function() {
-            var canvasEl, h, w, x, y, _ref, _ref2;
-            canvasEl = $('body').find('svg');
+            var h, w, x, y, _ref, _ref2;
             if (playerObj != null) {
               _ref = playerObj.getCoordinates(), x = _ref[0], y = _ref[1];
               _ref2 = playerObj.getSize(), w = _ref2[0], h = _ref2[1];
-              $(canvasEl).css({
+              $(that.canvas.canvas).css({
                 left: x + 'px',
-                top: y + 'px',
-                width: w + 'px',
-                height: h + 'px'
+                top: y + 'px'
               });
               return that.canvas.setSize(w, h);
             }
@@ -1887,7 +1884,7 @@
     }
   });
 
-  MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.AnnotationCreationButton", {
+  MITHGrid.defaults("OAC.Client.StreamingVideo.Component.AnnotationCreationButton", {
     bind: {
       events: {
         onCurrentModeChange: null
@@ -1898,17 +1895,6 @@
   MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.ShapeCreateBox", {
     bind: {
       events: {}
-    }
-  });
-
-  MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.WindowResize", {
-    bind: {
-      events: {
-        onResize: null
-      }
-    },
-    selectors: {
-      '': ''
     }
   });
 
