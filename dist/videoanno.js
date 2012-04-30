@@ -5,7 +5,7 @@
 # The **OAC Video Annotation Tool** is a MITHGrid application providing annotation capabilities for streaming
 # video embedded in a web page. 
 #  
-# Date: Mon Apr 30 10:05:13 2012 -0400
+# Date: Mon Apr 30 11:34:48 2012 -0400
 #  
 # Educational Community License, Version 2.0
 # 
@@ -1155,7 +1155,7 @@
         $("body").append(container);
       }
       extendedOpts = $.extend(true, {}, {
-        viewSetup: "<div id=\"" + myCanvasId + "\" class=\"section-canvas\"></div>\n<div class=\"mithgrid-bottomarea\">\n	<div class=\"timeselect\">\n		<p>Enter start time:</p>\n		<input id=\"timestart\" type=\"text\" />\n		<p>Enter end time:</p>\n		<input id=\"timeend\" type=\"text\" />\n		<div id=\"submittime\" class=\"button\">Confirm time settings</div>\n	</div>\n	<div id=\"sidebar" + myCanvasId + "\" class=\"section-controls\"></div>\n</div>",
+        viewSetup: "<div id=\"" + myCanvasId + "\" class=\"section-canvas\"></div>\n<!-- div class=\"mithgrid-bottomarea\">\n	<div class=\"timeselect\">\n		<p>Enter start time:</p>\n		<input id=\"timestart\" type=\"text\" />\n		<p>Enter end time:</p>\n		<input id=\"timeend\" type=\"text\" />\n		<div id=\"submittime\" class=\"button\">Confirm time settings</div>\n	</div>\n</div -->",
         controllers: {
           keyboard: {
             isActive: function() {
@@ -1331,40 +1331,6 @@
           annoEvents.events.onClick.addListener(app.setActiveAnnotation);
           annoEvents.events.onDelete.addListener(that.eventDelete);
           annoEvents.events.onUpdate.addListener(that.eventUpdate);
-          return that;
-        };
-        app.buttonFeature = function(area, grouping, action) {
-          var buttonBinding, buttons, groupEl, item, that;
-          return;
-          if ($('#' + action + myCanvasId).length !== 0) return false;
-          that = {};
-          buttons = $(".button");
-          container = $("#sidebar" + myCanvasId);
-          switch (area) {
-            case 'buttongrouping':
-              if ($(container).find('#' + grouping + myCanvasId).length === 0) {
-                $(container).append('<div id="' + grouping + myCanvasId + '" class="buttongrouping"></div>');
-              }
-              groupEl = $("#" + grouping + myCanvasId);
-              item = '<div id="' + action + myCanvasId + '" class="button">' + action + '</div>';
-              $(groupEl).append(item);
-              that.element = $("#" + action + myCanvasId);
-              buttonBinding = app.controller.buttonActive.bind(that.element, {
-                action: action
-              });
-              break;
-            case 'slidergrouping':
-              if ($(container).find('#' + grouping + myCanvasId).length === 0) {
-                $(container).append('<div id="' + grouping + myCanvasId + '" class="slidergrouping"></div>');
-              }
-              groupEl = $("#" + grouping + myCanvasId);
-              item = '<div id="' + action + myCanvasId + '"><div class="header">' + action + myCanvasId + '</div>' + '<div id="slider"></div><div class="timedisplay"></div></div>';
-              $(groupEl).append(item);
-              that.element = $("#" + action + myCanvasId);
-              buttonBinding = app.controller.slider.bind(that.element, {
-                action: action
-              });
-          }
           return that;
         };
         app.addShape = function(key, svgShape) {
