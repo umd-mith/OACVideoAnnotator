@@ -5,7 +5,7 @@
 # The **OAC Video Annotation Tool** is a MITHGrid application providing annotation capabilities for streaming
 # video embedded in a web page. 
 #  
-# Date: Fri Apr 27 17:43:29 2012 -0400
+# Date: Sat Apr 28 10:29:39 2012 -0400
 #  
 # Educational Community License, Version 2.0
 # 
@@ -1155,6 +1155,10 @@
       wh = [];
       _ref = MITHGrid.normalizeArgs.apply(MITHGrid, ["OAC.Client.StreamingVideo"].concat(__slice.call(args))), klass = _ref[0], container = _ref[1], options = _ref[2], cb = _ref[3];
       canvasId += 1;
+      if (!(container != null)) {
+        container = $("<div id='" + myCanvasId + "-container'></div>");
+        $("body").append(container);
+      }
       extendedOpts = $.extend(true, {}, {
         viewSetup: "<div id=\"" + myCanvasId + "\" class=\"section-canvas\"></div>\n<div class=\"mithgrid-bottomarea\">\n	<div class=\"timeselect\">\n		<p>Enter start time:</p>\n		<input id=\"timestart\" type=\"text\" />\n		<p>Enter end time:</p>\n		<input id=\"timeend\" type=\"text\" />\n		<div id=\"submittime\" class=\"button\">Confirm time settings</div>\n	</div>\n	<div id=\"sidebar" + myCanvasId + "\" class=\"section-controls\"></div>\n	<div class=\"section-annotations\">\n		<div class=\"header\">\n			Annotations\n		</div>\n	</div>\n</div>",
         controllers: {
