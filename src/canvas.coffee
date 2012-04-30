@@ -81,11 +81,6 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 					<div id="submittime" class="button">Confirm time settings</div>
 				</div>
 				<div id="sidebar#{myCanvasId}" class="section-controls"></div>
-				<div class="section-annotations">
-					<div class="header">
-						Annotations
-					</div>
-				</div>
 			</div>
 		"""
 		# We make the isActive() function available to the keyboard controller to let it know if
@@ -103,10 +98,6 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 				lenses: {}
 				lensKey: ['.shapeType']
 				playerWrapper: options.playerWrapper
-			annoItem:
-				container: '.section-annotations'
-				lenses: {}
-				lensKey: ['.bodyType']
 	}, options)
 
 	MITHGrid.Application.initInstance klass, container, extendedOpts, (appOb) ->
@@ -559,7 +550,7 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 		#
 		# Returns: Nothing.
 		#
-		app.addBody = (key, textLens) -> app.presentation.annoItem.addLens(key, textLens)
+		#app.addBody = (key, textLens) -> app.presentation.annoItem.addLens(key, textLens)
 
 		# ### #addShapeType
 		#
@@ -938,7 +929,7 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 			# We want the SVG overlay and the annotation body presentation to react to changes in
 			# the selection focus.
 			app.events.onActiveAnnotationChange.addListener app.presentation.raphsvg.eventFocusChange
-			app.events.onActiveAnnotationChange.addListener app.presentation.annoItem.eventFocusChange
+			#app.events.onActiveAnnotationChange.addListener app.presentation.annoItem.eventFocusChange
 
 			# We always want the current annotation list to include anything that covers a time within five seconds
 			# of the current time.
@@ -967,32 +958,6 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 		# We want to populate the available shapes with the rectangle and ellipse. These are considered stock
 		# shapes for annotations.
 		app.ready ->
-			# ### exportRectangle (private)
-			#
-			# Calculate the attributes needed for exporting the rectangle constraint.
-			#
-			# Parameters:
-			#
-			# * item - an object holding the .x, .y, .w, and .h (center and extents)
-			#
-			# * w - width of play surface
-			#
-			# * h - height of play surface
-			#
-			# Returns:
-			#
-			# Returns an object with the scaled .x, .y, .w, and .h.
-			#
-			exportRectangle = (item, w, h) ->
-				itemCopy = $.extend(true, {}, item)
-
-				itemCopy.x = (itemCopy.x / w) * 100
-				itemCopy.y = (itemCopy.y / h) * 100
-				itemCopy.w = (itemCopy.w / w) * 100
-				itemCopy.h = (itemCopy.h / h) * 100
-
-				itemCopy
-			
 			# Using addShapeType to add Rectangle to the array of possible SVG
 			# shapes
 			app.addShapeType "Rectangle",
@@ -1194,10 +1159,8 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 
 					that
 
-			app.addBody "Text", app.initTextLens
-
-
 			# Adding in button features for annotation creation
+			# These will be taken care of elsewhere
 			rectButton = app.buttonFeature 'buttongrouping', 'Shapes', 'Rectangle'
 
 			ellipseButton = app.buttonFeature 'buttongrouping', 'Shapes', 'Ellipse'

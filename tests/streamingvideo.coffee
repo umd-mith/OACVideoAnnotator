@@ -7,7 +7,7 @@ $(document).ready ->
 		ok OAC.Client.StreamingVideo?, "OAC.Client.StreamingVideo"
 	
 	test "Check construction", ->
-		expect 19
+		expect 15
 		app = OAC.Client.StreamingVideo.initApp "#content-container",
 			playerWrapper: '#myplayer'
 			url: 'http://www.youtube.com/watch?v=HYLacuAp76U&feature=fvsr'
@@ -23,14 +23,10 @@ $(document).ready ->
 		ok $.isFunction(app.getTimeEasement), "getTimeEasement"
 		ok $.isFunction(app.setCurrentMode), "setCurrentMode"
 		ok $.isFunction(app.getCurrentMode), "getCurrentMode"
-		ok $.isFunction(app.setPlayer), "setPlayer"
-		ok $.isFunction(app.getPlayer), "getPlayer"
 		
 		ok $.isFunction(app.initShapeLens), "initShapeLens"
 		ok $.isFunction(app.initTextLens), "initTextLens"
-		ok $.isFunction(app.buttonFeature), "buttonFeature"
 		ok $.isFunction(app.addShape), "addShape"
-		ok $.isFunction(app.addBody), "addBody"
 		ok $.isFunction(app.addShapeType), "addShapeType"
 		ok $.isFunction(app.insertShape), "insertShape"
 		ok $.isFunction(app.importData), "importData"
@@ -39,9 +35,31 @@ $(document).ready ->
 	test "Check annotation management", ->
 		expect 12
 		
+		playerObject = {
+			getCoordinates: ->
+				 [0,0]
+			getSize: ->
+				[100,100]
+			play: ->
+				true
+			pause: ->
+				true
+			onPlayheadUpdate: (callback) ->
+				setTimeout(callback, 1000)
+				true
+			setPlayhead: (t) ->
+				t
+			getPlayhead: -> 
+				0
+			events:
+				onResize: MITHGrid.initEventFirer(true, true)
+				onPlayheadUpdate: MITHGrid.initEventFirer(true, true)
+		}
+		
 		# We want to put a few annotations in
 		app = OAC.Client.StreamingVideo.initApp "#content-container",
 			playerWrapper: '#myplayer'
+			player: playerObject
 			url: 'http://www.youtube.com/watch?v=HYLacuAp76U&feature=fvsr'
 			easement: 5
 		app.run();

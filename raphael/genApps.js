@@ -18,7 +18,18 @@ $(function() {
 	
 		// creating Raphael canvas application
 		raphApp.run();
-	
+		console.log(raphApp);
+		
+		// have a plain HTML presentation of annotation bodies
+        var annotations = MITHGrid.Presentation.initPresentation('#annotation-list', {
+	        dataView: raphApp.dataView.currentAnnotations,
+	        lensKey: ['.bodyType'],
+			application: raphApp
+        });
+        annotations.addLens("Text", function(container, view, model, itemId) { 
+	        return raphApp.initTextLens(container, view, model, itemId) 
+	    });
+		raphApp.events.onActiveAnnotationChange.addListener(annotations.eventFocusChange);
 		// Creating handler for the export area 
 		// 
 		// May need to bring this into the application? 

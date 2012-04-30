@@ -256,13 +256,9 @@ MITHGrid.defaults "OAC.Client.StreamingVideo",
 			controllers:
 				keyboard: "keyboard"
 				canvas: "canvas"
-				shapeCreateBox: "shapeCreateBox"
-				shapeEditBox: "shapeEditBox"
-				windowResize: "windowResize"
+				#shapeCreateBox: "shapeCreateBox"
+				#shapeEditBox: "shapeEditBox"
+				#windowResize: "windowResize"
 			events:
 				onOpacityChange: null
 			fadeStart: 5
-		annoItem:
-			type: MITHGrid.Presentation.AnnotationList
-			dataView: 'currentAnnotations'
-			container: '.anno_list'

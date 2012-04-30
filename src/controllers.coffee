@@ -142,6 +142,7 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
 					updateButton = binding.locate('updatebutton')
 					deleteButton = binding.locate('deletebutton')
 					bindingActive = false
+					prevMode = null
 
 					# #### editStart (private)
 					#
