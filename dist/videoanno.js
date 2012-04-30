@@ -1337,10 +1337,9 @@
           return app.presentation.raphsvg.addLens(key, svgShape);
         };
         app.addShapeType = function(type, args) {
-          var button, calcF, lensF;
+          var calcF, lensF;
           calcF = args.calc;
           lensF = args.lens;
-          button = app.buttonFeature('Shapes', type);
           shapeTypes[type] = args;
           return app.addShape(type, lensF);
         };
