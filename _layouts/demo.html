@@ -20,10 +20,11 @@
   <body>
 	{% include top.html %}
     <div class="wrapper">
-	  {% include demo_header.html %}
+	  {% include demo-header.html %}
 	  <section>
       {{ content }}
       </section>
+      {% include demo-meta.html %}
       {% include footer.html %}
     </div>
     {% include bottom.html %}
