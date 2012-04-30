@@ -5,7 +5,7 @@
 # The **OAC Video Annotation Tool** is a MITHGrid application providing annotation capabilities for streaming
 # video embedded in a web page. 
 #  
-# Date: Mon Apr 30 09:43:22 2012 -0400
+# Date: Mon Apr 30 10:05:13 2012 -0400
 #  
 # Educational Community License, Version 2.0
 # 
@@ -328,42 +328,6 @@
           }]));
         };
       });
-      Controller.namespace('AnnotationCreationButton', function(AnnotationCreationButton) {
-        return AnnotationCreationButton.initController = function() {
-          var args, _ref;
-          args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-          return (_ref = MITHGrid.Controller).initController.apply(_ref, ["OAC.Client.StreamingVideo.Controller.AnnotationCreationButton"].concat(__slice.call(args), [function(that) {
-            var options;
-            options = that.options;
-            return that.applyBindings = function(binding, opts) {
-              var active, buttonEl, onCurrentModeChangeHandle;
-              active = false;
-              buttonEl = binding.locate('button');
-              $(buttonEl).live('mousedown', function(e) {
-                if (active === false) {
-                  active = true;
-                  options.application.setCurrentMode(opts.action);
-                  return $(buttonEl).addClass("active");
-                } else if (active === true) {
-                  active = false;
-                  options.application.setCurrentMode('');
-                  return $(buttonEl).removeClass("active");
-                }
-              });
-              onCurrentModeChangeHandle = function(action) {
-                if (action === options.action) {
-                  active = true;
-                  return $(buttonEl).addClass('active');
-                } else {
-                  active = false;
-                  return $(buttonEl).removeClass("active");
-                }
-              };
-              return options.application.events.onCurrentModeChange.addListener(onCurrentModeChangeHandle);
-            };
-          }]));
-        };
-      });
       Controller.namespace('sliderButton', function(sliderButton) {
         return sliderButton.initController = function() {
           var args, _ref;
@@ -669,6 +633,37 @@
       return driver;
     };
     OAC.Client.StreamingVideo.namespace('Component', function(Component) {
+      Component.namespace('AnnotationCreationButton', function(AnnotationCreationButton) {
+        return AnnotationCreationButton.initInstance = function() {
+          var args, _ref;
+          args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+          return (_ref = MITHGrid.Controller).initController.apply(_ref, ["OAC.Client.StreamingVideo.Component.AnnotationCreationButton"].concat(__slice.call(args), [function(that, buttonEl) {
+            var active, options;
+            options = that.options;
+            active = false;
+            $(buttonEl).mousedown(function(e) {
+              if (active === false) {
+                active = true;
+                options.application.setCurrentMode(options.mode);
+                return $(buttonEl).addClass("active");
+              } else if (active === true) {
+                active = false;
+                options.application.setCurrentMode(void 0);
+                return $(buttonEl).removeClass("active");
+              }
+            });
+            return options.application.events.onCurrentModeChange.addListener(function(action) {
+              if (action === options.mode) {
+                active = true;
+                return $(buttonEl).addClass('active');
+              } else {
+                active = false;
+                return $(buttonEl).removeClass("active");
+              }
+            });
+          }]));
+        };
+      });
       Component.namespace("ShapeEditBox", function(ShapeEditBox) {
         return ShapeEditBox.initInstance = function() {
           var args;
@@ -1340,6 +1335,7 @@
         };
         app.buttonFeature = function(area, grouping, action) {
           var buttonBinding, buttons, groupEl, item, that;
+          return;
           if ($('#' + action + myCanvasId).length !== 0) return false;
           that = {};
           buttons = $(".button");
@@ -1748,7 +1744,7 @@
           });
         });
         return app.ready(function() {
-          var ellipseButton, rectButton, selectButton, timeControlBinding, watchButton;
+          var timeControlBinding;
           app.addShapeType("Rectangle", {
             calc: function(coords) {
               return {
@@ -1875,10 +1871,6 @@
               return that;
             }
           });
-          rectButton = app.buttonFeature('buttongrouping', 'Shapes', 'Rectangle');
-          ellipseButton = app.buttonFeature('buttongrouping', 'Shapes', 'Ellipse');
-          selectButton = app.buttonFeature('buttongrouping', 'General', 'Select');
-          watchButton = app.buttonFeature('buttongrouping', 'General', 'Watch');
           app.setCurrentTime(0);
           timeControlBinding = app.controller.timecontrol.bind('.timeselect', {});
           return timeControlBinding.events.onUpdate.addListener(function(id, start, end) {
@@ -2028,12 +2020,6 @@
           textarea: '.editArea > textarea',
           updatebutton: '.button.update',
           deletebutton: '.button.delete'
-        }
-      },
-      buttonActive: {
-        type: OAC.Client.StreamingVideo.Controller.AnnotationCreationButton,
-        selectors: {
-          button: ''
         }
       },
       timecontrol: {

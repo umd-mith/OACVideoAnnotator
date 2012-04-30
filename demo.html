@@ -18,10 +18,10 @@ title: Demo
 <script type="text/javascript">//<!--
   $(document).ready(function() {
     OAC.Client.StreamingVideo.Player.onNewPlayer(function(playerobj) {
-      var app = OAC.Client.StreamingVideo.initInstance({
+      var annotations, 
+      app = OAC.Client.StreamingVideo.initInstance({
         player: playerobj
-      }),
-      annotations;
+      });
 
       app.run();
 
@@ -31,6 +31,24 @@ title: Demo
 	    lensKey: ['.bodyType'],
 	    application: app
       });
+
+	  // create mode buttons
+	  OAC.Client.StreamingVideo.Component.AnnotationCreationButton.initInstance("#modeRectangle", {
+		mode: "Rectangle",
+		application: app
+	  });
+	  OAC.Client.StreamingVideo.Component.AnnotationCreationButton.initInstance("#modeEllipse", {
+		mode: "Ellipse",
+		application: app
+	  });
+	  OAC.Client.StreamingVideo.Component.AnnotationCreationButton.initInstance("#modeSelect", {
+		mode: "Select",
+		application: app
+	  });
+	  OAC.Client.StreamingVideo.Component.AnnotationCreationButton.initInstance("#modeWatch", {
+		mode: "Watch",
+		application: app
+	  });
       // we can use the default bare-bones text display provided by the annotation client
       annotations.addLens("Text", app.initTextLens);
 
