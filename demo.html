@@ -20,8 +20,20 @@ title: Demo
     OAC.Client.StreamingVideo.Player.onNewPlayer(function(playerobj) {
       var app = OAC.Client.StreamingVideo.initInstance({
         player: playerobj
-      });
+      }),
+      annotations;
+
       app.run();
+
+      // have a plain HTML presentation of annotation bodies
+      annotations = MITHGrid.Presentation.initPresentation('#annotation-list', {
+	    dataView: app.dataViews.currentAnnotations,
+	    lensKey: ['.bodyType'],
+	    application: app
+      });
+      // we can use the default bare-bones text display provided by the annotation client
+      annotations.addLens("Text", app.initTextLens);
+
       $("#export-button").click(function() {
         var data = app.exportData();
         $("#export-text").val(JSON.stringify(data));

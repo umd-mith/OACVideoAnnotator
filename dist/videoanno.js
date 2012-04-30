@@ -5,7 +5,7 @@
 # The **OAC Video Annotation Tool** is a MITHGrid application providing annotation capabilities for streaming
 # video embedded in a web page. 
 #  
-# Date: Sat Apr 28 10:29:39 2012 -0400
+# Date: Mon Apr 30 08:58:23 2012 -0400
 #  
 # Educational Community License, Version 2.0
 # 
@@ -135,7 +135,7 @@
             var options;
             options = that.options;
             return that.applyBindings = function(binding, opts) {
-              var allAnnos, annoEl, bindingActive, bodyContent, deleteButton, editArea, editButton, editEnd, editStart, editUpdate, textArea, updateButton;
+              var allAnnos, annoEl, bindingActive, bodyContent, deleteButton, editArea, editButton, editEnd, editStart, editUpdate, prevMode, textArea, updateButton;
               annoEl = binding.locate('annotation');
               bodyContent = binding.locate('body');
               allAnnos = binding.locate('annotations');
@@ -145,6 +145,7 @@
               updateButton = binding.locate('updatebutton');
               deleteButton = binding.locate('deletebutton');
               bindingActive = false;
+              prevMode = null;
               editStart = function() {
                 $(editArea).show();
                 $(bodyContent).hide();
@@ -164,7 +165,6 @@
                 return editEnd();
               };
               $(annoEl).bind('dblclick', function(e) {
-                var prevMode;
                 e.preventDefault();
                 if (bindingActive) {
                   editEnd();
@@ -1157,7 +1157,7 @@
         $("body").append(container);
       }
       extendedOpts = $.extend(true, {}, {
-        viewSetup: "<div id=\"" + myCanvasId + "\" class=\"section-canvas\"></div>\n<div class=\"mithgrid-bottomarea\">\n	<div class=\"timeselect\">\n		<p>Enter start time:</p>\n		<input id=\"timestart\" type=\"text\" />\n		<p>Enter end time:</p>\n		<input id=\"timeend\" type=\"text\" />\n		<div id=\"submittime\" class=\"button\">Confirm time settings</div>\n	</div>\n	<div id=\"sidebar" + myCanvasId + "\" class=\"section-controls\"></div>\n	<div class=\"section-annotations\">\n		<div class=\"header\">\n			Annotations\n		</div>\n	</div>\n</div>",
+        viewSetup: "<div id=\"" + myCanvasId + "\" class=\"section-canvas\"></div>\n<div class=\"mithgrid-bottomarea\">\n	<div class=\"timeselect\">\n		<p>Enter start time:</p>\n		<input id=\"timestart\" type=\"text\" />\n		<p>Enter end time:</p>\n		<input id=\"timeend\" type=\"text\" />\n		<div id=\"submittime\" class=\"button\">Confirm time settings</div>\n	</div>\n	<div id=\"sidebar" + myCanvasId + "\" class=\"section-controls\"></div>\n</div>",
         controllers: {
           keyboard: {
             isActive: function() {
@@ -1176,11 +1176,6 @@
             lenses: {},
             lensKey: ['.shapeType'],
             playerWrapper: options.playerWrapper
-          },
-          annoItem: {
-            container: '.section-annotations',
-            lenses: {},
-            lensKey: ['.bodyType']
           }
         }
       }, options);
@@ -1374,9 +1369,6 @@
         };
         app.addShape = function(key, svgShape) {
           return app.presentation.raphsvg.addLens(key, svgShape);
-        };
-        app.addBody = function(key, textLens) {
-          return app.presentation.annoItem.addLens(key, textLens);
         };
         app.addShapeType = function(type, args) {
           var button, calcF, lensF;
@@ -1737,7 +1729,6 @@
         };
         app.ready(function() {
           app.events.onActiveAnnotationChange.addListener(app.presentation.raphsvg.eventFocusChange);
-          app.events.onActiveAnnotationChange.addListener(app.presentation.annoItem.eventFocusChange);
           app.events.onCurrentTimeChange.addListener(function(t) {
             app.dataView.currentAnnotations.setKeyRange(t - 5, t + 5);
             return playerObj.setPlayhead(t);
@@ -1753,16 +1744,7 @@
           });
         });
         return app.ready(function() {
-          var ellipseButton, exportRectangle, rectButton, selectButton, timeControlBinding, watchButton;
-          exportRectangle = function(item, w, h) {
-            var itemCopy;
-            itemCopy = $.extend(true, {}, item);
-            itemCopy.x = (itemCopy.x / w) * 100;
-            itemCopy.y = (itemCopy.y / h) * 100;
-            itemCopy.w = (itemCopy.w / w) * 100;
-            itemCopy.h = (itemCopy.h / h) * 100;
-            return itemCopy;
-          };
+          var ellipseButton, rectButton, selectButton, timeControlBinding, watchButton;
           app.addShapeType("Rectangle", {
             calc: function(coords) {
               return {
@@ -1889,7 +1871,6 @@
               return that;
             }
           });
-          app.addBody("Text", app.initTextLens);
           rectButton = app.buttonFeature('buttongrouping', 'Shapes', 'Rectangle');
           ellipseButton = app.buttonFeature('buttongrouping', 'Shapes', 'Ellipse');
           selectButton = app.buttonFeature('buttongrouping', 'General', 'Select');
@@ -2124,20 +2105,12 @@
         dataView: 'currentAnnotations',
         controllers: {
           keyboard: "keyboard",
-          canvas: "canvas",
-          shapeCreateBox: "shapeCreateBox",
-          shapeEditBox: "shapeEditBox",
-          windowResize: "windowResize"
+          canvas: "canvas"
         },
         events: {
           onOpacityChange: null
         },
         fadeStart: 5
-      },
-      annoItem: {
-        type: MITHGrid.Presentation.AnnotationList,
-        dataView: 'currentAnnotations',
-        container: '.anno_list'
       }
     }
   });
