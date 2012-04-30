@@ -54,6 +54,10 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 	# Generating the canvasId allows us to have multiple instances of the application on a page and still
 	# have a unique ID as expected by the Raphaël library.
 	canvasId += 1;
+	
+	if not container?
+		container = $("<div id='#{myCanvasId}-container'></div>")
+		$("body").append container
 
 	extendedOpts = $.extend(true, {}, {
 		# We create a general template that holds all of the different DOM elements we need:

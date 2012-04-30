@@ -95,12 +95,8 @@ MITHGrid.Presentation.namespace "RaphaelCanvas", (RaphaelCanvas) ->
 				htmlWrapper = $(container)
 				#playerObj = app.getPlayer()
 				if playerObj?
-					[x, y] = playerObj.getcoordinates()
-					[w, h] = playerObj.getsize()
-					#x = parseInt($(containerEl).offset().left, 10)
-					#y = parseInt($(containerEl).offset().top, 10)
-					#w = parseInt($(containerEl).width(), 10)
-					#h = parseInt($(containerEl).height(), 10)
+					[x, y] = playerObj.getCoordinates()
+					[w, h] = playerObj.getSize()
 
 					$(canvasEl).css
 						left: x + 'px'
@@ -147,33 +143,6 @@ MITHGrid.Presentation.namespace "RaphaelCanvas", (RaphaelCanvas) ->
 				that.visitRenderings (id, rendering) ->
 					if rendering.eventTimeEasementChange?
 						rendering.eventTimeEasementChange te
-
-			#
-			# Called whenever a player is set by the Application.
-			# Assumes that said player object has getcoordinates() and
-			# getsize() as valid methods that return arrays.
-			#
-			#app.events.onPlayerChange.addListener (player) ->
-			#	if player?
-			#		updateLocation()
-					# player passes args of x,y and width, height
-					#xy = player.getcoordinates()
-					#wh = player.getsize()
-					# move container and change size
-					#$(container).css
-					#	left: parseInt(xy[0], 10) + 'px'
-					#	top: parseInt(xy[1], 10) + 'px'
-					#	width: wh[0]
-					#	height: wh[1]
-
-					# Move canvas SVG to this location
-					#$('svg').css
-					#	left: parseInt(xy[0], 10) + 'px'
-					#	top: parseInt(xy[1], 10) + 'px'
-					#	width: wh[0],
-					#	height: wh[1]
-				
-					#updateLocation()
 
 			superEventFocusChange = that.eventFocusChange
 

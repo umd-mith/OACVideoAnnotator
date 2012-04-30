@@ -5,50 +5,38 @@
 */ 
 
 // pass in ID for the main div
-var initPlugin = function() {
-	var raphApp, setupAllPlayers, player, OACdrv, wh = [], xy = [],
-	OACVideoController, data;
-	
-	initStreamingVideoApp = function(playerobj) {
+$(function() {
+	OAC.Client.StreamingVideo.Player.onNewPlayer(function(playerobj) {
 		// Create Raphael canvas application controls
 		
 		// Adding a ready wrapper function to set the playerobject
-		raphApp = OAC.Client.StreamingVideo.initApp("#content-container", {
+		var raphApp = OAC.Client.StreamingVideo.initApp({
 			player: playerobj,
-			playerWrapper: '#myplayer',
-			url: 'http://html5demos.com/assets/dizzy',
-			easement: 5
+			url: 'http://html5demos.com/assets/dizzy'
 		});
 
 	
 		// creating Raphael canvas application
-			raphApp.run();
+		raphApp.run();
 	
-			// Creating handler for the export area 
-			// 
-			// May need to bring this into the application? 
-			// 
-			$('.section-export-data > #exportDataStore').click(function() {
-				// init exportData
-				data = raphApp.exportData();
-				$('.section-export-data > #export-text').val(JSON.stringify(data));
-			});
+		// Creating handler for the export area 
+		// 
+		// May need to bring this into the application? 
+		// 
+		$('.section-export-data > #exportDataStore').click(function() {
+			// init exportData
+			var data = raphApp.exportData();
+			$('.section-export-data > #export-text').val(JSON.stringify(data));
+		});
 			
-			// Setting up import button
-			// 
-			$('.section-export-data > #importJSONRDF').click(function() {
-				if($('.section-export-data > #export-text').val() !== '') {
-					data = $('.section-export-data > #export-text').val();
-					raphApp.importData(JSON.parse(data));
-				}
-			});
-	};
-	
-	// setting up listener for when a new player is created
-	//OAC_Controller.on_new_player(initStreamingVideoApp);
-	OAC.Client.StreamingVideo.Player.onNewPlayer(initStreamingVideoApp);
-};
-
-$(function() {
-	initPlugin();
+		// Setting up import button
+		// 
+		$('.section-export-data > #importJSONRDF').click(function() {
+			var data;
+			if($('.section-export-data > #export-text').val() !== '') {
+				data = $('.section-export-data > #export-text').val();
+				raphApp.importData(JSON.parse(data));
+			}
+		});
+	});
 });

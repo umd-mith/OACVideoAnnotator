@@ -27,20 +27,10 @@ initHTML5PlayerDrv = ->
 	driver.bindPlayer = (domObj) ->
 		OAC.Client.StreamingVideo.Player.DriverBinding.initInstance (that) ->
 			$(domObj).bind 'loadedmetadata', ->
-				that.events.onResize.fire that.getsize()
+				that.events.onResize.fire that.getSize()
 			
 			$(domObj).bind 'timeupdate', ->
 				that.events.onPlayheadUpdate.fire domObj.currentTime
-
-			#
-		    # Function: onplayheadupdate
-		    #	Customizable callback to set a function that is going to be called on each second.
-		    # Parameters:
-		    #	callback - User function
-			#
-			that.onPlayheadUpdate = (cb) ->
-				$(domObj).bind 'timeupdate', ->
-					cb domObj.currentTime
 				
 			#
 		    # Function: getcoordinates
@@ -48,7 +38,7 @@ initHTML5PlayerDrv = ->
 		    # Returns:
 		    #	An array of coordinates(0 is X, 1 is Y).
 			#	
-			that.getcoordinates = -> 
+			that.getCoordinates = -> 
 				[
 					$(domObj).position().left
 					$(domObj).position().top
@@ -60,7 +50,7 @@ initHTML5PlayerDrv = ->
 		    # Returns:
 		    #	Array of pixel values ( 0 is width, 1 is height).
 			#
-			that.getsize = -> 
+			that.getSize = -> 
 				[
 					$(domObj).width() - 2
 					$(domObj).height() - 2
