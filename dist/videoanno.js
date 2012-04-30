@@ -521,8 +521,10 @@
       };
       driver.bindPlayer = function(playerObj) {
         return OAC.Client.StreamingVideo.Player.DriverBinding.initInstance(function(that) {
-          that.onPlayheadUpdate = playerObj.onplayheadupdate;
-          that.getcoordinates = function() {
+          playerObj.onplayheadupdate(function() {
+            return that.events.onPlayheadUpdate.fire(that.getPlayhead());
+          });
+          that.getCoordinates = function() {
             var c, _i, _len, _ref, _results;
             _ref = playerObj.getcoordinates();
             _results = [];
@@ -532,7 +534,7 @@
             }
             return _results;
           };
-          that.getsize = function() {
+          that.getSize = function() {
             var s, _i, _len, _ref, _results;
             _ref = playerObj.getsize();
             _results = [];
@@ -636,20 +638,15 @@
       driver.bindPlayer = function(domObj) {
         return OAC.Client.StreamingVideo.Player.DriverBinding.initInstance(function(that) {
           $(domObj).bind('loadedmetadata', function() {
-            return that.events.onResize.fire(that.getsize());
+            return that.events.onResize.fire(that.getSize());
           });
           $(domObj).bind('timeupdate', function() {
             return that.events.onPlayheadUpdate.fire(domObj.currentTime);
           });
-          that.onPlayheadUpdate = function(cb) {
-            return $(domObj).bind('timeupdate', function() {
-              return cb(domObj.currentTime);
-            });
-          };
-          that.getcoordinates = function() {
+          that.getCoordinates = function() {
             return [$(domObj).position().left, $(domObj).position().top];
           };
-          that.getsize = function() {
+          that.getSize = function() {
             return [$(domObj).width() - 2, $(domObj).height() - 2];
           };
           that.play = function() {
@@ -1085,8 +1082,8 @@
             canvasEl = $('body').find('svg');
             htmlWrapper = $(container);
             if (playerObj != null) {
-              _ref = playerObj.getcoordinates(), x = _ref[0], y = _ref[1];
-              _ref2 = playerObj.getsize(), w = _ref2[0], h = _ref2[1];
+              _ref = playerObj.getCoordinates(), x = _ref[0], y = _ref[1];
+              _ref2 = playerObj.getSize(), w = _ref2[0], h = _ref2[1];
               $(canvasEl).css({
                 left: x + 'px',
                 top: y + 'px',
