@@ -5,7 +5,7 @@
 # The **OAC Video Annotation Tool** is a MITHGrid application providing annotation capabilities for streaming
 # video embedded in a web page. 
 #  
-# Date: Mon Apr 30 08:58:23 2012 -0400
+# Date: Mon Apr 30 09:43:22 2012 -0400
 #  
 # Educational Community License, Version 2.0
 # 
@@ -649,6 +649,9 @@
           that.getSize = function() {
             return [$(domObj).width() - 2, $(domObj).height() - 2];
           };
+          that.getTargetURI = function() {
+            return $(domObj).data('oatarget');
+          };
           that.play = function() {
             return domObj.play();
           };
@@ -1185,6 +1188,7 @@
         shapeTypes = {};
         options = app.options;
         playerObj = options.player;
+        options.url = options.url || playerObj.getTargetURI();
         app.getPlayer = function() {
           return playerObj;
         };
