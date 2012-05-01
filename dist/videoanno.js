@@ -5,7 +5,7 @@
 # The **OAC Video Annotation Tool** is a MITHGrid application providing annotation capabilities for streaming
 # video embedded in a web page. 
 #  
-# Date: Mon Apr 30 14:49:32 2012 -0400
+# Date: Tue May 1 09:15:47 2012 -0400
 #  
 # Educational Community License, Version 2.0
 # 
@@ -787,10 +787,16 @@
                   o = handles[i];
                   if (i === 'mid') {
                     midDrag = paper.rect(o.x, o.y, padding, padding);
+                    $(midDrag.node).css({
+                      "pointer-events": "auto"
+                    });
                     o.id = midDrag.id;
                     o.el = midDrag;
                   } else {
                     h = paper.rect(o.x, o.y, padding, padding);
+                    $(h.node).css({
+                      "pointer-events": "auto"
+                    });
                     o.id = h.id;
                     o.el = h;
                     h.attr({
@@ -1169,12 +1175,17 @@
         }
       }, options);
       return MITHGrid.Application.initInstance(klass, container, extendedOpts, function(appOb) {
-        var NS, parseNPT, playerObj, shapeTypes;
+        var NS, parseNPT, playerObj, screenSize, shapeTypes, _ref2;
         app = appOb;
         shapeTypes = {};
         options = app.options;
         playerObj = options.player;
         options.url = options.url || playerObj.getTargetURI();
+        screenSize = {};
+        _ref2 = playerObj.getSize(), screenSize.width = _ref2[0], screenSize.height = _ref2[1];
+        playerObj.events.onResize.addListener(function(s) {
+          return screenSize.width = s[0], screenSize.height = s[1], s;
+        });
         app.getPlayer = function() {
           return playerObj;
         };
@@ -1207,6 +1218,23 @@
               }
             }
             return val;
+          };
+          that.scalePoint = function(x, y, w, h) {
+            if ((w != null) && (w[0] != null)) {
+              w = w[0];
+            } else {
+              w = screenSize.width;
+            }
+            if ((h != null) && (h[0] != null)) {
+              h = h[0];
+            } else {
+              h = screenSize.height;
+            }
+            if (w === 0 || h === 0) {
+              return [x, y];
+            } else {
+              return [x * screenSize.width / w, y * screenSize.height / h];
+            }
           };
           that.eventTimeEasementChange = function(v) {
             fstart = start - v;
@@ -1251,7 +1279,9 @@
                 x: pos.x,
                 y: pos.y,
                 w: pos.width,
-                h: pos.height
+                h: pos.height,
+                targetWidth: screenSize.width,
+                targetHeight: screenSize.height
               }
             ]);
           };
@@ -1349,6 +1379,8 @@
               bodyContent: "This is an annotation for " + curMode,
               shapeType: curMode,
               targetURI: app.options.url,
+              targetHeight: screenSize.height,
+              targetWidth: screenSize.width,
               npt_start: npt_start < 0 ? 0 : npt_start,
               npt_end: npt_end
             };
@@ -1361,7 +1393,8 @@
           OAX: "http://www.w3.org/ns/openannotation/extensions",
           RDF: "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
           CNT: "http://www.w3.org/2008/content#",
-          DC: "http://purl.org/dc/elements/1.1/"
+          DC: "http://purl.org/dc/elements/1.1/",
+          EXIF: "http://www.w3.org/2003/12/exif/ns#"
         };
         parseNPT = function(npt) {
           var b, bits, hours, minutes, seconds;
@@ -1371,11 +1404,11 @@
             hours = 0;
           } else {
             bits = (function() {
-              var _i, _len, _ref2, _results;
-              _ref2 = npt.split(':');
+              var _i, _len, _ref3, _results;
+              _ref3 = npt.split(':');
               _results = [];
-              for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-                b = _ref2[_i];
+              for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
+                b = _ref3[_i];
                 _results.push(parseFloat(b));
               }
               return _results;
@@ -1395,20 +1428,20 @@
           return (hours * 60 + minutes) * 60 + seconds;
         };
         app.importData = function(data) {
-          var bits, doc, dom, fragment, hasSelector, hasSubSelector, hasTarget, i, info, o, refd, rootName, s, shapeInfo, svg, t, temp, tempstore, types, v, _i, _j, _k, _len, _len2, _len3, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
+          var bits, doc, dom, fragment, hasSelector, hasSubSelector, hasTarget, i, info, o, refd, rootName, s, shapeInfo, svg, t, temp, tempstore, types, v, _i, _j, _k, _len, _len2, _len3, _ref10, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
           tempstore = [];
           for (i in data) {
             o = data[i];
-            if (_ref2 = "" + NS.OA + "Annotation", __indexOf.call((function() {
-              var _i, _len, _ref3, _results;
-              _ref3 = o["" + NS.RDF + "type"];
+            if (_ref3 = "" + NS.OA + "Annotation", __indexOf.call((function() {
+              var _i, _len, _ref4, _results;
+              _ref4 = o["" + NS.RDF + "type"];
               _results = [];
-              for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
-                t = _ref3[_i];
+              for (_i = 0, _len = _ref4.length; _i < _len; _i++) {
+                t = _ref4[_i];
                 _results.push(t.value);
               }
               return _results;
-            })(), _ref2) >= 0) {
+            })(), _ref3) >= 0) {
               temp = {
                 id: i,
                 type: "Annotation",
@@ -1420,77 +1453,77 @@
                 temp.bodyContent = data[o["" + NS.OA + "hasBody"][0].value]["" + NS.CNT + "chars"][0].value;
               }
               if (o["" + NS.OA + "hasTarget"] != null) {
-                _ref3 = (function() {
-                  var _j, _len, _ref3, _results;
-                  _ref3 = o["" + NS.OA + "hasTarget"];
+                _ref4 = (function() {
+                  var _j, _len, _ref4, _results;
+                  _ref4 = o["" + NS.OA + "hasTarget"];
                   _results = [];
-                  for (_j = 0, _len = _ref3.length; _j < _len; _j++) {
-                    v = _ref3[_j];
+                  for (_j = 0, _len = _ref4.length; _j < _len; _j++) {
+                    v = _ref4[_j];
                     _results.push(v.value);
                   }
                   return _results;
                 })();
-                for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
-                  hasTarget = _ref3[_i];
+                for (_i = 0, _len = _ref4.length; _i < _len; _i++) {
+                  hasTarget = _ref4[_i];
                   if ((data[hasTarget] != null) && (data[hasTarget]["" + NS.OA + "hasSource"] != null)) {
-                    refd = (_ref4 = app.options.url, __indexOf.call((function() {
-                      var _j, _len2, _ref5, _results;
-                      _ref5 = data[hasTarget]["" + NS.OA + "hasSource"];
+                    refd = (_ref5 = app.options.url, __indexOf.call((function() {
+                      var _j, _len2, _ref6, _results;
+                      _ref6 = data[hasTarget]["" + NS.OA + "hasSource"];
                       _results = [];
-                      for (_j = 0, _len2 = _ref5.length; _j < _len2; _j++) {
-                        s = _ref5[_j];
+                      for (_j = 0, _len2 = _ref6.length; _j < _len2; _j++) {
+                        s = _ref6[_j];
                         _results.push(s.value);
                       }
                       return _results;
-                    })(), _ref4) >= 0);
+                    })(), _ref5) >= 0);
                     if (refd) {
-                      _ref5 = (function() {
-                        var _k, _len2, _ref5, _results;
-                        _ref5 = data[hasTarget]["" + NS.OA + "hasSelector"];
+                      _ref6 = (function() {
+                        var _k, _len2, _ref6, _results;
+                        _ref6 = data[hasTarget]["" + NS.OA + "hasSelector"];
                         _results = [];
-                        for (_k = 0, _len2 = _ref5.length; _k < _len2; _k++) {
-                          v = _ref5[_k];
+                        for (_k = 0, _len2 = _ref6.length; _k < _len2; _k++) {
+                          v = _ref6[_k];
                           _results.push(v.value);
                         }
                         return _results;
                       })();
-                      for (_j = 0, _len2 = _ref5.length; _j < _len2; _j++) {
-                        hasSelector = _ref5[_j];
-                        refd = (_ref6 = "" + NS.OAX + "CompositeSelector", __indexOf.call((function() {
-                          var _k, _len3, _ref7, _results;
-                          _ref7 = data[hasSelector]["" + NS.RDF + "type"];
+                      for (_j = 0, _len2 = _ref6.length; _j < _len2; _j++) {
+                        hasSelector = _ref6[_j];
+                        refd = (_ref7 = "" + NS.OAX + "CompositeSelector", __indexOf.call((function() {
+                          var _k, _len3, _ref8, _results;
+                          _ref8 = data[hasSelector]["" + NS.RDF + "type"];
                           _results = [];
-                          for (_k = 0, _len3 = _ref7.length; _k < _len3; _k++) {
-                            t = _ref7[_k];
+                          for (_k = 0, _len3 = _ref8.length; _k < _len3; _k++) {
+                            t = _ref8[_k];
                             _results.push(t.value);
                           }
                           return _results;
-                        })(), _ref6) >= 0);
+                        })(), _ref7) >= 0);
                         if ((data[hasSelector] != null) && refd) {
-                          _ref7 = (function() {
-                            var _l, _len3, _ref7, _results;
-                            _ref7 = data[hasSelector]["" + NS.OA + "hasSelector"];
+                          _ref8 = (function() {
+                            var _l, _len3, _ref8, _results;
+                            _ref8 = data[hasSelector]["" + NS.OA + "hasSelector"];
                             _results = [];
-                            for (_l = 0, _len3 = _ref7.length; _l < _len3; _l++) {
-                              v = _ref7[_l];
+                            for (_l = 0, _len3 = _ref8.length; _l < _len3; _l++) {
+                              v = _ref8[_l];
                               _results.push(v.value);
                             }
                             return _results;
                           })();
-                          for (_k = 0, _len3 = _ref7.length; _k < _len3; _k++) {
-                            hasSubSelector = _ref7[_k];
+                          for (_k = 0, _len3 = _ref8.length; _k < _len3; _k++) {
+                            hasSubSelector = _ref8[_k];
                             if (data[hasSubSelector] != null) {
                               types = (function() {
-                                var _l, _len4, _ref8, _results;
-                                _ref8 = data[hasSubSelector]["" + NS.RDF + "type"];
+                                var _l, _len4, _ref9, _results;
+                                _ref9 = data[hasSubSelector]["" + NS.RDF + "type"];
                                 _results = [];
-                                for (_l = 0, _len4 = _ref8.length; _l < _len4; _l++) {
-                                  t = _ref8[_l];
+                                for (_l = 0, _len4 = _ref9.length; _l < _len4; _l++) {
+                                  t = _ref9[_l];
                                   _results.push(t.value);
                                 }
                                 return _results;
                               })();
-                              if (_ref8 = "" + NS.OAX + "SvgSelector", __indexOf.call(types, _ref8) >= 0) {
+                              if (_ref9 = "" + NS.OAX + "SvgSelector", __indexOf.call(types, _ref9) >= 0) {
                                 if ((data[hasSubSelector]["" + NS.CNT + "chars"] != null) && (data[hasSubSelector]["" + NS.CNT + "chars"][0] != null)) {
                                   svg = data[hasSubSelector]["" + NS.CNT + "chars"][0].value;
                                   dom = $.parseXML(svg);
@@ -1504,13 +1537,19 @@
                                         if (shapeInfo != null) {
                                           $.extend(temp, shapeInfo);
                                           temp.shapeType = t;
+                                          if ((data[hasSubSelector]["" + NS.EXIF + "width"] != null) && (data[hasSubSelector]["" + NS.EXIF + "width"][0] != null)) {
+                                            temp.targetWidth = parseFloat(data[hasSubSelector]["" + NS.EXIF + "width"][0].value);
+                                          }
+                                          if ((data[hasSubSelector]["" + NS.EXIF + "height"] != null) && (data[hasSubSelector]["" + NS.EXIF + "height"][0] != null)) {
+                                            temp.targetHeight = parseFloat(data[hasSubSelector]["" + NS.EXIF + "height"][0].value);
+                                          }
                                         }
                                       }
                                     }
                                   }
                                 }
                               }
-                              if (_ref9 = "" + NS.OA + "FragSelector", __indexOf.call(types, _ref9) >= 0) {
+                              if (_ref10 = "" + NS.OA + "FragSelector", __indexOf.call(types, _ref10) >= 0) {
                                 if ((data[hasSubSelector]["" + NS.RDF + "value"] != null) && (data[hasSubSelector]["" + NS.RDF + "value"][0] != null)) {
                                   fragment = data[hasSubSelector]["" + NS.RDF + "value"][0].value;
                                   fragment = fragment.replace(/^t=npt:/, '');
@@ -1546,7 +1585,7 @@
           return app.dataStore.canvas.loadItems(tempstore);
         };
         app.exportData = function(data) {
-          var bnode, createJSONObjSeries, findAnnos, genBody, genTarget, literal, mergeData, node, o, tempstore, uri, _i, _len, _ref2;
+          var bnode, createJSONObjSeries, findAnnos, genBody, genTarget, literal, mergeData, node, o, tempstore, uri, _i, _len, _ref3;
           tempstore = {};
           findAnnos = app.dataStore.canvas.prepare(['!type']);
           node = function(s, pns, p, t, o) {
@@ -1573,7 +1612,7 @@
             return literal(id, NS.CNT, "chars", obj.bodyContent[0]);
           };
           genTarget = function(obj, id) {
-            var svglens, _ref2;
+            var svglens, _ref3;
             uri(id[0], NS.RDF, "type", "" + NS.OA + "SpecificResource");
             uri(id[0], NS.OA, "hasSource", obj.targetURI[0]);
             bnode(id[0], NS.OA, "hasSelector", id[1]);
@@ -1581,13 +1620,23 @@
             bnode(id[1], NS.OA, "hasSelector", id[2]);
             bnode(id[1], NS.OA, "hasSelector", id[3]);
             if (obj.shapeType != null) {
-              svglens = (_ref2 = shapeTypes[obj.shapeType[0]]) != null ? _ref2.renderAsSVG : void 0;
+              svglens = (_ref3 = shapeTypes[obj.shapeType[0]]) != null ? _ref3.renderAsSVG : void 0;
             }
             if (svglens != null) {
               uri(id[2], NS.RDF, "type", "" + NS.OAX + "SvgSelector");
               literal(id[2], NS.DC, "format", "text/svg+xml");
               literal(id[2], NS.CNT, "characterEncoding", "utf-8");
               literal(id[2], NS.CNT, "chars", svglens(app.dataStore.canvas, obj.id[0]));
+              if ((obj.targetHeight != null) && (obj.targetHeight[0] != null)) {
+                literal(id[2], NS.EXIF, "height", obj.targetHeight[0]);
+              } else {
+                literal(id[2], NS.EXIF, "height", screenSize.height);
+              }
+              if ((obj.targetWidth != null) && (obj.targetWidth[0] != null)) {
+                literal(id[2], NS.EXIF, "width", obj.targetWidth[0]);
+              } else {
+                literal(id[2], NS.EXIF, "width", screenSize.width);
+              }
             }
             uri(id[3], NS.RDF, "type", "" + NS.OA + "FragSelector");
             return literal(id[3], NS.RDF, "value", 't=npt:' + obj.npt_start[0] + ',' + obj.npt_end[0]);
@@ -1615,13 +1664,13 @@
             return genTarget(obj, [tuid, suid, svgid, fgid]);
           };
           mergeData = function(id) {
-            var buid, found, obj, seli, selo, seltype, selval, suid, tuid, type, value, _ref2, _ref3, _results;
+            var buid, found, obj, seli, selo, seltype, selval, suid, tuid, type, value, _ref3, _ref4, _results;
             obj = app.dataStore.canvas.getItem(id);
             if (data[obj.id] != null) {
-              _ref2 = data[obj.id];
+              _ref3 = data[obj.id];
               _results = [];
-              for (type in _ref2) {
-                value = _ref2[type];
+              for (type in _ref3) {
+                value = _ref3[type];
                 switch (type) {
                   case "" + NS.OA + "hasBody":
                     buid = data[obj.id].hasBody[0].value;
@@ -1634,9 +1683,9 @@
                       if (data[tuid].hasSource[0].value === obj.targetURI[0]) {
                         suid = data[tuid].hasSelector[0].value;
                         found = true;
-                        _ref3 = data[suid];
-                        for (seltype in _ref3) {
-                          selval = _ref3[seltype];
+                        _ref4 = data[suid];
+                        for (seltype in _ref4) {
+                          selval = _ref4[seltype];
                           if (seltype === 'hasSelector') {
                             for (seli in selval) {
                               selo = selval[seli];
@@ -1676,9 +1725,9 @@
             }
           };
           data = data || {};
-          _ref2 = findAnnos.evaluate('Annotation');
-          for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-            o = _ref2[_i];
+          _ref3 = findAnnos.evaluate('Annotation');
+          for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
+            o = _ref3[_i];
             mergeData(o);
           }
           return tempstore;
@@ -1726,10 +1775,12 @@
               return info;
             },
             lens: function(container, view, model, itemId) {
-              var c, item, selectBinding, superUpdate, that;
+              var c, h, item, selectBinding, superUpdate, that, w, x, y, _ref3, _ref4;
               that = app.initShapeLens(container, view, model, itemId);
               item = model.getItem(itemId);
-              c = view.canvas.rect(item.x[0] - (item.w[0] / 2), item.y[0] - (item.h[0] / 2), item.w[0], item.h[0]);
+              _ref3 = that.scalePoint(item.x[0] - (item.w[0] / 2), item.y[0] - (item.h[0] / 2), item.targetWidth, item.targetHeight), x = _ref3[0], y = _ref3[1];
+              _ref4 = that.scalePoint(item.w[0], item.h[0], item.targetWidth, item.targetHeight), w = _ref4[0], h = _ref4[1];
+              c = view.canvas.rect(x, y, w, h);
               that.shape = c;
               c.attr({
                 fill: "silver",
@@ -1746,14 +1797,17 @@
               });
               superUpdate = that.update;
               that.update = function(newItem) {
+                var _ref5, _ref6;
                 item = newItem;
                 superUpdate(item);
                 if ((item.x != null) && (item.y != null) && (item.w != null) && (item.h != null)) {
+                  _ref5 = that.scalePoint(item.x[0], item.y[0], item.targetWidth, item.targetHeight), x = _ref5[0], y = _ref5[1];
+                  _ref6 = that.scalePoint(item.w[0], item.h[0], item.targetWidth, item.targetHeight), w = _ref6[0], h = _ref6[1];
                   return c.attr({
-                    x: item.x[0] - item.w[0] / 2,
-                    y: item.y[0] - item.h[0] / 2,
-                    width: item.w[0],
-                    height: item.h[0]
+                    x: x - w / 2,
+                    y: y - h / 2,
+                    width: w,
+                    height: h
                   });
                 }
               };
@@ -1793,10 +1847,12 @@
               return info;
             },
             lens: function(container, view, model, itemId) {
-              var c, item, selectBinding, superUpdate, that;
+              var c, h, item, selectBinding, superUpdate, that, w, x, y, _ref3, _ref4;
               that = app.initShapeLens(container, view, model, itemId);
               item = model.getItem(itemId);
-              c = view.canvas.ellipse(item.x[0], item.y[0], item.w[0] / 2, item.h[0] / 2);
+              _ref3 = that.scalePoint(item.x[0], item.y[0], item.targetWidth, item.targetHeight), x = _ref3[0], y = _ref3[1];
+              _ref4 = that.scalePoint(item.w[0] / 2, item.h[0] / 2, item.targetWidth, item.targetHeight), w = _ref4[0], h = _ref4[1];
+              c = view.canvas.ellipse(x, y, w, h);
               that.shape = c;
               c.attr({
                 fill: "silver",
@@ -1812,13 +1868,16 @@
               });
               superUpdate = that.update;
               that.update = function(item) {
+                var _ref5, _ref6;
                 superUpdate(item);
                 if ((item.x != null) && (item.y != null)) {
+                  _ref5 = that.scalePoint(item.x[0], item.y[0], item.targetWidth, item.targetHeight), x = _ref5[0], y = _ref5[1];
+                  _ref6 = that.scalePoint(item.w[0], item.h[0], item.targetWidth, item.targetHeight), w = _ref6[0], h = _ref6[1];
                   return c.attr({
-                    cx: item.x[0],
-                    cy: item.y[0],
-                    rx: item.w[0] / 2,
-                    ry: item.h[0] / 2
+                    cx: x,
+                    cy: y,
+                    rx: w / 2,
+                    ry: h / 2
                   });
                 }
               };
