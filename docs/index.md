@@ -10,7 +10,7 @@ title: Main Page
 
 ## Video Annotator API Reference
 
-* [MITHgrid Core](/OACVideoAnnotator/docs/core/)
+* [Video Annotator Core](/OACVideoAnnotator/docs/core/)
 * [Components](/OACVideoAnnotator/docs/components/)
 * [Events](/OACVideoAnnotator/docs/events/)
 * [Controllers](/OACVideoAnnotator/docs/controllers/)

@@ -21,6 +21,11 @@ Unless otherwise noted, events are multicast and not preventable.
 
 ## OAC.Client.StreamingVideo
 
+In addition to the following events, instances have a data store (`app.dataStore.canvas`) and a data view
+(`app.dataView.currentAnnotations`) that have their own events (assuming the instance is held in `app`). 
+See the MITHgrid documentation for
+[data stores](/mithgrid/docs/data-stores/) and [data views](/mithgrid/docs/data-views/) for more information.
+
 ### Events
 
 #### onActiveAnnotationChange
