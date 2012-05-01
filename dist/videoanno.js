@@ -5,7 +5,7 @@
 # The **OAC Video Annotation Tool** is a MITHGrid application providing annotation capabilities for streaming
 # video embedded in a web page. 
 #  
-# Date: Tue May 1 09:15:47 2012 -0400
+# Date: Tue May 1 09:53:15 2012 -0400
 #  
 # Educational Community License, Version 2.0
 # 
@@ -1023,112 +1023,167 @@
         };
       });
     });
-    MITHGrid.Presentation.namespace("AnnotationList", function(AnnotationList) {
-      return AnnotationList.initPresentation = function() {
-        var args, _ref;
-        args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-        return (_ref = MITHGrid.Presentation).initPresentation.apply(_ref, ["MITHGrid.Presentation.AnnotationList"].concat(__slice.call(args), [function() {}]));
-      };
-    });
-    MITHGrid.Presentation.namespace("RaphaelCanvas", function(RaphaelCanvas) {
-      return RaphaelCanvas.initPresentation = function() {
-        var args, _ref;
-        args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-        return (_ref = MITHGrid.Presentation).initPresentation.apply(_ref, ["MITHGrid.Presentation.RaphaelCanvas"].concat(__slice.call(args), [function(that, container) {
-          var app, boundingBoxComponent, canvasBinding, canvasController, id, keyBoardController, keyboardBinding, options, playerObj, shapeCreateBoxComponent, superEventFocusChange, updateLocation;
-          id = $(container).attr('id');
-          options = that.options;
-          app = options.application;
-          canvasController = options.controllers.canvas;
-          keyBoardController = options.controllers.keyboard;
-          that.canvas = new Raphael($(container), 10, 10);
-          $(that.canvas.canvas).css({
-            "pointer-events": "none"
-          });
-          canvasBinding = canvasController.bind($(container), {
-            closeEnough: 5,
-            paper: that.canvas
-          });
-          boundingBoxComponent = OAC.Client.StreamingVideo.Component.ShapeEditBox.initInstance(that.canvas);
-          shapeCreateBoxComponent = OAC.Client.StreamingVideo.Component.ShapeCreateBox.initInstance(that.canvas);
-          keyboardBinding = keyBoardController.bind($(container), {});
-          that.events = $.extend(true, that.events, keyboardBinding.events);
-          boundingBoxComponent.events.onResize.addListener(function(pos) {
-            var activeRendering;
-            activeRendering = that.getFocusedRendering();
-            if ((activeRendering != null) && (activeRendering.eventResize != null)) {
-              return activeRendering.eventResize(pos);
-            }
-          });
-          boundingBoxComponent.events.onMove.addListener(function(pos) {
-            var activeRendering;
-            activeRendering = that.getFocusedRendering();
-            if ((activeRendering != null) && (activeRendering.eventMove != null)) {
-              return activeRendering.eventMove(pos);
-            }
-          });
-          boundingBoxComponent.events.onDelete.addListener(function() {
-            var activeRendering;
-            activeRendering = that.getFocusedRendering();
-            if ((activeRendering != null) && (activeRendering.eventDelete != null)) {
-              activeRendering.eventDelete();
-              return boundingBoxComponent.detachFromRendering();
-            }
-          });
-          app.events.onCurrentModeChange.addListener(function(newMode) {
-            if (newMode !== "Select" && newMode !== "Drag") {
-              return boundingBoxComponent.detachFromRendering();
-            }
-          });
-          playerObj = app.getPlayer();
-          updateLocation = function() {
-            var h, w, x, y, _ref, _ref2;
-            if (playerObj != null) {
-              _ref = playerObj.getCoordinates(), x = _ref[0], y = _ref[1];
-              _ref2 = playerObj.getSize(), w = _ref2[0], h = _ref2[1];
-              $(that.canvas.canvas).css({
-                left: x + 'px',
-                top: y + 'px'
+    OAC.Client.StreamingVideo.namespace("Presentation", function(Presentation) {
+      Presentation.namespace("AnnotationList", function(AnnotationList) {
+        return AnnotationList.initPresentation = function() {
+          var args, _ref;
+          args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+          return (_ref = MITHGrid.Presentation).initPresentation.apply(_ref, ["OAC.Client.StreamingVideo.Presentation.AnnotationList"].concat(__slice.call(args), [function(that, container) {
+            var app, options;
+            options = that.options;
+            app = options.application;
+            return that.initTextLens = function(container, view, model, itemId, cb) {
+              var annoEvents, bodyContent, bodyContentTextArea, item, itemEl, lens;
+              lens = {};
+              item = model.getItem(itemId);
+              itemEl = $("<div class=\"anno_item\">\n	<p class=\"bodyContentInstructions\">Double click here to open edit window.</p>\n	<div class=\"editArea\">\n		<textarea class=\"bodyContentTextArea\"></textarea>\n		<div id=\"editUpdate\" class=\"button update\">Update</div>\n		<div id=\"editDelete\" class=\"button delete\">Delete</div>\n	</div>\n	<div class=\"body\">\n		<p class=\"bodyContent\"></p>\n	</div>\n</div>");
+              bodyContentTextArea = $(itemEl).find(".bodyContentTextArea");
+              bodyContent = $(itemEl).find(".bodyContent");
+              $(bodyContentTextArea).text(item.bodyContent[0]);
+              $(bodyContent).text(item.bodyContent[0]);
+              $(container).append(itemEl);
+              $(itemEl).find(".editArea").hide();
+              lens.eventFocus = function() {
+                return itemEl.addClass('selected');
+              };
+              lens.eventUnfocus = function() {
+                return itemEl.removeClass('selected');
+              };
+              lens.eventUpdate = function(id, data) {
+                if (id === itemId) {
+                  return model.updateItems([
+                    {
+                      id: itemId,
+                      bodyContent: data
+                    }
+                  ]);
+                }
+              };
+              lens.eventDelete = function(id) {
+                if (id === itemId) return model.removeItems([itemId]);
+              };
+              lens.update = function(item) {
+                $(itemEl).find(".bodyContent").text(item.bodyContent[0]);
+                return $(itemEl).find(".bodyContentTextArea").text(item.bodyContent[0]);
+              };
+              lens.remove = function() {
+                return $(itemEl).remove();
+              };
+              annoEvents = app.controller.annoActive.bind(itemEl, {
+                model: model,
+                itemId: itemId
               });
-              return that.canvas.setSize(w, h);
-            }
-          };
-          MITHGrid.events.onWindowResize.addListener(updateLocation);
-          if (playerObj != null) {
-            playerObj.events.onResize.addListener(updateLocation);
-          }
-          updateLocation();
-          canvasBinding.events.onShapeStart.addListener(shapeCreateBoxComponent.createGuide);
-          canvasBinding.events.onShapeDrag.addListener(shapeCreateBoxComponent.resizeGuide);
-          canvasBinding.events.onShapeDone.addListener(function(coords) {
-            var shape;
-            shape = shapeCreateBoxComponent.completeShape(coords);
-            if (shape.height > 1 && shape.width > 1) return app.insertShape(shape);
-          });
-          app.events.onCurrentTimeChange.addListener(function(npt) {
-            return that.visitRenderings(function(id, rendering) {
-              if (rendering.eventCurrentTimeChange != null) {
-                return rendering.eventCurrentTimeChange(npt);
+              annoEvents.events.onClick.addListener(app.setActiveAnnotation);
+              annoEvents.events.onDelete.addListener(lens.eventDelete);
+              annoEvents.events.onUpdate.addListener(lens.eventUpdate);
+              if (cb != null) cb(lens);
+              return lens;
+            };
+          }]));
+        };
+      });
+      return Presentation.namespace("RaphaelCanvas", function(RaphaelCanvas) {
+        return RaphaelCanvas.initPresentation = function() {
+          var args, _ref;
+          args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+          return (_ref = MITHGrid.Presentation).initPresentation.apply(_ref, ["OAC.StreamingVideo.Client.Presentation.RaphaelCanvas"].concat(__slice.call(args), [function(that, container) {
+            var app, boundingBoxComponent, canvasBinding, canvasController, id, keyBoardController, keyboardBinding, options, playerObj, shapeCreateBoxComponent, superEventFocusChange, updateLocation;
+            id = $(container).attr('id');
+            options = that.options;
+            app = options.application;
+            canvasController = options.controllers.canvas;
+            keyBoardController = options.controllers.keyboard;
+            that.canvas = new Raphael($(container), 10, 10);
+            $(that.canvas.canvas).css({
+              "pointer-events": "none"
+            });
+            canvasBinding = canvasController.bind($(container), {
+              closeEnough: 5,
+              paper: that.canvas
+            });
+            boundingBoxComponent = OAC.Client.StreamingVideo.Component.ShapeEditBox.initInstance(that.canvas);
+            shapeCreateBoxComponent = OAC.Client.StreamingVideo.Component.ShapeCreateBox.initInstance(that.canvas);
+            keyboardBinding = keyBoardController.bind($(container), {});
+            that.events = $.extend(true, that.events, keyboardBinding.events);
+            boundingBoxComponent.events.onResize.addListener(function(pos) {
+              var activeRendering;
+              activeRendering = that.getFocusedRendering();
+              if ((activeRendering != null) && (activeRendering.eventResize != null)) {
+                return activeRendering.eventResize(pos);
               }
             });
-          });
-          app.events.onTimeEasementChange.addListener(function(te) {
-            return that.visitRenderings(function(id, rendering) {
-              if (rendering.eventTimeEasementChange != null) {
-                return rendering.eventTimeEasementChange(te);
+            boundingBoxComponent.events.onMove.addListener(function(pos) {
+              var activeRendering;
+              activeRendering = that.getFocusedRendering();
+              if ((activeRendering != null) && (activeRendering.eventMove != null)) {
+                return activeRendering.eventMove(pos);
               }
             });
-          });
-          superEventFocusChange = that.eventFocusChange;
-          return that.eventFocusChange = function(id) {
-            if (app.getCurrentMode() === 'Select') {
-              superEventFocusChange(id);
-              boundingBoxComponent.attachToRendering(that.getFocusedRendering());
-              return canvasBinding.toBack();
+            boundingBoxComponent.events.onDelete.addListener(function() {
+              var activeRendering;
+              activeRendering = that.getFocusedRendering();
+              if ((activeRendering != null) && (activeRendering.eventDelete != null)) {
+                activeRendering.eventDelete();
+                return boundingBoxComponent.detachFromRendering();
+              }
+            });
+            app.events.onCurrentModeChange.addListener(function(newMode) {
+              if (newMode !== "Select" && newMode !== "Drag") {
+                return boundingBoxComponent.detachFromRendering();
+              }
+            });
+            playerObj = app.getPlayer();
+            updateLocation = function() {
+              var h, w, x, y, _ref, _ref2;
+              if (playerObj != null) {
+                _ref = playerObj.getCoordinates(), x = _ref[0], y = _ref[1];
+                _ref2 = playerObj.getSize(), w = _ref2[0], h = _ref2[1];
+                $(that.canvas.canvas).css({
+                  left: x + 'px',
+                  top: y + 'px'
+                });
+                return that.canvas.setSize(w, h);
+              }
+            };
+            MITHGrid.events.onWindowResize.addListener(updateLocation);
+            if (playerObj != null) {
+              playerObj.events.onResize.addListener(updateLocation);
             }
-          };
-        }]));
-      };
+            updateLocation();
+            canvasBinding.events.onShapeStart.addListener(shapeCreateBoxComponent.createGuide);
+            canvasBinding.events.onShapeDrag.addListener(shapeCreateBoxComponent.resizeGuide);
+            canvasBinding.events.onShapeDone.addListener(function(coords) {
+              var shape;
+              shape = shapeCreateBoxComponent.completeShape(coords);
+              if (shape.height > 1 && shape.width > 1) {
+                return app.insertShape(shape);
+              }
+            });
+            app.events.onCurrentTimeChange.addListener(function(npt) {
+              return that.visitRenderings(function(id, rendering) {
+                if (rendering.eventCurrentTimeChange != null) {
+                  return rendering.eventCurrentTimeChange(npt);
+                }
+              });
+            });
+            app.events.onTimeEasementChange.addListener(function(te) {
+              return that.visitRenderings(function(id, rendering) {
+                if (rendering.eventTimeEasementChange != null) {
+                  return rendering.eventTimeEasementChange(te);
+                }
+              });
+            });
+            superEventFocusChange = that.eventFocusChange;
+            return that.eventFocusChange = function(id) {
+              if (app.getCurrentMode() === 'Select') {
+                superEventFocusChange(id);
+                boundingBoxComponent.attachToRendering(that.getFocusedRendering());
+                return canvasBinding.toBack();
+              }
+            };
+          }]));
+        };
+      });
     });
     S4 = function() {
       return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
@@ -1189,7 +1244,7 @@
         app.getPlayer = function() {
           return playerObj;
         };
-        app.initShapeLens = function(container, view, model, itemId) {
+        app.initShapeLens = function(container, view, model, itemId, cb) {
           var calcOpacity, end, fend, focused, fstart, item, opacity, start, that;
           that = {
             id: itemId
@@ -1306,63 +1361,12 @@
           that.remove = function(item) {
             return that.shape.remove();
           };
+          if (cb != null) cb(that);
           return that;
-        };
-        app.initTextLens = function(container, view, model, itemId) {
-          var annoEvents, bodyContent, bodyContentTextArea, item, itemEl, that;
-          that = {};
-          item = model.getItem(itemId);
-          itemEl = $("<div class=\"anno_item\">\n	<p class=\"bodyContentInstructions\">Double click here to open edit window.</p>\n	<div class=\"editArea\">\n		<textarea class=\"bodyContentTextArea\"></textarea>\n		<div id=\"editUpdate\" class=\"button update\">Update</div>\n		<div id=\"editDelete\" class=\"button delete\">Delete</div>\n	</div>\n	<div class=\"body\">\n		<p class=\"bodyContent\"></p>\n	</div>\n</div>");
-          bodyContentTextArea = $(itemEl).find(".bodyContentTextArea");
-          bodyContent = $(itemEl).find(".bodyContent");
-          $(bodyContentTextArea).text(item.bodyContent[0]);
-          $(bodyContent).text(item.bodyContent[0]);
-          $(container).append(itemEl);
-          $(itemEl).find(".editArea").hide();
-          that.eventFocus = function() {
-            return itemEl.addClass('selected');
-          };
-          that.eventUnfocus = function() {
-            return itemEl.removeClass('selected');
-          };
-          that.eventUpdate = function(id, data) {
-            if (id === itemId) {
-              return model.updateItems([
-                {
-                  id: itemId,
-                  bodyContent: data
-                }
-              ]);
-            }
-          };
-          that.eventDelete = function(id) {
-            if (id === itemId) return model.removeItems([itemId]);
-          };
-          that.update = function(item) {
-            $(itemEl).find(".bodyContent").text(item.bodyContent[0]);
-            return $(itemEl).find(".bodyContentTextArea").text(item.bodyContent[0]);
-          };
-          that.remove = function() {
-            return $(itemEl).remove();
-          };
-          annoEvents = app.controller.annoActive.bind(itemEl, {
-            model: model,
-            itemId: itemId
-          });
-          annoEvents.events.onClick.addListener(app.setActiveAnnotation);
-          annoEvents.events.onDelete.addListener(that.eventDelete);
-          annoEvents.events.onUpdate.addListener(that.eventUpdate);
-          return that;
-        };
-        app.addShape = function(key, svgShape) {
-          return app.presentation.raphsvg.addLens(key, svgShape);
         };
         app.addShapeType = function(type, args) {
-          var calcF, lensF;
-          calcF = args.calc;
-          lensF = args.lens;
           shapeTypes[type] = args;
-          return app.addShape(type, lensF);
+          return app.presentation.raphsvg.addLens(type, args.lens);
         };
         app.insertShape = function(coords) {
           var curMode, npt_end, npt_start, shape, shapeItem, t;
@@ -1373,7 +1377,7 @@
             shape = shapeTypes[curMode].calc(coords);
             shapeAnnotationId = uuid();
             shapeItem = {
-              id: "anno" + shapeAnnotationId,
+              id: "_:anno" + shapeAnnotationId,
               type: "Annotation",
               bodyType: "Text",
               bodyContent: "This is an annotation for " + curMode,
@@ -1736,7 +1740,8 @@
           app.events.onActiveAnnotationChange.addListener(app.presentation.raphsvg.eventFocusChange);
           app.events.onCurrentTimeChange.addListener(function(t) {
             app.dataView.currentAnnotations.setKeyRange(t - 5, t + 5);
-            return playerObj.setPlayhead(t);
+            playerObj.setPlayhead(t);
+            return app.setCurrentMode('Watch');
           });
           app.setCurrentTime(playerObj.getPlayhead());
           playerObj.events.onPlayheadUpdate.addListener(app.setCurrentTime);
@@ -1775,51 +1780,50 @@
               return info;
             },
             lens: function(container, view, model, itemId) {
-              var c, h, item, selectBinding, superUpdate, that, w, x, y, _ref3, _ref4;
-              that = app.initShapeLens(container, view, model, itemId);
-              item = model.getItem(itemId);
-              _ref3 = that.scalePoint(item.x[0] - (item.w[0] / 2), item.y[0] - (item.h[0] / 2), item.targetWidth, item.targetHeight), x = _ref3[0], y = _ref3[1];
-              _ref4 = that.scalePoint(item.w[0], item.h[0], item.targetWidth, item.targetHeight), w = _ref4[0], h = _ref4[1];
-              c = view.canvas.rect(x, y, w, h);
-              that.shape = c;
-              c.attr({
-                fill: "silver",
-                border: "grey"
-              });
-              that.setOpacity();
-              $(c.node).attr('id', item.id[0]);
-              $(c.node).css({
-                "pointer-events": "auto"
-              });
-              selectBinding = app.controller.selectShape.bind(c);
-              selectBinding.events.onSelect.addListener(function() {
-                return app.setActiveAnnotation(itemId);
-              });
-              superUpdate = that.update;
-              that.update = function(newItem) {
-                var _ref5, _ref6;
-                item = newItem;
-                superUpdate(item);
-                if ((item.x != null) && (item.y != null) && (item.w != null) && (item.h != null)) {
-                  _ref5 = that.scalePoint(item.x[0], item.y[0], item.targetWidth, item.targetHeight), x = _ref5[0], y = _ref5[1];
-                  _ref6 = that.scalePoint(item.w[0], item.h[0], item.targetWidth, item.targetHeight), w = _ref6[0], h = _ref6[1];
-                  return c.attr({
-                    x: x - w / 2,
-                    y: y - h / 2,
-                    width: w,
-                    height: h
-                  });
-                }
-              };
-              that.getExtents = function() {
-                return {
-                  x: c.attr("x") + (c.attr("width") / 2),
-                  y: c.attr("y") + (c.attr("height") / 2),
-                  width: c.attr("width"),
-                  height: c.attr("height")
+              return app.initShapeLens(container, view, model, itemId, function(that) {
+                var c, h, item, selectBinding, superUpdate, w, x, y, _ref3, _ref4;
+                item = model.getItem(itemId);
+                _ref3 = that.scalePoint(item.x[0] - (item.w[0] / 2), item.y[0] - (item.h[0] / 2), item.targetWidth, item.targetHeight), x = _ref3[0], y = _ref3[1];
+                _ref4 = that.scalePoint(item.w[0], item.h[0], item.targetWidth, item.targetHeight), w = _ref4[0], h = _ref4[1];
+                c = view.canvas.rect(x, y, w, h);
+                that.shape = c;
+                c.attr({
+                  fill: "silver",
+                  border: "grey"
+                });
+                that.setOpacity();
+                $(c.node).css({
+                  "pointer-events": "auto"
+                });
+                selectBinding = app.controller.selectShape.bind(c);
+                selectBinding.events.onSelect.addListener(function() {
+                  return app.setActiveAnnotation(itemId);
+                });
+                superUpdate = that.update;
+                that.update = function(newItem) {
+                  var _ref5, _ref6;
+                  item = newItem;
+                  superUpdate(item);
+                  if ((item.x != null) && (item.y != null) && (item.w != null) && (item.h != null)) {
+                    _ref5 = that.scalePoint(item.x[0], item.y[0], item.targetWidth, item.targetHeight), x = _ref5[0], y = _ref5[1];
+                    _ref6 = that.scalePoint(item.w[0], item.h[0], item.targetWidth, item.targetHeight), w = _ref6[0], h = _ref6[1];
+                    return c.attr({
+                      x: x - w / 2,
+                      y: y - h / 2,
+                      width: w,
+                      height: h
+                    });
+                  }
                 };
-              };
-              return that;
+                return that.getExtents = function() {
+                  return {
+                    x: c.attr("x") + (c.attr("width") / 2),
+                    y: c.attr("y") + (c.attr("height") / 2),
+                    width: c.attr("width"),
+                    height: c.attr("height")
+                  };
+                };
+              });
             }
           });
           app.addShapeType("Ellipse", {
@@ -1847,49 +1851,49 @@
               return info;
             },
             lens: function(container, view, model, itemId) {
-              var c, h, item, selectBinding, superUpdate, that, w, x, y, _ref3, _ref4;
-              that = app.initShapeLens(container, view, model, itemId);
-              item = model.getItem(itemId);
-              _ref3 = that.scalePoint(item.x[0], item.y[0], item.targetWidth, item.targetHeight), x = _ref3[0], y = _ref3[1];
-              _ref4 = that.scalePoint(item.w[0] / 2, item.h[0] / 2, item.targetWidth, item.targetHeight), w = _ref4[0], h = _ref4[1];
-              c = view.canvas.ellipse(x, y, w, h);
-              that.shape = c;
-              c.attr({
-                fill: "silver",
-                border: "grey"
-              });
-              that.setOpacity();
-              $(c.node).css({
-                "pointer-events": "auto"
-              });
-              selectBinding = app.controller.selectShape.bind(c);
-              selectBinding.events.onSelect.addListener(function() {
-                return app.setActiveAnnotation(itemId);
-              });
-              superUpdate = that.update;
-              that.update = function(item) {
-                var _ref5, _ref6;
-                superUpdate(item);
-                if ((item.x != null) && (item.y != null)) {
-                  _ref5 = that.scalePoint(item.x[0], item.y[0], item.targetWidth, item.targetHeight), x = _ref5[0], y = _ref5[1];
-                  _ref6 = that.scalePoint(item.w[0], item.h[0], item.targetWidth, item.targetHeight), w = _ref6[0], h = _ref6[1];
-                  return c.attr({
-                    cx: x,
-                    cy: y,
-                    rx: w / 2,
-                    ry: h / 2
-                  });
-                }
-              };
-              that.getExtents = function() {
-                return {
-                  x: c.attr("cx"),
-                  y: c.attr("cy"),
-                  width: c.attr("rx") * 2,
-                  height: c.attr("ry") * 2
+              return app.initShapeLens(container, view, model, itemId, function(that) {
+                var c, h, item, selectBinding, superUpdate, w, x, y, _ref3, _ref4;
+                item = model.getItem(itemId);
+                _ref3 = that.scalePoint(item.x[0], item.y[0], item.targetWidth, item.targetHeight), x = _ref3[0], y = _ref3[1];
+                _ref4 = that.scalePoint(item.w[0] / 2, item.h[0] / 2, item.targetWidth, item.targetHeight), w = _ref4[0], h = _ref4[1];
+                c = view.canvas.ellipse(x, y, w, h);
+                that.shape = c;
+                c.attr({
+                  fill: "silver",
+                  border: "grey"
+                });
+                that.setOpacity();
+                $(c.node).css({
+                  "pointer-events": "auto"
+                });
+                selectBinding = app.controller.selectShape.bind(c);
+                selectBinding.events.onSelect.addListener(function() {
+                  return app.setActiveAnnotation(itemId);
+                });
+                superUpdate = that.update;
+                that.update = function(item) {
+                  var _ref5, _ref6;
+                  superUpdate(item);
+                  if ((item.x != null) && (item.y != null)) {
+                    _ref5 = that.scalePoint(item.x[0], item.y[0], item.targetWidth, item.targetHeight), x = _ref5[0], y = _ref5[1];
+                    _ref6 = that.scalePoint(item.w[0], item.h[0], item.targetWidth, item.targetHeight), w = _ref6[0], h = _ref6[1];
+                    return c.attr({
+                      cx: x,
+                      cy: y,
+                      rx: w / 2,
+                      ry: h / 2
+                    });
+                  }
                 };
-              };
-              return that;
+                return that.getExtents = function() {
+                  return {
+                    x: c.attr("cx"),
+                    y: c.attr("cy"),
+                    width: c.attr("rx") * 2,
+                    height: c.attr("ry") * 2
+                  };
+                };
+              });
             }
           });
           app.setCurrentTime(0);
@@ -2101,7 +2105,7 @@
     },
     presentations: {
       raphsvg: {
-        type: MITHGrid.Presentation.RaphaelCanvas,
+        type: OAC.Client.StreamingVideo.Presentation.RaphaelCanvas,
         dataView: 'currentAnnotations',
         controllers: {
           keyboard: "keyboard",

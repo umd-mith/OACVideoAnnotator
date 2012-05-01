@@ -26,7 +26,7 @@ title: Video Annotator Demo
       app.run();
 
       // have a plain HTML presentation of annotation bodies
-      annotations = MITHGrid.Presentation.initPresentation('#annotation-text', {
+      annotations = OAC.Client.StreamingVideo.Presentation.initPresentation('#annotation-text', {
 	    dataView: app.dataView.currentAnnotations,
 	    lensKey: ['.bodyType'],
 	    application: app
@@ -50,7 +50,7 @@ title: Video Annotator Demo
 		application: app
 	  });
       // we can use the default bare-bones text display provided by the annotation client
-      annotations.addLens("Text", app.initTextLens);
+      annotations.addLens("Text", annotations.initTextLens);
 
       $("#export-button").click(function() {
         var data = app.exportData();
