@@ -5,7 +5,7 @@
 # The **OAC Video Annotation Tool** is a MITHGrid application providing annotation capabilities for streaming
 # video embedded in a web page. 
 #  
-# Date: Mon Apr 30 11:34:48 2012 -0400
+# Date: Mon Apr 30 14:49:32 2012 -0400
 #  
 # Educational Community License, Version 2.0
 # 
@@ -219,23 +219,26 @@
                 removeOverlay();
                 overlay = paper.rect(0, 0, paper.width, paper.height);
                 overlay.toFront();
-                return overlay.attr({
+                overlay.attr({
                   fill: "#ffffff",
                   opacity: 0.01
                 });
+                return $(overlay.node).css({
+                  "pointer-events": "auto"
+                });
               };
               removeOverlay = function() {
-                var mouseCaptured;
                 if (overlay != null) {
                   overlay.unmousedown();
                   overlay.unmouseup();
                   overlay.unmousemove();
+                  overlay.attr({
+                    opacity: 0.0
+                  });
                   overlay.remove();
+                  overlay = null;
                 }
-                if (typeof mouseCaptured !== "undefined" && mouseCaptured !== null) {
-                  MITHGrid.mouse.uncapture();
-                  return mouseCaptured = false;
-                }
+                return uncaptureMouse();
               };
               mouseCaptured = false;
               captureMouse = function(handlers) {
@@ -609,7 +612,7 @@
             return [$(domObj).position().left, $(domObj).position().top];
           };
           that.getSize = function() {
-            return [$(domObj).width() - 2, $(domObj).height() - 2];
+            return [$(domObj).width(), $(domObj).height()];
           };
           that.getTargetURI = function() {
             return $(domObj).data('oatarget');
@@ -1033,6 +1036,9 @@
           canvasController = options.controllers.canvas;
           keyBoardController = options.controllers.keyboard;
           that.canvas = new Raphael($(container), 10, 10);
+          $(that.canvas.canvas).css({
+            "pointer-events": "none"
+          });
           canvasBinding = canvasController.bind($(container), {
             closeEnough: 5,
             paper: that.canvas
@@ -1140,7 +1146,7 @@
         $("body").append(container);
       }
       extendedOpts = $.extend(true, {}, {
-        viewSetup: "<div id=\"" + myCanvasId + "\" class=\"section-canvas\"></div>\n<!-- div class=\"mithgrid-bottomarea\">\n	<div class=\"timeselect\">\n		<p>Enter start time:</p>\n		<input id=\"timestart\" type=\"text\" />\n		<p>Enter end time:</p>\n		<input id=\"timeend\" type=\"text\" />\n		<div id=\"submittime\" class=\"button\">Confirm time settings</div>\n	</div>\n</div -->",
+        viewSetup: "<div id=\"" + myCanvasId + "\" class=\"section-canvas\"></div>",
         controllers: {
           keyboard: {
             isActive: function() {
@@ -1731,6 +1737,9 @@
               });
               that.setOpacity();
               $(c.node).attr('id', item.id[0]);
+              $(c.node).css({
+                "pointer-events": "auto"
+              });
               selectBinding = app.controller.selectShape.bind(c);
               selectBinding.events.onSelect.addListener(function() {
                 return app.setActiveAnnotation(itemId);
@@ -1794,6 +1803,9 @@
                 border: "grey"
               });
               that.setOpacity();
+              $(c.node).css({
+                "pointer-events": "auto"
+              });
               selectBinding = app.controller.selectShape.bind(c);
               selectBinding.events.onSelect.addListener(function() {
                 return app.setActiveAnnotation(itemId);
