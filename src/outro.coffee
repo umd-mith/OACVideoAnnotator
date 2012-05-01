@@ -232,7 +232,7 @@ MITHGrid.defaults "OAC.Client.StreamingVideo",
 
 	presentations: 
 		raphsvg:
-			type: MITHGrid.Presentation.RaphaelCanvas
+			type: OAC.Client.StreamingVideo.Presentation.RaphaelCanvas
 			dataView: 'currentAnnotations'
 			# The controllers are configured for the application and passed in to the presentation's
 			# initInstance method as named here.

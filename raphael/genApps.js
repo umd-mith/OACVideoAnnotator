@@ -11,8 +11,7 @@ $(function() {
 		
 		// Adding a ready wrapper function to set the playerobject
 		var raphApp = OAC.Client.StreamingVideo.initApp({
-			player: playerobj//,
-			//url: 'http://html5demos.com/assets/dizzy'
+			player: playerobj
 		});
 
 	
@@ -20,23 +19,15 @@ $(function() {
 		raphApp.run();
 		
 		// have a plain HTML presentation of annotation bodies
-        var annotations = MITHGrid.Presentation.initPresentation('#annotation-list', {
+        var annotations = OAC.Client.StreamingVideo.Presentation.AnnotationList.initPresentation('#annotation-list', {
 	        dataView: raphApp.dataView.currentAnnotations,
 	        lensKey: ['.bodyType'],
 			application: raphApp
         });
         annotations.addLens("Text", function(container, view, model, itemId) { 
-	        return raphApp.initTextLens(container, view, model, itemId) 
+	        return annotations.initTextLens(container, view, model, itemId) 
 	    });
 		raphApp.events.onActiveAnnotationChange.addListener(annotations.eventFocusChange);
-		
-		//rectButton = app.buttonFeature 'buttongrouping', 'Shapes', 'Rectangle'
-
-		//ellipseButton = app.buttonFeature 'buttongrouping', 'Shapes', 'Ellipse'
-
-		//selectButton = app.buttonFeature 'buttongrouping', 'General', 'Select'
-
-		//watchButton = app.buttonFeature 'buttongrouping', 'General', 'Watch'
 		
 		// create mode buttons
 		OAC.Client.StreamingVideo.Component.AnnotationCreationButton.initInstance("#modeRectangle", {
