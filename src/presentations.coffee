@@ -33,6 +33,9 @@ MITHGrid.Presentation.namespace "RaphaelCanvas", (RaphaelCanvas) ->
 
 			that.canvas = new Raphael($(container), 10, 10)
 
+			$(that.canvas.canvas).css
+				"pointer-events": "none"
+			
 			# attach binding
 			# **FIXME:** We need to change this. If we have multiple videos on a page, this will break.
 			canvasBinding = canvasController.bind $(container),
@@ -81,9 +84,7 @@ MITHGrid.Presentation.namespace "RaphaelCanvas", (RaphaelCanvas) ->
 					$(that.canvas.canvas).css
 						left: x + 'px'
 						top: y + 'px'
-						#width: w + 'px'
-						#height: h + 'px'
-						
+							
 					that.canvas.setSize w, h
 
 			MITHGrid.events.onWindowResize.addListener updateLocation

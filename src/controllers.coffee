@@ -248,16 +248,19 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
 						overlay.attr
 							fill: "#ffffff"
 							opacity: 0.01
+						$(overlay.node).css
+							"pointer-events": "auto"
 					
 					removeOverlay = ->
 						if overlay?
 							overlay.unmousedown()
 							overlay.unmouseup()
 							overlay.unmousemove()
+							overlay.attr
+								opacity: 0.0
 							overlay.remove()
-						if mouseCaptured?
-							MITHGrid.mouse.uncapture()
-							mouseCaptured = false
+							overlay = null
+						uncaptureMouse()
 					
 					mouseCaptured = false
 					

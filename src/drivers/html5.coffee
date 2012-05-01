@@ -52,8 +52,8 @@ initHTML5PlayerDrv = ->
 			#
 			that.getSize = -> 
 				[
-					$(domObj).width() - 2
-					$(domObj).height() - 2
+					$(domObj).width()
+					$(domObj).height()
 				]
 			
 			#

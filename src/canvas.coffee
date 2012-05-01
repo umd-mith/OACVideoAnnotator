@@ -77,9 +77,9 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 		# the keyboard should be considered active.
 		controllers:
 			keyboard:
-				isActive: () -> app.getCurrentMode() != 'Editing'
+				isActive: -> app.getCurrentMode() != 'Editing'
 			selectShape:
-				isSelectable: () -> app.getCurrentMode() == "Select"
+				isSelectable: -> app.getCurrentMode() == "Select"
 		# We connect the SVG overlay and annotation sections of the DOM with their respective
 		# presentations.
 		presentations:
@@ -960,6 +960,8 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 					# sets of annotations.
 					# Should be fixed with UUID
 					$(c.node).attr('id', item.id[0])
+					$(c.node).css
+						"pointer-events": "auto"
 
 					selectBinding = app.controller.selectShape.bind c
 					selectBinding.events.onSelect.addListener ->
@@ -1052,6 +1054,8 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 						fill: "silver"
 						border: "grey"
 					that.setOpacity()
+					$(c.node).css
+						"pointer-events": "auto"
 
 					selectBinding = app.controller.selectShape.bind c
 					selectBinding.events.onSelect.addListener ->
