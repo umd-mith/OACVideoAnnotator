@@ -184,10 +184,14 @@ OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
 						for i, o of handles
 							if i == 'mid'
 								midDrag = paper.rect(o.x, o.y, padding, padding)
+								$(midDrag.node).css
+									"pointer-events": "auto"
 								o.id = midDrag.id
 								o.el = midDrag
 							else
 								h = paper.rect(o.x, o.y, padding, padding)
+								$(h.node).css
+									"pointer-events": "auto"
 								o.id = h.id
 								o.el = h
 								h.attr

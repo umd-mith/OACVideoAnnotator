@@ -102,6 +102,12 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 		playerObj = options.player
 		
 		options.url = options.url or playerObj.getTargetURI()
+		
+		screenSize = {}
+		[ screenSize.width, screenSize.height ] = playerObj.getSize()
+		
+		playerObj.events.onResize.addListener (s) ->
+			[ screenSize.width, screenSize.height ] = s
 
 		app.getPlayer = -> playerObj
 	
@@ -156,9 +162,22 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 					else
 						val = 1.0
 				val
+					
+			that.scalePoint = (x, y, w, h) ->
+				if w? and w[0]?
+					w = w[0]
+				else
+					w = screenSize.width
+				if h? and h[0]?
+					h = h[0]
+				else
+					h = screenSize.height
+				
+				if w == 0 or h == 0
+					[x, y]
+				else
+					[ x * screenSize.width / w, y * screenSize.height / h ]
 			
-		
-
 			# ### eventTimeEasementChange (private)
 			#
 			# Handles event calls for when the user wants
@@ -269,6 +288,8 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 					y: pos.y
 					w: pos.width
 					h: pos.height
+					targetWidth: screenSize.width
+					targetHeight: screenSize.height
 				]
 			
 			# #### #eventMove
@@ -532,6 +553,8 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 					bodyContent: "This is an annotation for " + curMode
 					shapeType: curMode
 					targetURI: app.options.url
+					targetHeight: screenSize.height
+					targetWidth: screenSize.width
 					# Starts off with half-opacity, 1 is for in-focus
 					npt_start: if(npt_start<0) then 0 else npt_start
 					npt_end: npt_end
@@ -553,6 +576,7 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 			RDF: "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 			CNT: "http://www.w3.org/2008/content#"
 			DC: "http://purl.org/dc/elements/1.1/"
+			EXIF: "http://www.w3.org/2003/12/exif/ns#"
 		
 		parseNPT = (npt) ->
 			if npt.indexOf(':') == -1
@@ -628,6 +652,11 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 																		if shapeInfo?
 																			$.extend(temp, shapeInfo)
 																			temp.shapeType = t
+																			if data[hasSubSelector]["#{NS.EXIF}width"]? and data[hasSubSelector]["#{NS.EXIF}width"][0]?
+																				temp.targetWidth = parseFloat data[hasSubSelector]["#{NS.EXIF}width"][0].value
+																			if data[hasSubSelector]["#{NS.EXIF}height"]? and data[hasSubSelector]["#{NS.EXIF}height"][0]?
+																				temp.targetHeight = parseFloat data[hasSubSelector]["#{NS.EXIF}height"][0].value
+																			
 															
 													if "#{NS.OA}FragSelector" in types
 														# extract media fragment stuff
@@ -726,12 +755,18 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 
 				if svglens?
 					# Targets have selectors, which then have svg and npt elements
-					# **FIXME:** This should be provided by the shape management info - render to SVG just as
-					# we render to the presentation
-					uri     id[2], NS.RDF, "type",              "#{NS.OAX}SvgSelector"
-					literal id[2], NS.DC,  "format",            "text/svg+xml"
-					literal id[2], NS.CNT, "characterEncoding", "utf-8"
-					literal id[2], NS.CNT, "chars",             svglens(app.dataStore.canvas, obj.id[0])
+					uri     id[2], NS.RDF,  "type",              "#{NS.OAX}SvgSelector"
+					literal id[2], NS.DC,   "format",            "text/svg+xml"
+					literal id[2], NS.CNT,  "characterEncoding", "utf-8"
+					literal id[2], NS.CNT,  "chars",             svglens(app.dataStore.canvas, obj.id[0])
+					if obj.targetHeight? and obj.targetHeight[0]?
+						literal id[2], NS.EXIF, "height",        obj.targetHeight[0]
+					else
+						literal id[2], NS.EXIF, "height",        screenSize.height
+					if obj.targetWidth? and obj.targetWidth[0]?
+						literal id[2], NS.EXIF, "width",         obj.targetWidth[0]
+					else
+						literal id[2], NS.EXIF, "width",         screenSize.width
 		
 				# This is inserted regardless of the shape type - it's a function of this being a
 				# streaming video annotation client
@@ -947,7 +982,10 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 					item = model.getItem itemId
 
 					# Accessing the view.canvas Object that was created in MITHGrid.Presentation.RaphSVG
-					c = view.canvas.rect(item.x[0] - (item.w[0] / 2), item.y[0] - (item.h[0] / 2), item.w[0], item.h[0])
+					[x, y] = that.scalePoint item.x[0] - (item.w[0] / 2), item.y[0] - (item.h[0] / 2), item.targetWidth, item.targetHeight
+					[w, h] = that.scalePoint item.w[0], item.h[0], item.targetWidth, item.targetHeight
+					
+					c = view.canvas.rect(x, y, w, h)
 
 					that.shape = c
 					# fill and set opacity
@@ -974,11 +1012,13 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 						item = newItem
 						superUpdate item
 						if item.x? and item.y? and item.w? and item.h?
+							[x, y] = that.scalePoint item.x[0], item.y[0], item.targetWidth, item.targetHeight
+							[w, h] = that.scalePoint item.w[0], item.h[0], item.targetWidth, item.targetHeight
 							c.attr
-								x: item.x[0] - item.w[0] / 2
-								y: item.y[0] - item.h[0] / 2
-								width: item.w[0]
-								height: item.h[0]
+								x: x - w / 2
+								y: y - h / 2
+								width: w
+								height: h
 
 					# calculate the extents (x, y, width, height)
 					# of this type of shape
@@ -1046,7 +1086,9 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 					item = model.getItem itemId
 
 					# create the shape
-					c = view.canvas.ellipse(item.x[0], item.y[0], item.w[0] / 2, item.h[0] / 2)
+					[x, y] = that.scalePoint item.x[0], item.y[0], item.targetWidth, item.targetHeight
+					[w, h] = that.scalePoint item.w[0]/2, item.h[0]/2, item.targetWidth, item.targetHeight
+					c = view.canvas.ellipse(x, y, w, h)
 					that.shape = c
 
 					# fill shape
@@ -1069,11 +1111,13 @@ OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance = (ar
 						superUpdate item
 
 						if item.x? and item.y?
+							[x, y] = that.scalePoint item.x[0], item.y[0], item.targetWidth, item.targetHeight
+							[w, h] = that.scalePoint item.w[0], item.h[0], item.targetWidth, item.targetHeight
 							c.attr
-								cx: item.x[0]
-								cy: item.y[0]
-								rx: item.w[0] / 2
-								ry: item.h[0] / 2
+								cx: x
+								cy: y
+								rx: w / 2
+								ry: h / 2
 					
 					# calculate the extents (x, y, width, height)
 					# of this type of shape
