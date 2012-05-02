@@ -1,0 +1,150 @@
+---
+layout: docco
+title: OACVideoAnnotator/code/src/drivers/dummy.coffee.html
+---
+<div id="container"><div id="background"></div><div id="jump_to">Jump To &hellip;<div id="jump_wrapper"><div id="jump_page"><a href="../../index.html" class="source"><span class="file_name">README</span></a><a href="../../src/canvas.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">canvas.coffee</span></a><a href="../../src/component.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">component.coffee</span></a><a href="../../src/controllers.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">controllers.coffee</span></a><a href="../../src/driver-framework.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">driver-framework.coffee</span></a><a href="../../src/drivers/dummy.coffee.html" class="source selected"><span class="base_path">src / drivers / </span><span class="file_name">dummy.coffee</span></a><a href="../../src/drivers/html5.coffee.html" class="source "><span class="base_path">src / drivers / </span><span class="file_name">html5.coffee</span></a><a href="../../src/drivers/youtube.coffee.html" class="source "><span class="base_path">src / drivers / </span><span class="file_name">youtube.coffee</span></a><a href="../../src/intro.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">intro.coffee</span></a><a href="../../src/outro.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">outro.coffee</span></a><a href="../../src/presentations.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">presentations.coffee</span></a></div></div></div><table cellpadding="0" cellspacing="0"><thead><tr><th class="docs"><h1>dummy.coffee</h1><div class="filepath">src/drivers/</div></th><th class="code"></th></tr></thead><tbody><tr id="section-1"><td class="docs"><div class="pilwrap"><a href="#section-1" class="pilcrow">&#182;</a></div><p>Function: ready</p>
+
+<p>Start point required to call OAC driver register. It initializes the OAC driver.</p>
+</td><td class="code"><div class="highlight"><pre><span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">ready</span> <span class="o">-&gt;</span>
+  <span class="nx">OAC</span><span class="p">.</span><span class="nx">Client</span><span class="p">.</span><span class="nx">StreamingVideo</span><span class="p">.</span><span class="nx">Player</span><span class="p">.</span><span class="nx">register</span> <span class="nx">initOACDummyPlayerDrv</span><span class="p">()</span></pre></div></td></tr><tr id="section-2"><td class="docs"><div class="pilwrap"><a href="#section-2" class="pilcrow">&#182;</a></div><p>Class: OACDummyPlayerDrv</p>
+
+<p>OAC driver for Dummy Player.</p>
+</td><td class="code"><div class="highlight"><pre><span class="nv">initOACDummyPlayerDrv = </span><span class="o">-&gt;</span>
+  <span class="nv">driver = </span><span class="p">{}</span></pre></div></td></tr><tr id="section-3"><td class="docs"><div class="pilwrap"><a href="#section-3" class="pilcrow">&#182;</a></div><p>Function: getAvailablePlayers
+Returns all players available on the page, that can be controlled with this driver.
+Returns:
+An array of DOM objects.</p>
+</td><td class="code"><div class="highlight"><pre>  <span class="nv">driver.getAvailablePlayers = </span><span class="o">-&gt;</span>
+    <span class="nv">index = </span><span class="mi">0</span>
+    <span class="k">for</span> <span class="nx">p</span> <span class="k">in</span> <span class="nx">$</span><span class="p">(</span><span class="s">&#39;.dummyplayer&#39;</span><span class="p">)</span>
+      <span class="nv">player = </span><span class="nx">$</span><span class="p">(</span><span class="nx">p</span><span class="p">).</span><span class="nx">data</span> <span class="s">&#39;player&#39;</span>
+      <span class="k">if</span> <span class="o">not</span> <span class="nx">player</span><span class="o">?</span>
+        <span class="nv">player = </span><span class="nx">initDummyPlayer</span> <span class="nx">p</span><span class="p">,</span> <span class="nx">index</span>
+        <span class="nx">$</span><span class="p">(</span><span class="nx">p</span><span class="p">).</span><span class="nx">data</span> <span class="s">&#39;player&#39;</span><span class="p">,</span> <span class="nx">player</span>
+        <span class="nx">player</span><span class="p">.</span><span class="nx">startDummyPlayer</span><span class="p">()</span>
+      <span class="nx">index</span> <span class="o">+=</span> <span class="mi">1</span>
+      <span class="nx">player</span>
+      
+  <span class="nv">driver.getOACVersion = </span><span class="o">-&gt;</span> <span class="s">&quot;1.0&quot;</span>
+
+  <span class="nv">driver.bindPlayer = </span><span class="nf">(playerObj) -&gt;</span>
+    <span class="nx">OAC</span><span class="p">.</span><span class="nx">Client</span><span class="p">.</span><span class="nx">StreamingVideo</span><span class="p">.</span><span class="nx">Player</span><span class="p">.</span><span class="nx">DriverBinding</span><span class="p">.</span><span class="nx">initInstance</span> <span class="nf">(that) -&gt;</span></pre></div></td></tr><tr id="section-4"><td class="docs"><div class="pilwrap"><a href="#section-4" class="pilcrow">&#182;</a></div><p>Function: onplayheadupdate
+Customizable callback to set a function that is going to be called on each second.
+Parameters:
+callback - User function</p>
+</td><td class="code"><div class="highlight"><pre>      <span class="nv">that.onPlayheadUpdate = </span><span class="nx">playerObj</span><span class="p">.</span><span class="nx">onplayheadupdate</span>
+  </pre></div></td></tr><tr id="section-5"><td class="docs"><div class="pilwrap"><a href="#section-5" class="pilcrow">&#182;</a></div><p>Function: getcoordinates
+Returns the current player coordinates on screen
+Returns:
+An array of coordinates(0 is X, 1 is Y).</p>
+</td><td class="code"><div class="highlight"><pre>      <span class="nv">that.getcoordinates = </span><span class="o">-&gt;</span> <span class="p">(</span><span class="nb">parseInt</span><span class="p">(</span><span class="nx">c</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span> <span class="k">for</span> <span class="nx">c</span> <span class="k">in</span> <span class="nx">playerObj</span><span class="p">.</span><span class="nx">getcoordinates</span><span class="p">())</span>
+  </pre></div></td></tr><tr id="section-6"><td class="docs"><div class="pilwrap"><a href="#section-6" class="pilcrow">&#182;</a></div><p>Function: getsize
+Returns the video size on current player.
+Returns:
+Array of pixel values ( 0 is width, 1 is height).</p>
+</td><td class="code"><div class="highlight"><pre>      <span class="nv">that.getsize = </span><span class="o">-&gt;</span> <span class="p">(</span><span class="nb">parseInt</span><span class="p">(</span><span class="nx">s</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span> <span class="k">for</span> <span class="nx">s</span> <span class="k">in</span> <span class="nx">playerObj</span><span class="p">.</span><span class="nx">getsize</span><span class="p">())</span>
+  </pre></div></td></tr><tr id="section-7"><td class="docs"><div class="pilwrap"><a href="#section-7" class="pilcrow">&#182;</a></div><p>Function: play
+Plays video.</p>
+</td><td class="code"><div class="highlight"><pre>      <span class="nv">that.play = </span><span class="nx">playerObj</span><span class="p">.</span><span class="nx">play</span>
+  </pre></div></td></tr><tr id="section-8"><td class="docs"><div class="pilwrap"><a href="#section-8" class="pilcrow">&#182;</a></div><p>Function: pause
+Pauses video.</p>
+</td><td class="code"><div class="highlight"><pre>      <span class="nv">that.pause = </span><span class="nx">playerObj</span><span class="p">.</span><span class="nx">pause</span>
+  </pre></div></td></tr><tr id="section-9"><td class="docs"><div class="pilwrap"><a href="#section-9" class="pilcrow">&#182;</a></div><p>Function: getPlayhead
+Returns the current play head position
+Returns:
+Play head position</p>
+</td><td class="code"><div class="highlight"><pre>      <span class="nv">that.getPlayhead = </span><span class="nx">playerObj</span><span class="p">.</span><span class="nx">getplayhead</span>
+  </pre></div></td></tr><tr id="section-10"><td class="docs"><div class="pilwrap"><a href="#section-10" class="pilcrow">&#182;</a></div><p>Function: setPlayhead
+Sets the play head value to a certain position.
+Parameters:
+value - New play head value</p>
+</td><td class="code"><div class="highlight"><pre>      <span class="nv">that.setPlayhead = </span><span class="nx">playerObj</span><span class="p">.</span><span class="nx">setplayhead</span>
+  <span class="nx">driver</span>
+
+<span class="nv">initDummyPlayer = </span><span class="nf">(DOMObject, index) -&gt;</span>
+    <span class="nv">that = </span><span class="p">{}</span>
+    
+    <span class="nv">that.startDummyPlayer = </span><span class="o">-&gt;</span>
+      <span class="nx">that</span><span class="p">.</span><span class="nx">setAspect</span><span class="p">()</span>
+      <span class="nx">that</span><span class="p">.</span><span class="nx">setContent</span><span class="p">()</span>
+      <span class="nx">that</span><span class="p">.</span><span class="nx">play</span><span class="p">()</span>
+      <span class="nb">window</span><span class="p">.</span><span class="nx">setTimeout</span> <span class="nx">that</span><span class="p">.</span><span class="nx">secondIntervalUpdate</span><span class="p">,</span> <span class="mi">1000</span>
+
+    <span class="nv">that.setAspect = </span><span class="o">-&gt;</span>
+      <span class="nx">$</span><span class="p">(</span><span class="nx">DOMObject</span><span class="p">).</span><span class="nx">css</span> <span class="s">&#39;background&#39;</span><span class="p">,</span> <span class="s">&#39;url(&quot;dummyplayer/images/dummy.png&quot;) no-repeat scroll right bottom #F8C700&#39;</span>
+      <span class="nx">$</span><span class="p">(</span><span class="nx">DOMObject</span><span class="p">).</span><span class="nx">css</span> <span class="s">&#39;border&#39;</span><span class="p">,</span> <span class="s">&#39;1px solid darkBlue&#39;</span>
+
+    <span class="nv">that.setContent = </span><span class="o">-&gt;</span>
+      <span class="nv">player = </span><span class="s">&quot;$(&#39;</span><span class="err">#</span><span class="s">player-content-</span><span class="si">#{</span><span class="nx">index</span><span class="si">}</span><span class="s">&#39;).parents(&#39;.dummyplayer&#39;).data(&#39;player&#39;)&quot;</span>
+      <span class="nx">$</span><span class="p">(</span><span class="nx">DOMObject</span><span class="p">).</span><span class="nx">append</span> <span class="s">&quot;&quot;&quot;</span>
+<span class="s">        &lt;ul id=&quot;player-content-</span><span class="si">#{</span><span class="nx">index</span><span class="si">}</span><span class="s">&quot; style=&quot;list-style-type: none; padding: 0;&quot;&gt;</span>
+<span class="s">          &lt;li style=&quot;text-align: center; font-weight: bold; text-decoration: underline;&quot;&gt;Dummy Player </span><span class="err">#</span><span class="si">#{</span><span class="nx">index</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s">&lt;/li&gt;</span>
+<span class="s">          &lt;li style=&quot;text-align: center;&quot;&gt;Status: &lt;span class=&quot;dummy-status&quot;&gt;Paused&lt;/span&gt;&lt;/li&gt;</span>
+<span class="s">          &lt;li style=&quot;text-align: center;&quot;&gt;Position: &lt;span class=&quot;dummy-position&quot;&gt;0&lt;/span&gt; seconds&lt;/li&gt;</span>
+<span class="s">          &lt;!-- li style=&quot;text-align: center;&quot;&gt;</span>
+<span class="s">            &lt;ul style=&quot;list-style-type: none; padding: 0;&quot;&gt;</span>
+<span class="s">              &lt;li style=&quot;margin: 0 8px; display: inline;&quot;&gt;</span>
+<span class="s">                &lt;a onClick=&quot;</span><span class="si">#{</span><span class="nx">player</span><span class="si">}</span><span class="s">.rewind(5)&quot;&gt;&lt;img src=&quot;dummyplayer/images/rewind.png&quot; /&gt;&lt;/a&gt;</span>
+<span class="s">              &lt;/li&gt;</span>
+<span class="s">              &lt;li style=&quot;margin: 0 8px; display: inline;&quot;&gt;</span>
+<span class="s">                &lt;a onClick=&quot;</span><span class="si">#{</span><span class="nx">player</span><span class="si">}</span><span class="s">.toggle()&quot;&gt;&lt;img src=&quot;dummyplayer/images/playpause.png&quot; /&gt;&lt;/a&gt;</span>
+<span class="s">              &lt;/li&gt;</span>
+<span class="s">              &lt;li style=&quot;margin: 0 8px; display: inline;&quot;&gt;</span>
+<span class="s">                &lt;a onClick=&quot;</span><span class="si">#{</span><span class="nx">player</span><span class="si">}</span><span class="s">.forward(5)&quot;&gt;&lt;img src=&quot;dummyplayer/images/forward.png&quot; /&gt;&lt;/a&gt;</span>
+<span class="s">              &lt;/li&gt;</span>
+<span class="s">            &lt;/ul&gt;</span>
+<span class="s">          &lt;/li --&gt;</span>
+<span class="s">        &lt;/ul&gt;</span>
+<span class="s">      &quot;&quot;&quot;</span>
+
+    <span class="nv">that.secondIntervalUpdate = </span><span class="o">-&gt;</span>
+      <span class="nb">window</span><span class="p">.</span><span class="nx">setTimeout</span> <span class="nx">that</span><span class="p">.</span><span class="nx">secondIntervalUpdate</span><span class="p">,</span> <span class="mi">1000</span>
+      <span class="k">if</span> <span class="nx">$</span><span class="p">(</span><span class="nx">DOMObject</span><span class="p">).</span><span class="nx">find</span><span class="p">(</span><span class="s">&quot;.dummy-status&quot;</span><span class="p">).</span><span class="nx">html</span><span class="p">()</span> <span class="o">==</span> <span class="s">&quot;Playing&quot;</span>
+        <span class="nx">that</span><span class="p">.</span><span class="nx">forward</span> <span class="mi">1</span>
+
+    <span class="nv">that.toggle = </span><span class="o">-&gt;</span>
+      <span class="k">if</span> <span class="nx">$</span><span class="p">(</span><span class="nx">DOMObject</span><span class="p">).</span><span class="nx">find</span><span class="p">(</span><span class="s">&quot;.dummy-status&quot;</span><span class="p">).</span><span class="nx">html</span><span class="p">()</span> <span class="o">==</span> <span class="s">&quot;Playing&quot;</span>
+        <span class="nx">that</span><span class="p">.</span><span class="nx">pause</span><span class="p">()</span>
+      <span class="k">else</span>
+        <span class="nx">that</span><span class="p">.</span><span class="nx">play</span><span class="p">()</span>
+
+    <span class="nv">that.pause = </span><span class="o">-&gt;</span>
+      <span class="nx">$</span><span class="p">(</span><span class="nx">DOMObject</span><span class="p">).</span><span class="nx">find</span><span class="p">(</span><span class="s">&quot;.dummy-status&quot;</span><span class="p">).</span><span class="nx">html</span><span class="p">(</span><span class="s">&quot;Paused&quot;</span><span class="p">)</span>
+
+    <span class="nv">that.play = </span><span class="o">-&gt;</span>
+      <span class="nx">$</span><span class="p">(</span><span class="nx">DOMObject</span><span class="p">).</span><span class="nx">find</span><span class="p">(</span><span class="s">&quot;.dummy-status&quot;</span><span class="p">).</span><span class="nx">html</span><span class="p">(</span><span class="s">&quot;Playing&quot;</span><span class="p">)</span>
+
+    <span class="nv">that.rewind = </span><span class="nf">(value) -&gt;</span>
+      <span class="nx">that</span><span class="p">.</span><span class="nx">setplayhead</span><span class="p">(</span><span class="nx">that</span><span class="p">.</span><span class="nx">getplayhead</span><span class="p">()</span> <span class="o">-</span> <span class="nb">parseInt</span><span class="p">(</span><span class="nx">value</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+
+    <span class="nv">that.forward = </span><span class="nf">(value) -&gt;</span>
+      <span class="nx">that</span><span class="p">.</span><span class="nx">setplayhead</span><span class="p">(</span><span class="nx">that</span><span class="p">.</span><span class="nx">getplayhead</span><span class="p">()</span> <span class="o">+</span> <span class="nb">parseInt</span><span class="p">(</span><span class="nx">value</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+
+    <span class="nv">that.setplayhead = </span><span class="nf">(value) -&gt;</span>
+      <span class="nv">value = </span><span class="nb">parseInt</span><span class="p">(</span><span class="nx">value</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+      <span class="k">if</span> <span class="nx">value</span> <span class="o">&lt;</span> <span class="mi">0</span>
+        <span class="nv">value = </span><span class="mi">0</span>
+      <span class="nx">$</span><span class="p">(</span><span class="nx">DOMObject</span><span class="p">).</span><span class="nx">find</span><span class="p">(</span><span class="s">&quot;.dummy-position&quot;</span><span class="p">).</span><span class="nx">html</span><span class="p">(</span><span class="nx">value</span><span class="p">)</span>
+      <span class="nx">$</span><span class="p">(</span><span class="nx">DOMObject</span><span class="p">).</span><span class="nx">trigger</span> <span class="s">&#39;timeupdate&#39;</span>
+
+    <span class="nv">that.getplayhead = </span><span class="nf">() -&gt;</span>
+      <span class="nb">parseInt</span> <span class="nx">$</span><span class="p">(</span><span class="nx">DOMObject</span><span class="p">).</span><span class="nx">find</span><span class="p">(</span><span class="s">&quot;.dummy-position&quot;</span><span class="p">).</span><span class="nx">html</span><span class="p">(),</span> <span class="mi">10</span>
+
+    <span class="nv">that.getsize = </span><span class="o">-&gt;</span>
+      <span class="nv">retval = </span><span class="p">[]</span>
+      <span class="nx">retval</span><span class="p">.</span><span class="nx">push</span> <span class="nb">parseInt</span> <span class="nx">$</span><span class="p">(</span><span class="s">&quot;</span><span class="err">#</span><span class="s">player-content-</span><span class="si">#{</span><span class="nx">index</span><span class="si">}</span><span class="s">&quot;</span><span class="p">).</span><span class="nx">parents</span><span class="p">(</span><span class="s">&#39;.dummyplayer&#39;</span><span class="p">).</span><span class="nx">css</span><span class="p">(</span><span class="s">&quot;width&quot;</span><span class="p">),</span> <span class="mi">10</span>
+      <span class="nx">retval</span><span class="p">.</span><span class="nx">push</span> <span class="nb">parseInt</span> <span class="nx">$</span><span class="p">(</span><span class="s">&quot;</span><span class="err">#</span><span class="s">player-content-</span><span class="si">#{</span><span class="nx">index</span><span class="si">}</span><span class="s">&quot;</span><span class="p">).</span><span class="nx">parents</span><span class="p">(</span><span class="s">&#39;.dummyplayer&#39;</span><span class="p">).</span><span class="nx">css</span><span class="p">(</span><span class="s">&quot;height&quot;</span><span class="p">),</span> <span class="mi">10</span>
+      <span class="nx">retval</span>
+    
+    <span class="nv">that.getcoordinates = </span><span class="o">-&gt;</span>
+      <span class="nv">retval = </span><span class="p">[]</span>
+      <span class="nx">retval</span><span class="p">.</span><span class="nx">push</span> <span class="nx">$</span><span class="p">(</span><span class="s">&quot;</span><span class="err">#</span><span class="s">player-content-</span><span class="si">#{</span><span class="nx">index</span><span class="si">}</span><span class="s">&quot;</span><span class="p">).</span><span class="nx">parents</span><span class="p">(</span><span class="s">&#39;.dummyplayer&#39;</span><span class="p">).</span><span class="nx">position</span><span class="p">().</span><span class="nx">top</span>
+      <span class="nx">retval</span><span class="p">.</span><span class="nx">push</span> <span class="nx">$</span><span class="p">(</span><span class="s">&quot;</span><span class="err">#</span><span class="s">player-content-</span><span class="si">#{</span><span class="nx">index</span><span class="si">}</span><span class="s">&quot;</span><span class="p">).</span><span class="nx">parents</span><span class="p">(</span><span class="s">&#39;.dummyplayer&#39;</span><span class="p">).</span><span class="nx">position</span><span class="p">().</span><span class="nx">left</span>
+      <span class="nx">retval</span>
+
+    <span class="nv">that.onplayheadupdate = </span><span class="nf">(callback) -&gt;</span>
+      <span class="nx">$</span><span class="p">(</span><span class="nx">DOMObject</span><span class="p">).</span><span class="nx">bind</span> <span class="s">&#39;timeupdate&#39;</span><span class="p">,</span> <span class="nx">callback</span>
+    
+    <span class="nx">that</span>
+
+</pre></div></td></tr></tbody></table><div id="generated">generated Sat Apr 28 2012 19:08:52 GMT-0400 (EDT)  </div><div id="projectname"><a href="../../index.html">OAC Video Annotation Client</a></div></div>

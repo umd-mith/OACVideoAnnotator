@@ -1,0 +1,430 @@
+---
+layout: docco
+title: OACVideoAnnotator/code/src/controllers.coffee.html
+---
+<div id="container"><div id="background"></div><div id="jump_to">Jump To &hellip;<div id="jump_wrapper"><div id="jump_page"><a href="../index.html" class="source"><span class="file_name">README</span></a><a href="../src/canvas.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">canvas.coffee</span></a><a href="../src/component.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">component.coffee</span></a><a href="../src/controllers.coffee.html" class="source selected"><span class="base_path">src / </span><span class="file_name">controllers.coffee</span></a><a href="../src/driver-framework.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">driver-framework.coffee</span></a><a href="../src/drivers/dummy.coffee.html" class="source "><span class="base_path">src / drivers / </span><span class="file_name">dummy.coffee</span></a><a href="../src/drivers/html5.coffee.html" class="source "><span class="base_path">src / drivers / </span><span class="file_name">html5.coffee</span></a><a href="../src/drivers/youtube.coffee.html" class="source "><span class="base_path">src / drivers / </span><span class="file_name">youtube.coffee</span></a><a href="../src/intro.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">intro.coffee</span></a><a href="../src/outro.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">outro.coffee</span></a><a href="../src/presentations.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">presentations.coffee</span></a></div></div></div><table cellpadding="0" cellspacing="0"><thead><tr><th class="docs"><h1>controllers.coffee</h1><div class="filepath">src/</div></th><th class="code"></th></tr></thead><tbody><tr id="section-1"><td class="docs"><div class="pilwrap"><a href="#section-1" class="pilcrow">&#182;</a></div><h1>Controllers</h1>
+</td><td class="code"><div class="highlight"><pre><span class="nx">OAC</span><span class="p">.</span><span class="nx">Client</span><span class="p">.</span><span class="nx">StreamingVideo</span><span class="p">.</span><span class="nx">namespace</span> <span class="s">&#39;Controller&#39;</span><span class="p">,</span> <span class="nf">(Controller) -&gt;</span>
+  <span class="nv">relativeCoords = </span><span class="nf">(currentElement, event) -&gt;</span>
+    <span class="nv">totalOffsetX = </span><span class="mi">0</span>
+    <span class="nv">totalOffsetY = </span><span class="mi">0</span>
+    
+    <span class="k">while</span> <span class="nx">currentElement</span><span class="o">?</span>
+      <span class="nx">totalOffsetX</span> <span class="o">+=</span> <span class="nx">currentElement</span><span class="p">.</span><span class="nx">offsetLeft</span>
+      <span class="nx">totalOffsetY</span> <span class="o">+=</span> <span class="nx">currentElement</span><span class="p">.</span><span class="nx">offsetTop</span>
+      <span class="nv">currentElement = </span><span class="nx">currentElement</span><span class="p">.</span><span class="nx">offsetParent</span>
+    
+    <span class="nv">x: </span><span class="nx">event</span><span class="p">.</span><span class="nx">pageX</span> <span class="o">-</span> <span class="nx">totalOffsetX</span>
+    <span class="nv">y: </span><span class="nx">event</span><span class="p">.</span><span class="nx">pageY</span> <span class="o">-</span> <span class="nx">totalOffsetY</span>
+    </pre></div></td></tr><tr id="section-2"><td class="docs"><div class="pilwrap"><a href="#section-2" class="pilcrow">&#182;</a></div><h2>KeyboardListener</h2>
+
+<p>OAC.Client.StreamingVideo.Controller.KeyboardListener listens to keydown events on the DOM document
+level and translates them into delete events.</p>
+</td><td class="code"><div class="highlight"><pre>  <span class="nx">Controller</span><span class="p">.</span><span class="nx">namespace</span> <span class="s">&quot;KeyboardListener&quot;</span><span class="p">,</span> <span class="nf">(KeyboardListener) -&gt;</span></pre></div></td></tr><tr id="section-3"><td class="docs"><div class="pilwrap"><a href="#section-3" class="pilcrow">&#182;</a></div><h3>KeyboardListener.initController</h3>
+
+<p>Parameters:</p>
+
+<ul>
+<li>options - object holding configuration options for the KeyboardListener object</li>
+</ul>
+
+<p>Returns:</p>
+
+<p>The configured KeyboardListener controller.</p>
+
+<p>Options:</p>
+
+<ul>
+<li>application - the application using this controller</li>
+<li>isAction - a function which returns true if keyboard events should be propagated</li>
+</ul>
+</td><td class="code"><div class="highlight"><pre>    <span class="nv">KeyboardListener.initController = </span><span class="nf">(args...) -&gt;</span>      
+      <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">initInstance</span> <span class="s">&quot;OAC.Client.StreamingVideo.Controller.KeyboardListener&quot;</span><span class="p">,</span> <span class="nx">args</span><span class="p">...,</span> <span class="nf">(that) -&gt;</span>
+        <span class="nv">options = </span><span class="nx">that</span><span class="p">.</span><span class="nx">options</span>
+
+        <span class="nv">that.applyBindings = </span><span class="nf">(binding, opts) -&gt;</span>
+          <span class="nv">doc = </span><span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s">&#39;doc&#39;</span><span class="p">)</span>
+
+          <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onActiveAnnotationChange</span><span class="p">.</span><span class="nx">addListener</span> <span class="nf">(id) -&gt;</span>
+            <span class="nv">activeId = </span><span class="nx">id</span>
+
+          <span class="nx">$</span><span class="p">(</span><span class="nx">doc</span><span class="p">).</span><span class="nx">keydown</span> <span class="nf">(e) -&gt;</span>
+            <span class="k">if</span> <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">.</span><span class="nx">getCurrentMode</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;Editing&#39;</span>
+              <span class="k">return</span>
+
+            <span class="k">if</span> <span class="nx">activeId</span><span class="o">?</span></pre></div></td></tr><tr id="section-4"><td class="docs"><div class="pilwrap"><a href="#section-4" class="pilcrow">&#182;</a></div><p>If backspace or delete is pressed,
+then it is interpreted as a
+delete call.</p>
+</td><td class="code"><div class="highlight"><pre>              <span class="k">if</span> <span class="nx">e</span><span class="p">.</span><span class="nx">keyCode</span> <span class="k">in</span> <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">46</span><span class="p">]</span>
+                <span class="nx">binding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onDelete</span><span class="p">.</span><span class="nx">fire</span> <span class="nx">activeId</span>
+                <span class="nv">activeId = </span><span class="kc">null</span></pre></div></td></tr><tr id="section-5"><td class="docs"><div class="pilwrap"><a href="#section-5" class="pilcrow">&#182;</a></div><h2>Drag</h2>
+
+<p>Attaches to an SVG rendering and produces events at the start, middle, and end of a drag.</p>
+</td><td class="code"><div class="highlight"><pre>  <span class="nx">Controller</span><span class="p">.</span><span class="nx">namespace</span> <span class="s">&quot;Drag&quot;</span><span class="p">,</span> <span class="nf">(Drag) -&gt;</span></pre></div></td></tr><tr id="section-6"><td class="docs"><div class="pilwrap"><a href="#section-6" class="pilcrow">&#182;</a></div><h3>Drag.initController</h3>
+</td><td class="code"><div class="highlight"><pre>    <span class="nv">Drag.initController = </span><span class="nf">(args...) -&gt;</span>
+      <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">Raphael</span><span class="p">.</span><span class="nx">initInstance</span> <span class="s">&quot;OAC.Client.StreamingVideo.Controller.Drag&quot;</span><span class="p">,</span> <span class="nx">args</span><span class="p">...,</span> <span class="nf">(that) -&gt;</span>
+        <span class="nv">that.applyBindings = </span><span class="nf">(binding) -&gt;</span>
+          <span class="nv">el = </span><span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s">&#39;raphael&#39;</span><span class="p">)</span>
+
+          <span class="nv">dstart = </span><span class="nf">(x, y, e) -&gt;</span></pre></div></td></tr><tr id="section-7"><td class="docs"><div class="pilwrap"><a href="#section-7" class="pilcrow">&#182;</a></div><p>We need to get the X/Y relative to the container we're bound to</p>
+</td><td class="code"><div class="highlight"><pre>            <span class="nv">pos = </span><span class="nx">relativeCoords</span> <span class="nx">el</span><span class="p">.</span><span class="nx">node</span><span class="p">,</span> <span class="nx">e</span>
+            <span class="nx">binding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onFocus</span><span class="p">.</span><span class="nx">fire</span> <span class="nx">pos</span><span class="p">.</span><span class="nx">x</span><span class="p">,</span> <span class="nx">pos</span><span class="p">.</span><span class="nx">y</span>
+          <span class="nv">dend = </span><span class="o">-&gt;</span>
+            <span class="nx">binding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onUnfocus</span><span class="p">.</span><span class="nx">fire</span><span class="p">()</span>
+          <span class="nv">dmid = </span><span class="nf">(x, y) -&gt;</span>
+            <span class="nx">binding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onUpdate</span><span class="p">.</span><span class="nx">fire</span> <span class="nx">x</span><span class="p">,</span> <span class="nx">y</span>
+          
+          <span class="nx">el</span><span class="p">.</span><span class="nx">drag</span> <span class="nx">dmid</span><span class="p">,</span> <span class="nx">dstart</span><span class="p">,</span> <span class="nx">dend</span>
+
+        <span class="nv">that.removeBindings = </span><span class="nf">(binding) -&gt;</span>
+          <span class="nv">el = </span><span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s">&#39;raphael&#39;</span><span class="p">)</span>
+          
+          <span class="nx">el</span><span class="p">.</span><span class="nx">undrag</span>
+          </pre></div></td></tr><tr id="section-8"><td class="docs"><div class="pilwrap"><a href="#section-8" class="pilcrow">&#182;</a></div><h2>Select</h2>
+
+<p>Attaches a click handler to an SVG rendering and fires an onSelect event if the rendering is clicked AND
+the application is in a mode to select things.</p>
+</td><td class="code"><div class="highlight"><pre>  <span class="nx">Controller</span><span class="p">.</span><span class="nx">namespace</span> <span class="s">&quot;Select&quot;</span><span class="p">,</span> <span class="nf">(Select) -&gt;</span></pre></div></td></tr><tr id="section-9"><td class="docs"><div class="pilwrap"><a href="#section-9" class="pilcrow">&#182;</a></div><h3>Select.initController</h3>
+
+<p>Parameters:</p>
+
+<ul>
+<li>options - object holding configuration information</li>
+</ul>
+
+<p>Returns:</p>
+
+<p>The configured controller object.</p>
+
+<p>Configuration Options:</p>
+
+<ul>
+<li>isSelectable - function taking no arguments that should return "true" if the click should cause the
+           onSelect event to fire.</li>
+</ul>
+</td><td class="code"><div class="highlight"><pre>    <span class="nv">Select.initController = </span><span class="nf">(args...) -&gt;</span>
+      <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">Raphael</span><span class="p">.</span><span class="nx">initInstance</span> <span class="s">&quot;OAC.Client.StreamingVideo.Controller.Select&quot;</span><span class="p">,</span> <span class="nx">args</span><span class="p">...,</span> <span class="nf">(that) -&gt;</span>
+        <span class="nv">options = </span><span class="nx">that</span><span class="p">.</span><span class="nx">options</span>
+
+        <span class="nv">that.applyBindings = </span><span class="nf">(binding) -&gt;</span>
+          <span class="nv">el = </span><span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s">&quot;raphael&quot;</span><span class="p">)</span>
+
+          <span class="nx">el</span><span class="p">.</span><span class="nx">click</span> <span class="nf">(e) -&gt;</span>
+            <span class="k">if</span> <span class="nx">options</span><span class="p">.</span><span class="nx">isSelectable</span><span class="p">()</span>
+              <span class="nx">binding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onSelect</span><span class="p">.</span><span class="nx">fire</span><span class="p">()</span></pre></div></td></tr><tr id="section-10"><td class="docs"><div class="pilwrap"><a href="#section-10" class="pilcrow">&#182;</a></div><h2>TextBodyEditor</h2>
+
+<p>Handles HTML annotation lens for editing the bodyContent text.</p>
+</td><td class="code"><div class="highlight"><pre>  <span class="nx">Controller</span><span class="p">.</span><span class="nx">namespace</span> <span class="s">&quot;TextBodyEditor&quot;</span><span class="p">,</span> <span class="nf">(TextBodyEditor) -&gt;</span>
+    <span class="nv">TextBodyEditor.initController = </span><span class="nf">(args...) -&gt;</span>
+      <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">initController</span> <span class="s">&quot;OAC.Client.StreamingVideo.Controller.TextBodyEditor&quot;</span><span class="p">,</span> <span class="nx">args</span><span class="p">...,</span> <span class="nf">(that) -&gt;</span>
+        <span class="nv">options = </span><span class="nx">that</span><span class="p">.</span><span class="nx">options</span></pre></div></td></tr><tr id="section-11"><td class="docs"><div class="pilwrap"><a href="#section-11" class="pilcrow">&#182;</a></div><h3>TextBodyEditor #applyBindings</h3>
+
+<p>Generates the following the methods:</p>
+</td><td class="code"><div class="highlight"><pre>        <span class="nv">that.applyBindings = </span><span class="nf">(binding, opts) -&gt;</span>
+          <span class="nv">annoEl = </span><span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s">&#39;annotation&#39;</span><span class="p">)</span>
+          <span class="nv">bodyContent = </span><span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s">&#39;body&#39;</span><span class="p">)</span>
+          <span class="nv">allAnnos = </span><span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s">&#39;annotations&#39;</span><span class="p">)</span>
+          <span class="nv">textArea = </span><span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s">&#39;textarea&#39;</span><span class="p">)</span>
+          <span class="nv">editArea = </span><span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s">&#39;editarea&#39;</span><span class="p">)</span>
+          <span class="nv">editButton = </span><span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s">&#39;editbutton&#39;</span><span class="p">)</span>
+          <span class="nv">updateButton = </span><span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s">&#39;updatebutton&#39;</span><span class="p">)</span>
+          <span class="nv">deleteButton = </span><span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s">&#39;deletebutton&#39;</span><span class="p">)</span>
+          <span class="nv">bindingActive = </span><span class="kc">false</span></pre></div></td></tr><tr id="section-12"><td class="docs"><div class="pilwrap"><a href="#section-12" class="pilcrow">&#182;</a></div><h4>editStart (private)</h4>
+
+<p>displays editing area</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="nv">editStart = </span><span class="nf">() -&gt;</span>
+            <span class="nx">$</span><span class="p">(</span><span class="nx">editArea</span><span class="p">).</span><span class="nx">show</span><span class="p">()</span>
+            <span class="nx">$</span><span class="p">(</span><span class="nx">bodyContent</span><span class="p">).</span><span class="nx">hide</span><span class="p">()</span>
+            <span class="nv">bindingActive = </span><span class="kc">true</span>
+            <span class="nx">binding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onClick</span><span class="p">.</span><span class="nx">fire</span><span class="p">(</span><span class="nx">opts</span><span class="p">.</span><span class="nx">itemId</span><span class="p">)</span></pre></div></td></tr><tr id="section-13"><td class="docs"><div class="pilwrap"><a href="#section-13" class="pilcrow">&#182;</a></div><h4>editEnd (private)</h4>
+
+<p>Hides the editing area after the user has completed editing/canceled editing</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="nv">editEnd = </span><span class="nf">() -&gt;</span>
+            <span class="nx">$</span><span class="p">(</span><span class="nx">editArea</span><span class="p">).</span><span class="nx">hide</span><span class="p">()</span>
+            <span class="nx">$</span><span class="p">(</span><span class="nx">bodyContent</span><span class="p">).</span><span class="nx">show</span><span class="p">()</span>
+            <span class="nv">bindingActive = </span><span class="kc">false</span></pre></div></td></tr><tr id="section-14"><td class="docs"><div class="pilwrap"><a href="#section-14" class="pilcrow">&#182;</a></div><h4>editUpdate (private)</h4>
+
+<p>Called when the user sends new data to dataStore</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="nv">editUpdate = </span><span class="nf">(e) -&gt;</span>
+            <span class="nv">data = </span><span class="nx">$</span><span class="p">(</span><span class="nx">textArea</span><span class="p">).</span><span class="nx">val</span><span class="p">()</span>
+            <span class="nx">e</span><span class="p">.</span><span class="nx">preventDefault</span><span class="p">()</span>
+            <span class="nx">binding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onUpdate</span><span class="p">.</span><span class="nx">fire</span><span class="p">(</span><span class="nx">opts</span><span class="p">.</span><span class="nx">itemId</span><span class="p">,</span> <span class="nx">data</span><span class="p">)</span>
+            <span class="nx">editEnd</span><span class="p">()</span></pre></div></td></tr><tr id="section-15"><td class="docs"><div class="pilwrap"><a href="#section-15" class="pilcrow">&#182;</a></div><p>Annotation DOM element listens for a double-click to either
+display and become active or hide and become unactive</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="nx">$</span><span class="p">(</span><span class="nx">annoEl</span><span class="p">).</span><span class="nx">bind</span> <span class="s">&#39;dblclick&#39;</span><span class="p">,</span> <span class="nf">(e) -&gt;</span>
+            <span class="nx">e</span><span class="p">.</span><span class="nx">preventDefault</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nx">bindingActive</span>
+              <span class="nx">editEnd</span><span class="p">()</span>
+              <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">.</span><span class="nx">setCurrentMode</span><span class="p">(</span><span class="nx">prevMode</span> <span class="o">or</span> <span class="s">&#39;&#39;</span><span class="p">)</span>
+            <span class="k">else</span>
+              <span class="nx">editStart</span><span class="p">()</span>
+              <span class="nv">prevMode = </span><span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">.</span><span class="nx">getCurrentMode</span><span class="p">()</span>
+              <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">.</span><span class="nx">setCurrentMode</span> <span class="s">&#39;TextEdit&#39;</span></pre></div></td></tr><tr id="section-16"><td class="docs"><div class="pilwrap"><a href="#section-16" class="pilcrow">&#182;</a></div><p>Clicking once on the annotation DOM element will activate the attached SVG shape</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="nx">$</span><span class="p">(</span><span class="nx">annoEl</span><span class="p">).</span><span class="nx">bind</span> <span class="s">&#39;click&#39;</span><span class="p">,</span> <span class="nf">(e) -&gt;</span></pre></div></td></tr><tr id="section-17"><td class="docs"><div class="pilwrap"><a href="#section-17" class="pilcrow">&#182;</a></div><p>binding.events.onClick.fire(opts.itemId);</p>
+</td><td class="code"><div class="highlight"><pre>            <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">.</span><span class="nx">setActiveAnnotation</span> <span class="nx">opts</span><span class="p">.</span><span class="nx">itemId</span></pre></div></td></tr><tr id="section-18"><td class="docs"><div class="pilwrap"><a href="#section-18" class="pilcrow">&#182;</a></div><p>Attach binding to the update button which ends editing and updates the bodyContent of the attached
+annotation</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="nx">$</span><span class="p">(</span><span class="nx">updateButton</span><span class="p">).</span><span class="nx">bind</span> <span class="s">&#39;click&#39;</span><span class="p">,</span> <span class="nf">(e) -&gt;</span>
+            <span class="nx">binding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onUpdate</span><span class="p">.</span><span class="nx">fire</span><span class="p">(</span><span class="nx">opts</span><span class="p">.</span><span class="nx">itemId</span><span class="p">,</span> <span class="nx">$</span><span class="p">(</span><span class="nx">textArea</span><span class="p">).</span><span class="nx">val</span><span class="p">())</span>
+            <span class="nx">editEnd</span><span class="p">()</span>
+            <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">.</span><span class="nx">setCurrentMode</span><span class="p">(</span><span class="nx">prevMode</span><span class="p">)</span></pre></div></td></tr><tr id="section-19"><td class="docs"><div class="pilwrap"><a href="#section-19" class="pilcrow">&#182;</a></div><p>Attach binding to the delete button to delete the entire annotation - removes from dataStore</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="nx">$</span><span class="p">(</span><span class="nx">deleteButton</span><span class="p">).</span><span class="nx">bind</span> <span class="s">&#39;click&#39;</span><span class="p">,</span> <span class="nf">(e) -&gt;</span>
+            <span class="nx">binding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onDelete</span><span class="p">.</span><span class="nx">fire</span><span class="p">(</span><span class="nx">opts</span><span class="p">.</span><span class="nx">itemId</span><span class="p">)</span></pre></div></td></tr><tr id="section-20"><td class="docs"><div class="pilwrap"><a href="#section-20" class="pilcrow">&#182;</a></div><p>remove DOM elements</p>
+</td><td class="code"><div class="highlight"><pre>            <span class="nx">$</span><span class="p">(</span><span class="nx">annoEl</span><span class="p">).</span><span class="nx">remove</span><span class="p">()</span></pre></div></td></tr><tr id="section-21"><td class="docs"><div class="pilwrap"><a href="#section-21" class="pilcrow">&#182;</a></div><p>Listening for changes in active annotation so that annotation text lens stays current</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onActiveAnnotationChange</span><span class="p">.</span><span class="nx">addListener</span> <span class="nf">(id) -&gt;</span>
+            <span class="k">if</span> <span class="nx">id</span> <span class="o">!=</span> <span class="nx">opts</span><span class="p">.</span><span class="nx">id</span> <span class="o">and</span> <span class="nx">bindingActive</span>
+              <span class="nx">editUpdate</span>
+                <span class="nv">preventDefault: </span><span class="o">-&gt;</span>
+              <span class="nx">editEnd</span><span class="p">()</span></pre></div></td></tr><tr id="section-22"><td class="docs"><div class="pilwrap"><a href="#section-22" class="pilcrow">&#182;</a></div><p>Listens for changes in the mode in order to stay current with rest of the application</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onCurrentModeChange</span><span class="p">.</span><span class="nx">addListener</span> <span class="nf">(newMode) -&gt;</span>
+            <span class="k">if</span> <span class="nx">newMode</span> <span class="o">!=</span> <span class="s">&#39;TextEdit&#39;</span>
+              <span class="nx">editEnd</span><span class="p">()</span></pre></div></td></tr><tr id="section-23"><td class="docs"><div class="pilwrap"><a href="#section-23" class="pilcrow">&#182;</a></div><h2>CanvasClickController</h2>
+
+<p>Listens for all clicks on the canvas and connects shapes with the Edit controller above</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li>options - Object that includes:
+<em>* paper - RaphaelSVG canvas object generated by Raphael Presentation
+*</em> closeEnough - value for how close (In RaphaelSVG units) a mouse-click has to be in order to be considered
+'clicking' an object</li>
+</ul>
+</td><td class="code"><div class="highlight"><pre>  <span class="nx">Controller</span><span class="p">.</span><span class="nx">namespace</span> <span class="s">&quot;CanvasClickController&quot;</span><span class="p">,</span> <span class="nf">(CanvasClickController) -&gt;</span>
+    <span class="nv">CanvasClickController.initController = </span><span class="nf">(args...) -&gt;</span>
+      <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">initController</span> <span class="s">&quot;OAC.Client.StreamingVideo.Controller.CanvasClickController&quot;</span><span class="p">,</span> <span class="nx">args</span><span class="p">...,</span> <span class="nf">(that) -&gt;</span>
+        <span class="nv">options = </span><span class="nx">that</span><span class="p">.</span><span class="nx">options</span>
+        <span class="nv">overlay = </span><span class="kc">null</span></pre></div></td></tr><tr id="section-24"><td class="docs"><div class="pilwrap"><a href="#section-24" class="pilcrow">&#182;</a></div><h4>CanvasClickController #applyBindings</h4>
+
+<p>Create the object passed back to the Presentation</p>
+</td><td class="code"><div class="highlight"><pre>        <span class="nv">that.applyBindings = </span><span class="nf">(binding, opts) -&gt;</span>
+          <span class="nv">closeEnough = </span><span class="nx">opts</span><span class="p">.</span><span class="nx">closeEnough</span>
+          <span class="nv">renderings = </span><span class="p">{}</span>
+          <span class="nv">paper = </span><span class="nx">opts</span><span class="p">.</span><span class="nx">paper</span>
+            
+          <span class="nv">drawOverlay = </span><span class="o">-&gt;</span>
+            <span class="nx">removeOverlay</span><span class="p">()</span>
+            <span class="nv">overlay = </span><span class="nx">paper</span><span class="p">.</span><span class="nx">rect</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="nx">paper</span><span class="p">.</span><span class="nx">width</span><span class="p">,</span><span class="nx">paper</span><span class="p">.</span><span class="nx">height</span><span class="p">)</span>
+            <span class="nx">overlay</span><span class="p">.</span><span class="nx">toFront</span><span class="p">()</span>
+            <span class="nx">overlay</span><span class="p">.</span><span class="nx">attr</span>
+              <span class="nv">fill: </span><span class="s">&quot;</span><span class="err">#</span><span class="s">ffffff&quot;</span>
+              <span class="nv">opacity: </span><span class="mf">0.01</span>
+          
+          <span class="nv">removeOverlay = </span><span class="o">-&gt;</span>
+            <span class="k">if</span> <span class="nx">overlay</span><span class="o">?</span>
+              <span class="nx">overlay</span><span class="p">.</span><span class="nx">unmousedown</span><span class="p">()</span>
+              <span class="nx">overlay</span><span class="p">.</span><span class="nx">unmouseup</span><span class="p">()</span>
+              <span class="nx">overlay</span><span class="p">.</span><span class="nx">unmousemove</span><span class="p">()</span>
+              <span class="nx">overlay</span><span class="p">.</span><span class="nx">remove</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nx">mouseCaptured</span><span class="o">?</span>
+              <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">mouse</span><span class="p">.</span><span class="nx">uncapture</span><span class="p">()</span>
+              <span class="nv">mouseCaptured = </span><span class="kc">false</span>
+          
+          <span class="nv">mouseCaptured = </span><span class="kc">false</span>
+          
+          <span class="nv">captureMouse = </span><span class="nf">(handlers) -&gt;</span>
+            <span class="k">if</span> <span class="o">!</span><span class="nx">mouseCaptured</span>
+              <span class="nv">mouseCaptured = </span><span class="kc">true</span>
+              <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">mouse</span><span class="p">.</span><span class="nx">capture</span> <span class="nf">(eType) -&gt;</span>
+                <span class="k">if</span> <span class="nx">handlers</span><span class="p">[</span><span class="nx">eType</span><span class="p">]</span><span class="o">?</span>
+                  <span class="nx">handlers</span><span class="p">[</span><span class="nx">eType</span><span class="p">](</span><span class="k">this</span><span class="p">)</span>
+          
+          <span class="nv">uncaptureMouse = </span><span class="o">-&gt;</span>
+            <span class="k">if</span> <span class="nx">mouseCaptured</span>
+              <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">mouse</span><span class="p">.</span><span class="nx">uncapture</span><span class="p">()</span>
+              <span class="nv">mouseCaptured = </span><span class="kc">false</span></pre></div></td></tr><tr id="section-25"><td class="docs"><div class="pilwrap"><a href="#section-25" class="pilcrow">&#182;</a></div><h4>drawShape (private)</h4>
+
+<p>Using two html elements: container is for
+registering the offset of the screen (.section-canvas) and
+the svgEl is for registering mouse clicks on the svg element (svg)</p>
+
+<p>Parameters:
+* container - DOM element that contains the canvas
+* svgEl - SVG shape element that will have mouse bindings attached to it</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="nv">drawShape = </span><span class="nf">(container) -&gt;</span></pre></div></td></tr><tr id="section-26"><td class="docs"><div class="pilwrap"><a href="#section-26" class="pilcrow">&#182;</a></div><p>Sets mousedown, mouseup, mousemove to draw a
+shape on the canvas.</p>
+</td><td class="code"><div class="highlight"><pre>            <span class="nv">mouseDown = </span><span class="kc">false</span>
+            <span class="nv">mouseCaptured = </span><span class="kc">false</span>
+            <span class="nv">topLeft = </span><span class="p">[]</span>
+            <span class="nv">bottomRight = </span><span class="p">[]</span>
+            <span class="nv">container = </span><span class="nx">$</span><span class="p">(</span><span class="nx">container</span><span class="p">)</span>
+            <span class="nx">drawOverlay</span><span class="p">()</span>
+            <span class="nv">offset = </span><span class="nx">container</span><span class="p">.</span><span class="nx">offset</span><span class="p">()</span></pre></div></td></tr><tr id="section-27"><td class="docs"><div class="pilwrap"><a href="#section-27" class="pilcrow">&#182;</a></div><p>remove all previous bindings</p>
+</td><td class="code"><div class="highlight"><pre>            <span class="nx">overlay</span><span class="p">.</span><span class="nx">unmousedown</span><span class="p">()</span>
+            <span class="nx">overlay</span><span class="p">.</span><span class="nx">unmouseup</span><span class="p">()</span>
+            <span class="nx">overlay</span><span class="p">.</span><span class="nx">unmousemove</span><span class="p">()</span>
+            
+            <span class="nv">mousedown = </span><span class="nf">(e) -&gt;</span>
+              <span class="k">if</span> <span class="nx">mouseDown</span>
+                <span class="k">return</span>
+
+              <span class="nv">pos = </span><span class="nx">relativeCoords</span> <span class="nx">overlay</span><span class="p">.</span><span class="nx">node</span><span class="p">,</span> <span class="nx">e</span>
+              <span class="nv">x = </span><span class="nx">pos</span><span class="p">.</span><span class="nx">x</span>
+              <span class="nv">y = </span><span class="nx">pos</span><span class="p">.</span><span class="nx">y</span>
+              <span class="nv">topLeft = </span><span class="p">[</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">]</span>
+              <span class="nv">bottomRight = </span><span class="p">[</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">]</span>
+              <span class="nv">mouseDown = </span><span class="kc">true</span>
+              <span class="nx">binding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onShapeStart</span><span class="p">.</span><span class="nx">fire</span><span class="p">(</span><span class="nx">topLeft</span><span class="p">)</span>
+
+            <span class="nv">mousemove = </span><span class="nf">(e) -&gt;</span>
+              <span class="k">if</span> <span class="o">!</span><span class="nx">mouseDown</span>
+                <span class="k">return</span>
+
+              <span class="nv">pos = </span><span class="nx">relativeCoords</span> <span class="nx">overlay</span><span class="p">.</span><span class="nx">node</span><span class="p">,</span> <span class="nx">e</span>
+              <span class="nv">x = </span><span class="nx">pos</span><span class="p">.</span><span class="nx">x</span>
+              <span class="nv">y = </span><span class="nx">pos</span><span class="p">.</span><span class="nx">y</span>
+              <span class="nv">bottomRight = </span><span class="p">[</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">]</span>
+              <span class="nx">binding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onShapeDrag</span><span class="p">.</span><span class="nx">fire</span><span class="p">(</span><span class="nx">bottomRight</span><span class="p">)</span>
+
+            <span class="nv">mouseup = </span><span class="nf">(e) -&gt;</span>
+              <span class="k">if</span> <span class="o">!</span><span class="nx">mouseDown</span>
+                <span class="k">return</span>
+
+              <span class="nv">mouseDown = </span><span class="kc">false</span>
+
+              <span class="nx">binding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onShapeDone</span><span class="p">.</span><span class="nx">fire</span> <span class="nx">bottomRight</span>
+              <span class="nx">uncaptureMouse</span><span class="p">()</span>
+              <span class="nx">overlay</span><span class="p">.</span><span class="nx">toFront</span><span class="p">()</span>
+                
+            <span class="nx">overlay</span><span class="p">.</span><span class="nx">mousedown</span> <span class="nx">mousedown</span>
+            <span class="nx">overlay</span><span class="p">.</span><span class="nx">mousemove</span> <span class="nx">mousemove</span>
+            <span class="nx">overlay</span><span class="p">.</span><span class="nx">mouseup</span>   <span class="nx">mouseup</span>
+            
+            <span class="nx">captureMouse</span>
+              <span class="nv">mousedown: </span><span class="nx">mousedown</span>
+              <span class="nv">mouseup: </span><span class="nx">mouseup</span>
+              <span class="nv">mousemove: </span><span class="nx">mousemove</span>
+            </pre></div></td></tr><tr id="section-28"><td class="docs"><div class="pilwrap"><a href="#section-28" class="pilcrow">&#182;</a></div><h4>selectShape (private)</h4>
+
+<p>Creates a binding for the canvas to listen for mousedowns to select a shape</p>
+
+<p>Parameters:
+* container - HTML element housing the canvas</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="nv">selectShape = </span><span class="nf">(container) -&gt;</span></pre></div></td></tr><tr id="section-29"><td class="docs"><div class="pilwrap"><a href="#section-29" class="pilcrow">&#182;</a></div><p>Sets mousedown events to select shapes, not to draw
+them.</p>
+</td><td class="code"><div class="highlight"><pre>            <span class="nx">drawOverlay</span><span class="p">()</span>
+            <span class="nx">overlay</span><span class="p">.</span><span class="nx">unmousedown</span><span class="p">()</span>
+            <span class="nx">overlay</span><span class="p">.</span><span class="nx">mousedown</span> <span class="nf">(e) -&gt;</span></pre></div></td></tr><tr id="section-30"><td class="docs"><div class="pilwrap"><a href="#section-30" class="pilcrow">&#182;</a></div><p>By default, nullifies all selections</p>
+</td><td class="code"><div class="highlight"><pre>              <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">.</span><span class="nx">setActiveAnnotation</span><span class="p">(</span><span class="kc">undefined</span><span class="p">)</span>
+              <span class="nv">activeId = </span><span class="kc">null</span>
+              <span class="nx">overlay</span><span class="p">.</span><span class="nx">toBack</span><span class="p">()</span>
+            <span class="nx">overlay</span><span class="p">.</span><span class="nx">toBack</span><span class="p">()</span>
+          </pre></div></td></tr><tr id="section-31"><td class="docs"><div class="pilwrap"><a href="#section-31" class="pilcrow">&#182;</a></div><p>Change the mouse actions depending on what Mode the application is currently
+in
+<strong>FIXME:</strong> We shouldn't depend on the shape name being drawn - will break when a third
+shape is added</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onCurrentModeChange</span><span class="p">.</span><span class="nx">addListener</span> <span class="nf">(mode) -&gt;</span>
+            <span class="nx">removeOverlay</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nx">mode</span> <span class="k">in</span> <span class="p">[</span><span class="s">&quot;Rectangle&quot;</span><span class="p">,</span> <span class="s">&quot;Ellipse&quot;</span><span class="p">]</span>
+              <span class="nx">drawShape</span> <span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s">&#39;svgwrapper&#39;</span><span class="p">)</span>
+            <span class="k">else</span> <span class="k">if</span> <span class="nx">mode</span> <span class="o">==</span> <span class="s">&#39;Select&#39;</span>
+              <span class="nx">selectShape</span> <span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s">&#39;svgwrapper&#39;</span><span class="p">)</span>
+            <span class="k">else</span>
+              <span class="nx">$</span><span class="p">(</span><span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s">&#39;svgwrapper&#39;</span><span class="p">)).</span><span class="nx">unbind</span><span class="p">()</span>
+          
+          <span class="nv">binding.toBack = </span><span class="o">-&gt;</span>
+            <span class="k">if</span> <span class="nx">overlay</span><span class="o">?</span>
+              <span class="nx">overlay</span><span class="p">.</span><span class="nx">toBack</span><span class="p">()</span></pre></div></td></tr><tr id="section-32"><td class="docs"><div class="pilwrap"><a href="#section-32" class="pilcrow">&#182;</a></div><h2>AnnotationCreationButton</h2>
+
+<p>Controls the Annotation Creation Tools set by app.buttonFeature</p>
+</td><td class="code"><div class="highlight"><pre>  <span class="nx">Controller</span><span class="p">.</span><span class="nx">namespace</span> <span class="s">&#39;AnnotationCreationButton&#39;</span><span class="p">,</span> <span class="nf">(AnnotationCreationButton) -&gt;</span>
+    <span class="nv">AnnotationCreationButton.initController = </span><span class="nf">(args...) -&gt;</span>
+      <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">initController</span> <span class="s">&quot;OAC.Client.StreamingVideo.Controller.AnnotationCreationButton&quot;</span><span class="p">,</span> <span class="nx">args</span><span class="p">...,</span> <span class="nf">(that) -&gt;</span>
+        <span class="nv">options = </span><span class="nx">that</span><span class="p">.</span><span class="nx">options</span></pre></div></td></tr><tr id="section-33"><td class="docs"><div class="pilwrap"><a href="#section-33" class="pilcrow">&#182;</a></div><h4>AnnotationCreationButton #applyBindings</h4>
+</td><td class="code"><div class="highlight"><pre>        <span class="nv">that.applyBindings = </span><span class="nf">(binding, opts) -&gt;</span>
+          <span class="nv">active = </span><span class="kc">false</span></pre></div></td></tr><tr id="section-34"><td class="docs"><div class="pilwrap"><a href="#section-34" class="pilcrow">&#182;</a></div><p>Mousedown: activate button - set as active mode</p>
+
+<p>Mousedown #2: de-activate button - unset active mode</p>
+
+<p>onCurrentModeChange: if != id passed, deactivate, else do nothing</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="nv">buttonEl = </span><span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s">&#39;button&#39;</span><span class="p">)</span></pre></div></td></tr><tr id="section-35"><td class="docs"><div class="pilwrap"><a href="#section-35" class="pilcrow">&#182;</a></div><p>Attach binding to the mousedown</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="nx">$</span><span class="p">(</span><span class="nx">buttonEl</span><span class="p">).</span><span class="nx">live</span> <span class="s">&#39;mousedown&#39;</span><span class="p">,</span> <span class="nf">(e) -&gt;</span>
+            <span class="k">if</span> <span class="nx">active</span> <span class="o">==</span> <span class="kc">false</span>
+              <span class="nv">active = </span><span class="kc">true</span>
+              <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">.</span><span class="nx">setCurrentMode</span><span class="p">(</span><span class="nx">opts</span><span class="p">.</span><span class="nx">action</span><span class="p">)</span>
+              <span class="nx">$</span><span class="p">(</span><span class="nx">buttonEl</span><span class="p">).</span><span class="nx">addClass</span><span class="p">(</span><span class="s">&quot;active&quot;</span><span class="p">)</span>
+            <span class="k">else</span> <span class="k">if</span> <span class="nx">active</span> <span class="o">==</span> <span class="kc">true</span>
+              <span class="nv">active = </span><span class="kc">false</span>
+              <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">.</span><span class="nx">setCurrentMode</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">)</span>
+              <span class="nx">$</span><span class="p">(</span><span class="nx">buttonEl</span><span class="p">).</span><span class="nx">removeClass</span><span class="p">(</span><span class="s">&quot;active&quot;</span><span class="p">)</span></pre></div></td></tr><tr id="section-36"><td class="docs"><div class="pilwrap"><a href="#section-36" class="pilcrow">&#182;</a></div><h4>onCurrentModeChangeHandle (private)</h4>
+
+<p>Handles when the mode is changed externally from controller</p>
+
+<p>Parameters:
+* action - name of new mode</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="nv">onCurrentModeChangeHandle = </span><span class="nf">(action) -&gt;</span>
+            <span class="k">if</span> <span class="nx">action</span> <span class="o">==</span> <span class="nx">options</span><span class="p">.</span><span class="nx">action</span>
+              <span class="nv">active = </span><span class="kc">true</span>
+              <span class="nx">$</span><span class="p">(</span><span class="nx">buttonEl</span><span class="p">).</span><span class="nx">addClass</span><span class="p">(</span><span class="s">&#39;active&#39;</span><span class="p">)</span>
+            <span class="k">else</span>
+              <span class="nv">active = </span><span class="kc">false</span>
+              <span class="nx">$</span><span class="p">(</span><span class="nx">buttonEl</span><span class="p">).</span><span class="nx">removeClass</span><span class="p">(</span><span class="s">&quot;active&quot;</span><span class="p">)</span>
+
+          <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onCurrentModeChange</span><span class="p">.</span><span class="nx">addListener</span> <span class="nx">onCurrentModeChangeHandle</span></pre></div></td></tr><tr id="section-37"><td class="docs"><div class="pilwrap"><a href="#section-37" class="pilcrow">&#182;</a></div><h2>sliderButton</h2>
+
+<p>Creates a jQuery UI slider for the current time in the video</p>
+</td><td class="code"><div class="highlight"><pre>  <span class="nx">Controller</span><span class="p">.</span><span class="nx">namespace</span> <span class="s">&#39;sliderButton&#39;</span><span class="p">,</span> <span class="nf">(sliderButton) -&gt;</span>
+    <span class="nv">sliderButton.initController = </span><span class="nf">(args...) -&gt;</span>
+      <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">initController</span> <span class="s">&quot;OAC.Client.StreamingVideo.Controller.sliderButton&quot;</span><span class="p">,</span> <span class="nx">args</span><span class="p">...,</span> <span class="nf">(that) -&gt;</span>
+        <span class="nv">options = </span><span class="nx">that</span><span class="p">.</span><span class="nx">options</span>
+
+        <span class="nv">that.applyBindings = </span><span class="nf">(binding, opts) -&gt;</span>
+          <span class="nv">displayElement = </span><span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s">&#39;timedisplay&#39;</span><span class="p">)</span>
+          <span class="nv">positionCheck = </span><span class="nf">(t) -&gt;</span></pre></div></td></tr><tr id="section-38"><td class="docs"><div class="pilwrap"><a href="#section-38" class="pilcrow">&#182;</a></div><p>if time is not equal to internal time, then
+reset the slider</p>
+</td><td class="code"><div class="highlight"><pre>            <span class="k">if</span> <span class="o">!</span><span class="nx">localTime</span><span class="o">?</span>
+              <span class="nv">localTime = </span><span class="nx">t</span>
+              <span class="nx">$</span><span class="p">(</span><span class="nx">sliderElement</span><span class="p">).</span><span class="nx">slider</span><span class="p">(</span><span class="s">&#39;value&#39;</span><span class="p">,</span> <span class="nx">localTime</span><span class="p">)</span>
+
+          <span class="nv">sliderStart = </span><span class="nf">(e, ui) -&gt;</span>
+            <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">.</span><span class="nx">setCurrentTime</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">value</span>
+            <span class="nx">$</span><span class="p">(</span><span class="nx">displayElement</span><span class="p">).</span><span class="nx">text</span> <span class="s">&#39;TIME: &#39;</span> <span class="o">+</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">value</span>
+            <span class="nv">localTime = </span><span class="nx">ui</span><span class="p">.</span><span class="nx">value</span>
+
+          <span class="nv">sliderMove = </span><span class="nf">(e, ui) -&gt;</span>
+            <span class="k">if</span> <span class="o">!</span><span class="nx">ui</span><span class="o">?</span>
+              <span class="nv">localTime = </span><span class="nx">e</span>
+              <span class="nx">$</span><span class="p">(</span><span class="nx">sliderElement</span><span class="p">).</span><span class="nx">slider</span><span class="p">(</span><span class="s">&#39;value&#39;</span><span class="p">,</span> <span class="nx">e</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="nx">localTime</span> <span class="o">!=</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">value</span>
+              <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">.</span><span class="nx">setCurrentTime</span><span class="p">(</span><span class="nx">ui</span><span class="p">.</span><span class="nx">value</span><span class="p">)</span>
+              <span class="nx">$</span><span class="p">(</span><span class="nx">displayElement</span><span class="p">).</span><span class="nx">text</span><span class="p">(</span><span class="s">&#39;TIME: &#39;</span> <span class="o">+</span> <span class="nx">ui</span><span class="p">.</span><span class="nx">value</span><span class="p">)</span>
+              <span class="nv">localTime = </span><span class="nx">ui</span><span class="p">.</span><span class="nx">value</span>
+
+          <span class="nv">sliderElement = </span><span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s">&quot;slider&quot;</span><span class="p">)</span>
+
+          <span class="nx">$</span><span class="p">(</span><span class="nx">sliderElement</span><span class="p">).</span><span class="nx">slider</span>
+            <span class="nv">start: </span><span class="nx">sliderStart</span>
+            <span class="nv">slide: </span><span class="nx">sliderMove</span></pre></div></td></tr><tr id="section-39"><td class="docs"><div class="pilwrap"><a href="#section-39" class="pilcrow">&#182;</a></div><h2>timeControl</h2>
+
+<p>Controller for manipulating the time sequence for an annotation.
+Currently, just a text box for user to enter basic time data</p>
+</td><td class="code"><div class="highlight"><pre>  <span class="nx">Controller</span><span class="p">.</span><span class="nx">namespace</span> <span class="s">&#39;timeControl&#39;</span><span class="p">,</span> <span class="nf">(timeControl) -&gt;</span>
+    <span class="nv">timeControl.initController = </span><span class="nf">(args...) -&gt;</span>
+      <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">initController</span> <span class="s">&quot;OAC.Client.StreamingVideo.Controller.timeControl&quot;</span><span class="p">,</span> <span class="nx">args</span><span class="p">...,</span> <span class="nf">(that) -&gt;</span>
+        <span class="nv">options = </span><span class="nx">that</span><span class="p">.</span><span class="nx">options</span>
+        <span class="nv">that.currentId = </span><span class="s">&#39;&#39;</span></pre></div></td></tr><tr id="section-40"><td class="docs"><div class="pilwrap"><a href="#section-40" class="pilcrow">&#182;</a></div><h4>timeControl #applyBindings</h4>
+</td><td class="code"><div class="highlight"><pre>        <span class="nv">that.applyBindings = </span><span class="nf">(binding, opts) -&gt;</span>
+          <span class="nv">timestart = </span><span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s">&#39;timestart&#39;</span><span class="p">)</span>
+          <span class="nv">timeend = </span><span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s">&#39;timeend&#39;</span><span class="p">)</span>
+          <span class="nv">submit = </span><span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s">&#39;submit&#39;</span><span class="p">)</span>
+          <span class="nv">menudiv = </span><span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s">&#39;menudiv&#39;</span><span class="p">)</span>
+
+          <span class="nx">$</span><span class="p">(</span><span class="nx">menudiv</span><span class="p">).</span><span class="nx">hide</span><span class="p">()</span>
+
+          <span class="nx">$</span><span class="p">(</span><span class="nx">submit</span><span class="p">).</span><span class="nx">bind</span> <span class="s">&#39;click&#39;</span><span class="p">,</span> <span class="o">-&gt;</span></pre></div></td></tr><tr id="section-41"><td class="docs"><div class="pilwrap"><a href="#section-41" class="pilcrow">&#182;</a></div><p><strong>FIXME:</strong> times can be in parts of seconds</p>
+</td><td class="code"><div class="highlight"><pre>            <span class="nv">start_time = </span><span class="nb">parseInt</span><span class="p">(</span><span class="nx">$</span><span class="p">(</span><span class="nx">timestart</span><span class="p">).</span><span class="nx">val</span><span class="p">(),</span> <span class="mi">10</span><span class="p">)</span>
+            <span class="nv">end_time = </span><span class="nb">parseInt</span><span class="p">(</span><span class="nx">$</span><span class="p">(</span><span class="nx">timeend</span><span class="p">).</span><span class="nx">val</span><span class="p">(),</span> <span class="mi">10</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nx">binding</span><span class="p">.</span><span class="nx">currentId</span><span class="o">?</span> <span class="o">and</span> <span class="nx">start_time</span><span class="o">?</span> <span class="o">and</span> <span class="nx">end_time</span><span class="o">?</span></pre></div></td></tr><tr id="section-42"><td class="docs"><div class="pilwrap"><a href="#section-42" class="pilcrow">&#182;</a></div><p>update core data</p>
+</td><td class="code"><div class="highlight"><pre>              <span class="nx">binding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onUpdate</span><span class="p">.</span><span class="nx">fire</span> <span class="nx">binding</span><span class="p">.</span><span class="nx">currentId</span><span class="p">,</span> <span class="nx">start_time</span><span class="p">,</span> <span class="nx">end_time</span>
+
+              <span class="nx">$</span><span class="p">(</span><span class="nx">menudiv</span><span class="p">).</span><span class="nx">hide</span><span class="p">()</span>
+
+          <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onActiveAnnotationChange</span><span class="p">.</span><span class="nx">addListener</span> <span class="nf">(id) -&gt;</span>
+            <span class="k">if</span> <span class="nx">id</span><span class="o">?</span>
+              <span class="nx">$</span><span class="p">(</span><span class="nx">menudiv</span><span class="p">).</span><span class="nx">show</span><span class="p">()</span>
+              <span class="nx">$</span><span class="p">(</span><span class="nx">timestart</span><span class="p">).</span><span class="nx">val</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">)</span>
+              <span class="nx">$</span><span class="p">(</span><span class="nx">timeend</span><span class="p">).</span><span class="nx">val</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">)</span>
+              <span class="nv">binding.currentId = </span><span class="nx">id</span>
+            <span class="k">else</span>
+              <span class="nx">$</span><span class="p">(</span><span class="nx">menudiv</span><span class="p">).</span><span class="nx">hide</span><span class="p">()</span>
+
+</pre></div></td></tr></tbody></table><div id="generated">generated Sat Apr 28 2012 19:08:51 GMT-0400 (EDT)  </div><div id="projectname"><a href="../index.html">OAC Video Annotation Client</a></div></div>
