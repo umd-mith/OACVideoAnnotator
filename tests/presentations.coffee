@@ -8,9 +8,9 @@ $(document).ready ->
 	# generating 'dummy' player object - will manually set time to advance 
 	# for testing
 	playerObject = {
-		getcoordinates: ->
+		getCoordinates: ->
 			 [0,0]
-		getsize: ->
+		getSize: ->
 			[100,100]
 		play: ->
 			true
@@ -19,8 +19,13 @@ $(document).ready ->
 		onPlayheadUpdate: (callback) ->
 			setTimeout(callback, 1000)
 			true
+		setPlayhead: (t) ->
+			t
 		getPlayhead: -> 
 			0
+		events:
+			onResize: MITHGrid.initEventFirer(true, true)
+			onPlayheadUpdate: MITHGrid.initEventFirer(true, true)
 	}
 	# Generating some seemingly randomized data -- all the same
 	# except for npt start and end times, which is what we're testing
@@ -70,14 +75,14 @@ $(document).ready ->
 	appInstance = 0
 	setupApp = ->
 		$(document).append($("<div id='content-container-#{appInstance}'></div>"))
-		app = OAC.Client.StreamingVideo.initApp '#content-container-'+appInstance,
+		app = OAC.Client.StreamingVideo.Application.initInstance '#content-container-'+appInstance,
 			url: 'http://youtube.com/'
+			player: playerObject
 			playerWrapper: '#myplayer'
 		
 		appInstance += 1
 		
 		app.ready ->
-			app.setPlayer(playerObject)
 			app.dataStore.canvas.loadItems(testdata)
 			
 		app.run()

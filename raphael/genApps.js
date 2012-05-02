@@ -5,56 +5,66 @@
 */ 
 
 // pass in ID for the main div
-var initPlugin = function() {
-	var raphApp, setupAllPlayers, player, OACdrv, wh = [], xy = [],
-	OACVideoController, data;
-	
-	initStreamingVideoApp = function(playerobj) {
+$(function() {
+	OAC.Client.StreamingVideo.Player.onNewPlayer(function(playerobj) {
 		// Create Raphael canvas application controls
-		raphApp = OAC.Client.StreamingVideo.initApp("#content-container", {
-			playerWrapper: '#myplayer',
-			url: 'http://www.youtube.com/watch?v=HYLacuAp76U&feature=fvsr',
-			easement: 5
-		});
 		
 		// Adding a ready wrapper function to set the playerobject
-		setTimeout(function() {
-			raphApp.ready(function() {
-				raphApp.setPlayer(playerobj);
-			});
-		}, 1);
+		var raphApp = OAC.Client.StreamingVideo.Application.initInstance({
+			player: playerobj
+		});
 
 	
 		// creating Raphael canvas application
-		setTimeout(function() {
-			raphApp.run();
-	
-			// Creating handler for the export area 
-			// 
-			// May need to bring this into the application? 
-			// 
-			$('.section-export-data > #exportDataStore').click(function() {
-				// init exportData
-				data = raphApp.exportData();
-				$('.section-export-data > #export-text').val(JSON.stringify(data));
-			});
+		raphApp.run();
+		
+		// have a plain HTML presentation of annotation bodies
+        var annotations = OAC.Client.StreamingVideo.Presentation.AnnotationList.initInstance('#annotation-list', {
+	        dataView: raphApp.dataView.currentAnnotations,
+	        lensKey: ['.bodyType'],
+			application: raphApp
+        });
+        annotations.addLens("Text", function(container, view, model, itemId) { 
+	        return annotations.initTextLens(container, view, model, itemId) 
+	    });
+		raphApp.events.onActiveAnnotationChange.addListener(annotations.eventFocusChange);
+		
+		// create mode buttons
+		OAC.Client.StreamingVideo.Component.ModeButton.initInstance("#modeRectangle", {
+			mode: "Rectangle",
+			application: raphApp
+		});
+		OAC.Client.StreamingVideo.Component.ModeButton.initInstance("#modeEllipse", {
+			mode: "Ellipse",
+			application: raphApp
+		});
+		OAC.Client.StreamingVideo.Component.ModeButton.initInstance("#modeSelect", {
+			mode: "Select",
+			application: raphApp
+		});
+		OAC.Client.StreamingVideo.Component.ModeButton.initInstance("#modeWatch", {
+			mode: "Watch",
+			application: raphApp
+		});
+		
+		// Creating handler for the export area 
+		// 
+		// May need to bring this into the application? 
+		// 
+		$('.section-export-data > #exportDataStore').click(function() {
+			// init exportData
+			var data = raphApp.exportData();
+			$('.section-export-data > #export-text').val(JSON.stringify(data));
+		});
 			
-			// Setting up import button
-			// 
-			$('.section-export-data > #importJSONRDF').click(function() {
-				if($('.section-export-data > #export-text').val() !== '') {
-					data = $('.section-export-data > #export-text').val();
-					raphApp.importData(JSON.parse(data));
-				}
-			});
-		}, 10);
-	};
-	
-	// setting up listener for when a new player is created
-	//OAC_Controller.on_new_player(initStreamingVideoApp);
-	OAC.Client.StreamingVideo.Player.onNewPlayer(initStreamingVideoApp);
-};
-
-$(function() {
-	initPlugin();
+		// Setting up import button
+		// 
+		$('.section-export-data > #importJSONRDF').click(function() {
+			var data;
+			if($('.section-export-data > #export-text').val() !== '') {
+				data = $('.section-export-data > #export-text').val();
+				raphApp.importData(JSON.parse(data));
+			}
+		});
+	});
 });

@@ -35,21 +35,15 @@ initOACDummyPlayerDrv = ->
 
 	driver.bindPlayer = (playerObj) ->
 		OAC.Client.StreamingVideo.Player.DriverBinding.initInstance (that) ->
-			#
-		    # Function: onplayheadupdate
-		    #	Customizable callback to set a function that is going to be called on each second.
-		    # Parameters:
-		    #	callback - User function
-			#
-			that.onPlayheadUpdate = playerObj.onplayheadupdate
-	
+			playerObj.onplayheadupdate ->
+				that.events.onPlayheadUpdate.fire that.getPlayhead()
 			#
 		    # Function: getcoordinates
 		    #	Returns the current player coordinates on screen
 		    # Returns:
 		    #	An array of coordinates(0 is X, 1 is Y).
 			#
-			that.getcoordinates = -> (parseInt(c, 10) for c in playerObj.getcoordinates())
+			that.getCoordinates = -> (parseInt(c, 10) for c in playerObj.getcoordinates())
 	
 			#
 		    # Function: getsize
@@ -57,7 +51,7 @@ initOACDummyPlayerDrv = ->
 		    # Returns:
 		    #	Array of pixel values ( 0 is width, 1 is height).
 			#
-			that.getsize = -> (parseInt(s, 10) for s in playerObj.getsize())
+			that.getSize = -> (parseInt(s, 10) for s in playerObj.getsize())
 	
 			#
 		    # Function: play
