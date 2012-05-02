@@ -13,10 +13,6 @@
 	<script src="../lib/mithgrid.js" type="text/javascript"></script>
 	<script src="../lib/raphael.js" type="text/javascript"></script>
 	<script src="../dist/videoanno.js" type="text/javascript"></script>
-	<!-- script type="text/javascript" SRC="../oacframework/oac-player-integration/js/dummy-player.1.0.js"></script>
-	
-	<script type="text/javascript" SRC="../oacframework/oac-player-integration/js/oac-framework-1.0.js"></script>
-	<script type="text/javascript" SRC="../oacframework/oac-player-integration/js/oac-dummyplayer-drv-1.0.js"></script -->
 	<script src="./genApps.js" type="text/javascript"></script>
 	
 </head>
@@ -25,7 +21,7 @@
 <h2>
 	Raphael Test
 </h2>
-<div id="main-container">
+<!-- div id="main-container">
 	<div id="content-container">
 		<div id="myplayer" class="dummyplayer" style="width:300px; height:200px;"></div>
 			<div id="myplayer-controls">
@@ -42,14 +38,34 @@
 		</div>
 	</div>
 	
+</div -->
+<!-- div id="main-container">
+	<div id="content-container">
+		<div id="myplayer" -->
+	<video preload="metadata" data-oatarget="http://html5demos.com/assets/dizzy" controls>
+		<source src="http://html5demos.com/assets/dizzy.mp4" type="video/mp4" />
+		<source src="http://html5demos.com/assets/dizzy.webm" type="video/webm" />
+		<source src="http://html5demos.com/assets/dizzy.ogv" type="video/ogv" />
+	</video>
+	<!-- /div>
+	</div>
+</div -->
+
+<div class="controls">
+  <span id="modeRectangle">Rectangle</span>
+  <span id="modeEllipse">Ellipse</span>
+  <span id="modeSelect">Select</span>
+  <span id="modeWatch">Watch</span>
 </div>
 
 <div class="section-export-data">
-	<textarea id="export-text" cols="100" rows="10"></textarea>
+	<textarea id="export-text" cols="80" rows="10"></textarea>
 	
 	<div id="exportDataStore" class="button">Export</div>
 	<div id="importJSONRDF" class="button">Import</div> 
 </div>
+
+<div id="annotation-list"></div>
 
 </body>
 </html>

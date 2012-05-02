@@ -1,10 +1,13 @@
-
-	#OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance
 	
 )(jQuery, MITHGrid, OAC)
 
 # # Default Configurations
 #
+
+MITHGrid.defaults "OAC.Client.StreamingVideo.Player.DriverBinding",
+	events:
+		onResize: null
+		onPlayheadUpdate: null
 
 # ## Component.ShapeEditBox
 #
@@ -15,7 +18,7 @@
 # - onEdit
 # - onDelete
 # - onCurrentModeChange
-MITHGrid.defaults "OAC.Client.StreamingVideo.Component.ShapeEditBox"
+MITHGrid.defaults "OAC.Client.StreamingVideo.Component.ShapeEditBox",
 	dirs: ['ul', 'top', 'ur', 'lft', 'lr', 'btm', 'll', 'rgt', 'mid']
 	events:
 		onResize: null
@@ -65,12 +68,12 @@ MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.KeyboardListener",
 		events:
 			onDelete: ["preventable", "unicast"]
 
-# ## Controller.AnnotationCreationButton
+# ## Component.ModeButton
 #
 # Bindings created by this controller will have the following events:
 #
 # - onCurrentModeChange
-MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.AnnotationCreationButton",
+MITHGrid.defaults "OAC.Client.StreamingVideo.Component.ModeButton",
 	bind:
 		events:
 			onCurrentModeChange: null
@@ -80,15 +83,6 @@ MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.AnnotationCreationButton
 MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.ShapeCreateBox",
 	bind:
 		events: { }
-
-# ## Controller.WindowResize
-#
-MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.WindowResize",
-	bind:
-		events:
-			onResize: null
-	selectors:
-		'': ''
 
 # ## Controller.Drag
 #
@@ -123,7 +117,7 @@ MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.timeControl",
 
 # ## Annotation Client
 #
-MITHGrid.defaults "OAC.Client.StreamingVideo",
+MITHGrid.defaults "OAC.Client.StreamingVideo.Application",
 	controllers:
 		keyboard:
 			type: OAC.Client.StreamingVideo.Controller.KeyboardListener
@@ -145,10 +139,6 @@ MITHGrid.defaults "OAC.Client.StreamingVideo",
 				textarea: '.editArea > textarea'
 				updatebutton: '.button.update'
 				deletebutton: '.button.delete'
-		buttonActive:
-			type: OAC.Client.StreamingVideo.Controller.AnnotationCreationButton
-			selectors:
-				button: ''
 		timecontrol:
 			type: OAC.Client.StreamingVideo.Controller.timeControl
 			selectors:
@@ -196,14 +186,6 @@ MITHGrid.defaults "OAC.Client.StreamingVideo",
 		CurrentMode:
 			is: 'rw'
 
-		# **Player** holds the current video player driver instance.
-		#
-		# - setPlayer(player) sets the current video player driver instance
-		# - getPlayer() returns the current video player driver instance
-		# - events.onPlayerChange fires when the Player value changes
-		Player:
-			is: 'rw'
-
 	dataViews:
 		# **currentAnnotations** pages a range of times through the annotation store selecting those
 		# annotations which have a time range (.npt\_start through .npt\_end) that fall within the time
@@ -244,20 +226,16 @@ MITHGrid.defaults "OAC.Client.StreamingVideo",
 
 	presentations: 
 		raphsvg:
-			type: MITHGrid.Presentation.RaphaelCanvas
+			type: OAC.Client.StreamingVideo.Presentation.RaphaelCanvas
 			dataView: 'currentAnnotations'
 			# The controllers are configured for the application and passed in to the presentation's
 			# initInstance method as named here.
 			controllers:
 				keyboard: "keyboard"
 				canvas: "canvas"
-				shapeCreateBox: "shapeCreateBox"
-				shapeEditBox: "shapeEditBox"
-				windowResize: "windowResize"
+				#shapeCreateBox: "shapeCreateBox"
+				#shapeEditBox: "shapeEditBox"
+				#windowResize: "windowResize"
 			events:
 				onOpacityChange: null
 			fadeStart: 5
-		annoItem:
-			type: MITHGrid.Presentation.AnnotationList
-			dataView: 'currentAnnotations'
-			container: '.anno_list'
