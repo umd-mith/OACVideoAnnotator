@@ -19,14 +19,14 @@ title: Video Annotator Demo
   $(document).ready(function() {
     OAC.Client.StreamingVideo.Player.onNewPlayer(function(playerobj) {
       var annotations, 
-      app = OAC.Client.StreamingVideo.initInstance({
+      app = OAC.Client.StreamingVideo.Application.initInstance({
         player: playerobj
       });
 
       app.run();
 
       // have a plain HTML presentation of annotation bodies
-      annotations = OAC.Client.StreamingVideo.Presentation.AnnotationList.initPresentation('#annotation-text', {
+      annotations = OAC.Client.StreamingVideo.Presentation.AnnotationList.initInstance('#annotation-text', {
 	    dataView: app.dataView.currentAnnotations,
 	    lensKey: ['.bodyType'],
 	    application: app
