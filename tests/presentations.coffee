@@ -75,7 +75,7 @@ $(document).ready ->
 	appInstance = 0
 	setupApp = ->
 		$(document).append($("<div id='content-container-#{appInstance}'></div>"))
-		app = OAC.Client.StreamingVideo.initApp '#content-container-'+appInstance,
+		app = OAC.Client.StreamingVideo.Application.initInstance '#content-container-'+appInstance,
 			url: 'http://youtube.com/'
 			player: playerObject
 			playerWrapper: '#myplayer'

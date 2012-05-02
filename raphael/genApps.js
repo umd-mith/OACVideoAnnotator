@@ -10,7 +10,7 @@ $(function() {
 		// Create Raphael canvas application controls
 		
 		// Adding a ready wrapper function to set the playerobject
-		var raphApp = OAC.Client.StreamingVideo.initApp({
+		var raphApp = OAC.Client.StreamingVideo.Application.initInstance({
 			player: playerobj
 		});
 
@@ -19,7 +19,7 @@ $(function() {
 		raphApp.run();
 		
 		// have a plain HTML presentation of annotation bodies
-        var annotations = OAC.Client.StreamingVideo.Presentation.AnnotationList.initPresentation('#annotation-list', {
+        var annotations = OAC.Client.StreamingVideo.Presentation.AnnotationList.initInstance('#annotation-list', {
 	        dataView: raphApp.dataView.currentAnnotations,
 	        lensKey: ['.bodyType'],
 			application: raphApp
@@ -30,19 +30,19 @@ $(function() {
 		raphApp.events.onActiveAnnotationChange.addListener(annotations.eventFocusChange);
 		
 		// create mode buttons
-		OAC.Client.StreamingVideo.Component.AnnotationCreationButton.initInstance("#modeRectangle", {
+		OAC.Client.StreamingVideo.Component.ModeButton.initInstance("#modeRectangle", {
 			mode: "Rectangle",
 			application: raphApp
 		});
-		OAC.Client.StreamingVideo.Component.AnnotationCreationButton.initInstance("#modeEllipse", {
+		OAC.Client.StreamingVideo.Component.ModeButton.initInstance("#modeEllipse", {
 			mode: "Ellipse",
 			application: raphApp
 		});
-		OAC.Client.StreamingVideo.Component.AnnotationCreationButton.initInstance("#modeSelect", {
+		OAC.Client.StreamingVideo.Component.ModeButton.initInstance("#modeSelect", {
 			mode: "Select",
 			application: raphApp
 		});
-		OAC.Client.StreamingVideo.Component.AnnotationCreationButton.initInstance("#modeWatch", {
+		OAC.Client.StreamingVideo.Component.ModeButton.initInstance("#modeWatch", {
 			mode: "Watch",
 			application: raphApp
 		});

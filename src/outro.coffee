@@ -1,5 +1,3 @@
-
-	#OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance
 	
 )(jQuery, MITHGrid, OAC)
 
@@ -70,12 +68,12 @@ MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.KeyboardListener",
 		events:
 			onDelete: ["preventable", "unicast"]
 
-# ## Controller.AnnotationCreationButton
+# ## Component.ModeButton
 #
 # Bindings created by this controller will have the following events:
 #
 # - onCurrentModeChange
-MITHGrid.defaults "OAC.Client.StreamingVideo.Component.AnnotationCreationButton",
+MITHGrid.defaults "OAC.Client.StreamingVideo.Component.ModeButton",
 	bind:
 		events:
 			onCurrentModeChange: null
@@ -119,7 +117,7 @@ MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.timeControl",
 
 # ## Annotation Client
 #
-MITHGrid.defaults "OAC.Client.StreamingVideo",
+MITHGrid.defaults "OAC.Client.StreamingVideo.Application",
 	controllers:
 		keyboard:
 			type: OAC.Client.StreamingVideo.Controller.KeyboardListener
@@ -141,10 +139,6 @@ MITHGrid.defaults "OAC.Client.StreamingVideo",
 				textarea: '.editArea > textarea'
 				updatebutton: '.button.update'
 				deletebutton: '.button.delete'
-		#buttonActive:
-		#	type: OAC.Client.StreamingVideo.Controller.AnnotationCreationButton
-		#	selectors:
-		#		button: ''
 		timecontrol:
 			type: OAC.Client.StreamingVideo.Controller.timeControl
 			selectors:

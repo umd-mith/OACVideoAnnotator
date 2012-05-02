@@ -7,9 +7,8 @@ $(document).ready ->
 		ok OAC.Client.StreamingVideo?, "OAC.Client.StreamingVideo"
 	
 	test "Check construction", ->
-		expect 15
-		app = OAC.Client.StreamingVideo.initApp "#content-container",
-			playerWrapper: '#myplayer'
+		expect 13
+		app = OAC.Client.StreamingVideo.Application.initInstance "#content-container",
 			url: 'http://www.youtube.com/watch?v=HYLacuAp76U&feature=fvsr'
 			easement: 5
 
@@ -25,8 +24,8 @@ $(document).ready ->
 		ok $.isFunction(app.getCurrentMode), "getCurrentMode"
 		
 		ok $.isFunction(app.initShapeLens), "initShapeLens"
-		ok $.isFunction(app.initTextLens), "initTextLens"
-		ok $.isFunction(app.addShape), "addShape"
+		#ok $.isFunction(app.initTextLens), "initTextLens"
+		#ok $.isFunction(app.addShape), "addShape"
 		ok $.isFunction(app.addShapeType), "addShapeType"
 		ok $.isFunction(app.insertShape), "insertShape"
 		ok $.isFunction(app.importData), "importData"
@@ -57,8 +56,7 @@ $(document).ready ->
 		}
 		
 		# We want to put a few annotations in
-		app = OAC.Client.StreamingVideo.initApp "#content-container",
-			playerWrapper: '#myplayer'
+		app = OAC.Client.StreamingVideo.Application.initInstance "#content-container",
 			player: playerObject
 			url: 'http://www.youtube.com/watch?v=HYLacuAp76U&feature=fvsr'
 			easement: 5

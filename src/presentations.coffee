@@ -12,8 +12,8 @@
 #
 OAC.Client.StreamingVideo.namespace "Presentation", (Presentation) ->
 	Presentation.namespace "AnnotationList", (AnnotationList) ->
-		AnnotationList.initPresentation = (args...) ->
-			MITHGrid.Presentation.initPresentation "OAC.Client.StreamingVideo.Presentation.AnnotationList", args..., (that, container) ->
+		AnnotationList.initInstance = (args...) ->
+			MITHGrid.Presentation.initInstance "OAC.Client.StreamingVideo.Presentation.AnnotationList", args..., (that, container) ->
 				options = that.options
 				app = options.application
 			
@@ -163,8 +163,8 @@ OAC.Client.StreamingVideo.namespace "Presentation", (Presentation) ->
 # Presentation for the Canvas area - area that the Raphael canvas is drawn on
 #
 	Presentation.namespace "RaphaelCanvas", (RaphaelCanvas) ->
-		RaphaelCanvas.initPresentation = (args...) ->
-			MITHGrid.Presentation.initPresentation "OAC.StreamingVideo.Client.Presentation.RaphaelCanvas", args..., (that, container) ->
+		RaphaelCanvas.initInstance = (args...) ->
+			MITHGrid.Presentation.initInstance "OAC.StreamingVideo.Client.Presentation.RaphaelCanvas", args..., (that, container) ->
 				id = $(container).attr('id')
 		
 				options = that.options

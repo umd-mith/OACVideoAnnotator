@@ -2,13 +2,13 @@
 #
 OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
 
-	# ## AnnotationCreationButton
+	# ## ModeButton
 	#
 	# Controls the Annotation Creation Tools set by app.buttonFeature
 	#
-	Component.namespace 'AnnotationCreationButton', (AnnotationCreationButton) ->
-		AnnotationCreationButton.initInstance = (args...) ->
-			MITHGrid.Controller.initController "OAC.Client.StreamingVideo.Component.AnnotationCreationButton", args..., (that, buttonEl) ->
+	Component.namespace 'ModeButton', (ModeButton) ->
+		ModeButton.initInstance = (args...) ->
+			MITHGrid.initInstance "OAC.Client.StreamingVideo.Component.ModeButton", args..., (that, buttonEl) ->
 				options = that.options
 
 				# #### AnnotationCreationButton #applyBindings
@@ -57,7 +57,7 @@ OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
 		ShapeEditBox.initInstance = (args...) ->
 			MITHGrid.initInstance "OAC.Client.StreamingVideo.Component.ShapeEditBox", args..., (that, paper) ->
 				options = that.options
-				dragController = OAC.Client.StreamingVideo.Controller.Drag.initController {}
+				dragController = OAC.Client.StreamingVideo.Controller.Drag.initInstance {}
 				handleSet = {}
 				handles = {}
 				activeRendering = null
@@ -351,7 +351,7 @@ OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
 	#
 	Component.namespace 'ShapeCreateBox', (ShapeCreateBox) ->
 		ShapeCreateBox.initInstance = (args...) ->
-			MITHGrid.Controller.initController "OAC.Client.StreamingVideo.Component.ShapeCreateBox", args..., (that, paper) ->
+			MITHGrid.initInstance "OAC.Client.StreamingVideo.Component.ShapeCreateBox", args..., (that, paper) ->
 				options = that.options
 
 				#

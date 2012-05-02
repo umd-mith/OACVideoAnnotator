@@ -20,7 +20,7 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
 	#
 	Controller.namespace "KeyboardListener", (KeyboardListener) ->
 
-		# ### KeyboardListener.initController
+		# ### KeyboardListener.initInstance
 		#
 		# Parameters:
 		#
@@ -35,10 +35,11 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
 		# * application - the application using this controller
 		# * isAction - a function which returns true if keyboard events should be propagated
 		#
-		KeyboardListener.initController = (args...) ->			
+		KeyboardListener.initInstance = (args...) ->			
 			MITHGrid.Controller.initInstance "OAC.Client.StreamingVideo.Controller.KeyboardListener", args..., (that) ->
 				options = that.options
-
+				isActive = options.isActive or -> true
+				
 				that.applyBindings = (binding, opts) ->
 					doc = binding.locate('doc')
 
@@ -46,10 +47,7 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
 						activeId = id
 
 					$(doc).keydown (e) ->
-						if options.application.getCurrentMode() == 'Editing'
-							return
-
-						if activeId?
+						if isActive() and activeId?
 							# If backspace or delete is pressed,
 							# then it is interpreted as a
 							# delete call.
@@ -63,9 +61,9 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
 	#
 	Controller.namespace "Drag", (Drag) ->
 
-		# ### Drag.initController
+		# ### Drag.initInstance
 		#
-		Drag.initController = (args...) ->
+		Drag.initInstance = (args...) ->
 			MITHGrid.Controller.Raphael.initInstance "OAC.Client.StreamingVideo.Controller.Drag", args..., (that) ->
 				that.applyBindings = (binding) ->
 					el = binding.locate('raphael')
@@ -93,7 +91,7 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
 	#
 	Controller.namespace "Select", (Select) ->
 
-		# ### Select.initController
+		# ### Select.initInstance
 		#
 		# Parameters:
 		#
@@ -108,15 +106,17 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
 		# * isSelectable - function taking no arguments that should return "true" if the click should cause the
 		#				   onSelect event to fire.
 		#
-		Select.initController = (args...) ->
+		Select.initInstance = (args...) ->
 			MITHGrid.Controller.Raphael.initInstance "OAC.Client.StreamingVideo.Controller.Select", args..., (that) ->
 				options = that.options
+				isSelectable = options.isSelectable or -> true
+				
 
 				that.applyBindings = (binding) ->
 					el = binding.locate("raphael")
 
 					el.click (e) ->
-						if options.isSelectable()
+						if isSelectable()
 							binding.events.onSelect.fire()
 
 	# ## TextBodyEditor
@@ -125,8 +125,8 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
 	#
 	#
 	Controller.namespace "TextBodyEditor", (TextBodyEditor) ->
-		TextBodyEditor.initController = (args...) ->
-			MITHGrid.Controller.initController "OAC.Client.StreamingVideo.Controller.TextBodyEditor", args..., (that) ->
+		TextBodyEditor.initInstance = (args...) ->
+			MITHGrid.Controller.initInstance "OAC.Client.StreamingVideo.Controller.TextBodyEditor", args..., (that) ->
 				options = that.options
 
 				# ### TextBodyEditor #applyBindings
@@ -227,8 +227,8 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
 	# 'clicking' an object
 	#
 	Controller.namespace "CanvasClickController", (CanvasClickController) ->
-		CanvasClickController.initController = (args...) ->
-			MITHGrid.Controller.initController "OAC.Client.StreamingVideo.Controller.CanvasClickController", args..., (that) ->
+		CanvasClickController.initInstance = (args...) ->
+			MITHGrid.Controller.initInstance "OAC.Client.StreamingVideo.Controller.CanvasClickController", args..., (that) ->
 				options = that.options
 				overlay = null
 
@@ -385,8 +385,8 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
 	# Creates a jQuery UI slider for the current time in the video
 	#
 	Controller.namespace 'sliderButton', (sliderButton) ->
-		sliderButton.initController = (args...) ->
-			MITHGrid.Controller.initController "OAC.Client.StreamingVideo.Controller.sliderButton", args..., (that) ->
+		sliderButton.initInstance = (args...) ->
+			MITHGrid.Controller.initInstance "OAC.Client.StreamingVideo.Controller.sliderButton", args..., (that) ->
 				options = that.options
 
 				that.applyBindings = (binding, opts) ->
@@ -427,8 +427,8 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
 	# Currently, just a text box for user to enter basic time data
 	#
 	Controller.namespace 'timeControl', (timeControl) ->
-		timeControl.initController = (args...) ->
-			MITHGrid.Controller.initController "OAC.Client.StreamingVideo.Controller.timeControl", args..., (that) ->
+		timeControl.initInstance = (args...) ->
+			MITHGrid.Controller.initInstance "OAC.Client.StreamingVideo.Controller.timeControl", args..., (that) ->
 				options = that.options
 				that.currentId = ''
 
