@@ -1,0 +1,105 @@
+---
+layout: docco
+title: OACVideoAnnotator/code/src/drivers/youtube.coffee.html
+---
+<div id="container"><div id="background"></div><div id="jump_to">Jump To &hellip;<div id="jump_wrapper"><div id="jump_page"><a href="../../index.html" class="source"><span class="file_name">README</span></a><a href="../../src/canvas.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">canvas.coffee</span></a><a href="../../src/component.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">component.coffee</span></a><a href="../../src/controllers.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">controllers.coffee</span></a><a href="../../src/driver-framework.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">driver-framework.coffee</span></a><a href="../../src/drivers/dummy.coffee.html" class="source "><span class="base_path">src / drivers / </span><span class="file_name">dummy.coffee</span></a><a href="../../src/drivers/html5.coffee.html" class="source "><span class="base_path">src / drivers / </span><span class="file_name">html5.coffee</span></a><a href="../../src/drivers/youtube.coffee.html" class="source selected"><span class="base_path">src / drivers / </span><span class="file_name">youtube.coffee</span></a><a href="../../src/intro.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">intro.coffee</span></a><a href="../../src/outro.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">outro.coffee</span></a><a href="../../src/presentations.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">presentations.coffee</span></a></div></div></div><table cellpadding="0" cellspacing="0"><thead><tr><th class="docs"><h1>youtube.coffee</h1><div class="filepath">src/drivers/</div></th><th class="code"></th></tr></thead><tbody><tr id="section-1"><td class="docs"><div class="pilwrap"><a href="#section-1" class="pilcrow">&#182;</a></div>
+</td><td class="code"><div class="highlight"><pre><span class="p">(</span> <span class="o">-&gt;</span>
+  <span class="nv">prevOnYouTubePlayerReady = </span><span class="nb">window</span><span class="p">.</span><span class="nx">onYouTubePlayerReady</span>
+  <span class="nb">window</span><span class="p">.</span><span class="nv">onYouTubePlayerReady = </span><span class="nf">(id) -&gt;</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span> <span class="s">&quot;registering driver&quot;</span><span class="p">,</span> <span class="nx">id</span>
+  
+    <span class="k">if</span> <span class="nx">prevOnYouTubePlayerReady</span><span class="o">?</span>
+      <span class="nx">prevOnYouTubePlayerReady</span><span class="p">(</span><span class="nx">id</span><span class="p">)</span>
+    <span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">ready</span> <span class="o">-&gt;</span>
+      <span class="nx">OAC</span><span class="p">.</span><span class="nx">Client</span><span class="p">.</span><span class="nx">StreamingVideo</span><span class="p">.</span><span class="nx">Player</span><span class="p">.</span><span class="nx">register</span> <span class="nx">initOACYoutubeDrv</span><span class="p">(</span><span class="nx">id</span><span class="p">)</span></pre></div></td></tr><tr id="section-2"><td class="docs"><div class="pilwrap"><a href="#section-2" class="pilcrow">&#182;</a></div><p>Class: OACYoutubeDrv</p>
+
+<pre><code>OAC driver for Dummy Player.
+</code></pre>
+
+<p>Youtube API documentation: https://developers.google.com/youtube/js<em>api</em>reference</p>
+</td><td class="code"><div class="highlight"><pre>  <span class="nv">players = </span><span class="p">[]</span>
+  
+  <span class="nv">initOACYoutubeDrv = </span><span class="nf">(playerId) -&gt;</span>
+    <span class="nv">driver = </span><span class="p">{}</span></pre></div></td></tr><tr id="section-3"><td class="docs"><div class="pilwrap"><a href="#section-3" class="pilcrow">&#182;</a></div><p>Function: getAvailablePlayers</p>
+
+<p>Returns all players available on the page, that can be controlled with this driver.</p>
+
+<p>Returns:
+An array of player binding objects.</p>
+</td><td class="code"><div class="highlight"><pre>  
+    <span class="nv">driver.getAvailablePlayers = </span><span class="nf">() -&gt;</span> 
+      <span class="nx">console</span><span class="p">.</span><span class="nx">log</span> <span class="s">&quot;getting available YT players&quot;</span>
+      <span class="k">if</span> <span class="nx">playerId</span><span class="o">?</span>
+        <span class="nv">p = </span><span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span> <span class="nx">playerId</span>
+      <span class="k">else</span>
+        <span class="nv">p = </span><span class="p">(</span><span class="nx">initOACYoutubeDrvBinding</span> <span class="nx">i</span> <span class="k">for</span> <span class="nx">i</span> <span class="k">in</span> <span class="nx">$</span><span class="p">(</span><span class="s">&#39;.youtubeplayer&#39;</span><span class="p">))</span>
+      <span class="nv">players = </span><span class="nx">players</span><span class="p">.</span><span class="nx">concat</span> <span class="nx">p</span>
+      <span class="nv">players = </span><span class="p">(</span><span class="nx">p</span> <span class="k">for</span> <span class="nx">p</span> <span class="k">in</span> <span class="nx">players</span> <span class="k">when</span> <span class="nx">p</span><span class="o">?</span><span class="p">)</span>
+      <span class="nx">console</span><span class="p">.</span><span class="nx">log</span> <span class="nx">players</span>
+      <span class="nx">p</span>
+
+    <span class="nv">driver.getOACVersion = </span><span class="nf">() -&gt;</span> <span class="s">&quot;1.0&quot;</span>
+  </pre></div></td></tr><tr id="section-4"><td class="docs"><div class="pilwrap"><a href="#section-4" class="pilcrow">&#182;</a></div><p>We update the player head positions every 400 milliseconds. We depend on event propagation
+to update the set of annotations on display. The 400 millisecond timing is copied from the
+demo linked from the Youtube API documentation.</p>
+</td><td class="code"><div class="highlight"><pre>    <span class="nv">playersForUpdating = </span><span class="p">[]</span>
+    <span class="nv">updateTimes = </span><span class="nf">() -&gt;</span>
+      <span class="nx">setTimeout</span> <span class="nx">updateTimes</span><span class="p">,</span> <span class="mi">400</span>
+      <span class="k">for</span> <span class="nx">player</span> <span class="k">in</span> <span class="nx">playersForUpdating</span>
+        <span class="nx">player</span><span class="p">.</span><span class="nx">setCurrentTime</span> <span class="nx">player</span><span class="p">.</span><span class="nx">getPlayhead</span><span class="p">()</span>
+  
+    <span class="nx">setTimeout</span> <span class="nx">updateTimes</span><span class="p">,</span> <span class="mi">400</span>
+    
+    <span class="nv">driver.bindPlayer = </span><span class="nf">(domObj) -&gt;</span>
+      <span class="nx">OAC</span><span class="p">.</span><span class="nx">Client</span><span class="p">.</span><span class="nx">StreamingVideo</span><span class="p">.</span><span class="nx">Player</span><span class="p">.</span><span class="nx">DriverBinding</span><span class="p">.</span><span class="nx">initInstance</span> <span class="nf">(that) -&gt;</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span> <span class="s">&quot;binding&quot;</span><span class="p">,</span> <span class="nx">domObj</span><span class="p">,</span> <span class="s">&quot;to&quot;</span><span class="p">,</span> <span class="nx">that</span>
+        <span class="nx">playersForUpdating</span><span class="p">.</span><span class="nx">push</span> <span class="nx">that</span>
+        <span class="nv">playerObj = </span><span class="nx">$</span><span class="p">(</span><span class="nx">domObj</span><span class="p">).</span><span class="nx">data</span><span class="p">(</span><span class="s">&#39;player&#39;</span><span class="p">)</span>
+  
+        <span class="nv">tag = </span><span class="nb">document</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="s">&#39;script&#39;</span><span class="p">)</span>
+        <span class="nv">tag.src = </span><span class="s">&quot;http://www.youtube.com/player_api&quot;</span>
+        <span class="nv">firstScriptTag = </span><span class="nb">document</span><span class="p">.</span><span class="nx">getElementsByTagName</span><span class="p">(</span><span class="s">&#39;script&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="nx">firstScriptTag</span><span class="p">.</span><span class="nx">parentNode</span><span class="p">.</span><span class="nx">insertBefore</span> <span class="nx">tag</span><span class="p">,</span> <span class="nx">firstScriptTag</span>
+  
+        <span class="nv">done = </span><span class="kc">false</span>
+  
+        <span class="nv">height = </span><span class="nx">domObj</span><span class="p">.</span><span class="nx">getAttribute</span> <span class="s">&quot;height&quot;</span>
+        <span class="nv">width = </span><span class="nx">domObj</span><span class="p">.</span><span class="nx">getAttribute</span> <span class="s">&quot;width&quot;</span>
+        <span class="nv">src = </span><span class="nx">domObj</span><span class="p">.</span><span class="nx">getAttribute</span> <span class="s">&quot;src&quot;</span>
+        <span class="nv">srcArray = </span><span class="nx">src</span><span class="p">.</span><span class="nx">split</span> <span class="s">&quot;/&quot;</span>
+        <span class="nv">videoId = </span><span class="nx">srcArray</span><span class="p">[</span><span class="nx">srcArray</span><span class="p">.</span><span class="nx">length</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="nv">playerId = </span><span class="nx">$</span><span class="p">(</span><span class="nx">domObj</span><span class="p">).</span><span class="nx">parent</span><span class="p">().</span><span class="nx">attr</span><span class="p">(</span><span class="s">&quot;id&quot;</span><span class="p">)</span>
+  
+        <span class="nv">onPlayerReady = </span><span class="nf">(event) -&gt;</span> <span class="nx">event</span><span class="p">.</span><span class="nx">target</span><span class="p">.</span><span class="nx">playVideo</span><span class="p">()</span>
+
+        <span class="nv">onPlayerStateChange = </span><span class="nf">(event) -&gt;</span>
+          <span class="k">if</span> <span class="nx">event</span><span class="p">.</span><span class="nx">data</span> <span class="o">==</span> <span class="nx">YT</span><span class="p">.</span><span class="nx">PlayerState</span><span class="p">.</span><span class="nx">PLAYING</span> <span class="o">and</span> <span class="o">!</span><span class="nx">done</span>
+            <span class="nx">setTimeout</span> <span class="nx">that</span><span class="p">.</span><span class="nx">stop</span><span class="p">,</span> <span class="mi">6000</span>
+            <span class="nv">done = </span><span class="kc">true</span>
+        
+        <span class="nv">playerObj = </span><span class="k">new</span> <span class="nx">YT</span><span class="p">.</span><span class="nx">Player</span> <span class="nx">playerId</span><span class="p">,</span>
+          <span class="nv">height: </span><span class="nx">height</span>
+          <span class="nv">width: </span><span class="nx">width</span>
+          <span class="nv">videoId: </span><span class="nx">videoId</span>
+          <span class="nv">events:</span>
+            <span class="nv">onReady: </span><span class="o">-&gt;</span> <span class="nx">onPlayerReady</span>
+            <span class="nv">onStateChange: </span><span class="o">-&gt;</span> <span class="nx">onPlayerStateChange</span>
+      </pre></div></td></tr><tr id="section-5"><td class="docs"><div class="pilwrap"><a href="#section-5" class="pilcrow">&#182;</a></div><p>Function: play</p>
+
+<p>Plays video.</p>
+</td><td class="code"><div class="highlight"><pre>        <span class="nv">that.play = </span><span class="nx">playerObj</span><span class="p">.</span><span class="nx">playVideo</span>
+  </pre></div></td></tr><tr id="section-6"><td class="docs"><div class="pilwrap"><a href="#section-6" class="pilcrow">&#182;</a></div><p>Function: pause</p>
+
+<p>Pauses video.</p>
+</td><td class="code"><div class="highlight"><pre>        <span class="nv">pause = </span><span class="nx">playerObj</span><span class="p">.</span><span class="nx">stopVideo</span></pre></div></td></tr><tr id="section-7"><td class="docs"><div class="pilwrap"><a href="#section-7" class="pilcrow">&#182;</a></div><p>Function: getPlayhead
+Returns the current play head position
+Returns:
+Play head position</p>
+</td><td class="code"><div class="highlight"><pre>        <span class="nv">that.getPlayhead = </span><span class="nx">playerObj</span><span class="p">.</span><span class="nx">getCurrentTime</span>
+    
+        <span class="nx">that</span></pre></div></td></tr><tr id="section-8"><td class="docs"><div class="pilwrap"><a href="#section-8" class="pilcrow">&#182;</a></div><p>End of initOACYoutubeDrvBinding</p>
+</td><td class="code"><div class="highlight"><pre>    
+    <span class="nx">driver</span>
+<span class="p">)()</span>
+
+</pre></div></td></tr></tbody></table><div id="generated">generated Sat Apr 28 2012 19:08:52 GMT-0400 (EDT)  </div><div id="projectname"><a href="../../index.html">OAC Video Annotation Client</a></div></div>

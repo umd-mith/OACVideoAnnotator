@@ -1,0 +1,154 @@
+---
+layout: docco
+title: OACVideoAnnotator/code/src/presentations.coffee.html
+---
+<div id="container"><div id="background"></div><div id="jump_to">Jump To &hellip;<div id="jump_wrapper"><div id="jump_page"><a href="../index.html" class="source"><span class="file_name">README</span></a><a href="../src/canvas.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">canvas.coffee</span></a><a href="../src/component.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">component.coffee</span></a><a href="../src/controllers.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">controllers.coffee</span></a><a href="../src/driver-framework.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">driver-framework.coffee</span></a><a href="../src/drivers/dummy.coffee.html" class="source "><span class="base_path">src / drivers / </span><span class="file_name">dummy.coffee</span></a><a href="../src/drivers/html5.coffee.html" class="source "><span class="base_path">src / drivers / </span><span class="file_name">html5.coffee</span></a><a href="../src/drivers/youtube.coffee.html" class="source "><span class="base_path">src / drivers / </span><span class="file_name">youtube.coffee</span></a><a href="../src/intro.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">intro.coffee</span></a><a href="../src/outro.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">outro.coffee</span></a><a href="../src/presentations.coffee.html" class="source selected"><span class="base_path">src / </span><span class="file_name">presentations.coffee</span></a></div></div></div><table cellpadding="0" cellspacing="0"><thead><tr><th class="docs"><h1>presentations.coffee</h1><div class="filepath">src/</div></th><th class="code"></th></tr></thead><tbody><tr id="section-1"><td class="docs"><div class="pilwrap"><a href="#section-1" class="pilcrow">&#182;</a></div><h1>Presentations</h1>
+
+<p>Presentations for OAC:ASP Application
+@author Grant Dickie, Jim Smith</p>
+</td><td class="code"><div class="highlight"><pre></pre></div></td></tr><tr id="section-2"><td class="docs"><div class="pilwrap"><a href="#section-2" class="pilcrow">&#182;</a></div><h2>AnnotationList</h2>
+
+<p>Presentation that extends SimpleText in order to add new
+functionality for Annotation HTML lens</p>
+</td><td class="code"><div class="highlight"><pre><span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">Presentation</span><span class="p">.</span><span class="nx">namespace</span> <span class="s">&quot;AnnotationList&quot;</span><span class="p">,</span> <span class="nf">(AnnotationList) -&gt;</span>
+  <span class="nv">AnnotationList.initPresentation = </span><span class="nf">(args...) -&gt;</span>
+    <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">Presentation</span><span class="p">.</span><span class="nx">initPresentation</span> <span class="s">&quot;MITHGrid.Presentation.AnnotationList&quot;</span><span class="p">,</span> <span class="nx">args</span><span class="p">...,</span> <span class="o">-&gt;</span></pre></div></td></tr><tr id="section-3"><td class="docs"><div class="pilwrap"><a href="#section-3" class="pilcrow">&#182;</a></div><h2>RaphaelCanvas</h2>
+
+<p>Presentation for the Canvas area - area that the Raphael canvas is drawn on</p>
+</td><td class="code"><div class="highlight"><pre><span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">Presentation</span><span class="p">.</span><span class="nx">namespace</span> <span class="s">&quot;RaphaelCanvas&quot;</span><span class="p">,</span> <span class="nf">(RaphaelCanvas) -&gt;</span>
+  <span class="nv">RaphaelCanvas.initPresentation = </span><span class="nf">(args...) -&gt;</span>
+    <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">Presentation</span><span class="p">.</span><span class="nx">initPresentation</span> <span class="s">&quot;MITHGrid.Presentation.RaphaelCanvas&quot;</span><span class="p">,</span> <span class="nx">args</span><span class="p">...,</span> <span class="nf">(that, container) -&gt;</span>
+      <span class="nv">id = </span><span class="nx">$</span><span class="p">(</span><span class="nx">container</span><span class="p">).</span><span class="nx">attr</span><span class="p">(</span><span class="s">&#39;id&#39;</span><span class="p">)</span>
+    
+      <span class="nv">options = </span><span class="nx">that</span><span class="p">.</span><span class="nx">options</span>
+      
+      <span class="nv">app = </span><span class="nx">options</span><span class="p">.</span><span class="nx">application</span></pre></div></td></tr><tr id="section-4"><td class="docs"><div class="pilwrap"><a href="#section-4" class="pilcrow">&#182;</a></div><p>Setting up local names for the assigned presentation controllers</p>
+</td><td class="code"><div class="highlight"><pre>      <span class="nv">canvasController = </span><span class="nx">options</span><span class="p">.</span><span class="nx">controllers</span><span class="p">.</span><span class="nx">canvas</span>
+      <span class="nv">keyBoardController = </span><span class="nx">options</span><span class="p">.</span><span class="nx">controllers</span><span class="p">.</span><span class="nx">keyboard</span></pre></div></td></tr><tr id="section-5"><td class="docs"><div class="pilwrap"><a href="#section-5" class="pilcrow">&#182;</a></div><p>x,y,w, and h coordinates are set through the CSS of the container passed in the constructor</p>
+</td><td class="code"><div class="highlight"><pre>      <span class="nv">x = </span><span class="nx">$</span><span class="p">(</span><span class="nx">container</span><span class="p">).</span><span class="nx">css</span><span class="p">(</span><span class="s">&#39;x&#39;</span><span class="p">)</span>
+      <span class="nv">y = </span><span class="nx">$</span><span class="p">(</span><span class="nx">container</span><span class="p">).</span><span class="nx">css</span><span class="p">(</span><span class="s">&#39;y&#39;</span><span class="p">)</span>
+
+      <span class="nv">w = </span><span class="nx">$</span><span class="p">(</span><span class="nx">container</span><span class="p">).</span><span class="nx">width</span><span class="p">()</span></pre></div></td></tr><tr id="section-6"><td class="docs"><div class="pilwrap"><a href="#section-6" class="pilcrow">&#182;</a></div><p>measure the div space and make the canvas
+to fit</p>
+</td><td class="code"><div class="highlight"><pre>      <span class="nv">h = </span><span class="nx">$</span><span class="p">(</span><span class="nx">container</span><span class="p">).</span><span class="nx">height</span><span class="p">()</span>
+      </pre></div></td></tr><tr id="section-7"><td class="docs"><div class="pilwrap"><a href="#section-7" class="pilcrow">&#182;</a></div><p>init RaphaelJS canvas
+Parameters for Raphael:
+* @x: value for top left corner
+* @y: value for top left corner
+* @w: Integer value for width of the SVG canvas
+* @h: Integer value for height of the SVG canvas
+Create canvas at xy and width height</p>
+</td><td class="code"><div class="highlight"><pre>      <span class="nv">that.canvas = </span><span class="k">new</span> <span class="nx">Raphael</span><span class="p">(</span><span class="nx">$</span><span class="p">(</span><span class="nx">container</span><span class="p">),</span> <span class="nx">w</span><span class="p">,</span> <span class="nx">h</span><span class="p">)</span></pre></div></td></tr><tr id="section-8"><td class="docs"><div class="pilwrap"><a href="#section-8" class="pilcrow">&#182;</a></div><p>attach binding
+<strong>FIXME:</strong> We need to change this. If we have multiple videos on a page, this will break.</p>
+</td><td class="code"><div class="highlight"><pre>      <span class="nv">canvasBinding = </span><span class="nx">canvasController</span><span class="p">.</span><span class="nx">bind</span> <span class="nx">$</span><span class="p">(</span><span class="nx">container</span><span class="p">),</span>
+        <span class="nv">closeEnough: </span><span class="mi">5</span>
+        <span class="nv">paper: </span><span class="nx">that</span><span class="p">.</span><span class="nx">canvas</span>
+      
+      <span class="nv">boundingBoxComponent = </span><span class="nx">OAC</span><span class="p">.</span><span class="nx">Client</span><span class="p">.</span><span class="nx">StreamingVideo</span><span class="p">.</span><span class="nx">Component</span><span class="p">.</span><span class="nx">ShapeEditBox</span><span class="p">.</span><span class="nx">initInstance</span> <span class="nx">that</span><span class="p">.</span><span class="nx">canvas</span>
+            
+      <span class="nv">shapeCreateBoxComponent = </span><span class="nx">OAC</span><span class="p">.</span><span class="nx">Client</span><span class="p">.</span><span class="nx">StreamingVideo</span><span class="p">.</span><span class="nx">Component</span><span class="p">.</span><span class="nx">ShapeCreateBox</span><span class="p">.</span><span class="nx">initInstance</span> <span class="nx">that</span><span class="p">.</span><span class="nx">canvas</span></pre></div></td></tr><tr id="section-9"><td class="docs"><div class="pilwrap"><a href="#section-9" class="pilcrow">&#182;</a></div><p>Keyboard binding attached to container to avoid multiple-keyboard events from firing</p>
+</td><td class="code"><div class="highlight"><pre>      <span class="nv">keyboardBinding = </span><span class="nx">keyBoardController</span><span class="p">.</span><span class="nx">bind</span> <span class="nx">$</span><span class="p">(</span><span class="nx">container</span><span class="p">),</span> <span class="p">{}</span>
+
+      <span class="nv">that.events = </span><span class="nx">$</span><span class="p">.</span><span class="nx">extend</span> <span class="kc">true</span><span class="p">,</span> <span class="nx">that</span><span class="p">.</span><span class="nx">events</span><span class="p">,</span> <span class="nx">keyboardBinding</span><span class="p">.</span><span class="nx">events</span>
+
+      <span class="nx">boundingBoxComponent</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onResize</span><span class="p">.</span><span class="nx">addListener</span> <span class="nf">(pos) -&gt;</span>
+        <span class="nv">activeRendering = </span><span class="nx">that</span><span class="p">.</span><span class="nx">getFocusedRendering</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nx">activeRendering</span><span class="o">?</span> <span class="o">and</span> <span class="nx">activeRendering</span><span class="p">.</span><span class="nx">eventResize</span><span class="o">?</span>
+          <span class="nx">activeRendering</span><span class="p">.</span><span class="nx">eventResize</span><span class="p">(</span><span class="nx">pos</span><span class="p">)</span>
+
+      <span class="nx">boundingBoxComponent</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onMove</span><span class="p">.</span><span class="nx">addListener</span> <span class="nf">(pos) -&gt;</span>
+        <span class="nv">activeRendering = </span><span class="nx">that</span><span class="p">.</span><span class="nx">getFocusedRendering</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nx">activeRendering</span><span class="o">?</span> <span class="o">and</span> <span class="nx">activeRendering</span><span class="p">.</span><span class="nx">eventMove</span><span class="o">?</span>
+          <span class="nx">activeRendering</span><span class="p">.</span><span class="nx">eventMove</span><span class="p">(</span><span class="nx">pos</span><span class="p">)</span>
+
+      <span class="nx">boundingBoxComponent</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onDelete</span><span class="p">.</span><span class="nx">addListener</span> <span class="o">-&gt;</span>
+        <span class="nv">activeRendering = </span><span class="nx">that</span><span class="p">.</span><span class="nx">getFocusedRendering</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nx">activeRendering</span><span class="o">?</span> <span class="o">and</span> <span class="nx">activeRendering</span><span class="p">.</span><span class="nx">eventDelete</span><span class="o">?</span>
+          <span class="nx">activeRendering</span><span class="p">.</span><span class="nx">eventDelete</span><span class="p">()</span>
+          <span class="nx">boundingBoxComponent</span><span class="p">.</span><span class="nx">detachFromRendering</span><span class="p">()</span>
+
+      <span class="nx">app</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onCurrentModeChange</span><span class="p">.</span><span class="nx">addListener</span> <span class="nf">(newMode) -&gt;</span>
+        <span class="k">if</span> <span class="nx">newMode</span> <span class="o">not</span> <span class="k">in</span> <span class="p">[</span><span class="s">&quot;Select&quot;</span><span class="p">,</span> <span class="s">&quot;Drag&quot;</span><span class="p">]</span>
+          <span class="nx">boundingBoxComponent</span><span class="p">.</span><span class="nx">detachFromRendering</span><span class="p">()</span></pre></div></td></tr><tr id="section-10"><td class="docs"><div class="pilwrap"><a href="#section-10" class="pilcrow">&#182;</a></div><p>Adjusts the canvas area, canvas wrapper to fall directly over the
+player area</p>
+</td><td class="code"><div class="highlight"><pre>      <span class="nv">playerObj = </span><span class="nx">app</span><span class="p">.</span><span class="nx">getPlayer</span><span class="p">()</span>
+      
+      <span class="nv">updateLocation = </span><span class="o">-&gt;</span></pre></div></td></tr><tr id="section-11"><td class="docs"><div class="pilwrap"><a href="#section-11" class="pilcrow">&#182;</a></div><p>the following elements should be parts of this presentation</p>
+</td><td class="code"><div class="highlight"><pre>        <span class="nv">canvasEl = </span><span class="nx">$</span><span class="p">(</span><span class="s">&#39;body&#39;</span><span class="p">).</span><span class="nx">find</span><span class="p">(</span><span class="s">&#39;svg&#39;</span><span class="p">)</span></pre></div></td></tr><tr id="section-12"><td class="docs"><div class="pilwrap"><a href="#section-12" class="pilcrow">&#182;</a></div><p>containerEl = $(options.playerWrapper)</p>
+</td><td class="code"><div class="highlight"><pre>        <span class="nv">htmlWrapper = </span><span class="nx">$</span><span class="p">(</span><span class="nx">container</span><span class="p">)</span></pre></div></td></tr><tr id="section-13"><td class="docs"><div class="pilwrap"><a href="#section-13" class="pilcrow">&#182;</a></div><p>playerObj = app.getPlayer()</p>
+</td><td class="code"><div class="highlight"><pre>        <span class="k">if</span> <span class="nx">playerObj</span><span class="o">?</span>
+          <span class="p">[</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">]</span> <span class="o">=</span> <span class="nx">playerObj</span><span class="p">.</span><span class="nx">getcoordinates</span><span class="p">()</span>
+          <span class="p">[</span><span class="nx">w</span><span class="p">,</span> <span class="nx">h</span><span class="p">]</span> <span class="o">=</span> <span class="nx">playerObj</span><span class="p">.</span><span class="nx">getsize</span><span class="p">()</span></pre></div></td></tr><tr id="section-14"><td class="docs"><div class="pilwrap"><a href="#section-14" class="pilcrow">&#182;</a></div><p>x = parseInt($(containerEl).offset().left, 10)
+y = parseInt($(containerEl).offset().top, 10)
+w = parseInt($(containerEl).width(), 10)
+h = parseInt($(containerEl).height(), 10)</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="nx">$</span><span class="p">(</span><span class="nx">canvasEl</span><span class="p">).</span><span class="nx">css</span>
+            <span class="nv">left: </span><span class="nx">x</span> <span class="o">+</span> <span class="s">&#39;px&#39;</span>
+            <span class="nv">top: </span><span class="nx">y</span> <span class="o">+</span> <span class="s">&#39;px&#39;</span>
+            <span class="nv">width: </span><span class="nx">w</span> <span class="o">+</span> <span class="s">&#39;px&#39;</span>
+            <span class="nv">height: </span><span class="nx">h</span> <span class="o">+</span> <span class="s">&#39;px&#39;</span>
+
+          <span class="nx">$</span><span class="p">(</span><span class="nx">htmlWrapper</span><span class="p">).</span><span class="nx">css</span>
+            <span class="nv">left: </span><span class="nx">x</span> <span class="o">+</span> <span class="s">&#39;px&#39;</span>
+            <span class="nv">top: </span><span class="nx">y</span> <span class="o">+</span> <span class="s">&#39;px&#39;</span>
+            <span class="nv">width: </span><span class="nx">w</span> <span class="o">+</span> <span class="s">&#39;px&#39;</span>
+            <span class="nv">height: </span><span class="nx">h</span> <span class="o">+</span> <span class="s">&#39;px&#39;</span>
+
+      <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onWindowResize</span><span class="p">.</span><span class="nx">addListener</span> <span class="nx">updateLocation</span>
+      
+      <span class="k">if</span> <span class="nx">playerObj</span><span class="o">?</span>
+        <span class="nx">playerObj</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onResize</span><span class="p">.</span><span class="nx">addListener</span> <span class="nx">updateLocation</span>
+      
+      <span class="nx">updateLocation</span><span class="p">()</span>
+      </pre></div></td></tr><tr id="section-15"><td class="docs"><div class="pilwrap"><a href="#section-15" class="pilcrow">&#182;</a></div><p>to make sure we get things set up right</p>
+
+<p>Registering canvas special events for start, drag, stop</p>
+</td><td class="code"><div class="highlight"><pre>      <span class="nx">canvasBinding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onShapeStart</span><span class="p">.</span><span class="nx">addListener</span> <span class="nx">shapeCreateBoxComponent</span><span class="p">.</span><span class="nx">createGuide</span> 
+
+      <span class="nx">canvasBinding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onShapeDrag</span><span class="p">.</span><span class="nx">addListener</span> <span class="nx">shapeCreateBoxComponent</span><span class="p">.</span><span class="nx">resizeGuide</span>
+
+      <span class="nx">canvasBinding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onShapeDone</span><span class="p">.</span><span class="nx">addListener</span> <span class="nf">(coords) -&gt;</span></pre></div></td></tr><tr id="section-16"><td class="docs"><div class="pilwrap"><a href="#section-16" class="pilcrow">&#182;</a></div><p>Adjust x,y in order to fit data store
+model</p>
+</td><td class="code"><div class="highlight"><pre>        <span class="nv">shape = </span><span class="nx">shapeCreateBoxComponent</span><span class="p">.</span><span class="nx">completeShape</span> <span class="nx">coords</span>
+        <span class="k">if</span> <span class="nx">shape</span><span class="p">.</span><span class="nx">height</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="o">and</span> <span class="nx">shape</span><span class="p">.</span><span class="nx">width</span> <span class="o">&gt;</span> <span class="mi">1</span>
+          <span class="nx">app</span><span class="p">.</span><span class="nx">insertShape</span> <span class="nx">shape</span>
+
+      <span class="nx">app</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onCurrentTimeChange</span><span class="p">.</span><span class="nx">addListener</span> <span class="nf">(npt) -&gt;</span>
+        <span class="nx">that</span><span class="p">.</span><span class="nx">visitRenderings</span> <span class="nf">(id, rendering) -&gt;</span>
+          <span class="k">if</span> <span class="nx">rendering</span><span class="p">.</span><span class="nx">eventCurrentTimeChange</span><span class="o">?</span>
+            <span class="nx">rendering</span><span class="p">.</span><span class="nx">eventCurrentTimeChange</span> <span class="nx">npt</span>
+
+      <span class="nx">app</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onTimeEasementChange</span><span class="p">.</span><span class="nx">addListener</span> <span class="nf">(te) -&gt;</span>
+        <span class="nx">that</span><span class="p">.</span><span class="nx">visitRenderings</span> <span class="nf">(id, rendering) -&gt;</span>
+          <span class="k">if</span> <span class="nx">rendering</span><span class="p">.</span><span class="nx">eventTimeEasementChange</span><span class="o">?</span>
+            <span class="nx">rendering</span><span class="p">.</span><span class="nx">eventTimeEasementChange</span> <span class="nx">te</span></pre></div></td></tr><tr id="section-17"><td class="docs"><div class="pilwrap"><a href="#section-17" class="pilcrow">&#182;</a></div><p>Called whenever a player is set by the Application.
+Assumes that said player object has getcoordinates() and
+getsize() as valid methods that return arrays.</p>
+
+<p>app.events.onPlayerChange.addListener (player) ->
+if player?
+    updateLocation()
+player passes args of x,y and width, height
+xy = player.getcoordinates()
+wh = player.getsize()
+move container and change size
+$(container).css
+left: parseInt(xy[0], 10) + 'px'
+top: parseInt(xy[1], 10) + 'px'
+width: wh[0]
+height: wh[1]</p>
+</td><td class="code"><div class="highlight"><pre></pre></div></td></tr><tr id="section-18"><td class="docs"><div class="pilwrap"><a href="#section-18" class="pilcrow">&#182;</a></div><p>Move canvas SVG to this location
+$('svg').css
+left: parseInt(xy[0], 10) + 'px'
+top: parseInt(xy[1], 10) + 'px'
+width: wh[0],
+height: wh[1]</p>
+</td><td class="code"><div class="highlight"><pre>        </pre></div></td></tr><tr id="section-19"><td class="docs"><div class="pilwrap"><a href="#section-19" class="pilcrow">&#182;</a></div><p>updateLocation()</p>
+</td><td class="code"><div class="highlight"><pre>      <span class="nv">superEventFocusChange = </span><span class="nx">that</span><span class="p">.</span><span class="nx">eventFocusChange</span>
+
+      <span class="nv">that.eventFocusChange = </span><span class="nf">(id) -&gt;</span>
+        <span class="k">if</span> <span class="nx">app</span><span class="p">.</span><span class="nx">getCurrentMode</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;Select&#39;</span>
+          <span class="nx">superEventFocusChange</span> <span class="nx">id</span>
+          <span class="nx">boundingBoxComponent</span><span class="p">.</span><span class="nx">attachToRendering</span> <span class="nx">that</span><span class="p">.</span><span class="nx">getFocusedRendering</span><span class="p">()</span>
+          <span class="nx">canvasBinding</span><span class="p">.</span><span class="nx">toBack</span><span class="p">()</span></pre></div></td></tr><tr id="section-20"><td class="docs"><div class="pilwrap"><a href="#section-20" class="pilcrow">&#182;</a></div><p>End of Presentation constructors</p>
+</td><td class="code"><div class="highlight"><pre></pre></div></td></tr></tbody></table><div id="generated">generated Sat Apr 28 2012 19:08:52 GMT-0400 (EDT)  </div><div id="projectname"><a href="../index.html">OAC Video Annotation Client</a></div></div>

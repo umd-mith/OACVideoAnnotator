@@ -1,6 +1,33 @@
-<!DOCTYPE html><html><head><title>outro.coffee</title><meta http-equiv="Content-Type" content="text/html" charset="UTF-8"><link rel="stylesheet" media="all" href="../docco.css"></head><body><div id="container"><div id="background"></div><div id="jump_to">Jump To &hellip;<div id="jump_wrapper"><div id="jump_page"><a href="../index.html" class="source"><span class="file_name">README</span></a><a href="../src/canvas.js.html" class="source "><span class="base_path">src / </span><span class="file_name">canvas.js</span></a><a href="../src/component.js.html" class="source "><span class="base_path">src / </span><span class="file_name">component.js</span></a><a href="../src/controllers.js.html" class="source "><span class="base_path">src / </span><span class="file_name">controllers.js</span></a><a href="../src/intro.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">intro.coffee</span></a><a href="../src/intro.js.html" class="source "><span class="base_path">src / </span><span class="file_name">intro.js</span></a><a href="../src/oac-dummy-player.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">oac-dummy-player.coffee</span></a><a href="../src/oac-dummy-player.js.html" class="source "><span class="base_path">src / </span><span class="file_name">oac-dummy-player.js</span></a><a href="../src/oac-player-framework.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">oac-player-framework.coffee</span></a><a href="../src/oac-player-framework.js.html" class="source "><span class="base_path">src / </span><span class="file_name">oac-player-framework.js</span></a><a href="../src/oac-youtube-player.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">oac-youtube-player.coffee</span></a><a href="../src/outro.coffee.html" class="source selected"><span class="base_path">src / </span><span class="file_name">outro.coffee</span></a><a href="../src/outro.js.html" class="source "><span class="base_path">src / </span><span class="file_name">outro.js</span></a><a href="../src/presentations.js.html" class="source "><span class="base_path">src / </span><span class="file_name">presentations.js</span></a></div></div></div><table cellpadding="0" cellspacing="0"><thead><tr><th class="docs"><h1>outro.coffee</h1><div class="filepath">src/</div></th><th class="code"></th></tr></thead><tbody><tr id="section-1"><td class="docs"><div class="pilwrap"><a href="#section-1" class="pilcrow">&#182;</a></div>
-</td><td class="code"><div class="highlight"><pre><span class="p">)(</span><span class="nx">jQuery</span><span class="p">,</span> <span class="nx">MITHgrid</span><span class="p">,</span> <span class="nx">OAC</span><span class="p">.</span><span class="nx">Client</span><span class="p">.</span><span class="nx">StreamingVideo</span><span class="p">)</span></pre></div></td></tr><tr id="section-2"><td class="docs"><div class="pilwrap"><a href="#section-2" class="pilcrow">&#182;</a></div><h1>Default Configurations</h1>
-</td><td class="code"><div class="highlight"><pre></pre></div></td></tr><tr id="section-3"><td class="docs"><div class="pilwrap"><a href="#section-3" class="pilcrow">&#182;</a></div><h2>Controller.CanvasClickController</h2>
+---
+layout: docco
+title: OACVideoAnnotator/code/src/outro.coffee.html
+---
+<div id="container"><div id="background"></div><div id="jump_to">Jump To &hellip;<div id="jump_wrapper"><div id="jump_page"><a href="../index.html" class="source"><span class="file_name">README</span></a><a href="../src/canvas.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">canvas.coffee</span></a><a href="../src/component.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">component.coffee</span></a><a href="../src/controllers.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">controllers.coffee</span></a><a href="../src/driver-framework.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">driver-framework.coffee</span></a><a href="../src/drivers/dummy.coffee.html" class="source "><span class="base_path">src / drivers / </span><span class="file_name">dummy.coffee</span></a><a href="../src/drivers/html5.coffee.html" class="source "><span class="base_path">src / drivers / </span><span class="file_name">html5.coffee</span></a><a href="../src/drivers/youtube.coffee.html" class="source "><span class="base_path">src / drivers / </span><span class="file_name">youtube.coffee</span></a><a href="../src/intro.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">intro.coffee</span></a><a href="../src/outro.coffee.html" class="source selected"><span class="base_path">src / </span><span class="file_name">outro.coffee</span></a><a href="../src/presentations.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">presentations.coffee</span></a></div></div></div><table cellpadding="0" cellspacing="0"><thead><tr><th class="docs"><h1>outro.coffee</h1><div class="filepath">src/</div></th><th class="code"></th></tr></thead><tbody><tr id="section-1"><td class="docs"><div class="pilwrap"><a href="#section-1" class="pilcrow">&#182;</a></div>
+</td><td class="code"><div class="highlight"><pre></pre></div></td></tr><tr id="section-2"><td class="docs"><div class="pilwrap"><a href="#section-2" class="pilcrow">&#182;</a></div><p>OAC.Client.StreamingVideo.initApp = OAC.Client.StreamingVideo.initInstance</p>
+</td><td class="code"><div class="highlight"><pre>  
+<span class="p">)(</span><span class="nx">jQuery</span><span class="p">,</span> <span class="nx">MITHGrid</span><span class="p">,</span> <span class="nx">OAC</span><span class="p">)</span></pre></div></td></tr><tr id="section-3"><td class="docs"><div class="pilwrap"><a href="#section-3" class="pilcrow">&#182;</a></div><h1>Default Configurations</h1>
+</td><td class="code"><div class="highlight"><pre><span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">defaults</span> <span class="s">&quot;OAC.Client.StreamingVideo.Player.DriverBinding&quot;</span><span class="p">,</span>
+  <span class="nv">events:</span>
+    <span class="nv">onResize: </span><span class="kc">null</span>
+    <span class="nv">onPlayheadUpdate: </span><span class="kc">null</span></pre></div></td></tr><tr id="section-4"><td class="docs"><div class="pilwrap"><a href="#section-4" class="pilcrow">&#182;</a></div><h2>Component.ShapeEditBox</h2>
+
+<p>Bindings created by this controller will have the following events:</p>
+
+<ul>
+<li>onResize</li>
+<li>onMove</li>
+<li>onEdit</li>
+<li>onDelete</li>
+<li>onCurrentModeChange</li>
+</ul>
+</td><td class="code"><div class="highlight"><pre><span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">defaults</span> <span class="s">&quot;OAC.Client.StreamingVideo.Component.ShapeEditBox&quot;</span><span class="p">,</span>
+  <span class="nv">dirs: </span><span class="p">[</span><span class="s">&#39;ul&#39;</span><span class="p">,</span> <span class="s">&#39;top&#39;</span><span class="p">,</span> <span class="s">&#39;ur&#39;</span><span class="p">,</span> <span class="s">&#39;lft&#39;</span><span class="p">,</span> <span class="s">&#39;lr&#39;</span><span class="p">,</span> <span class="s">&#39;btm&#39;</span><span class="p">,</span> <span class="s">&#39;ll&#39;</span><span class="p">,</span> <span class="s">&#39;rgt&#39;</span><span class="p">,</span> <span class="s">&#39;mid&#39;</span><span class="p">]</span>
+  <span class="nv">events:</span>
+    <span class="nv">onResize: </span><span class="kc">null</span>
+    <span class="nv">onMove: </span><span class="kc">null</span>
+    <span class="nv">onEdit: </span><span class="kc">null</span>
+    <span class="nv">onDelete: </span><span class="kc">null</span>
+    <span class="nv">onCurrentModeChange: </span><span class="kc">null</span></pre></div></td></tr><tr id="section-5"><td class="docs"><div class="pilwrap"><a href="#section-5" class="pilcrow">&#182;</a></div><h2>Controller.CanvasClickController</h2>
 
 <p>Bindings created by this controller will have the following events:</p>
 
@@ -16,7 +43,7 @@
       <span class="nv">onClick: </span><span class="kc">null</span>
       <span class="nv">onShapeStart: </span><span class="kc">null</span>
       <span class="nv">onShapeDrag: </span><span class="kc">null</span>
-      <span class="nv">onShapeDone: </span><span class="kc">null</span></pre></div></td></tr><tr id="section-4"><td class="docs"><div class="pilwrap"><a href="#section-4" class="pilcrow">&#182;</a></div><h2>Controller.TextBodyEditor</h2>
+      <span class="nv">onShapeDone: </span><span class="kc">null</span></pre></div></td></tr><tr id="section-6"><td class="docs"><div class="pilwrap"><a href="#section-6" class="pilcrow">&#182;</a></div><h2>Controller.TextBodyEditor</h2>
 
 <p>Bindings created by this controller will have the following events:</p>
 
@@ -30,26 +57,7 @@
     <span class="nv">events:</span>
       <span class="nv">onClick: </span><span class="kc">null</span>
       <span class="nv">onDelete: </span><span class="kc">null</span>
-      <span class="nv">onUpdate: </span><span class="kc">null</span></pre></div></td></tr><tr id="section-5"><td class="docs"><div class="pilwrap"><a href="#section-5" class="pilcrow">&#182;</a></div><h2>Controller.AnnotationEditSelectionGrid</h2>
-
-<p>Bindings created by this controller will have the following events:</p>
-
-<ul>
-<li>onResize</li>
-<li>onMove</li>
-<li>onEdit</li>
-<li>onDelete</li>
-<li>onCurrentModeChange</li>
-</ul>
-</td><td class="code"><div class="highlight"><pre><span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">defaults</span> <span class="s">&quot;OAC.Client.StreamingVideo.Controller.AnnotationEditSelectionGrid&quot;</span><span class="p">,</span>
-  <span class="nv">dirs: </span><span class="p">[</span><span class="s">&#39;ul&#39;</span><span class="p">,</span> <span class="s">&#39;top&#39;</span><span class="p">,</span> <span class="s">&#39;ur&#39;</span><span class="p">,</span> <span class="s">&#39;lft&#39;</span><span class="p">,</span> <span class="s">&#39;lr&#39;</span><span class="p">,</span> <span class="s">&#39;btm&#39;</span><span class="p">,</span> <span class="s">&#39;ll&#39;</span><span class="p">,</span> <span class="s">&#39;rgt&#39;</span><span class="p">,</span> <span class="s">&#39;mid&#39;</span><span class="p">]</span>
-  <span class="nv">bind:</span>
-    <span class="nv">events:</span>
-      <span class="nv">onResize: </span><span class="kc">null</span>
-      <span class="nv">onMove: </span><span class="kc">null</span>
-      <span class="nv">onEdit: </span><span class="kc">null</span>
-      <span class="nv">onDelete: </span><span class="kc">null</span>
-      <span class="nv">onCurrentModeChange: </span><span class="kc">null</span></pre></div></td></tr><tr id="section-6"><td class="docs"><div class="pilwrap"><a href="#section-6" class="pilcrow">&#182;</a></div><h2>Controller.KeyboardListener</h2>
+      <span class="nv">onUpdate: </span><span class="kc">null</span></pre></div></td></tr><tr id="section-7"><td class="docs"><div class="pilwrap"><a href="#section-7" class="pilcrow">&#182;</a></div><h2>Controller.KeyboardListener</h2>
 
 <p>Bindings created by this controller will have the following events:</p>
 
@@ -59,7 +67,7 @@
 </td><td class="code"><div class="highlight"><pre><span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">defaults</span> <span class="s">&quot;OAC.Client.StreamingVideo.Controller.KeyboardListener&quot;</span><span class="p">,</span>
   <span class="nv">bind:</span>
     <span class="nv">events:</span>
-      <span class="nv">onDelete: </span><span class="p">[</span><span class="s">&quot;preventable&quot;</span><span class="p">,</span> <span class="s">&quot;unicast&quot;</span><span class="p">]</span></pre></div></td></tr><tr id="section-7"><td class="docs"><div class="pilwrap"><a href="#section-7" class="pilcrow">&#182;</a></div><h2>Controller.AnnotationCreationButton</h2>
+      <span class="nv">onDelete: </span><span class="p">[</span><span class="s">&quot;preventable&quot;</span><span class="p">,</span> <span class="s">&quot;unicast&quot;</span><span class="p">]</span></pre></div></td></tr><tr id="section-8"><td class="docs"><div class="pilwrap"><a href="#section-8" class="pilcrow">&#182;</a></div><h2>Controller.AnnotationCreationButton</h2>
 
 <p>Bindings created by this controller will have the following events:</p>
 
@@ -69,16 +77,16 @@
 </td><td class="code"><div class="highlight"><pre><span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">defaults</span> <span class="s">&quot;OAC.Client.StreamingVideo.Controller.AnnotationCreationButton&quot;</span><span class="p">,</span>
   <span class="nv">bind:</span>
     <span class="nv">events:</span>
-      <span class="nv">onCurrentModeChange: </span><span class="kc">null</span></pre></div></td></tr><tr id="section-8"><td class="docs"><div class="pilwrap"><a href="#section-8" class="pilcrow">&#182;</a></div><h2>Controller.ShapeCreateBox</h2>
+      <span class="nv">onCurrentModeChange: </span><span class="kc">null</span></pre></div></td></tr><tr id="section-9"><td class="docs"><div class="pilwrap"><a href="#section-9" class="pilcrow">&#182;</a></div><h2>Controller.ShapeCreateBox</h2>
 </td><td class="code"><div class="highlight"><pre><span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">defaults</span> <span class="s">&quot;OAC.Client.StreamingVideo.Controller.ShapeCreateBox&quot;</span><span class="p">,</span>
   <span class="nv">bind:</span>
-    <span class="nv">events:</span></pre></div></td></tr><tr id="section-9"><td class="docs"><div class="pilwrap"><a href="#section-9" class="pilcrow">&#182;</a></div><h2>Controller.WindowResize</h2>
-</td><td class="code"><div class="highlight"><pre><span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">defaults</span><span class="p">(</span><span class="s">&quot;OAC.Client.StreamingVideo.Controller.WindowResize&quot;</span><span class="p">,</span>
+    <span class="nv">events: </span><span class="p">{</span> <span class="p">}</span></pre></div></td></tr><tr id="section-10"><td class="docs"><div class="pilwrap"><a href="#section-10" class="pilcrow">&#182;</a></div><h2>Controller.WindowResize</h2>
+</td><td class="code"><div class="highlight"><pre><span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">defaults</span> <span class="s">&quot;OAC.Client.StreamingVideo.Controller.WindowResize&quot;</span><span class="p">,</span>
   <span class="nv">bind:</span>
     <span class="nv">events:</span>
       <span class="nv">onResize: </span><span class="kc">null</span>
   <span class="nv">selectors:</span>
-    <span class="s">&#39;&#39;</span><span class="o">:</span> <span class="s">&#39;&#39;</span></pre></div></td></tr><tr id="section-10"><td class="docs"><div class="pilwrap"><a href="#section-10" class="pilcrow">&#182;</a></div><h2>Controller.Drag</h2>
+    <span class="s">&#39;&#39;</span><span class="o">:</span> <span class="s">&#39;&#39;</span></pre></div></td></tr><tr id="section-11"><td class="docs"><div class="pilwrap"><a href="#section-11" class="pilcrow">&#182;</a></div><h2>Controller.Drag</h2>
 </td><td class="code"><div class="highlight"><pre><span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">defaults</span> <span class="s">&quot;OAC.Client.StreamingVideo.Controller.Drag&quot;</span><span class="p">,</span>
   <span class="nv">bind:</span>
     <span class="nv">events:</span>
@@ -86,14 +94,14 @@
       <span class="nv">onUnfocus: </span><span class="kc">null</span>
       <span class="nv">onUpdate: </span><span class="kc">null</span>
   <span class="nv">selectors:</span>
-    <span class="s">&#39;&#39;</span><span class="o">:</span> <span class="s">&#39;&#39;</span></pre></div></td></tr><tr id="section-11"><td class="docs"><div class="pilwrap"><a href="#section-11" class="pilcrow">&#182;</a></div><h2>Controller.Select</h2>
+    <span class="s">&#39;&#39;</span><span class="o">:</span> <span class="s">&#39;&#39;</span></pre></div></td></tr><tr id="section-12"><td class="docs"><div class="pilwrap"><a href="#section-12" class="pilcrow">&#182;</a></div><h2>Controller.Select</h2>
 </td><td class="code"><div class="highlight"><pre><span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">defaults</span> <span class="s">&quot;OAC.Client.StreamingVideo.Controller.Select&quot;</span><span class="p">,</span>
   <span class="nv">bind:</span>
     <span class="nv">events:</span>
       <span class="nv">onSelect: </span><span class="kc">null</span>
   <span class="nv">selectors:</span>
     <span class="s">&#39;&#39;</span><span class="o">:</span> <span class="s">&#39;&#39;</span>
-  <span class="nv">isSelectable: </span><span class="nf">() -&gt;</span> <span class="kc">true</span></pre></div></td></tr><tr id="section-12"><td class="docs"><div class="pilwrap"><a href="#section-12" class="pilcrow">&#182;</a></div><h2>Controller.timeControl</h2>
+  <span class="nv">isSelectable: </span><span class="o">-&gt;</span> <span class="kc">true</span></pre></div></td></tr><tr id="section-13"><td class="docs"><div class="pilwrap"><a href="#section-13" class="pilcrow">&#182;</a></div><h2>Controller.timeControl</h2>
 
 <p>Bindings created by this controller will have the following events:</p>
 
@@ -103,27 +111,17 @@
 </td><td class="code"><div class="highlight"><pre><span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">defaults</span> <span class="s">&quot;OAC.Client.StreamingVideo.Controller.timeControl&quot;</span><span class="p">,</span>
   <span class="nv">bind:</span>
     <span class="nv">events:</span>
-      <span class="nv">onUpdate: </span><span class="kc">null</span></pre></div></td></tr><tr id="section-13"><td class="docs"><div class="pilwrap"><a href="#section-13" class="pilcrow">&#182;</a></div><h2>Player Driver</h2>
-</td><td class="code"><div class="highlight"><pre><span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">defaults</span> <span class="s">&quot;OAC.Client.StreamingVideo.PlayerController.DriverBinding&quot;</span><span class="p">,</span>
-  <span class="nv">variables:</span>
-    <span class="nv">CurrentTime:</span>
-      <span class="o">is:</span> <span class="s">&#39;rw&#39;</span>
-      <span class="nv">default: </span><span class="mi">0</span></pre></div></td></tr><tr id="section-14"><td class="docs"><div class="pilwrap"><a href="#section-14" class="pilcrow">&#182;</a></div><h2>Annotation Client</h2>
+      <span class="nv">onUpdate: </span><span class="kc">null</span></pre></div></td></tr><tr id="section-14"><td class="docs"><div class="pilwrap"><a href="#section-14" class="pilcrow">&#182;</a></div><h2>Annotation Client</h2>
 </td><td class="code"><div class="highlight"><pre><span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">defaults</span> <span class="s">&quot;OAC.Client.StreamingVideo&quot;</span><span class="p">,</span>
   <span class="nv">controllers:</span>
     <span class="nv">keyboard:</span>
       <span class="nv">type: </span><span class="nx">OAC</span><span class="p">.</span><span class="nx">Client</span><span class="p">.</span><span class="nx">StreamingVideo</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">KeyboardListener</span>
       <span class="nv">selectors:</span>
         <span class="nv">doc: </span><span class="s">&#39;&#39;</span>
-    <span class="nv">shapeEditBox:</span>
-      <span class="nv">type: </span><span class="nx">OAC</span><span class="p">.</span><span class="nx">Client</span><span class="p">.</span><span class="nx">StreamingVideo</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">AnnotationEditSelectionGrid</span>
-    <span class="nv">shapeCreateBox:</span>
-      <span class="nv">type: </span><span class="nx">OAC</span><span class="p">.</span><span class="nx">Client</span><span class="p">.</span><span class="nx">StreamingVideo</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">ShapeCreateBox</span>
     <span class="nv">canvas:</span>
       <span class="nv">type: </span><span class="nx">OAC</span><span class="p">.</span><span class="nx">Client</span><span class="p">.</span><span class="nx">StreamingVideo</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">CanvasClickController</span>
       <span class="nv">selectors:</span>
-        <span class="nv">svg: </span><span class="s">&#39; &gt; svg&#39;</span>
-        <span class="nv">svgwrapper: </span><span class="s">&#39;.section-canvas&#39;</span>
+        <span class="nv">svgwrapper: </span><span class="s">&#39;&#39;</span>
     <span class="nv">annoActive:</span>
       <span class="nv">type: </span><span class="nx">OAC</span><span class="p">.</span><span class="nx">Client</span><span class="p">.</span><span class="nx">StreamingVideo</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">TextBodyEditor</span>
       <span class="nv">selectors:</span>
@@ -151,10 +149,6 @@
       <span class="nv">type: </span><span class="nx">OAC</span><span class="p">.</span><span class="nx">Client</span><span class="p">.</span><span class="nx">StreamingVideo</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">Select</span>
       <span class="nv">selectors:</span>
         <span class="nv">raphael: </span><span class="s">&#39;&#39;</span>
-    <span class="nv">windowResize:</span>
-      <span class="nv">type: </span><span class="nx">OAC</span><span class="p">.</span><span class="nx">Client</span><span class="p">.</span><span class="nx">StreamingVideo</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">WindowResize</span>
-      <span class="nv">selectors:</span>
-        <span class="nv">resizeBox: </span><span class="s">&#39;&#39;</span>
   <span class="nv">variables:</span></pre></div></td></tr><tr id="section-15"><td class="docs"><div class="pilwrap"><a href="#section-15" class="pilcrow">&#182;</a></div><p><strong>ActiveAnnotation</strong> holds the item ID of the annotation currently receiving selection focus.</p>
 
 <ul>
@@ -180,7 +174,7 @@
 <li>events.onTimeEasementChange</li>
 </ul>
 </td><td class="code"><div class="highlight"><pre>    <span class="nv">TimeEasement:</span>
-      <span class="o">is:</span> <span class="s">&#39;rw&#39;</span>
+      <span class="o">is:</span> <span class="s">&#39;rw&#39;</span><span class="p">,</span>
       <span class="s">&quot;default&quot;</span><span class="o">:</span> <span class="mi">5</span></pre></div></td></tr><tr id="section-18"><td class="docs"><div class="pilwrap"><a href="#section-18" class="pilcrow">&#182;</a></div><p><strong>CurrentMode</strong> holds the current interaction mode for the annotation client. Values may be a shape type,
 "Watch", or "Select".</p>
 
@@ -195,18 +189,18 @@
 <ul>
 <li>setPlayer(player) sets the current video player driver instance</li>
 <li>getPlayer() returns the current video player driver instance</li>
-<li>events.onPlayerChange fires when the Player value changes</li>
+<li>events.onPlayerChange fires when the Player value changes
+Player:
+is: 'rw'</li>
 </ul>
-</td><td class="code"><div class="highlight"><pre>    <span class="nv">Player:</span>
-      <span class="o">is:</span> <span class="s">&#39;rw&#39;</span>
-  <span class="nv">dataViews:</span></pre></div></td></tr><tr id="section-20"><td class="docs"><div class="pilwrap"><a href="#section-20" class="pilcrow">&#182;</a></div><p><strong>currentAnnotations</strong> pages a range of times through the annotation store selecting those
-annotations which have a time range (.ntp_start through .ntp_end) that fall within the time
+</td><td class="code"><div class="highlight"><pre>  <span class="nv">dataViews:</span></pre></div></td></tr><tr id="section-20"><td class="docs"><div class="pilwrap"><a href="#section-20" class="pilcrow">&#182;</a></div><p><strong>currentAnnotations</strong> pages a range of times through the annotation store selecting those
+annotations which have a time range (.npt_start through .npt_end) that fall within the time
 range set.</p>
 </td><td class="code"><div class="highlight"><pre>    <span class="nv">currentAnnotations:</span>
       <span class="nv">dataStore: </span><span class="s">&#39;canvas&#39;</span>
       <span class="nv">type: </span><span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">Data</span><span class="p">.</span><span class="nx">RangePager</span>
-      <span class="nv">leftExpressions: </span><span class="p">[</span> <span class="s">&#39;.ntp_start&#39;</span> <span class="p">]</span>
-      <span class="nv">rightExpressions: </span><span class="p">[</span> <span class="s">&#39;.ntp_end&#39;</span> <span class="p">]</span></pre></div></td></tr><tr id="section-21"><td class="docs"><div class="pilwrap"><a href="#section-21" class="pilcrow">&#182;</a></div><p>Data store for the Application</p>
+      <span class="nv">leftExpressions: </span><span class="p">[</span> <span class="s">&#39;.npt_start&#39;</span> <span class="p">]</span>
+      <span class="nv">rightExpressions: </span><span class="p">[</span> <span class="s">&#39;.npt_end&#39;</span> <span class="p">]</span></pre></div></td></tr><tr id="section-21"><td class="docs"><div class="pilwrap"><a href="#section-21" class="pilcrow">&#182;</a></div><p>Data store for the Application</p>
 </td><td class="code"><div class="highlight"><pre>  <span class="nv">dataStores:</span></pre></div></td></tr><tr id="section-22"><td class="docs"><div class="pilwrap"><a href="#section-22" class="pilcrow">&#182;</a></div><p><strong>canvas</strong> holds all of the annotation data for the client.</p>
 </td><td class="code"><div class="highlight"><pre>    <span class="nv">canvas:</span>
       <span class="nv">types:</span></pre></div></td></tr><tr id="section-23"><td class="docs"><div class="pilwrap"><a href="#section-23" class="pilcrow">&#182;</a></div><p>All annotation items are of type "Annotation"</p>
@@ -228,22 +222,19 @@ range set.</p>
 </ul>
 </td><td class="code"><div class="highlight"><pre>        <span class="nv">targetURI:</span>
           <span class="nv">valueType: </span><span class="s">&#39;uri&#39;</span></pre></div></td></tr><tr id="section-29"><td class="docs"><div class="pilwrap"><a href="#section-29" class="pilcrow">&#182;</a></div><ul>
-<li>opacity is used in the SVG rendering of the annotation target constraint (shape)</li>
-</ul>
-</td><td class="code"><div class="highlight"><pre>        <span class="nv">opacity:</span>
-          <span class="nv">valueType: </span><span class="s">&#39;numeric&#39;</span></pre></div></td></tr><tr id="section-30"><td class="docs"><div class="pilwrap"><a href="#section-30" class="pilcrow">&#182;</a></div><ul>
 <li>the play head position at which this annotation becomes active/current</li>
 </ul>
-</td><td class="code"><div class="highlight"><pre>        <span class="nv">ntp_start:</span>
-          <span class="nv">valueType: </span><span class="s">&quot;numeric&quot;</span></pre></div></td></tr><tr id="section-31"><td class="docs"><div class="pilwrap"><a href="#section-31" class="pilcrow">&#182;</a></div><ul>
+</td><td class="code"><div class="highlight"><pre>        <span class="nv">npt_start:</span>
+          <span class="nv">valueType: </span><span class="s">&quot;numeric&quot;</span></pre></div></td></tr><tr id="section-30"><td class="docs"><div class="pilwrap"><a href="#section-30" class="pilcrow">&#182;</a></div><ul>
 <li>the play head position at which this annotation ceases being active/current</li>
 </ul>
-</td><td class="code"><div class="highlight"><pre>        <span class="nv">ntp_end:</span>
+</td><td class="code"><div class="highlight"><pre>        <span class="nv">npt_end: </span>
           <span class="nv">valueType: </span><span class="s">&quot;numeric&quot;</span>
-  <span class="nv">presentations:</span>
+
+  <span class="nv">presentations: </span>
     <span class="nv">raphsvg:</span>
       <span class="nv">type: </span><span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">Presentation</span><span class="p">.</span><span class="nx">RaphaelCanvas</span>
-      <span class="nv">dataView: </span><span class="s">&#39;currentAnnotations&#39;</span></pre></div></td></tr><tr id="section-32"><td class="docs"><div class="pilwrap"><a href="#section-32" class="pilcrow">&#182;</a></div><p>The controllers are configured for the application and passed in to the presentation's
+      <span class="nv">dataView: </span><span class="s">&#39;currentAnnotations&#39;</span></pre></div></td></tr><tr id="section-31"><td class="docs"><div class="pilwrap"><a href="#section-31" class="pilcrow">&#182;</a></div><p>The controllers are configured for the application and passed in to the presentation's
 initInstance method as named here.</p>
 </td><td class="code"><div class="highlight"><pre>      <span class="nv">controllers:</span>
         <span class="nv">keyboard: </span><span class="s">&quot;keyboard&quot;</span>
@@ -255,8 +246,8 @@ initInstance method as named here.</p>
         <span class="nv">onOpacityChange: </span><span class="kc">null</span>
       <span class="nv">fadeStart: </span><span class="mi">5</span>
     <span class="nv">annoItem:</span>
-      <span class="nv">type: </span><span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">Presentation</span><span class="p">.</span><span class="nx">AnnotationList</span><span class="p">,</span>
-      <span class="nv">dataView: </span><span class="s">&#39;currentAnnotations&#39;</span><span class="p">,</span>
+      <span class="nv">type: </span><span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">Presentation</span><span class="p">.</span><span class="nx">AnnotationList</span>
+      <span class="nv">dataView: </span><span class="s">&#39;currentAnnotations&#39;</span>
       <span class="nv">container: </span><span class="s">&#39;.anno_list&#39;</span>
 
-</pre></div></td></tr></tbody></table><div id="generated">generated Wed Apr 11 2012 13:12:18 GMT-0400 (EDT)  </div><div id="projectname"><a href="../index.html">OAC Video Annotation Client</a></div></div></body></html>
+</pre></div></td></tr></tbody></table><div id="generated">generated Sat Apr 28 2012 19:08:52 GMT-0400 (EDT)  </div><div id="projectname"><a href="../index.html">OAC Video Annotation Client</a></div></div>

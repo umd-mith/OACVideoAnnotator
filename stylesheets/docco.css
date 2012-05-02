@@ -1,7 +1,10 @@
 /*--------------------- Layout and Typography ----------------------------*/
+@import url(https://fonts.googleapis.com/css?family=Lato:300italic,700italic,300,700);
+
 body {
-  font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, FreeSerif, serif;
-  font-size: 15px;
+  font:14px/1.5 Lato, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  /* font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, FreeSerif, serif;
+  font-size: 15px; */
   line-height: 22px;
   color: #252519;
   margin: 0; padding: 0;
@@ -26,7 +29,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 #background {
   position: fixed;
-  top: 0; left: 525px; right: 0; bottom: 0;
+  top: 0; left: 475px; right: 0; bottom: 0;
   background: #f5f5ff;
   border-left: 1px solid #e5e5ee;
   z-index: -1;
@@ -41,7 +44,8 @@ h1, h2, h3, h4, h5, h6 {
   position: fixed;
   font-size: 18px;
   left: 50px;
-  background-color: white;      
+  background-color: white;   
+  display: none;   
 }
   #projectname a {
     text-decoration: none;
@@ -139,8 +143,8 @@ table td {
   outline: 0;
 }
   td.docs, th.docs {
-    max-width: 450px;
-    min-width: 450px;
+    max-width: 400px;
+    min-width: 400px;
     min-height: 5px;
     padding: 10px 25px 1px 50px;
     overflow-x: hidden;
@@ -282,3 +286,62 @@ body .vg { color: #19469D }                     /* Name.Variable.Global */
 body .vi { color: #19469D }                     /* Name.Variable.Instance */
 body .il { color: #666666 }                     /* Literal.Number.Integer.Long */
 
+#top {
+	background-color: black;
+	margin-bottom: 1em;
+	padding-bottom: 2em;
+	padding-left: 0.5em;
+}
+
+#bottom {
+	clear: both;
+	background-color: black;
+	margin-top: 1em;
+	padding-top: 1em;
+	padding-left: 1em;
+	padding-right: 1em;
+	color: #aaa;
+	font-weight: bolder;
+	text-align: right;
+	padding-bottom: 1em;
+}
+
+#bottom p {
+	padding: 0px;
+	margin: 0px;
+}
+
+#bottom p a {
+	font-weight: bolder;
+	color: #39c;
+	text-decoration: none;
+}
+
+#title {
+	text-shadow: 0 0 3px #222;
+	font-weight: bold;
+	width: 860px;
+	margin: 0 auto;
+}
+
+#title h1, #description {
+	padding: 0.5em 0 0;
+	margin: 0;
+	color: #aaa;
+}
+
+#title h1 a {
+	color: #39c;
+	font-weight: 400;
+	text-decoration: none;
+}
+
+#title h1 {
+	font-size: 48px;
+	line-height: 1.1;
+}
+
+#description {
+	font-size: 14px;
+	font-style: italic;
+}
