@@ -639,11 +639,11 @@
       return driver;
     };
     OAC.Client.StreamingVideo.namespace('Component', function(Component) {
-      Component.namespace('AnnotationCreationButton', function(AnnotationCreationButton) {
-        return AnnotationCreationButton.initInstance = function() {
+      Component.namespace('ModeButton', function(ModeButton) {
+        return ModeButton.initInstance = function() {
           var args;
           args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-          return MITHGrid.initInstance.apply(MITHGrid, ["OAC.Client.StreamingVideo.Component.AnnotationCreationButton"].concat(__slice.call(args), [function(that, buttonEl) {
+          return MITHGrid.initInstance.apply(MITHGrid, ["OAC.Client.StreamingVideo.Component.ModeButton"].concat(__slice.call(args), [function(that, buttonEl) {
             var active, options;
             options = that.options;
             active = false;
@@ -1967,7 +1967,7 @@
     }
   });
 
-  MITHGrid.defaults("OAC.Client.StreamingVideo.Component.AnnotationCreationButton", {
+  MITHGrid.defaults("OAC.Client.StreamingVideo.Component.ModeButton", {
     bind: {
       events: {
         onCurrentModeChange: null
