@@ -5,7 +5,7 @@
 # The **OAC Video Annotation Tool** is a MITHGrid application providing annotation capabilities for streaming
 # video embedded in a web page. 
 #  
-# Date: Tue May 1 11:30:18 2012 -0400
+# Date: Wed May 2 12:53:44 2012 -0700
 #  
 # Educational Community License, Version 2.0
 # 
@@ -1041,10 +1041,9 @@
               var annoEvents, bodyContent, bodyContentTextArea, item, itemEl, lens;
               lens = {};
               item = model.getItem(itemId);
-              itemEl = $("<div class=\"anno_item\">\n	<p class=\"bodyContentInstructions\">Double click here to open edit window.</p>\n	<div class=\"editArea\">\n		<textarea class=\"bodyContentTextArea\"></textarea>\n		<div id=\"editUpdate\" class=\"button update\">Update</div>\n		<div id=\"editDelete\" class=\"button delete\">Delete</div>\n	</div>\n	<div class=\"body\">\n		<p class=\"bodyContent\"></p>\n	</div>\n</div>");
-              bodyContentTextArea = $(itemEl).find(".bodyContentTextArea");
-              bodyContent = $(itemEl).find(".bodyContent");
-              $(bodyContentTextArea).text(item.bodyContent[0]);
+              itemEl = $("<div class=\"annotation-body\">\n	<div class=\"annotation-body-text\">\n		<div class=\"body-content\">\n		</div>\n	</div>\n</div>");
+              bodyContentTextArea = $(itemEl).find(".body-content-edit");
+              bodyContent = $(itemEl).find(".body-content");
               $(bodyContent).text(item.bodyContent[0]);
               $(container).append(itemEl);
               $(itemEl).find(".editArea").hide();

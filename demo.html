@@ -9,10 +9,16 @@ title: Video Annotator Demo
     <source src="http://html5demos.com/assets/dizzy.ogv" type="video/ogv" />
 </video>
 
-<div class="export-data">
-    <textarea id="export-text" cols="64" rows="10"></textarea><br/>
-    <input type="button" id="export-button" value="Export"></input>
-    <input type="button" id="import-button" value="Import"></input>
+<div id="demo-code-view" class="toggle-container">
+  <h3 class="demo-box-title active">Open Annotation Code</h3>
+  <div class="demo-box">
+    <ul class="demo-tool-buttons">
+      <li class="highlight"><a href="#" title="highlight all"><img src="images/tools_buttons_hilite.png" width="22" height="22" alt="highlight all" /></a></li>
+      <li class="import"><a id="import-button" href="#" title="import code"><img src="images/tools_buttons_import.png" width="22" height="22" alt="import code" /></a></li>
+      <li class="export"><a id="export-button" title="export code"><img src="images/tools_buttons_export.png" width="22" height="22" alt="export code" /></a></li>
+    </ul>
+    <textarea id="export-text" cols="68" rows="10"></textarea>
+  </div>
 </div>
 
 <script type="text/javascript">//<!--
@@ -54,6 +60,7 @@ title: Video Annotator Demo
 
       $("#export-button").click(function() {
         var data = app.exportData();
+console.log("export!");
         $("#export-text").val(jsl.format.formatJson(JSON.stringify(data)));
       });
 

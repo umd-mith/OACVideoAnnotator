@@ -1,11 +1,21 @@
 <section id="meta">
-	<h3>Controls</h3>
-		<div class="controls">
-		  <span id="modeRectangle">Rectangle</span>
-		  <span id="modeEllipse">Ellipse</span>
-		  <span id="modeSelect">Select</span>
-		  <span id="modeWatch">Watch</span>
+	<div id="demo-tools">
+	  <h3 class="demo-box-title active">Tools</h3>
+	  <div class="demo-box">
+	    <ul class="demo-tool-buttons">
+	      <li id="modeRectangle" class="rect"><a href="#" title="draw a rectangle"><img src="images/tools_buttons_rect.png" width="22" height="22" alt="rectangle" /></a></li>
+	      <li id="modeEllipse" class="circ"><a href="#" title="draw an ellipse"><img src="images/tools_buttons_circ.png" width="22" height="22" alt="ellipse" /></a></li>
+	      <li id="modeSelect" class="pointer"><a href="#" title="select shapes"><img src="images/tools_buttons_pointer.png" width="22" height="22" alt="pointer" /></a></li>
+	      <li class="size"><a href="#" title="resize shapes"><img src="images/tools_buttons_size.png" width="22" height="22" alt="resize" /></a></li>
+	      <li class="clear"><a href="#" title="clear all"><img src="images/tools_buttons_clear.png" width="22" height="22" alt="clear" /></a></li>
+	      <li id="modeWatch" class="watch"><a href="#" title="resume video"><img src="images/tools_buttons_resume.png" width="22" height="22" alt="resume" /></a></li>
+	    </ul>
+	  </div>
+	</div>
+	<div id="demo-annotation" class="toggle-container">
+		<h3 class="demo-box-title active">Annotation</h3>
+		<div class="demo-box">
+			<div id="annotation-text"></div>
 		</div>
-	<h3>Annotations</h3>
-		<div id="annotation-text"></div>
+	</div>
 </section>
