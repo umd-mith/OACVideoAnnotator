@@ -272,7 +272,7 @@ text-transform: uppercase;
 font-weight: normal;
 font-size: 12px;
 padding: 6px 9px;
-background: #646464 url(images/toggle.png) no-repeat right 0;
+background: #646464 url(../images/toggle.png) no-repeat right 0;
 background: -webkit-border-radius: 3px 3px 0px 0px;
 border-radius: 3px 3px 0px 0px;
 }
@@ -290,7 +290,7 @@ padding: 0;
 padding: 6px;
 border: 1px solid #c6c6c6;
 overflow: auto;
-background: #EEEEEE url(images/bg_tools.png) repeat;
+background: #EEEEEE url(../images/bg_tools.png) repeat;
 }
 
 /*-------- EDITING TOOLS ---------*/
@@ -310,7 +310,7 @@ height: 22px;
 width: 22px;
 display: block;
 list-style-type: none;
-background: url(images/bg_tools_buttons.png) no-repeat left center;
+background: url(../images/bg_tools_buttons.png) no-repeat left center;
 }
 .demo-tool-buttons li a {
 cursor: pointer;
@@ -321,7 +321,7 @@ border: 0;
 .demo-tool-buttons li:hover {
 background-position: center center;
 }
-.demo-tool-buttons li:active, .demo-tool-buttons li.selected {
+.demo-tool-buttons li:active, .demo-tool-buttons li.active {
 background-position: right center;
 }
 
