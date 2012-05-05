@@ -23,6 +23,7 @@ OAC.Client.StreamingVideo.namespace "Demo", (Demo) ->
 			MITHGrid.initInstance "OAC.Client.StreamingVideo.Demo.TextControls", args..., (that, container) ->
 				options = that.options
 
+				# this may be a bug in MITHGrid. We hard code the "#text-controls" selector for now.
 				if !container?
 					container = $("#text-controls")
 			
