@@ -152,31 +152,34 @@
               };
               rendering.eventEdit = function() {
                 var text;
-                app.lockActiveAnnotation();
-                inEditing = true;
-                text = textEl.text();
-                textEl.hide();
-                inputEl.show();
-                return inputEl.val(text);
+                if (!inEditing) {
+                  app.lockActiveAnnotation();
+                  inEditing = true;
+                  text = textEl.text();
+                  textEl.hide();
+                  inputEl.show();
+                  return inputEl.val(text);
+                }
               };
               superDelete = rendering.eventDelete;
               rendering.eventDelete = function() {
-                app.unlockActiveAnnotation();
                 if (inEditing) {
+                  app.unlockActiveAnnotation();
                   inEditing = false;
                   textEl.show();
                   return inputEl.hide();
                 } else {
-                  superDelete();
-                  return inEditing = false;
+                  return superDelete();
                 }
               };
               rendering.eventSave = function() {
-                app.unlockActiveAnnotation();
-                inEditing = false;
-                textEl.show();
-                rendering.eventUpdate(inputEl.val());
-                return inputEl.hide();
+                if (inEditing) {
+                  app.unlockActiveAnnotation();
+                  inEditing = false;
+                  textEl.show();
+                  rendering.eventUpdate(inputEl.val());
+                  return inputEl.hide();
+                }
               };
               return rendering;
             });

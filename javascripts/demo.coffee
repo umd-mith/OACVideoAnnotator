@@ -163,31 +163,32 @@ OAC.Client.StreamingVideo.namespace "Demo", (Demo) ->
 							textControls.eventHide()
 						
 						rendering.eventEdit = ->
-							app.lockActiveAnnotation()
-							inEditing = true
-							# we want to replace the body with a textarea
-							text = textEl.text()
-							textEl.hide()
-							inputEl.show()
-							inputEl.val(text)							
+							if !inEditing
+								app.lockActiveAnnotation()
+								inEditing = true
+								# we want to replace the body with a textarea
+								text = textEl.text()
+								textEl.hide()
+								inputEl.show()
+								inputEl.val(text)							
 							
 						superDelete = rendering.eventDelete
 						rendering.eventDelete = ->
-							app.unlockActiveAnnotation()
 							if inEditing
+								app.unlockActiveAnnotation()
 								inEditing = false
 								textEl.show()
 								inputEl.hide()
 							else
 								superDelete()
-								inEditing = false
 							
 						rendering.eventSave = ->
-							app.unlockActiveAnnotation()
-							inEditing = false
-							textEl.show()
-							rendering.eventUpdate inputEl.val()
-							inputEl.hide()
+							if inEditing
+								app.unlockActiveAnnotation()
+								inEditing = false
+								textEl.show()
+								rendering.eventUpdate inputEl.val()
+								inputEl.hide()
 						rendering
 
 					  # create mode buttons
