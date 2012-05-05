@@ -33,12 +33,8 @@
         var args, _ref;
         args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
         return (_ref = MITHGrid.Controller).initInstance.apply(_ref, ["OAC.Client.StreamingVideo.Demo.Click"].concat(__slice.call(args), [function(that) {
-          var options;
-          options = that.options;
           return that.applyBindings = function(binding) {
-            return binding.locate('').click(function() {
-              return binding.events.onSelect.fire();
-            });
+            return binding.locate('').click(binding.events.onSelect.fire);
           };
         }]));
       };
@@ -131,10 +127,14 @@
               if (rendering != null) return rendering.eventSave();
             });
             annotations.addLens("Text", function(container, view, model, itemId) {
-              var binding, inEditing, rendering, superDelete, superFocus, superUnfocus;
+              var binding, inEditing, inputEl, rendering, superDelete, superFocus, superUnfocus, textEl;
               rendering = annotations.initTextLens(container, view, model, itemId);
               binding = hoverController.bind(rendering.el);
               inEditing = false;
+              textEl = $(rendering.el).find(".body-content");
+              inputEl = $("<textarea></textarea>");
+              rendering.el.append(inputEl);
+              inputEl.hide();
               binding.events.onFocus.addListener(function() {
                 return app.setActiveAnnotation(itemId);
               });
@@ -151,19 +151,29 @@
                 return textControls.eventHide();
               };
               rendering.eventEdit = function() {
-                return inEditing = true;
+                var text;
+                inEditing = true;
+                text = textEl.text();
+                textEl.hide();
+                inputEl.show();
+                return inputEl.val(text);
               };
               superDelete = rendering.eventDelete;
               rendering.eventDelete = function() {
                 if (inEditing) {
-                  return inEditing = false;
+                  inEditing = false;
+                  textEl.show();
+                  return inputEl.hide();
                 } else {
                   superDelete();
                   return inEditing = false;
                 }
               };
               rendering.eventSave = function() {
-                return inEditing = false;
+                inEditing = false;
+                textEl.show();
+                rendering.eventUpdate(inputEl.val());
+                return inputEl.hide();
               };
               return rendering;
             });

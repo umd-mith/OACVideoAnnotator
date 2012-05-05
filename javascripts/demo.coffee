@@ -29,11 +29,8 @@ OAC.Client.StreamingVideo.namespace "Demo", (Demo) ->
 	Demo.namespace "Click", (Click) ->
 		Click.initInstance = (args...) ->
 			MITHGrid.Controller.initInstance "OAC.Client.StreamingVideo.Demo.Click", args..., (that) ->
-				options = that.options				
-
 				that.applyBindings = (binding) ->
-					binding.locate('').click ->
-						binding.events.onSelect.fire()
+					binding.locate('').click binding.events.onSelect.fire
 	
 	Demo.namespace "Hover", (Hover) ->
 		Hover.initInstance = (args...) ->
@@ -138,6 +135,10 @@ OAC.Client.StreamingVideo.namespace "Demo", (Demo) ->
 						rendering = annotations.initTextLens container, view, model, itemId
 						binding = hoverController.bind rendering.el
 						inEditing = false
+						textEl = $(rendering.el).find(".body-content")
+						inputEl = $("<textarea></textarea>")
+						rendering.el.append(inputEl)
+						inputEl.hide()
 
 						# we want to switch the active annotation to this one when the cursor hovers over it
 						binding.events.onFocus.addListener ->
@@ -163,18 +164,27 @@ OAC.Client.StreamingVideo.namespace "Demo", (Demo) ->
 						
 						rendering.eventEdit = ->
 							inEditing = true
+							# we want to replace the body with a textarea
+							text = textEl.text()
+							textEl.hide()
+							inputEl.show()
+							inputEl.val(text)							
 							
 						superDelete = rendering.eventDelete
 						rendering.eventDelete = ->
 							if inEditing
 								inEditing = false
+								textEl.show()
+								inputEl.hide()
 							else
 								superDelete()
 								inEditing = false
 							
 						rendering.eventSave = ->
 							inEditing = false
-						
+							textEl.show()
+							rendering.eventUpdate inputEl.val()
+							inputEl.hide()
 						rendering
 
 					  # create mode buttons
