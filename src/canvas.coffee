@@ -229,7 +229,7 @@ OAC.Client.StreamingVideo.namespace "Application", (Application) ->
 					that.setOpacity()
 					that.shape.toFront()
 					# **FIXME:** This should be handled in the view instead of by adding/removing listeners like this
-					view.events.onDelete.addListener that.eventDelete
+					#view.events.onDelete.addListener that.eventDelete
 			
 				# #### #eventUnfocus
 				#
@@ -240,7 +240,7 @@ OAC.Client.StreamingVideo.namespace "Application", (Application) ->
 					focused = false
 					that.setOpacity()
 					that.shape.toBack()
-					view.events.onDelete.removeListener that.eventDelete
+					#view.events.onDelete.removeListener that.eventDelete
 			
 				# #### #eventDelete
 				#
@@ -256,7 +256,8 @@ OAC.Client.StreamingVideo.namespace "Application", (Application) ->
 
 				# #### #eventResize
 				#
-				# Called when the bounding box of the rendering changes size.
+				# Called when the bounding box of the rendering changes size. Note that we change the
+				# width and height of the targeted video to correspond to the current size of the play surface.
 				#
 				# Parameters:
 				#

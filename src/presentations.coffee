@@ -38,27 +38,23 @@ OAC.Client.StreamingVideo.namespace "Presentation", (Presentation) ->
 
 					# We put together a template representing the text annotations associated with any shape.
 					itemEl = $("""
-						<div class="anno_item">
-							<p class="bodyContentInstructions">Double click here to open edit window.</p>
-							<div class="editArea">
-								<textarea class="bodyContentTextArea"></textarea>
-								<div id="editUpdate" class="button update">Update</div>
-								<div id="editDelete" class="button delete">Delete</div>
-							</div>
-							<div class="body">
-								<p class="bodyContent"></p>
+						<div class="annotation-body">
+							<div class="annotation-body-text">
+								<div class="body-content">
+								</div>
 							</div>
 						</div>
 					""")
 
 					# We capture the parts of the annotation presentation for use later.
-					bodyContentTextArea = $(itemEl).find ".bodyContentTextArea"
-					bodyContent = $(itemEl).find ".bodyContent"
+					bodyContentTextArea = $(itemEl).find ".body-content-edit"
+					bodyContent = $(itemEl).find ".body-content"
 
-					$(bodyContentTextArea).text item.bodyContent[0]
+					#$(bodyContentTextArea).text item.bodyContent[0]
 					$(bodyContent).text item.bodyContent[0]
 
 					# We attach the rendering to the container and hide the edit area.
+					lens.el = itemEl
 					$(container).append itemEl
 					$(itemEl).find(".editArea").hide()
 
@@ -111,9 +107,8 @@ OAC.Client.StreamingVideo.namespace "Presentation", (Presentation) ->
 					#
 					# Returns: Nothing.
 					#
-					lens.eventDelete = (id) ->
-						if id == itemId
-							model.removeItems [itemId]
+					lens.eventDelete = ->
+						model.removeItems [itemId]
 
 					# #### #update
 					#
@@ -268,8 +263,8 @@ OAC.Client.StreamingVideo.namespace "Presentation", (Presentation) ->
 				superEventFocusChange = that.eventFocusChange
 
 				that.eventFocusChange = (id) ->
+					superEventFocusChange id
 					if app.getCurrentMode() == 'Select'
-						superEventFocusChange id
 						boundingBoxComponent.attachToRendering that.getFocusedRendering()
 						canvasBinding.toBack()
 
