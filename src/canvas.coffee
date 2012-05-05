@@ -377,6 +377,7 @@ OAC.Client.StreamingVideo.namespace "Application", (Application) ->
 						npt_end: npt_end
 
 					app.dataStore.canvas.loadItems [t = $.extend(true, shapeItem, shape)]
+					app.setActiveAnnotation shapeItem.id
 					shapeItem.id
 
 			# ### importData
