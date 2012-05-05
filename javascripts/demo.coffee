@@ -4,32 +4,79 @@ MITHGrid.defaults "OAC.Client.StreamingVideo.Demo.Hover",
 			onFocus: null
 			onUnfocus: null
 
+MITHGrid.defaults "OAC.Client.StreamingVideo.Demo.Click",
+	bind:
+		events:
+			onSelect: null
+
 MITHGrid.defaults "OAC.Client.StreamingVideo.Demo.TextControls",
 	events:
 		onDelete: null
 		onEdit: null
-
+		onSave: null
+	viewSetup: """
+		<span class="edit"><a href="#" title="edit annotation"></a></span>
+		<span class="save"><a href="#" title="save annotation"></a></span>
+		<span class="delete"><a href="#" title="delete annotation"></a></span>
+	"""
+	
 OAC.Client.StreamingVideo.namespace "Demo", (Demo) ->
+	# ## Select
+	#
+	# Attaches a click handler to an SVG rendering and fires an onSelect event if the rendering is clicked AND
+	# the application is in a mode to select things.
+	#
+	Demo.namespace "Click", (Click) ->
+		Click.initInstance = (args...) ->
+			MITHGrid.Controller.initInstance "OAC.Client.StreamingVideo.Demo.Click", args..., (that) ->
+				options = that.options				
+
+				that.applyBindings = (binding) ->
+					binding.locate('').click ->
+						binding.events.onSelect.fire()
+	
 	Demo.namespace "Hover", (Hover) ->
 		Hover.initInstance = (args...) ->
 			MITHGrid.Controller.initInstance "OAC.Client.StreamingVideo.Demo.Hover", args..., (that) ->
 				that.applyBindings = (binding) ->
 					binding.locate('').hover binding.events.onFocus.fire, binding.events.onUnfocus.fire
 
-
-
 	Demo.namespace "TextControls", (TextControls) ->
+		
 		TextControls.initInstance = (args...) ->
+			clickController = Demo.Click.initInstance {}
+			
 			MITHGrid.initInstance "OAC.Client.StreamingVideo.Demo.TextControls", args..., (that, container) ->
 				options = that.options
+				app = options.application
+				shown = false
 
-				# this may be a bug in MITHGrid. We hard code the "#text-controls" selector for now.
-				if !container?
-					container = $("#text-controls")
+				$(document).ready ->
+					editEl = $(container).find(".edit")
+					saveEl = $(container).find(".save")
+					deleteEl = $(container).find(".delete")
+				
+					editBinding = clickController.bind editEl
+					saveBinding = clickController.bind saveEl
+					deleteBinding = clickController.bind deleteEl
+								
+					editBinding.events.onSelect.addListener ->
+						if shown
+							that.events.onEdit.fire()
+					saveBinding.events.onSelect.addListener ->
+						if shown
+							that.events.onSave.fire()
+					deleteBinding.events.onSelect.addListener ->
+						if shown
+							that.events.onDelete.fire()
 			
-				that.eventShow = -> $(container).show()
+				that.eventShow = -> 
+					$(container).show()
+					shown = true
 			
-				that.eventHide = -> $(container).hide()
+				that.eventHide = -> 
+					$(container).hide()
+					shown = false
 			
 				that.eventMove = (top, right) ->
 					$(container).css
@@ -73,10 +120,24 @@ OAC.Client.StreamingVideo.namespace "Demo", (Demo) ->
 					textControls = OAC.Client.StreamingVideo.Demo.TextControls.initInstance $ "#text-controls"
 			
 					app.events.onActiveAnnotationChange.addListener annotations.eventFocusChange
+					
+					textControls.events.onEdit.addListener ->
+						rendering = annotations.getFocusedRendering()
+						if rendering?
+							rendering.eventEdit()
+					textControls.events.onDelete.addListener ->
+						rendering = annotations.getFocusedRendering()
+						if rendering?
+							rendering.eventDelete()
+					textControls.events.onSave.addListener ->
+						rendering = annotations.getFocusedRendering()
+						if rendering?
+							rendering.eventSave()
 		
 					annotations.addLens "Text", (container, view, model, itemId) ->
 						rendering = annotations.initTextLens container, view, model, itemId
 						binding = hoverController.bind rendering.el
+						inEditing = false
 
 						# we want to switch the active annotation to this one when the cursor hovers over it
 						binding.events.onFocus.addListener ->
@@ -99,7 +160,21 @@ OAC.Client.StreamingVideo.namespace "Demo", (Demo) ->
 						rendering.eventUnfocus = ->
 							superUnfocus()
 							textControls.eventHide()
-
+						
+						rendering.eventEdit = ->
+							inEditing = true
+							
+						superDelete = rendering.eventDelete
+						rendering.eventDelete = ->
+							if inEditing
+								inEditing = false
+							else
+								superDelete()
+								inEditing = false
+							
+						rendering.eventSave = ->
+							inEditing = false
+						
 						rendering
 
 					  # create mode buttons

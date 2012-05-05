@@ -5,7 +5,7 @@
 # The **OAC Video Annotation Tool** is a MITHGrid application providing annotation capabilities for streaming
 # video embedded in a web page. 
 #  
-# Date: Wed May 2 12:53:44 2012 -0700
+# Date: Sat May 5 14:31:08 2012 -0400
 #  
 # Educational Community License, Version 2.0
 # 
@@ -1064,8 +1064,8 @@
                   ]);
                 }
               };
-              lens.eventDelete = function(id) {
-                if (id === itemId) return model.removeItems([itemId]);
+              lens.eventDelete = function() {
+                return model.removeItems([itemId]);
               };
               lens.update = function(item) {
                 $(itemEl).find(".bodyContent").text(item.bodyContent[0]);
@@ -1180,8 +1180,8 @@
             });
             superEventFocusChange = that.eventFocusChange;
             return that.eventFocusChange = function(id) {
+              superEventFocusChange(id);
               if (app.getCurrentMode() === 'Select') {
-                superEventFocusChange(id);
                 boundingBoxComponent.attachToRendering(that.getFocusedRendering());
                 return canvasBinding.toBack();
               }
@@ -1322,14 +1322,12 @@
             that.eventFocus = function() {
               focused = true;
               that.setOpacity();
-              that.shape.toFront();
-              return view.events.onDelete.addListener(that.eventDelete);
+              return that.shape.toFront();
             };
             that.eventUnfocus = function() {
               focused = false;
               that.setOpacity();
-              that.shape.toBack();
-              return view.events.onDelete.removeListener(that.eventDelete);
+              return that.shape.toBack();
             };
             that.eventDelete = function() {
               return model.removeItems([itemId]);
