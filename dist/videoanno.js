@@ -1076,8 +1076,6 @@
                 itemId: itemId
               });
               annoEvents.events.onClick.addListener(app.setActiveAnnotation);
-              annoEvents.events.onDelete.addListener(lens.eventDelete);
-              annoEvents.events.onUpdate.addListener(lens.eventUpdate);
               if (cb != null) cb(lens);
               return lens;
             };
@@ -2058,7 +2056,7 @@
     },
     variables: {
       ActiveAnnotation: {
-        is: 'rw'
+        is: 'rwl'
       },
       CurrentTime: {
         is: 'rw',

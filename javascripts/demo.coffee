@@ -117,7 +117,7 @@ OAC.Client.StreamingVideo.namespace "Demo", (Demo) ->
 					textControls = OAC.Client.StreamingVideo.Demo.TextControls.initInstance $ "#text-controls"
 			
 					app.events.onActiveAnnotationChange.addListener annotations.eventFocusChange
-					
+										
 					textControls.events.onEdit.addListener ->
 						rendering = annotations.getFocusedRendering()
 						if rendering?
@@ -163,6 +163,7 @@ OAC.Client.StreamingVideo.namespace "Demo", (Demo) ->
 							textControls.eventHide()
 						
 						rendering.eventEdit = ->
+							app.lockActiveAnnotation()
 							inEditing = true
 							# we want to replace the body with a textarea
 							text = textEl.text()
@@ -172,6 +173,7 @@ OAC.Client.StreamingVideo.namespace "Demo", (Demo) ->
 							
 						superDelete = rendering.eventDelete
 						rendering.eventDelete = ->
+							app.unlockActiveAnnotation()
 							if inEditing
 								inEditing = false
 								textEl.show()
@@ -181,6 +183,7 @@ OAC.Client.StreamingVideo.namespace "Demo", (Demo) ->
 								inEditing = false
 							
 						rendering.eventSave = ->
+							app.unlockActiveAnnotation()
 							inEditing = false
 							textEl.show()
 							rendering.eventUpdate inputEl.val()

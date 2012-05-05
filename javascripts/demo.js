@@ -152,6 +152,7 @@
               };
               rendering.eventEdit = function() {
                 var text;
+                app.lockActiveAnnotation();
                 inEditing = true;
                 text = textEl.text();
                 textEl.hide();
@@ -160,6 +161,7 @@
               };
               superDelete = rendering.eventDelete;
               rendering.eventDelete = function() {
+                app.unlockActiveAnnotation();
                 if (inEditing) {
                   inEditing = false;
                   textEl.show();
@@ -170,6 +172,7 @@
                 }
               };
               rendering.eventSave = function() {
+                app.unlockActiveAnnotation();
                 inEditing = false;
                 textEl.show();
                 rendering.eventUpdate(inputEl.val());
