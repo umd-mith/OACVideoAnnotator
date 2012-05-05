@@ -22,54 +22,21 @@ title: Video Annotator Demo
 </div>
 
 <script type="text/javascript">//<!--
-  $(document).ready(function() {
-    OAC.Client.StreamingVideo.Player.onNewPlayer(function(playerobj) {
-      var annotations, 
-      app = OAC.Client.StreamingVideo.Application.initInstance({
-        player: playerobj
-      });
-
-      app.run();
-
-      // have a plain HTML presentation of annotation bodies
-      annotations = OAC.Client.StreamingVideo.Presentation.AnnotationList.initInstance('#annotation-text', {
-	    dataView: app.dataView.currentAnnotations,
-	    lensKey: ['.bodyType'],
-	    application: app
-      });
-
-	  // create mode buttons
-	  OAC.Client.StreamingVideo.Component.ModeButton.initInstance("#modeRectangle", {
-		mode: "Rectangle",
-		application: app
-	  });
-	  OAC.Client.StreamingVideo.Component.ModeButton.initInstance("#modeEllipse", {
-		mode: "Ellipse",
-		application: app
-	  });
-	  OAC.Client.StreamingVideo.Component.ModeButton.initInstance("#modeSelect", {
-		mode: "Select",
-		application: app
-	  });
-	  OAC.Client.StreamingVideo.Component.ModeButton.initInstance("#modeWatch", {
-		mode: "Watch",
-		application: app
-	  });
-      // we can use the default bare-bones text display provided by the annotation client
-      annotations.addLens("Text", annotations.initTextLens);
-
-      $("#export-button").click(function() {
-        var data = app.exportData();
-console.log("export!");
-        $("#export-text").val(jsl.format.formatJson(JSON.stringify(data)));
-      });
-
-      $("#import-button").click(function() {
-        var str = $("#export-text").val();
-        if(str != "") {
-          app.importData(JSON.parse(str));
-        }
-      });
+$(document).ready(function() {
+  OAC.Client.StreamingVideo.Player.onNewPlayer(function(playerobj) {
+    /*
+     * We begin by creating an instance of the Video Annotator application.
+     * This requires the player object passed in by the onNewPlayer function above.
+     */
+    var app = OAC.Client.StreamingVideo.Demo.Application.initInstance({
+      player: playerobj
     });
+
+    /*
+     * Running the application causes all of the DOM elements, presentations, and other components to be
+     * instantiated.
+     */
+    app.run();
   });
+});
 // --></script>

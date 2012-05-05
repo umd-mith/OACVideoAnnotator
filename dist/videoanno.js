@@ -1045,6 +1045,7 @@
               bodyContentTextArea = $(itemEl).find(".body-content-edit");
               bodyContent = $(itemEl).find(".body-content");
               $(bodyContent).text(item.bodyContent[0]);
+              lens.el = itemEl;
               $(container).append(itemEl);
               $(itemEl).find(".editArea").hide();
               lens.eventFocus = function() {
