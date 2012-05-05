@@ -43,12 +43,13 @@
           that.eventHide = function() {
             return $(container).hide();
           };
-          return that.eventMove = function(top, right) {
-            return $(container).attr({
-              top: top,
-              right: right
+          that.eventMove = function(top, right) {
+            return $(container).css({
+              top: top + "px",
+              left: (right - 60) + "px"
             });
           };
+          return that.eventHide();
         }]));
       };
     });

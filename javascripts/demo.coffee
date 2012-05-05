@@ -31,9 +31,11 @@ OAC.Client.StreamingVideo.namespace "Demo", (Demo) ->
 				that.eventHide = -> $(container).hide()
 			
 				that.eventMove = (top, right) ->
-					$(container).attr
-						top: top
-						right: right
+					$(container).css
+						top: top + "px"
+						left: (right - 60) + "px"
+				
+				that.eventHide()
 
 
 

@@ -132,6 +132,7 @@ border: 0;
 width: 15px;
 height: 15px;
 display: block;
+float: left;
 }
 .demo-edit-buttons .save a {
 background: url(../images/tools_edit_buttons_save.png) no-repeat center center;
