@@ -104,6 +104,16 @@ background: #FFF;
 #demo-annotation .demo-box textarea {
 }
 
+#demo-annotation .annotation-body {
+	border: 1px solid #fff;
+}
+
+#demo-annotation .annotation-body.selected {
+	background-color: #eee;
+	border-radius: 3px 3px 3px 3px;
+	border: 1px dotted #ddd;
+}
+
 .demo-edit-buttons {
 padding: 0 2px 8px 8px;
 position: absolute;
