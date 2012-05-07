@@ -24,7 +24,7 @@ BASE_FILES = ${SRC_DIR}/controllers.coffee \
 	${SRC_DIR}/drivers/html5.coffee \
 	${SRC_DIR}/component.coffee \
 	${SRC_DIR}/presentations.coffee \
-	${SRC_DIR}/canvas.coffee
+	${SRC_DIR}/application.coffee
 
 
 MODULES = ${SRC_DIR}/intro.coffee \
