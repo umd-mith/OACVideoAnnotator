@@ -5,7 +5,7 @@
 # The **OAC Video Annotation Tool** is a MITHGrid application providing annotation capabilities for streaming
 # video embedded in a web page. 
 #  
-# Date: Mon May 7 09:07:27 2012 -0400
+# Date: Mon May 7 09:32:31 2012 -0400
 #  
 # Educational Community License, Version 2.0
 # 
@@ -127,81 +127,6 @@
               el = binding.locate("raphael");
               return el.click(function(e) {
                 if (isSelectable()) return binding.events.onSelect.fire();
-              });
-            };
-          }]));
-        };
-      });
-      Controller.namespace("TextBodyEditor", function(TextBodyEditor) {
-        return TextBodyEditor.initInstance = function() {
-          var args, _ref;
-          args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-          return (_ref = MITHGrid.Controller).initInstance.apply(_ref, ["OAC.Client.StreamingVideo.Controller.TextBodyEditor"].concat(__slice.call(args), [function(that) {
-            var options;
-            options = that.options;
-            return that.applyBindings = function(binding, opts) {
-              var allAnnos, annoEl, bindingActive, bodyContent, deleteButton, editArea, editButton, editEnd, editStart, editUpdate, prevMode, textArea, updateButton;
-              annoEl = binding.locate('annotation');
-              bodyContent = binding.locate('body');
-              allAnnos = binding.locate('annotations');
-              textArea = binding.locate('textarea');
-              editArea = binding.locate('editarea');
-              editButton = binding.locate('editbutton');
-              updateButton = binding.locate('updatebutton');
-              deleteButton = binding.locate('deletebutton');
-              bindingActive = false;
-              prevMode = null;
-              editStart = function() {
-                $(editArea).show();
-                $(bodyContent).hide();
-                bindingActive = true;
-                return binding.events.onClick.fire(opts.itemId);
-              };
-              editEnd = function() {
-                $(editArea).hide();
-                $(bodyContent).show();
-                return bindingActive = false;
-              };
-              editUpdate = function(e) {
-                var data;
-                data = $(textArea).val();
-                e.preventDefault();
-                binding.events.onUpdate.fire(opts.itemId, data);
-                return editEnd();
-              };
-              $(annoEl).bind('dblclick', function(e) {
-                e.preventDefault();
-                if (bindingActive) {
-                  editEnd();
-                  return options.application.setCurrentMode(prevMode || '');
-                } else {
-                  editStart();
-                  prevMode = options.application.getCurrentMode();
-                  return options.application.setCurrentMode('TextEdit');
-                }
-              });
-              $(annoEl).bind('click', function(e) {
-                return options.application.setActiveAnnotation(opts.itemId);
-              });
-              $(updateButton).bind('click', function(e) {
-                binding.events.onUpdate.fire(opts.itemId, $(textArea).val());
-                editEnd();
-                return options.application.setCurrentMode(prevMode);
-              });
-              $(deleteButton).bind('click', function(e) {
-                binding.events.onDelete.fire(opts.itemId);
-                return $(annoEl).remove();
-              });
-              options.application.events.onActiveAnnotationChange.addListener(function(id) {
-                if (id !== opts.id && bindingActive) {
-                  editUpdate({
-                    preventDefault: function() {}
-                  });
-                  return editEnd();
-                }
-              });
-              return options.application.events.onCurrentModeChange.addListener(function(newMode) {
-                if (newMode !== 'TextEdit') return editEnd();
               });
             };
           }]));
@@ -1749,7 +1674,7 @@
             app.events.onCurrentTimeChange.addListener(function(t) {
               app.dataView.currentAnnotations.setKeyRange(t - 5, t + 5);
               playerObj.setPlayhead(t);
-              return app.setCurrentMode('Watch');
+              return app.setCurrentMode(null);
             });
             app.setCurrentTime(playerObj.getPlayhead());
             playerObj.events.onPlayheadUpdate.addListener(app.setCurrentTime);
