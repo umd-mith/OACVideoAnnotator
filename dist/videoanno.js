@@ -66,7 +66,7 @@
             return that.applyBindings = function(binding, opts) {
               var doc;
               doc = binding.locate('doc');
-              options.application.events.onActiveAnnotationChange.addListener(function(id) {
+              options.application().events.onActiveAnnotationChange.addListener(function(id) {
                 var activeId;
                 return activeId = id;
               });
@@ -132,7 +132,7 @@
           }]));
         };
       });
-      Controller.namespace("CanvasClickController", function(CanvasClickController) {
+      return Controller.namespace("CanvasClickController", function(CanvasClickController) {
         return CanvasClickController.initInstance = function() {
           var args, _ref;
           args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
@@ -141,10 +141,11 @@
             options = that.options;
             overlay = null;
             return that.applyBindings = function(binding, opts) {
-              var captureMouse, closeEnough, drawOverlay, drawShape, mouseCaptured, paper, removeOverlay, renderings, selectShape, uncaptureMouse;
+              var captureMouse, closeEnough, drawOverlay, drawShape, mouseCaptured, paper, removeOverlay, renderings, selectShape, svgWrapper, uncaptureMouse;
               closeEnough = opts.closeEnough;
               renderings = {};
               paper = opts.paper;
+              svgWrapper = binding.locate('svgwrapper');
               drawOverlay = function() {
                 removeOverlay();
                 overlay = paper.rect(0, 0, paper.width, paper.height);
@@ -236,107 +237,26 @@
                 overlay.unmousedown();
                 overlay.mousedown(function(e) {
                   var activeId;
-                  options.application.setActiveAnnotation(void 0);
+                  options.application().setActiveAnnotation(void 0);
                   activeId = null;
                   return overlay.toBack();
                 });
                 return overlay.toBack();
               };
-              options.application.events.onCurrentModeChange.addListener(function(mode) {
+              options.application().events.onCurrentModeChange.addListener(function(mode) {
                 removeOverlay();
-                if (mode === "Rectangle" || mode === "Ellipse") {
-                  return drawShape(binding.locate('svgwrapper'));
-                } else if (mode === 'Select') {
-                  return selectShape(binding.locate('svgwrapper'));
-                } else {
-                  return $(binding.locate('svgwrapper')).unbind();
+                switch (options.application().getCurrentModeClass()) {
+                  case "shape":
+                    return drawShape(svgWrapper);
+                  case "select":
+                    return selectShape(svgWrapper);
+                  default:
+                    return $(svgWrapper).unbind();
                 }
               });
               return binding.toBack = function() {
                 if (overlay != null) return overlay.toBack();
               };
-            };
-          }]));
-        };
-      });
-      Controller.namespace('sliderButton', function(sliderButton) {
-        return sliderButton.initInstance = function() {
-          var args, _ref;
-          args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-          return (_ref = MITHGrid.Controller).initInstance.apply(_ref, ["OAC.Client.StreamingVideo.Controller.sliderButton"].concat(__slice.call(args), [function(that) {
-            var options;
-            options = that.options;
-            return that.applyBindings = function(binding, opts) {
-              var displayElement, positionCheck, sliderElement, sliderMove, sliderStart;
-              displayElement = binding.locate('timedisplay');
-              positionCheck = function(t) {
-                var localTime;
-                if (!(typeof localTime !== "undefined" && localTime !== null)) {
-                  localTime = t;
-                  return $(sliderElement).slider('value', localTime);
-                }
-              };
-              sliderStart = function(e, ui) {
-                var localTime;
-                options.application.setCurrentTime(ui.value);
-                $(displayElement).text('TIME: ' + ui.value);
-                return localTime = ui.value;
-              };
-              sliderMove = function(e, ui) {
-                var localTime;
-                if (!(ui != null)) {
-                  localTime = e;
-                  $(sliderElement).slider('value', e);
-                }
-                if (localTime !== ui.value) {
-                  options.application.setCurrentTime(ui.value);
-                  $(displayElement).text('TIME: ' + ui.value);
-                  return localTime = ui.value;
-                }
-              };
-              sliderElement = binding.locate("slider");
-              return $(sliderElement).slider({
-                start: sliderStart,
-                slide: sliderMove
-              });
-            };
-          }]));
-        };
-      });
-      return Controller.namespace('timeControl', function(timeControl) {
-        return timeControl.initInstance = function() {
-          var args, _ref;
-          args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-          return (_ref = MITHGrid.Controller).initInstance.apply(_ref, ["OAC.Client.StreamingVideo.Controller.timeControl"].concat(__slice.call(args), [function(that) {
-            var options;
-            options = that.options;
-            that.currentId = '';
-            return that.applyBindings = function(binding, opts) {
-              var menudiv, submit, timeend, timestart;
-              timestart = binding.locate('timestart');
-              timeend = binding.locate('timeend');
-              submit = binding.locate('submit');
-              menudiv = binding.locate('menudiv');
-              $(menudiv).hide();
-              $(submit).bind('click', function() {
-                var end_time, start_time;
-                start_time = parseInt($(timestart).val(), 10);
-                end_time = parseInt($(timeend).val(), 10);
-                if ((binding.currentId != null) && (start_time != null) && (end_time != null)) {
-                  binding.events.onUpdate.fire(binding.currentId, start_time, end_time);
-                  return $(menudiv).hide();
-                }
-              });
-              return options.application.events.onActiveAnnotationChange.addListener(function(id) {
-                if (id != null) {
-                  $(menudiv).show();
-                  $(timestart).val('');
-                  $(timeend).val('');
-                  return binding.currentId = id;
-                } else {
-                  return $(menudiv).hide();
-                }
-              });
             };
           }]));
         };
@@ -575,15 +495,15 @@
             $(buttonEl).mousedown(function(e) {
               if (active === false) {
                 active = true;
-                options.application.setCurrentMode(options.mode);
+                options.application().setCurrentMode(options.mode);
                 return $(buttonEl).addClass("active");
               } else if (active === true) {
                 active = false;
-                options.application.setCurrentMode(void 0);
+                options.application().setCurrentMode(void 0);
                 return $(buttonEl).removeClass("active");
               }
             });
-            return options.application.events.onCurrentModeChange.addListener(function(action) {
+            return options.application().events.onCurrentModeChange.addListener(function(action) {
               if (action === options.mode) {
                 active = true;
                 return $(buttonEl).addClass('active');
@@ -965,7 +885,7 @@
           return (_ref = MITHGrid.Presentation).initInstance.apply(_ref, ["OAC.Client.StreamingVideo.Presentation.AnnotationList"].concat(__slice.call(args), [function(that, container) {
             var app, options;
             options = that.options;
-            app = options.application;
+            app = options.application();
             return that.initTextLens = function(container, view, model, itemId, cb) {
               var bodyContent, item, itemEl, lens;
               lens = {};
@@ -1028,7 +948,7 @@
               }
             }
             options = that.options;
-            app = options.application;
+            app = options.application();
             screenSize = {
               width: 0,
               height: 0
@@ -1071,14 +991,13 @@
             });
             app.events.onCurrentModeChange.addListener(function(newMode) {
               var activeRendering;
-              if (newMode !== "Select" && newMode !== "Drag") {
-                boundingBoxComponent.detachFromRendering();
-              }
-              if (newMode === "Select") {
+              if (app.getCurrentModeClass() === "select") {
                 activeRendering = that.getFocusedRendering();
                 if (activeRendering != null) {
                   return boundingBoxComponent.attachToRendering(activeRendering);
                 }
+              } else {
+                return boundingBoxComponent.detachFromRendering();
               }
             });
             playerObj = app.getPlayer();
@@ -1268,25 +1187,23 @@
         return S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4();
       };
       return Application.initInstance = function() {
-        var app, args, _ref;
+        var appOb, args, _ref;
         args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-        app = {};
-        return (_ref = MITHGrid.Application).initInstance.apply(_ref, ["OAC.Client.StreamingVideo.Application"].concat(__slice.call(args), [{
+        return appOb = (_ref = MITHGrid.Application).initInstance.apply(_ref, ["OAC.Client.StreamingVideo.Application"].concat(__slice.call(args), [{
           controllers: {
             keyboard: {
               isActive: function() {
-                return app.getCurrentMode() !== 'Editing';
+                return appOb.getCurrentMode() !== 'Editing';
               }
             },
             selectShape: {
               isSelectable: function() {
-                return app.getCurrentMode() === "Select";
+                return appOb.getCurrentMode() === "Select";
               }
             }
           }
-        }], [function(appOb) {
+        }], [function(app) {
           var NS, options, parseNPT, playerObj, screenSize, shapeAnnotationId, shapeTypes, wh, xy, _ref;
-          app = appOb;
           shapeTypes = {};
           shapeAnnotationId = 0;
           xy = [];
@@ -1307,6 +1224,22 @@
           app.ready(function() {
             return app.initShapeLens = app.presentation.raphsvg.initShapeLens;
           });
+          app.getCurrentModeClass = function() {
+            var m;
+            m = app.getCurrentMode();
+            if (shapeTypes[m] != null) {
+              return "shape";
+            } else {
+              switch (m) {
+                case "Select":
+                  return "select";
+                case "Watch":
+                  return "video";
+                default:
+                  return null;
+              }
+            }
+          };
           app.addShapeType = function(type, args) {
             shapeTypes[type] = args;
             return app.presentation.raphsvg.addLens(type, args.lens);
