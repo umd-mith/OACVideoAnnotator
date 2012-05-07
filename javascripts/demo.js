@@ -58,7 +58,7 @@
         return MITHGrid.initInstance.apply(MITHGrid, ["OAC.Client.StreamingVideo.Demo.TextControls"].concat(__slice.call(args), [function(that, container) {
           var app, options, shown;
           options = that.options;
-          app = options.application;
+          app = options.application();
           shown = false;
           $(document).ready(function() {
             var deleteBinding, deleteEl, editBinding, editEl, saveBinding, saveEl;
@@ -106,7 +106,9 @@
             annotations = OAC.Client.StreamingVideo.Presentation.AnnotationList.initInstance('#annotation-text', {
               dataView: app.dataView.currentAnnotations,
               lensKey: ['.bodyType'],
-              application: app
+              application: function() {
+                return app;
+              }
             });
             hoverController = OAC.Client.StreamingVideo.Demo.Hover.initInstance();
             textControls = OAC.Client.StreamingVideo.Demo.TextControls.initInstance("#text-controls");
@@ -187,19 +189,27 @@
             });
             OAC.Client.StreamingVideo.Component.ModeButton.initInstance("#modeRectangle", {
               mode: "Rectangle",
-              application: app
+              application: function() {
+                return app;
+              }
             });
             OAC.Client.StreamingVideo.Component.ModeButton.initInstance("#modeEllipse", {
               mode: "Ellipse",
-              application: app
+              application: function() {
+                return app;
+              }
             });
             OAC.Client.StreamingVideo.Component.ModeButton.initInstance("#modeSelect", {
               mode: "Select",
-              application: app
+              application: function() {
+                return app;
+              }
             });
             OAC.Client.StreamingVideo.Component.ModeButton.initInstance("#modeWatch", {
               mode: "Watch",
-              application: app
+              application: function() {
+                return app;
+              }
             });
             $("#export-button").click(function() {
               var data;

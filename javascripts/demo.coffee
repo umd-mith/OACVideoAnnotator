@@ -45,7 +45,7 @@ OAC.Client.StreamingVideo.namespace "Demo", (Demo) ->
 			
 			MITHGrid.initInstance "OAC.Client.StreamingVideo.Demo.TextControls", args..., (that, container) ->
 				options = that.options
-				app = options.application
+				app = options.application()
 				shown = false
 
 				$(document).ready ->
@@ -105,7 +105,7 @@ OAC.Client.StreamingVideo.namespace "Demo", (Demo) ->
 					annotations = OAC.Client.StreamingVideo.Presentation.AnnotationList.initInstance '#annotation-text',
 						dataView: app.dataView.currentAnnotations
 						lensKey: ['.bodyType']
-						application: app
+						application: -> app
 
 					#
 					# we can use the default bare-bones text display provided by the annotation client.
@@ -195,19 +195,19 @@ OAC.Client.StreamingVideo.namespace "Demo", (Demo) ->
 					  # be the name of a shapeType.
 					OAC.Client.StreamingVideo.Component.ModeButton.initInstance "#modeRectangle",
 						mode: "Rectangle"
-						application: app
+						application: -> app
 
 					OAC.Client.StreamingVideo.Component.ModeButton.initInstance "#modeEllipse",
 						mode: "Ellipse"
-						application: app
+						application: -> app
 
 					OAC.Client.StreamingVideo.Component.ModeButton.initInstance "#modeSelect",
 						mode: "Select"
-						application: app
+						application: -> app
 
 					OAC.Client.StreamingVideo.Component.ModeButton.initInstance "#modeWatch",
 						mode: "Watch"
-						application: app
+						application: -> app
 
 					$("#export-button").click ->
 						data = app.exportData()
