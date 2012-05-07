@@ -13,48 +13,6 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
 		x: event.pageX - totalOffsetX
 		y: event.pageY - totalOffsetY
 		
-	# ## KeyboardListener
-	#
-	# OAC.Client.StreamingVideo.Controller.KeyboardListener listens to keydown events on the DOM document
-	# level and translates them into delete events.
-	#
-	Controller.namespace "KeyboardListener", (KeyboardListener) ->
-
-		# ### KeyboardListener.initInstance
-		#
-		# Parameters:
-		#
-		# * options - object holding configuration options for the KeyboardListener object
-		#
-		# Returns:
-		#
-		# The configured KeyboardListener controller.
-		#
-		# Options:
-		#
-		# * application - the application using this controller
-		# * isAction - a function which returns true if keyboard events should be propagated
-		#
-		KeyboardListener.initInstance = (args...) ->			
-			MITHGrid.Controller.initInstance "OAC.Client.StreamingVideo.Controller.KeyboardListener", args..., (that) ->
-				options = that.options
-				isActive = options.isActive or -> true
-				
-				that.applyBindings = (binding, opts) ->
-					doc = binding.locate('doc')
-
-					options.application().events.onActiveAnnotationChange.addListener (id) ->
-						activeId = id
-
-					$(doc).keydown (e) ->
-						if isActive() and activeId?
-							# If backspace or delete is pressed,
-							# then it is interpreted as a
-							# delete call.
-							if e.keyCode in [8, 46]
-								binding.events.onDelete.fire activeId
-								activeId = null
-
 	# ## Drag
 	#
 	# Attaches to an SVG rendering and produces events at the start, middle, and end of a drag.

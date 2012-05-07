@@ -163,7 +163,6 @@ OAC.Client.StreamingVideo.namespace "Presentation", (Presentation) ->
 					
 				# Setting up local names for the assigned presentation controllers
 				canvasController = options.controllers.canvas
-				keyBoardController = options.controllers.keyboard
 
 				that.canvas = new Raphael($(container), 10, 10)
 
@@ -179,11 +178,6 @@ OAC.Client.StreamingVideo.namespace "Presentation", (Presentation) ->
 				boundingBoxComponent = OAC.Client.StreamingVideo.Component.ShapeEditBox.initInstance that.canvas
 						
 				shapeCreateBoxComponent = OAC.Client.StreamingVideo.Component.ShapeCreateBox.initInstance that.canvas
-
-				# Keyboard binding attached to container to avoid multiple-keyboard events from firing
-				keyboardBinding = keyBoardController.bind $(container), {}
-
-				that.events = $.extend true, that.events, keyboardBinding.events
 
 				boundingBoxComponent.events.onResize.addListener (pos) ->
 					activeRendering = that.getFocusedRendering()

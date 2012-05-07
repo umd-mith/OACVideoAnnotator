@@ -31,8 +31,6 @@ OAC.Client.StreamingVideo.namespace "Application", (Application) ->
 	Application.initInstance = (args...) ->
 		appOb = MITHGrid.Application.initInstance "OAC.Client.StreamingVideo.Application", args..., {
 			controllers:
-				keyboard:
-					isActive: -> appOb.getCurrentMode() != 'Editing'
 				selectShape:
 					isSelectable: -> appOb.getCurrentMode() == "Select"
 		}, (app) ->

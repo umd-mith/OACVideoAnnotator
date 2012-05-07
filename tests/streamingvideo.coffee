@@ -3,9 +3,9 @@ $(document).ready ->
 	
 	test "Check namespace", ->
 		expect 2
-		ok OAC.Client?, "OAC.Client"
-		ok OAC.Client.StreamingVideo?, "OAC.Client.StreamingVideo"
-	
+		ok OAC?.Client?.StreamingVideo?.Application?, "OAC.Client.StreamingVideo.Application exists"
+		ok $.isFunction(OAC.Client.StreamingVideo.Application.initInstance), "OAC.Client.StreamingVideo.Application.initInstance is a function"
+		
 	test "Check construction", ->
 		expect 13
 		app = OAC.Client.StreamingVideo.Application.initInstance

@@ -15,17 +15,15 @@ MITHGrid.defaults "OAC.Client.StreamingVideo.Player.DriverBinding",
 #
 # - onResize
 # - onMove
-# - onEdit
 # - onDelete
-# - onCurrentModeChange
+# - onFocus
+# - onUnfocus
 MITHGrid.defaults "OAC.Client.StreamingVideo.Component.ShapeEditBox",
 	dirs: ['ul', 'top', 'ur', 'lft', 'lr', 'btm', 'll', 'rgt', 'mid']
 	events:
 		onResize: null
 		onMove: null
-		onEdit: null
 		onDelete: null
-		onCurrentModeChange: null
 		onFocus: null
 		onUnfocus: null
 
@@ -34,41 +32,15 @@ MITHGrid.defaults "OAC.Client.StreamingVideo.Component.ShapeEditBox",
 #
 # Bindings created by this controller will have the following events:
 #
-# - onClick
 # - onShapeStart
 # - onShapeDrag
 # - onShapeDone
 MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.CanvasClickController",
 	bind:
 		events:
-			onClick: null
 			onShapeStart: null
 			onShapeDrag: null
 			onShapeDone: null
-
-# ## Controller.TextBodyEditor
-#
-# Bindings created by this controller will have the following events:
-#
-# - onClick
-# - onDelete
-# - onUpdate
-MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.TextBodyEditor",
-	bind:
-		events:
-			onClick: null
-			onDelete: null
-			onUpdate: null
-
-# ## Controller.KeyboardListener
-#
-# Bindings created by this controller will have the following events:
-#
-# - onDelete
-MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.KeyboardListener",
-	bind:
-		events:
-			onDelete: ["preventable", "unicast"]
 
 # ## Component.ModeButton
 #
@@ -103,24 +75,10 @@ MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.Select",
 			onSelect: null
 	isSelectable: -> true
 
-# ## Controller.timeControl
-#
-# Bindings created by this controller will have the following events:
-#
-# - onUpdate
-MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.timeControl",
-	bind:
-		events:
-			onUpdate: null
-
 # ## Annotation Client
 #
 MITHGrid.defaults "OAC.Client.StreamingVideo.Application",
 	controllers:
-		keyboard:
-			type: OAC.Client.StreamingVideo.Controller.KeyboardListener
-			selectors:
-				doc: ''
 		canvas:
 			type: OAC.Client.StreamingVideo.Controller.CanvasClickController
 			selectors:
@@ -214,11 +172,7 @@ MITHGrid.defaults "OAC.Client.StreamingVideo.Application",
 			# The controllers are configured for the application and passed in to the presentation's
 			# initInstance method as named here.
 			controllers:
-				keyboard: "keyboard"
 				canvas: "canvas"
-			events:
-				onOpacityChange: null
-			fadeStart: 5
 	# We create a general template that holds all of the different DOM elements we need:
 	#
 	# * the SVG view that will overlay the play surface (myCanvasId is the DOM id)
