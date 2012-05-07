@@ -1,11 +1,7 @@
-# Copied over from Jim Smith's copy of MITHGrid  
-# based on the Makefile for jquery
-
 SRC_DIR = src
 TEST_DIR = tests
 BUILD_DIR = build
 COMPILED_DOCS_DIR = ${PREFIX}/compiled_docs
-
 
 PREFIX = .
 DIST_DIR = ${PREFIX}/dist

@@ -1,7 +1,5 @@
 # # Annotation Application
 #
-# TODO: rename file to application.js
-
 
 OAC.Client.StreamingVideo.namespace "Application", (Application) ->
 	# ### #S4 (private)
@@ -463,7 +461,7 @@ OAC.Client.StreamingVideo.namespace "Application", (Application) ->
 					playerObj.setPlayhead t
 					# Making sure that none of the button items are still active while video is playing
 					# (Can't draw a shape while video is playing - force user to re-click item)
-					app.setCurrentMode('Watch')
+					app.setCurrentMode null
 
 				app.setCurrentTime playerObj.getPlayhead()
 				playerObj.events.onPlayheadUpdate.addListener app.setCurrentTime
