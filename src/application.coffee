@@ -29,21 +29,18 @@ OAC.Client.StreamingVideo.namespace "Application", (Application) ->
 	# * 
 	#
 	Application.initInstance = (args...) ->
-		app = {}
-
-		MITHGrid.Application.initInstance "OAC.Client.StreamingVideo.Application", args..., {
+		appOb = MITHGrid.Application.initInstance "OAC.Client.StreamingVideo.Application", args..., {
 			controllers:
 				keyboard:
-					isActive: -> app.getCurrentMode() != 'Editing'
+					isActive: -> appOb.getCurrentMode() != 'Editing'
 				selectShape:
-					isSelectable: -> app.getCurrentMode() == "Select"
-		}, (appOb) ->
-			app = appOb
+					isSelectable: -> appOb.getCurrentMode() == "Select"
+		}, (app) ->
 			shapeTypes = {}
 			shapeAnnotationId = 0
 			xy = []
 			wh = []
-		
+					
 			options = app.options
 		
 
@@ -65,6 +62,16 @@ OAC.Client.StreamingVideo.namespace "Application", (Application) ->
 			app.ready ->
 				app.initShapeLens = app.presentation.raphsvg.initShapeLens
 
+			app.getCurrentModeClass = ->
+				m = app.getCurrentMode()
+				if shapeTypes[m]?
+					"shape"
+				else
+					switch m
+						when "Select" then "select"
+						when "Watch"  then "video"
+						else
+							null
 
 			# ### #addShapeType
 			#
@@ -461,7 +468,8 @@ OAC.Client.StreamingVideo.namespace "Application", (Application) ->
 					playerObj.setPlayhead t
 					# Making sure that none of the button items are still active while video is playing
 					# (Can't draw a shape while video is playing - force user to re-click item)
-					app.setCurrentMode null
+					if app.getCurrentMode() != "Watch"
+						app.setCurrentMode null
 
 				app.setCurrentTime playerObj.getPlayhead()
 				playerObj.events.onPlayheadUpdate.addListener app.setCurrentTime

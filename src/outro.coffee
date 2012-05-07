@@ -26,6 +26,8 @@ MITHGrid.defaults "OAC.Client.StreamingVideo.Component.ShapeEditBox",
 		onEdit: null
 		onDelete: null
 		onCurrentModeChange: null
+		onFocus: null
+		onUnfocus: null
 
 
 # ## Controller.CanvasClickController

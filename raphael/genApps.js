@@ -18,11 +18,13 @@ $(function() {
 		// creating Raphael canvas application
 		raphApp.run();
 		
+		raphAppFn = function() { return raphApp; };
+		
 		// have a plain HTML presentation of annotation bodies
         var annotations = OAC.Client.StreamingVideo.Presentation.AnnotationList.initInstance('#annotation-list', {
 	        dataView: raphApp.dataView.currentAnnotations,
 	        lensKey: ['.bodyType'],
-			application: raphApp
+			application: raphAppFn
         });
         annotations.addLens("Text", function(container, view, model, itemId) { 
 	        return annotations.initTextLens(container, view, model, itemId) 
@@ -32,19 +34,19 @@ $(function() {
 		// create mode buttons
 		OAC.Client.StreamingVideo.Component.ModeButton.initInstance("#modeRectangle", {
 			mode: "Rectangle",
-			application: raphApp
+			application: raphAppFn
 		});
 		OAC.Client.StreamingVideo.Component.ModeButton.initInstance("#modeEllipse", {
 			mode: "Ellipse",
-			application: raphApp
+			application: raphAppFn
 		});
 		OAC.Client.StreamingVideo.Component.ModeButton.initInstance("#modeSelect", {
 			mode: "Select",
-			application: raphApp
+			application: raphAppFn
 		});
 		OAC.Client.StreamingVideo.Component.ModeButton.initInstance("#modeWatch", {
 			mode: "Watch",
-			application: raphApp
+			application: raphAppFn
 		});
 		
 		// Creating handler for the export area 

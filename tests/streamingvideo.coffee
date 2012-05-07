@@ -7,7 +7,7 @@ $(document).ready ->
 		ok OAC.Client.StreamingVideo?, "OAC.Client.StreamingVideo"
 	
 	test "Check construction", ->
-		expect 12
+		expect 13
 		app = OAC.Client.StreamingVideo.Application.initInstance
 			url: 'http://www.youtube.com/watch?v=HYLacuAp76U&feature=fvsr'
 			easement: 5
@@ -22,6 +22,7 @@ $(document).ready ->
 		ok $.isFunction(app.getTimeEasement), "getTimeEasement"
 		ok $.isFunction(app.setCurrentMode), "setCurrentMode"
 		ok $.isFunction(app.getCurrentMode), "getCurrentMode"
+		ok $.isFunction(app.getCurrentModeClass), "getCurrentModeClass"
 		
 		ok $.isFunction(app.addShapeType), "addShapeType"
 		ok $.isFunction(app.insertShape), "insertShape"
@@ -29,7 +30,7 @@ $(document).ready ->
 		ok $.isFunction(app.exportData), "exportData"
 		
 	test "Check annotation management", ->
-		expect 13
+		expect 14
 		
 		playerObject = {
 			getCoordinates: ->
@@ -65,6 +66,7 @@ $(document).ready ->
 		
 		app.setCurrentMode 'Rectangle'
 		equal app.getCurrentMode(), 'Rectangle', "Setting mode to 'Rectangle' works"
+		equal app.getCurrentModeClass(), "shape", "Setting mode to 'Rectangle' means we're in a 'shape' mode"
 		
 		equal app.dataStore.canvas.items().length, 0, "Right number of items in data store"
 		
