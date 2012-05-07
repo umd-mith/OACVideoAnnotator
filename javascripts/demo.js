@@ -168,6 +168,7 @@
                   textEl.show();
                   return inputEl.hide();
                 } else {
+                  app.setActiveAnnotation(null);
                   return superDelete();
                 }
               };

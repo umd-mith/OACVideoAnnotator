@@ -177,6 +177,7 @@ OAC.Client.StreamingVideo.namespace "Demo", (Demo) ->
 								textEl.show()
 								inputEl.hide()
 							else
+								app.setActiveAnnotation null
 								superDelete()
 							
 						rendering.eventSave = ->
