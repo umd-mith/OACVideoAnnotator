@@ -76,7 +76,9 @@ OAC.Client.StreamingVideo.namespace "Player", (exports) ->
 	#
 	# oacController.register(OACDummyPlayerDrv);
 	#
-	exports.register = (driverObject) ->
+	exports.register = (driverObjectCB) ->
+		driverObject = {}
+		driverObjectCB driverObject
 		ps = driverObject.getAvailablePlayers()
 		for player in ps
 			$(player).data('driver', driverObject)
