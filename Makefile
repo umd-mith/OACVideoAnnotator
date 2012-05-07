@@ -1,15 +1,10 @@
-# Copied over from Jim Smith's copy of MITHGrid  
-# based on the Makefile for jquery
-
 SRC_DIR = src
 TEST_DIR = tests
 BUILD_DIR = build
 COMPILED_DOCS_DIR = ${PREFIX}/compiled_docs
 
-
 PREFIX = .
 DIST_DIR = ${PREFIX}/dist
-OAC_FRAMEWORK_DIR = ${PREFIX}/oacframework/oac-player-integration/js
 
 JS_ENGINE ?= `which node nodejs`
 COMPILER = ${JS_ENGINE} ${BUILD_DIR}/uglify.js --unsafe
@@ -24,8 +19,7 @@ BASE_FILES = ${SRC_DIR}/controllers.coffee \
 	${SRC_DIR}/drivers/html5.coffee \
 	${SRC_DIR}/component.coffee \
 	${SRC_DIR}/presentations.coffee \
-	${SRC_DIR}/canvas.coffee
-
+	${SRC_DIR}/application.coffee
 
 MODULES = ${SRC_DIR}/intro.coffee \
 	${BASE_FILES} \
@@ -35,7 +29,6 @@ OAC = ${DIST_DIR}/videoanno.js
 OAC_MIN = ${DIST_DIR}/videoanno.min.js
 OAC_C = ${DIST_DIR}/videoanno.coffee
 
-
 OAC_VER = $(shell cat version.txt)
 VER = sed "s/@VERSION/${MG_VER}/"
 
@@ -43,7 +36,7 @@ DATE=$(shell git log --pretty=format:%ad | head -1)
 
 all: core docs
 
-core: videoanno min lint
+core: videoanno min test
 	@@echo "videoanno build complete"
 
 ${DIST_DIR}:
