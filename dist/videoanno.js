@@ -5,7 +5,7 @@
 # The **OAC Video Annotation Tool** is a MITHGrid application providing annotation capabilities for streaming
 # video embedded in a web page. 
 #  
-# Date: Mon May 7 10:04:02 2012 -0400
+# Date: Mon May 7 14:50:44 2012 -0400
 #  
 # Educational Community License, Version 2.0
 # 
@@ -36,7 +36,6 @@
   OAC.Client.namespace("StreamingVideo");
 
   (function($, MITHGrid, OAC) {
-    var initDummyPlayer, initHTML5PlayerDrv, initOACDummyPlayerDrv;
     OAC.Client.StreamingVideo.namespace('Controller', function(Controller) {
       var relativeCoords;
       relativeCoords = function(currentElement, event) {
@@ -53,36 +52,6 @@
           y: event.pageY - totalOffsetY
         };
       };
-      Controller.namespace("KeyboardListener", function(KeyboardListener) {
-        return KeyboardListener.initInstance = function() {
-          var args, _ref;
-          args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-          return (_ref = MITHGrid.Controller).initInstance.apply(_ref, ["OAC.Client.StreamingVideo.Controller.KeyboardListener"].concat(__slice.call(args), [function(that) {
-            var isActive, options;
-            options = that.options;
-            isActive = options.isActive || function() {
-              return true;
-            };
-            return that.applyBindings = function(binding, opts) {
-              var doc;
-              doc = binding.locate('doc');
-              options.application().events.onActiveAnnotationChange.addListener(function(id) {
-                var activeId;
-                return activeId = id;
-              });
-              return $(doc).keydown(function(e) {
-                var activeId, _ref;
-                if (isActive() && (typeof activeId !== "undefined" && activeId !== null)) {
-                  if ((_ref = e.keyCode) === 8 || _ref === 46) {
-                    binding.events.onDelete.fire(activeId);
-                    return activeId = null;
-                  }
-                }
-              });
-            };
-          }]));
-        };
-      });
       Controller.namespace("Drag", function(Drag) {
         return Drag.initInstance = function() {
           var args, _ref;
@@ -278,8 +247,10 @@
         }
         return callbacks.push(callback);
       };
-      exports.register = function(driverObject) {
-        var cb, p, player, ps, _i, _len, _results;
+      exports.register = function(driverObjectCB) {
+        var cb, driverObject, p, player, ps, _i, _len, _results;
+        driverObject = {};
+        driverObjectCB(driverObject);
         ps = driverObject.getAvailablePlayers();
         _results = [];
         for (_i = 0, _len = ps.length; _i < _len; _i++) {
@@ -308,181 +279,174 @@
       });
     });
     $(document).ready(function() {
-      return OAC.Client.StreamingVideo.Player.register(initOACDummyPlayerDrv());
-    });
-    initOACDummyPlayerDrv = function() {
-      var driver;
-      driver = {};
-      driver.getAvailablePlayers = function() {
-        var index, p, player, _i, _len, _ref, _results;
-        index = 0;
-        _ref = $('.dummyplayer');
-        _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          p = _ref[_i];
-          player = $(p).data('player');
-          if (!(player != null)) {
-            player = initDummyPlayer(p, index);
-            $(p).data('player', player);
-            player.startDummyPlayer();
+      return OAC.Client.StreamingVideo.Player.register(function(driver) {
+        var initDummyPlayer;
+        driver.getAvailablePlayers = function() {
+          var index, p, player, _i, _len, _ref, _results;
+          index = 0;
+          _ref = $('.dummyplayer');
+          _results = [];
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            p = _ref[_i];
+            player = $(p).data('player');
+            if (!(player != null)) {
+              player = initDummyPlayer(p, index);
+              $(p).data('player', player);
+              player.startDummyPlayer();
+            }
+            index += 1;
+            _results.push(player);
           }
-          index += 1;
-          _results.push(player);
-        }
-        return _results;
-      };
-      driver.getOACVersion = function() {
-        return "1.0";
-      };
-      driver.bindPlayer = function(playerObj) {
-        return OAC.Client.StreamingVideo.Player.DriverBinding.initInstance(function(that) {
-          playerObj.onplayheadupdate(function() {
-            return that.events.onPlayheadUpdate.fire(that.getPlayhead());
+          return _results;
+        };
+        driver.getOACVersion = function() {
+          return "1.0";
+        };
+        driver.bindPlayer = function(playerObj) {
+          return OAC.Client.StreamingVideo.Player.DriverBinding.initInstance(function(that) {
+            playerObj.onplayheadupdate(function() {
+              return that.events.onPlayheadUpdate.fire(that.getPlayhead());
+            });
+            that.getCoordinates = function() {
+              var c, _i, _len, _ref, _results;
+              _ref = playerObj.getcoordinates();
+              _results = [];
+              for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+                c = _ref[_i];
+                _results.push(parseInt(c, 10));
+              }
+              return _results;
+            };
+            that.getSize = function() {
+              var s, _i, _len, _ref, _results;
+              _ref = playerObj.getsize();
+              _results = [];
+              for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+                s = _ref[_i];
+                _results.push(parseInt(s, 10));
+              }
+              return _results;
+            };
+            that.play = playerObj.play;
+            that.pause = playerObj.pause;
+            that.getPlayhead = playerObj.getplayhead;
+            return that.setPlayhead = playerObj.setplayhead;
           });
-          that.getCoordinates = function() {
-            var c, _i, _len, _ref, _results;
-            _ref = playerObj.getcoordinates();
-            _results = [];
-            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-              c = _ref[_i];
-              _results.push(parseInt(c, 10));
+        };
+        return initDummyPlayer = function(DOMObject, index) {
+          var that;
+          that = {};
+          that.startDummyPlayer = function() {
+            that.setAspect();
+            that.setContent();
+            that.play();
+            return window.setTimeout(that.secondIntervalUpdate, 1000);
+          };
+          that.setAspect = function() {
+            $(DOMObject).css('background', 'url("dummyplayer/images/dummy.png") no-repeat scroll right bottom #F8C700');
+            return $(DOMObject).css('border', '1px solid darkBlue');
+          };
+          that.setContent = function() {
+            var player;
+            player = "$('#player-content-" + index + "').parents('.dummyplayer').data('player')";
+            return $(DOMObject).append("<ul id=\"player-content-" + index + "\" style=\"list-style-type: none; padding: 0;\">\n	<li style=\"text-align: center; font-weight: bold; text-decoration: underline;\">Dummy Player #" + (index + 1) + "</li>\n	<li style=\"text-align: center;\">Status: <span class=\"dummy-status\">Paused</span></li>\n	<li style=\"text-align: center;\">Position: <span class=\"dummy-position\">0</span> seconds</li>\n	<!-- li style=\"text-align: center;\">\n		<ul style=\"list-style-type: none; padding: 0;\">\n			<li style=\"margin: 0 8px; display: inline;\">\n				<a onClick=\"" + player + ".rewind(5)\"><img src=\"dummyplayer/images/rewind.png\" /></a>\n			</li>\n			<li style=\"margin: 0 8px; display: inline;\">\n				<a onClick=\"" + player + ".toggle()\"><img src=\"dummyplayer/images/playpause.png\" /></a>\n			</li>\n			<li style=\"margin: 0 8px; display: inline;\">\n				<a onClick=\"" + player + ".forward(5)\"><img src=\"dummyplayer/images/forward.png\" /></a>\n			</li>\n		</ul>\n	</li -->\n</ul>");
+          };
+          that.secondIntervalUpdate = function() {
+            window.setTimeout(that.secondIntervalUpdate, 1000);
+            if ($(DOMObject).find(".dummy-status").html() === "Playing") {
+              return that.forward(1);
             }
-            return _results;
           };
-          that.getSize = function() {
-            var s, _i, _len, _ref, _results;
-            _ref = playerObj.getsize();
-            _results = [];
-            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-              s = _ref[_i];
-              _results.push(parseInt(s, 10));
+          that.toggle = function() {
+            if ($(DOMObject).find(".dummy-status").html() === "Playing") {
+              return that.pause();
+            } else {
+              return that.play();
             }
-            return _results;
-          };
-          that.play = playerObj.play;
-          that.pause = playerObj.pause;
-          that.getPlayhead = playerObj.getplayhead;
-          return that.setPlayhead = playerObj.setplayhead;
-        });
-      };
-      return driver;
-    };
-    initDummyPlayer = function(DOMObject, index) {
-      var that;
-      that = {};
-      that.startDummyPlayer = function() {
-        that.setAspect();
-        that.setContent();
-        that.play();
-        return window.setTimeout(that.secondIntervalUpdate, 1000);
-      };
-      that.setAspect = function() {
-        $(DOMObject).css('background', 'url("dummyplayer/images/dummy.png") no-repeat scroll right bottom #F8C700');
-        return $(DOMObject).css('border', '1px solid darkBlue');
-      };
-      that.setContent = function() {
-        var player;
-        player = "$('#player-content-" + index + "').parents('.dummyplayer').data('player')";
-        return $(DOMObject).append("<ul id=\"player-content-" + index + "\" style=\"list-style-type: none; padding: 0;\">\n	<li style=\"text-align: center; font-weight: bold; text-decoration: underline;\">Dummy Player #" + (index + 1) + "</li>\n	<li style=\"text-align: center;\">Status: <span class=\"dummy-status\">Paused</span></li>\n	<li style=\"text-align: center;\">Position: <span class=\"dummy-position\">0</span> seconds</li>\n	<!-- li style=\"text-align: center;\">\n		<ul style=\"list-style-type: none; padding: 0;\">\n			<li style=\"margin: 0 8px; display: inline;\">\n				<a onClick=\"" + player + ".rewind(5)\"><img src=\"dummyplayer/images/rewind.png\" /></a>\n			</li>\n			<li style=\"margin: 0 8px; display: inline;\">\n				<a onClick=\"" + player + ".toggle()\"><img src=\"dummyplayer/images/playpause.png\" /></a>\n			</li>\n			<li style=\"margin: 0 8px; display: inline;\">\n				<a onClick=\"" + player + ".forward(5)\"><img src=\"dummyplayer/images/forward.png\" /></a>\n			</li>\n		</ul>\n	</li -->\n</ul>");
-      };
-      that.secondIntervalUpdate = function() {
-        window.setTimeout(that.secondIntervalUpdate, 1000);
-        if ($(DOMObject).find(".dummy-status").html() === "Playing") {
-          return that.forward(1);
-        }
-      };
-      that.toggle = function() {
-        if ($(DOMObject).find(".dummy-status").html() === "Playing") {
-          return that.pause();
-        } else {
-          return that.play();
-        }
-      };
-      that.pause = function() {
-        return $(DOMObject).find(".dummy-status").html("Paused");
-      };
-      that.play = function() {
-        return $(DOMObject).find(".dummy-status").html("Playing");
-      };
-      that.rewind = function(value) {
-        return that.setplayhead(that.getplayhead() - parseInt(value, 10));
-      };
-      that.forward = function(value) {
-        return that.setplayhead(that.getplayhead() + parseInt(value, 10));
-      };
-      that.setplayhead = function(value) {
-        value = parseInt(value, 10);
-        if (value < 0) value = 0;
-        $(DOMObject).find(".dummy-position").html(value);
-        return $(DOMObject).trigger('timeupdate');
-      };
-      that.getplayhead = function() {
-        return parseInt($(DOMObject).find(".dummy-position").html(), 10);
-      };
-      that.getsize = function() {
-        var retval;
-        retval = [];
-        retval.push(parseInt($("#player-content-" + index).parents('.dummyplayer').css("width"), 10));
-        retval.push(parseInt($("#player-content-" + index).parents('.dummyplayer').css("height"), 10));
-        return retval;
-      };
-      that.getcoordinates = function() {
-        var retval;
-        retval = [];
-        retval.push($("#player-content-" + index).parents('.dummyplayer').position().top);
-        retval.push($("#player-content-" + index).parents('.dummyplayer').position().left);
-        return retval;
-      };
-      that.onplayheadupdate = function(callback) {
-        return $(DOMObject).bind('timeupdate', callback);
-      };
-      return that;
-    };
-    $(document).ready(function() {
-      return OAC.Client.StreamingVideo.Player.register(initHTML5PlayerDrv());
-    });
-    initHTML5PlayerDrv = function() {
-      var driver;
-      driver = {};
-      driver.getAvailablePlayers = function() {
-        return $('video');
-      };
-      driver.getOACVersion = function() {
-        return "1.0";
-      };
-      driver.bindPlayer = function(domObj) {
-        return OAC.Client.StreamingVideo.Player.DriverBinding.initInstance(function(that) {
-          $(domObj).bind('loadedmetadata', function() {
-            return that.events.onResize.fire(that.getSize());
-          });
-          $(domObj).bind('timeupdate', function() {
-            return that.events.onPlayheadUpdate.fire(domObj.currentTime);
-          });
-          that.getCoordinates = function() {
-            return [$(domObj).position().left, $(domObj).position().top];
-          };
-          that.getSize = function() {
-            return [$(domObj).width(), $(domObj).height()];
-          };
-          that.getTargetURI = function() {
-            return $(domObj).data('oatarget');
-          };
-          that.play = function() {
-            return domObj.play();
           };
           that.pause = function() {
-            return domObj.pause();
+            return $(DOMObject).find(".dummy-status").html("Paused");
           };
-          that.getPlayhead = function() {
-            return domObj.currentTime;
+          that.play = function() {
+            return $(DOMObject).find(".dummy-status").html("Playing");
           };
-          return that.setPlayhead = function(n) {
-            return domObj.currentTime = parseFloat(n);
+          that.rewind = function(value) {
+            return that.setplayhead(that.getplayhead() - parseInt(value, 10));
           };
-        });
-      };
-      return driver;
-    };
+          that.forward = function(value) {
+            return that.setplayhead(that.getplayhead() + parseInt(value, 10));
+          };
+          that.setplayhead = function(value) {
+            value = parseInt(value, 10);
+            if (value < 0) value = 0;
+            $(DOMObject).find(".dummy-position").html(value);
+            return $(DOMObject).trigger('timeupdate');
+          };
+          that.getplayhead = function() {
+            return parseInt($(DOMObject).find(".dummy-position").html(), 10);
+          };
+          that.getsize = function() {
+            var retval;
+            retval = [];
+            retval.push(parseInt($("#player-content-" + index).parents('.dummyplayer').css("width"), 10));
+            retval.push(parseInt($("#player-content-" + index).parents('.dummyplayer').css("height"), 10));
+            return retval;
+          };
+          that.getcoordinates = function() {
+            var retval;
+            retval = [];
+            retval.push($("#player-content-" + index).parents('.dummyplayer').position().top);
+            retval.push($("#player-content-" + index).parents('.dummyplayer').position().left);
+            return retval;
+          };
+          that.onplayheadupdate = function(callback) {
+            return $(DOMObject).bind('timeupdate', callback);
+          };
+          return that;
+        };
+      });
+    });
+    $(document).ready(function() {
+      return OAC.Client.StreamingVideo.Player.register(function(driver) {
+        driver.getAvailablePlayers = function() {
+          return $('video');
+        };
+        driver.getOACVersion = function() {
+          return "1.0";
+        };
+        return driver.bindPlayer = function(domObj) {
+          return OAC.Client.StreamingVideo.Player.DriverBinding.initInstance(function(that) {
+            $(domObj).bind('loadedmetadata', function() {
+              return that.events.onResize.fire(that.getSize());
+            });
+            $(domObj).bind('timeupdate', function() {
+              return that.events.onPlayheadUpdate.fire(domObj.currentTime);
+            });
+            that.getCoordinates = function() {
+              return [$(domObj).position().left, $(domObj).position().top];
+            };
+            that.getSize = function() {
+              return [$(domObj).width(), $(domObj).height()];
+            };
+            that.getTargetURI = function() {
+              return $(domObj).data('oatarget');
+            };
+            that.play = function() {
+              return domObj.play();
+            };
+            that.pause = function() {
+              return domObj.pause();
+            };
+            that.getPlayhead = function() {
+              return domObj.currentTime;
+            };
+            return that.setPlayhead = function(n) {
+              return domObj.currentTime = parseFloat(n);
+            };
+          });
+        };
+      });
+    });
     OAC.Client.StreamingVideo.namespace('Component', function(Component) {
       Component.namespace('ModeButton', function(ModeButton) {
         return ModeButton.initInstance = function() {
@@ -931,7 +895,7 @@
           var args, _ref;
           args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
           return (_ref = MITHGrid.Presentation).initInstance.apply(_ref, ["OAC.StreamingVideo.Client.Presentation.RaphaelCanvas"].concat(__slice.call(args), [function(that, container) {
-            var app, boundingBoxComponent, canvasBinding, canvasController, id, keyBoardController, keyboardBinding, options, playerObj, screenSize, shapeCreateBoxComponent, superEventFocusChange, updateLocation;
+            var app, boundingBoxComponent, canvasBinding, canvasController, id, options, playerObj, screenSize, shapeCreateBoxComponent, superEventFocusChange, updateLocation;
             if (!(container != null)) {
               id = "oac-raphael-presentation-canvas-" + counter;
               counter += 1;
@@ -954,7 +918,6 @@
               height: 0
             };
             canvasController = options.controllers.canvas;
-            keyBoardController = options.controllers.keyboard;
             that.canvas = new Raphael($(container), 10, 10);
             $(that.canvas.canvas).css({
               "pointer-events": "none"
@@ -965,8 +928,6 @@
             });
             boundingBoxComponent = OAC.Client.StreamingVideo.Component.ShapeEditBox.initInstance(that.canvas);
             shapeCreateBoxComponent = OAC.Client.StreamingVideo.Component.ShapeCreateBox.initInstance(that.canvas);
-            keyboardBinding = keyBoardController.bind($(container), {});
-            that.events = $.extend(true, that.events, keyboardBinding.events);
             boundingBoxComponent.events.onResize.addListener(function(pos) {
               var activeRendering;
               activeRendering = that.getFocusedRendering();
@@ -1191,11 +1152,6 @@
         args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
         return appOb = (_ref = MITHGrid.Application).initInstance.apply(_ref, ["OAC.Client.StreamingVideo.Application"].concat(__slice.call(args), [{
           controllers: {
-            keyboard: {
-              isActive: function() {
-                return appOb.getCurrentMode() !== 'Editing';
-              }
-            },
             selectShape: {
               isSelectable: function() {
                 return appOb.getCurrentMode() === "Select";
@@ -1793,9 +1749,7 @@
     events: {
       onResize: null,
       onMove: null,
-      onEdit: null,
       onDelete: null,
-      onCurrentModeChange: null,
       onFocus: null,
       onUnfocus: null
     }
@@ -1804,28 +1758,9 @@
   MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.CanvasClickController", {
     bind: {
       events: {
-        onClick: null,
         onShapeStart: null,
         onShapeDrag: null,
         onShapeDone: null
-      }
-    }
-  });
-
-  MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.TextBodyEditor", {
-    bind: {
-      events: {
-        onClick: null,
-        onDelete: null,
-        onUpdate: null
-      }
-    }
-  });
-
-  MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.KeyboardListener", {
-    bind: {
-      events: {
-        onDelete: ["preventable", "unicast"]
       }
     }
   });
@@ -1865,22 +1800,8 @@
     }
   });
 
-  MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.timeControl", {
-    bind: {
-      events: {
-        onUpdate: null
-      }
-    }
-  });
-
   MITHGrid.defaults("OAC.Client.StreamingVideo.Application", {
     controllers: {
-      keyboard: {
-        type: OAC.Client.StreamingVideo.Controller.KeyboardListener,
-        selectors: {
-          doc: ''
-        }
-      },
       canvas: {
         type: OAC.Client.StreamingVideo.Controller.CanvasClickController,
         selectors: {
@@ -1953,13 +1874,8 @@
         lensKey: ['.shapeType'],
         dataView: 'currentAnnotations',
         controllers: {
-          keyboard: "keyboard",
           canvas: "canvas"
-        },
-        events: {
-          onOpacityChange: null
-        },
-        fadeStart: 5
+        }
       }
     },
     viewSetup: "<div class=\"canvas\"></div>"
