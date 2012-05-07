@@ -5,7 +5,7 @@
 # The **OAC Video Annotation Tool** is a MITHGrid application providing annotation capabilities for streaming
 # video embedded in a web page. 
 #  
-# Date: Mon May 7 09:32:31 2012 -0400
+# Date: Mon May 7 10:04:02 2012 -0400
 #  
 # Educational Community License, Version 2.0
 # 
@@ -764,6 +764,7 @@
                     });
                   });
                   midDragDragBinding.events.onFocus.addListener(function(x, y) {
+                    that.events.onFocus.fire();
                     factors.x = 0;
                     factors.y = 0;
                     calcFactors();
@@ -773,10 +774,11 @@
                   });
                   midDragDragBinding.events.onUnfocus.addListener(function() {
                     calcXYHeightWidth(attrs);
-                    return that.events.onMove.fire({
+                    that.events.onMove.fire({
                       x: attrs.x + attrs.width / 2,
                       y: attrs.y + attrs.height / 2
                     });
+                    return that.events.onUnfocus.fire();
                   });
                 }
                 return handleSet.forEach(function(handle) {
@@ -796,6 +798,7 @@
                   handleBinding.events.onFocus.addListener(function(x, y) {
                     var px, py;
                     extents = activeRendering.getExtents();
+                    that.events.onFocus.fire();
                     px = (8 * (x - extents.x) / extents.width) + 4;
                     py = (8 * (y - extents.y) / extents.height) + 4;
                     if (px < 3) {
@@ -816,12 +819,13 @@
                   });
                   handleBinding.events.onUnfocus.addListener(function() {
                     calcXYHeightWidth(attrs);
-                    return that.events.onResize.fire({
+                    that.events.onResize.fire({
                       x: attrs.x + attrs.width / 2,
                       y: attrs.y + attrs.height / 2,
                       width: attrs.width,
                       height: attrs.height
                     });
+                    return that.events.onUnfocus.fire();
                   });
                   svgBBox.toFront();
                   handleSet.toFront();
@@ -1066,8 +1070,15 @@
               }
             });
             app.events.onCurrentModeChange.addListener(function(newMode) {
+              var activeRendering;
               if (newMode !== "Select" && newMode !== "Drag") {
-                return boundingBoxComponent.detachFromRendering();
+                boundingBoxComponent.detachFromRendering();
+              }
+              if (newMode === "Select") {
+                activeRendering = that.getFocusedRendering();
+                if (activeRendering != null) {
+                  return boundingBoxComponent.attachToRendering(activeRendering);
+                }
               }
             });
             playerObj = app.getPlayer();
@@ -1674,7 +1685,9 @@
             app.events.onCurrentTimeChange.addListener(function(t) {
               app.dataView.currentAnnotations.setKeyRange(t - 5, t + 5);
               playerObj.setPlayhead(t);
-              return app.setCurrentMode(null);
+              if (app.getCurrentMode() !== "Watch") {
+                return app.setCurrentMode(null);
+              }
             });
             app.setCurrentTime(playerObj.getPlayhead());
             playerObj.events.onPlayheadUpdate.addListener(app.setCurrentTime);
@@ -1849,7 +1862,9 @@
       onMove: null,
       onEdit: null,
       onDelete: null,
-      onCurrentModeChange: null
+      onCurrentModeChange: null,
+      onFocus: null,
+      onUnfocus: null
     }
   });
 
