@@ -1,80 +1,48 @@
 # # Annotation Application
 #
-# TODO: rename file to application.js
 
-
-# #S4 (private)
-#
-# Generates a UUID value, this is not a global uid
-#
-# Returns:
-# String with 16-byte pattern
-S4 = () -> (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1)
-
-# #uuid (private)
-#
-# Generates a UUID
-#
-# This is not a global variable - theoretically could clash with another
-# variable if enough MITHGrid instances are started. Works now as a local
-# unique ID
-# **FIXME: Abstract so that there is a server prefix component that insures
-# more of a GUID
-#
-uuid = () -> (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4())
-
-# canvasId is unique within the OAC annotation application, which is loaded once on a webpage but instanced for
-# each video.
-canvasId = 1
-
-# ## StreamingVideo.initInstance
-#
-# Options:
-#
 OAC.Client.StreamingVideo.namespace "Application", (Application) ->
+	# ### #S4 (private)
+	#
+	# Generates a UUID value, this is not a global uid
+	#
+	# Returns:
+	# String with 16-byte pattern
+	S4 = () -> (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1)
+
+	# ### #uuid (private)
+	#
+	# Generates a UUID
+	#
+	# This is not a globally unique value - theoretically could clash with another
+	# value if enough MITHGrid instances are started. Works now as a local
+	# unique ID
+	# **FIXME:** Abstract so that there is a server prefix component that insures
+	# more of a GUID
+	#
+	uuid = () -> (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4())
+	
+	# ## StreamingVideo.initInstance
+	#
+	# Options:
+	#
+	# * 
+	#
 	Application.initInstance = (args...) ->
 		app = {}
-		shapeAnnotationId = 0
-		myCanvasId = 'OAC-Client-StreamingVideo-SVG-Canvas-' + canvasId
-		xy = []
-		wh = []
-		[klass, container, options, cb] = MITHGrid.normalizeArgs "OAC.Client.StreamingVideo.Application", args...
 
-		# Generating the canvasId allows us to have multiple instances of the application on a page and still
-		# have a unique ID as expected by the Raphaël library.
-		canvasId += 1;
-	
-		if not container?
-			container = $("<div id='#{myCanvasId}-container'></div>")
-			$("body").append container
-
-		extendedOpts = $.extend(true, {}, {
-			# We create a general template that holds all of the different DOM elements we need:
-			#
-			# * the SVG view that will overlay the play surface (myCanvasId is the DOM id)
-			#
-			viewSetup: """
-				<div id="#{myCanvasId}" class="section-canvas"></div>
-			"""
-			# We make the isActive() function available to the keyboard controller to let it know if
-			# the keyboard should be considered active.
+		MITHGrid.Application.initInstance "OAC.Client.StreamingVideo.Application", args..., {
 			controllers:
 				keyboard:
 					isActive: -> app.getCurrentMode() != 'Editing'
 				selectShape:
 					isSelectable: -> app.getCurrentMode() == "Select"
-			# We connect the SVG overlay and annotation sections of the DOM with their respective
-			# presentations.
-			presentations:
-				raphsvg:
-					container: "#" + myCanvasId
-					lenses: {}
-					lensKey: ['.shapeType']
-		}, options)
-
-		MITHGrid.Application.initInstance klass, container, extendedOpts, cb, (appOb) ->
+		}, (appOb) ->
 			app = appOb
 			shapeTypes = {}
+			shapeAnnotationId = 0
+			xy = []
+			wh = []
 		
 			options = app.options
 		
@@ -94,226 +62,8 @@ OAC.Client.StreamingVideo.namespace "Application", (Application) ->
 
 			app.getPlayer = -> playerObj
 	
-			# ### #initShapeLens
-			#
-			# Initializes a basic shape lens. The default methods expect the Raphaël SVG shape object to
-			# be held in the .shape property.
-			#
-			# Parameters:
-			#
-			# * container - the container holding the lens content
-			# * view - the presentation managing the collection of renderings
-			# * model - the data store or data view holding information about the item to be rendered
-			# * itemId - the item ID of the item to be rendered
-			#
-			# Returns:
-			#
-			# The basic lens object with the following methods defined:
-			app.initShapeLens = (container, view, model, itemId, cb) ->
-				that =
-					id: itemId
-				item = model.getItem itemId
-
-				focused = false
-				start = item.npt_start[0]
-				end = item.npt_end[0]
-				fstart = start - app.getTimeEasement()
-				fend = end + app.getTimeEasement()
-			
-				# ### #calcOpacity (private)
-				#
-				# Calculate the opacity of the annotation shape rendering over the video.
-				#
-				# Parameters:
-				#
-				# * n - the current time of the play head
-				#
-				calcOpacity = (n) ->
-					val = 0.0
-
-					if n >= fstart and n < fend
-						e = app.getTimeEasement()
-						if e > 0
-							if n < start
-								# fading in
-								val = (e - start + n) / e
-							else if n > end
-								# fading out
-								val = (e + end - n) / e
-							else
-								val = 1.0
-						else
-							val = 1.0
-					val
-					
-				that.scalePoint = (x, y, w, h) ->
-					if w? and w[0]?
-						w = w[0]
-					else
-						w = screenSize.width
-					if h? and h[0]?
-						h = h[0]
-					else
-						h = screenSize.height
-				
-					if w == 0 or h == 0
-						[x, y]
-					else
-						[ x * screenSize.width / w, y * screenSize.height / h ]
-			
-				# ### eventTimeEasementChange (private)
-				#
-				# Handles event calls for when the user wants
-				# to see the annotation at a specific interval.
-				# By default, annotations are in view for the time period
-				# of the item being annotated. They are 'eased in', or fade in
-				# and out depending on the Easement variable, which is set
-				# here.
-				#
-				# Parameters:
-				#
-				# * v: when the annotation should be in view
-				#
-				that.eventTimeEasementChange = (v) ->
-					fstart = start - v
-					fend = end + v
-				
-					that.setOpacity calcOpacity(app.getCurrentTime())
-			
-				# ### eventCurrentTimeChange (private)
-				#
-				# Handles when application advances the time
-				#
-				# Parameters:
-				#
-				# *n: current time of the video player
-				#
-				that.eventCurrentTimeChange = (n) ->
-					that.setOpacity calcOpacity(n)
-			
-				opacity = 0.0
-		
-				# #### #setOpacity
-				#
-				# Sets the opacity for the SVG shape. This is moderated by the renderings focus. If in focus, then
-				# the full opacity is set. Otherwise, it is halved.
-				#
-				# If no value is given, then the shape's opacity is updated to reflect the currently set opacity and
-				# focus state.
-				#
-				# Parameters:
-				#
-				# * o - opacity when in focus
-				#
-				# Returns: Nothing.
-				#
-				that.setOpacity = (o) ->
-					if o?
-						opacity = o
-			
-					if that.shape?
-						that.shape.attr
-							opacity: (if focused then 0.5 else 0.25) * opacity
-		
-				that.getOpacity = -> opacity
-			
-				that.setOpacity(calcOpacity app.getCurrentTime())
-			
-				# #### #eventFocus
-				#
-				# Called when this rendering receives the selection focus. The default implementation brings the rendering
-				# to the front and makes it opaque.
-				#
-				that.eventFocus = ->
-					focused = true
-					that.setOpacity()
-					that.shape.toFront()
-					# **FIXME:** This should be handled in the view instead of by adding/removing listeners like this
-					view.events.onDelete.addListener that.eventDelete
-			
-				# #### #eventUnfocus
-				#
-				# Called when this rendering loses the selection focus. The default implementation pushes the rendering
-				# to the back and makes it semi-transparent.
-				#
-				that.eventUnfocus = ->
-					focused = false
-					that.setOpacity()
-					that.shape.toBack()
-					view.events.onDelete.removeListener that.eventDelete
-			
-				# #### #eventDelete
-				#
-				# Called when the data item represented by this rendering is to be deleted. The default implementation
-				# passes the deletion request to the data store with the item ID represented by the rendering.
-				#
-				# Parameters: None.
-				#
-				# Returns: Nothing.
-				#
-				that.eventDelete = -> model.removeItems [itemId]
-
-
-				# #### #eventResize
-				#
-				# Called when the bounding box of the rendering changes size.
-				#
-				# Parameters:
-				#
-				# * pos - object containing the .width and .height properties
-				#
-				# Returns: Nothing.
-				#
-				that.eventResize = (pos) ->
-					model.updateItems [
-						id: itemId
-						x: pos.x
-						y: pos.y
-						w: pos.width
-						h: pos.height
-						targetWidth: screenSize.width
-						targetHeight: screenSize.height
-					]
-			
-				# #### #eventMove
-				#
-				# Called when the bounding box of the rendering is moved.
-				#
-				# Parameters:
-				#
-				# * pos - object containing the .x and .y properties
-				#
-				# Returns: Nothing.
-				#
-				that.eventMove = (pos) ->
-					model.updateItems [
-						id: itemId
-						x: pos.x
-						y: pos.y
-					]
-			
-				# #### #update
-				#
-				# Updates the rendering's opacity based on the current time and the time extent of the annotation.
-				#
-				that.update = (item) ->
-					if item.npt_start[0] != start or item.npt_end[0] != end
-						start = item.npt_start[0]
-						end = item.npt_end[0]
-						fstart = start - app.getTimeEasement()
-						fend = end + app.getTimeEasement()
-						that.setOpacity calcOpacity(app.getCurrentTime())
-			
-				# #### #remove
-				#
-				# Called to remove the rendering from the presentation.
-				#
-				that.remove = (item) -> that.shape.remove()
-			
-				if cb?
-					cb that
-				that
-			
+			app.ready ->
+				app.initShapeLens = app.presentation.raphsvg.initShapeLens
 
 
 			# ### #addShapeType
@@ -376,6 +126,7 @@ OAC.Client.StreamingVideo.namespace "Application", (Application) ->
 						npt_end: npt_end
 
 					app.dataStore.canvas.loadItems [t = $.extend(true, shapeItem, shape)]
+					app.setActiveAnnotation shapeItem.id
 					shapeItem.id
 
 			# ### importData
@@ -710,7 +461,7 @@ OAC.Client.StreamingVideo.namespace "Application", (Application) ->
 					playerObj.setPlayhead t
 					# Making sure that none of the button items are still active while video is playing
 					# (Can't draw a shape while video is playing - force user to re-click item)
-					app.setCurrentMode('Watch')
+					app.setCurrentMode null
 
 				app.setCurrentTime playerObj.getPlayhead()
 				playerObj.events.onPlayheadUpdate.addListener app.setCurrentTime
@@ -936,12 +687,3 @@ OAC.Client.StreamingVideo.namespace "Application", (Application) ->
 								height: (c.attr("ry") * 2)
 
 				app.setCurrentTime 0
-
-				# binding time controller to time DOM
-				timeControlBinding = app.controller.timecontrol.bind '.timeselect', {}
-				timeControlBinding.events.onUpdate.addListener (id, start, end) ->
-					app.dataStore.canvas.updateItems [
-						id: id
-						npt_start: start
-						npt_end: end
-					]

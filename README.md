@@ -1,30 +1,24 @@
-OAC Video Annotation Tool
-=========================
+# Video Annotator
 
-for use in the Alexander Street Press online streaming video window. 
-
-Authors:
-
-* Grant Dickie
-* Jim Smith
+The Video Annotator developer library is the result of an experiment run as part of the
+[Open Annotation](http://www.openannotation.org) collaboration to test the 
+[OA data model](http://www.openannotation.org/spec/beta/) 
+for use in exchanging annotations of streaming video.
 
 See license.txt for licensing details
 
-Setting up the OAC Annotation Tool
-----------------------------------
+## Setting up the OAC Annotation Tool
 
-What you will need for your site
-----------------------
+### What you will need for your site
 
 The following code libraries are required and are listed in the order
 in which to include them:
 
 * jQuery
-* RaphaelJS
-* MITHGrid 
+* Raphaël.js
+* MITHgrid 
 
-What you will need for building OAC Video Annotator
--------------------------
+### What you will need for building Video Annotator
 
 A Makefile has been included with this distribution to allow for running system-level commands to minimize the code and provide a distribution directory `dist/` with two files, `videoanno.js` which is the full, human-readable version of the Javascript code, and `videoanno.min.js`, which is a compressed version of the core code library intended for quick-loading in the browser. The minified version is, of course, much less readable than the full version.
 
@@ -34,19 +28,17 @@ Mac OS users should install Xcode, either from the Mac OS install DVD or from th
 
 Linux/BSD users should use their appropriate package managers to install make, git, and node.
 
-How to build your own OAC Video Annotator
--------------------------
+### How to build your own Video Annotator
 
 First, use the *git* command *git clone* to copy the remote repository to your directory, like so: `git clone git://github.com/umd_mith/OACVideoAnnotator.git`.
 
-Then, to get a complete, minified, jslinted version of the OACVideoAnnotator, `cd` to the directory containing the files for OACVideoAnnotator and type `make`.  If you don't have Node installed and/or want to make a basic, uncompressed, unlinted version of OACVideoAnnotator, use `make videoanno` instead of `make`.
+Then, to get a complete, minified, jslinted version of Video Annotator, `cd` to the directory containing the files for Video Annotator and type `make`.  If you don't have Node installed and/or want to make a basic, uncompressed, unlinted version of Video Annotator, use `make videoanno` instead of `make`.
 
 The built version of OACVideoAnnotator will be in the `dist/` subdirectory.
 
 To remove all built files, run `make clean`.
 
-Testing the OAC Video Annotator
--------------------------------
+### Testing Video Annotator
 
 Direct your browser to `/your installation directory/tests/` and it will display the QUnit tests that have been set up with this release. For more information on QUnit and how you can set up your own tests, visit [the QUnit documentation](http://docs.jquery.com/Qunit) 
 

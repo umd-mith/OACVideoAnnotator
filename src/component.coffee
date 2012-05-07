@@ -33,8 +33,6 @@ OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
 						options.application.setCurrentMode(undefined)
 						$(buttonEl).removeClass("active")
 
-				# #### onCurrentModeChangeHandle (private)
-				#
 				# Handles when the mode is changed externally from controller
 				#
 				# Parameters:

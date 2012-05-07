@@ -7,8 +7,8 @@ $(document).ready ->
 		ok OAC.Client.StreamingVideo?, "OAC.Client.StreamingVideo"
 	
 	test "Check construction", ->
-		expect 13
-		app = OAC.Client.StreamingVideo.Application.initInstance "#content-container",
+		expect 12
+		app = OAC.Client.StreamingVideo.Application.initInstance
 			url: 'http://www.youtube.com/watch?v=HYLacuAp76U&feature=fvsr'
 			easement: 5
 
@@ -23,16 +23,13 @@ $(document).ready ->
 		ok $.isFunction(app.setCurrentMode), "setCurrentMode"
 		ok $.isFunction(app.getCurrentMode), "getCurrentMode"
 		
-		ok $.isFunction(app.initShapeLens), "initShapeLens"
-		#ok $.isFunction(app.initTextLens), "initTextLens"
-		#ok $.isFunction(app.addShape), "addShape"
 		ok $.isFunction(app.addShapeType), "addShapeType"
 		ok $.isFunction(app.insertShape), "insertShape"
 		ok $.isFunction(app.importData), "importData"
 		ok $.isFunction(app.exportData), "exportData"
 		
 	test "Check annotation management", ->
-		expect 12
+		expect 13
 		
 		playerObject = {
 			getCoordinates: ->
@@ -50,17 +47,21 @@ $(document).ready ->
 				t
 			getPlayhead: -> 
 				0
+			getTargetURI: -> 'http://www.youtube.com/watch?v=HYLacuAp76U&feature=fvsr'
 			events:
 				onResize: MITHGrid.initEventFirer(true, true)
 				onPlayheadUpdate: MITHGrid.initEventFirer(true, true)
 		}
 		
 		# We want to put a few annotations in
-		app = OAC.Client.StreamingVideo.Application.initInstance "#content-container",
+		app = OAC.Client.StreamingVideo.Application.initInstance
 			player: playerObject
 			url: 'http://www.youtube.com/watch?v=HYLacuAp76U&feature=fvsr'
 			easement: 5
 		app.run();
+		
+		# initShapeLens is only defined once the SVG presentation is instantiated
+		ok $.isFunction(app.initShapeLens), "initShapeLens"
 		
 		app.setCurrentMode 'Rectangle'
 		equal app.getCurrentMode(), 'Rectangle', "Setting mode to 'Rectangle' works"
