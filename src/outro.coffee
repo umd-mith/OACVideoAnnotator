@@ -92,8 +92,6 @@ MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.Drag",
 			onFocus: null
 			onUnfocus: null
 			onUpdate: null
-	selectors:
-		'': ''
 
 # ## Controller.Select
 #
@@ -101,8 +99,6 @@ MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.Select",
 	bind:
 		events:
 			onSelect: null
-	selectors:
-		'': ''
 	isSelectable: -> true
 
 # ## Controller.timeControl
@@ -127,25 +123,6 @@ MITHGrid.defaults "OAC.Client.StreamingVideo.Application",
 			type: OAC.Client.StreamingVideo.Controller.CanvasClickController
 			selectors:
 				svgwrapper: ''
-		annoActive:
-			type: OAC.Client.StreamingVideo.Controller.TextBodyEditor
-			selectors:
-				annotation: ''
-				annotationlist: ':parent'
-				bodycontent: '.bodyContent'
-				body: '.body'
-				editbutton: '.button.edit'
-				editarea: '.editArea'
-				textarea: '.editArea > textarea'
-				updatebutton: '.button.update'
-				deletebutton: '.button.delete'
-		timecontrol:
-			type: OAC.Client.StreamingVideo.Controller.timeControl
-			selectors:
-				timestart: '#timestart'
-				timeend: '#timeend'
-				submit: '#submittime'
-				menudiv: ''
 		selectShape:
 			type: OAC.Client.StreamingVideo.Controller.Select
 			selectors:
@@ -155,9 +132,11 @@ MITHGrid.defaults "OAC.Client.StreamingVideo.Application",
 		#
 		# - setActiveAnnotation(id) sets the id
 		# - getActiveAnnotation() returns the id
+		# - lockActiveAnnotation() keeps it from being changed
+		# - unlockActiveAnnotation() undoes a previous call to lockActiveAnnotation()
 		# - events.onActiveAnnotationChange fires when the ActiveAnnotation value changes
 		ActiveAnnotation:
-			is: 'rw'
+			is: 'rwl'
 
 		# **CurrentTime** holds the current position of the video play head in seconds. The value defaults to 0 seconds.
 		#
@@ -223,19 +202,25 @@ MITHGrid.defaults "OAC.Client.StreamingVideo.Application",
 				# - the play head position at which this annotation ceases being active/current
 				npt_end: 
 					valueType: "numeric"
-
 	presentations: 
 		raphsvg:
 			type: OAC.Client.StreamingVideo.Presentation.RaphaelCanvas
+			container: ".canvas"
+			lenses: {}
+			lensKey: ['.shapeType']
 			dataView: 'currentAnnotations'
 			# The controllers are configured for the application and passed in to the presentation's
 			# initInstance method as named here.
 			controllers:
 				keyboard: "keyboard"
 				canvas: "canvas"
-				#shapeCreateBox: "shapeCreateBox"
-				#shapeEditBox: "shapeEditBox"
-				#windowResize: "windowResize"
 			events:
 				onOpacityChange: null
 			fadeStart: 5
+	# We create a general template that holds all of the different DOM elements we need:
+	#
+	# * the SVG view that will overlay the play surface (myCanvasId is the DOM id)
+	#
+	viewSetup: """
+		<div class="canvas"></div>
+	"""
