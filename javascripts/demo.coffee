@@ -114,7 +114,7 @@ OAC.Client.StreamingVideo.namespace "Demo", (Demo) ->
 					# the shape on the video.
 					#
 					hoverController = OAC.Client.StreamingVideo.Demo.Hover.initInstance()
-					textControls = OAC.Client.StreamingVideo.Demo.TextControls.initInstance $ "#text-controls"
+					textControls = OAC.Client.StreamingVideo.Demo.TextControls.initInstance "#text-controls"
 			
 					app.events.onActiveAnnotationChange.addListener annotations.eventFocusChange
 										
@@ -143,9 +143,6 @@ OAC.Client.StreamingVideo.namespace "Demo", (Demo) ->
 						# we want to switch the active annotation to this one when the cursor hovers over it
 						binding.events.onFocus.addListener ->
 							app.setActiveAnnotation itemId
-
-						binding.events.onUnfocus.addListener ->
-							#app.setActiveAnnotation undefined
 
 						# Now we want to handle showing the edit controls when this rendering is active.
 						# We split this out from the above binding events focus/unfocus handling since

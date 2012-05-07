@@ -109,7 +109,7 @@
               application: app
             });
             hoverController = OAC.Client.StreamingVideo.Demo.Hover.initInstance();
-            textControls = OAC.Client.StreamingVideo.Demo.TextControls.initInstance($("#text-controls"));
+            textControls = OAC.Client.StreamingVideo.Demo.TextControls.initInstance("#text-controls");
             app.events.onActiveAnnotationChange.addListener(annotations.eventFocusChange);
             textControls.events.onEdit.addListener(function() {
               var rendering;
@@ -138,7 +138,6 @@
               binding.events.onFocus.addListener(function() {
                 return app.setActiveAnnotation(itemId);
               });
-              binding.events.onUnfocus.addListener(function() {});
               superFocus = rendering.eventFocus;
               superUnfocus = rendering.eventUnfocus;
               rendering.eventFocus = function() {
