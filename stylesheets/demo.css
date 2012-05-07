@@ -1,0 +1,183 @@
+@charset "UTF-8"
+
+h3.demo-box-title {
+border: 1px solid #7c7c7c;
+margin: 0;
+color: #FFF;
+text-transform: uppercase;
+font-weight: normal;
+font-size: 12px;
+padding: 6px 9px;
+background: #646464; /* url(../images/toggle.png) no-repeat right 0; */
+/* background: */
+-webkit-border-radius: 3px 3px 0px 0px;
+border-radius: 3px 3px 0px 0px;
+}
+
+h3.demo-box-title.active {
+	border: 1px solid #7c7c7c;
+	margin: 0;
+	color: #FFF;
+	text-transform: uppercase;
+	font-weight: normal;
+	font-size: 12px;
+	padding: 6px 9px;
+	background: #646464; /* url(../images/toggle.png) no-repeat right 0; */
+	/* background: */
+	-webkit-border-radius: 3px 3px 0px 0px;
+	border-radius: 3px 3px 0px 0px;
+background-position: right -50px;
+}
+
+ul, li, ol, img, p {
+margin: 0;
+padding: 0;
+}
+
+.demo-box {
+padding: 6px;
+border: 1px solid #c6c6c6;
+overflow: auto;
+background: #EEEEEE url(../images/bg_tools.png) repeat;
+}
+
+/*-------- EDITING TOOLS ---------*/
+
+#demo-tools {
+padding: 0;
+margin: 0 auto;
+width: 66px;
+overflow: auto;
+-webkit-box-shadow: 5px 5px 20px 0px #444;
+box-shadow: 5px 5px 20px 0px #444;
+}
+.demo-tool-buttons li {
+margin: 2px;
+float: left;
+height: 22px;
+width: 22px;
+display: block;
+list-style-type: none;
+background: url(../images/bg_tools_buttons.png) no-repeat left center;
+}
+.demo-tool-buttons li a {
+cursor: pointer;
+}
+.demo-tool-buttons li a img {
+border: 0;
+}
+.demo-tool-buttons li:hover {
+background-position: center center;
+}
+.demo-tool-buttons li:active, .demo-tool-buttons li.active {
+background-position: right center;
+}
+
+
+/*-------- CODE VIEW TOOLS ---------*/
+
+#demo-code-view {
+width: 480px;
+margin-bottom: 3px;
+}
+.demo-code-tools li {
+margin: 2px;
+float: left; height; display block
+}
+.demo-box textarea {
+clear: both;
+float: left;
+width: 99%;
+margin: 6px 0 0 0;
+padding: 0;
+}
+
+
+/*-------- ANNOTATION ---------*/
+#demo-annotation {
+width: 270px;
+margin: 1em auto;
+}
+#demo-annotation .demo-box {
+background: #FFF;
+}
+#demo-annotation .demo-box textarea {
+}
+
+.demo-edit-buttons {
+padding: 0 2px 8px 8px;
+position: absolute;
+}
+.demo-edit-buttons li {
+height: 15px;
+width: 15px;
+display: block;
+list-style-type: none;
+background: url(../images/bg_tools_buttons.png) no-repeat left center;
+background: -webkit-border-radius: 2px 2px 2px 2px;
+border-radius: 2px 2px 2px 2px;
+border: 1px solid #DDD;
+margin-bottom: 3px;
+}
+.demo-edit-buttons li:hover {
+background-position: center center;
+}
+.demo-edit-buttons li:active, .demo-tool-buttons li.selected {
+background-position: right center;
+}
+
+.demo-edit-buttons a {
+cursor: pointer;
+border: 0;
+width: 15px;
+height: 15px;
+display: block;
+float: left;
+}
+.demo-edit-buttons .save a {
+background: url(../images/tools_edit_buttons_save.png) no-repeat center center;
+}
+.demo-edit-buttons .delete a {
+background: url(../images/tools_edit_buttons_delete.png) no-repeat center center;
+}
+.demo-edit-buttons .edit a {
+background: url(../images/tools_edit_buttons_edit.png) no-repeat center center;
+}
+
+.demo-anno-item {
+margin: 8px 0 0 0;
+overflow: auto;
+}
+.demo-anno-item .content-area {
+display: block;
+}
+.demo-anno-item p {
+font-size: 12px;
+font-weight: normal;
+margin-bottom: 8px;
+line-height: 14px;
+}
+
+.anno-id {
+display: block;
+font-size: 13px;
+font-weight: normal;
+text-align: center;
+width: 18px;
+padding: 6px 3px;
+color: #06C;
+}
+.anno-content {
+width: 240px;
+padding: 8px;
+border: 1px solid #d4d4d4;
+background: -webkit-border-radius: 3px 3px 3px 3px;
+border-radius: 3px 3px 3px 3px;
+}
+.demo-box .edit-area {
+}
+
+edit-button {
+text-align: right;
+display: inline;
+}
