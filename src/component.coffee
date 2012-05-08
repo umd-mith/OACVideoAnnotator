@@ -26,11 +26,11 @@ OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
 				$(buttonEl).mousedown (e) ->
 					if active == false
 						active = true
-						options.application.setCurrentMode(options.mode)
+						options.application().setCurrentMode(options.mode)
 						$(buttonEl).addClass("active")
 					else if active == true
 						active = false
-						options.application.setCurrentMode(undefined)
+						options.application().setCurrentMode(undefined)
 						$(buttonEl).removeClass("active")
 
 				# Handles when the mode is changed externally from controller
@@ -38,7 +38,7 @@ OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
 				# Parameters:
 				# * action - name of new mode
 				#
-				options.application.events.onCurrentModeChange.addListener (action) ->
+				options.application().events.onCurrentModeChange.addListener (action) ->
 					if action == options.mode
 						active = true
 						$(buttonEl).addClass('active')
@@ -234,6 +234,7 @@ OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
 
 							midDragDragBinding.events.onFocus.addListener (x, y) ->
 									# start
+									that.events.onFocus.fire()
 									factors.x = 0
 									factors.y = 0
 									calcFactors()
@@ -246,6 +247,7 @@ OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
 									that.events.onMove.fire
 										x: attrs.x + attrs.width/2
 										y: attrs.y + attrs.height/2
+									that.events.onUnfocus.fire()
 
 						# Attaching drag and resize handlers
 						handleSet.forEach (handle) ->
@@ -271,7 +273,7 @@ OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
 							handleBinding.events.onFocus.addListener (x, y) ->
 								# onstart function
 								extents = activeRendering.getExtents()
-
+								that.events.onFocus.fire()
 								# extents: x, y, width, height
 								px = (8 * (x - extents.x) / extents.width) + 4
 								py = (8 * (y - extents.y) / extents.height) + 4
@@ -293,12 +295,12 @@ OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
 								# onend function
 								# update
 								calcXYHeightWidth attrs
-								
 								that.events.onResize.fire
 									x: attrs.x + attrs.width/2
 									y: attrs.y + attrs.height/2
 									width: attrs.width
 									height: attrs.height
+								that.events.onUnfocus.fire()
 							svgBBox.toFront()
 							handleSet.toFront()
 							midDrag.toFront()
@@ -347,6 +349,8 @@ OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
 	# Creates an SVG shape with a dotted border to be used as a guide for drawing shapes. Listens for user mousedown, which
 	# activates the appearance of the box at the x,y where the mousedown coords are, then finishes when user mouseup call is made
 	#
+	# **TODO:** See if the bindings in the presentation can be moved here and have a simple event from here go back to
+	# the presentation to create the shape.
 	Component.namespace 'ShapeCreateBox', (ShapeCreateBox) ->
 		ShapeCreateBox.initInstance = (args...) ->
 			MITHGrid.initInstance "OAC.Client.StreamingVideo.Component.ShapeCreateBox", args..., (that, paper) ->
@@ -359,7 +363,7 @@ OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
 				svgBBox = {}
 				factors = {}
 				attrs = {}
-				padding = 10
+				#padding = 10
 				shapeAttrs = {}
 
 				# #### createGuide

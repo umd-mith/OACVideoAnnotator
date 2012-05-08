@@ -15,7 +15,7 @@ OAC.Client.StreamingVideo.namespace "Presentation", (Presentation) ->
 		AnnotationList.initInstance = (args...) ->
 			MITHGrid.Presentation.initInstance "OAC.Client.StreamingVideo.Presentation.AnnotationList", args..., (that, container) ->
 				options = that.options
-				app = options.application
+				app = options.application()
 			
 				# ### #initTextLens
 				#
@@ -156,14 +156,13 @@ OAC.Client.StreamingVideo.namespace "Presentation", (Presentation) ->
 		
 				options = that.options
 			
-				app = options.application
+				app = options.application()
 				screenSize =
 					width: 0
 					height: 0
 					
 				# Setting up local names for the assigned presentation controllers
 				canvasController = options.controllers.canvas
-				keyBoardController = options.controllers.keyboard
 
 				that.canvas = new Raphael($(container), 10, 10)
 
@@ -179,11 +178,6 @@ OAC.Client.StreamingVideo.namespace "Presentation", (Presentation) ->
 				boundingBoxComponent = OAC.Client.StreamingVideo.Component.ShapeEditBox.initInstance that.canvas
 						
 				shapeCreateBoxComponent = OAC.Client.StreamingVideo.Component.ShapeCreateBox.initInstance that.canvas
-
-				# Keyboard binding attached to container to avoid multiple-keyboard events from firing
-				keyboardBinding = keyBoardController.bind $(container), {}
-
-				that.events = $.extend true, that.events, keyboardBinding.events
 
 				boundingBoxComponent.events.onResize.addListener (pos) ->
 					activeRendering = that.getFocusedRendering()
@@ -202,8 +196,13 @@ OAC.Client.StreamingVideo.namespace "Presentation", (Presentation) ->
 						boundingBoxComponent.detachFromRendering()
 
 				app.events.onCurrentModeChange.addListener (newMode) ->
-					if newMode not in ["Select", "Drag"]
+					if app.getCurrentModeClass() == "select"
+						activeRendering = that.getFocusedRendering()
+						if activeRendering?
+							boundingBoxComponent.attachToRendering activeRendering
+					else
 						boundingBoxComponent.detachFromRendering()
+						
 
 				# Adjusts the canvas area, canvas wrapper to fall directly over the
 				# player area
@@ -265,8 +264,6 @@ OAC.Client.StreamingVideo.namespace "Presentation", (Presentation) ->
 					if app.getCurrentMode() == 'Select'
 						boundingBoxComponent.attachToRendering that.getFocusedRendering()
 						canvasBinding.toBack()
-
-				#
 				
 				# ### #initShapeLens
 				#

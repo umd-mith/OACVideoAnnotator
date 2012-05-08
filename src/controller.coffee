@@ -13,48 +13,6 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
 		x: event.pageX - totalOffsetX
 		y: event.pageY - totalOffsetY
 		
-	# ## KeyboardListener
-	#
-	# OAC.Client.StreamingVideo.Controller.KeyboardListener listens to keydown events on the DOM document
-	# level and translates them into delete events.
-	#
-	Controller.namespace "KeyboardListener", (KeyboardListener) ->
-
-		# ### KeyboardListener.initInstance
-		#
-		# Parameters:
-		#
-		# * options - object holding configuration options for the KeyboardListener object
-		#
-		# Returns:
-		#
-		# The configured KeyboardListener controller.
-		#
-		# Options:
-		#
-		# * application - the application using this controller
-		# * isAction - a function which returns true if keyboard events should be propagated
-		#
-		KeyboardListener.initInstance = (args...) ->			
-			MITHGrid.Controller.initInstance "OAC.Client.StreamingVideo.Controller.KeyboardListener", args..., (that) ->
-				options = that.options
-				isActive = options.isActive or -> true
-				
-				that.applyBindings = (binding, opts) ->
-					doc = binding.locate('doc')
-
-					options.application.events.onActiveAnnotationChange.addListener (id) ->
-						activeId = id
-
-					$(doc).keydown (e) ->
-						if isActive() and activeId?
-							# If backspace or delete is pressed,
-							# then it is interpreted as a
-							# delete call.
-							if e.keyCode in [8, 46]
-								binding.events.onDelete.fire activeId
-								activeId = null
-
 	# ## Drag
 	#
 	# Attaches to an SVG rendering and produces events at the start, middle, and end of a drag.
@@ -144,6 +102,7 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
 					closeEnough = opts.closeEnough
 					renderings = {}
 					paper = opts.paper
+					svgWrapper = binding.locate('svgwrapper')
 						
 					drawOverlay = ->
 						removeOverlay()
@@ -262,104 +221,20 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
 						overlay.unmousedown()
 						overlay.mousedown (e) ->
 							# By default, nullifies all selections
-							options.application.setActiveAnnotation(undefined)
+							options.application().setActiveAnnotation(undefined)
 							activeId = null
 							overlay.toBack()
 						overlay.toBack()
 					
-					# Change the mouse actions depending on what Mode the application is currently
-					# in
-					# **FIXME:** We shouldn't depend on the shape name being drawn - will break when a third
-					# shape is added
-					options.application.events.onCurrentModeChange.addListener (mode) ->
+					# Change the mouse actions depending on what class of Mode the application is currently in
+					options.application().events.onCurrentModeChange.addListener (mode) ->
 						removeOverlay()
-						if mode in ["Rectangle", "Ellipse"]
-							drawShape binding.locate('svgwrapper')
-						else if mode == 'Select'
-							selectShape binding.locate('svgwrapper')
-						else
-							$(binding.locate('svgwrapper')).unbind()
+						switch options.application().getCurrentModeClass()
+							when "shape"  then drawShape svgWrapper
+							when "select" then selectShape svgWrapper
+							else
+								$(svgWrapper).unbind()
 					
 					binding.toBack = ->
 						if overlay?
 							overlay.toBack()
-
-	# ## sliderButton
-	#
-	# Creates a jQuery UI slider for the current time in the video
-	#
-	Controller.namespace 'sliderButton', (sliderButton) ->
-		sliderButton.initInstance = (args...) ->
-			MITHGrid.Controller.initInstance "OAC.Client.StreamingVideo.Controller.sliderButton", args..., (that) ->
-				options = that.options
-
-				that.applyBindings = (binding, opts) ->
-					displayElement = binding.locate('timedisplay')
-					positionCheck = (t) ->
-						#
-						# if time is not equal to internal time, then
-						# reset the slider
-						#
-						if !localTime?
-							localTime = t
-							$(sliderElement).slider('value', localTime)
-
-					sliderStart = (e, ui) ->
-						options.application.setCurrentTime ui.value
-						$(displayElement).text 'TIME: ' + ui.value
-						localTime = ui.value
-
-					sliderMove = (e, ui) ->
-						if !ui?
-							localTime = e
-							$(sliderElement).slider('value', e)
-
-						if localTime != ui.value
-							options.application.setCurrentTime(ui.value)
-							$(displayElement).text('TIME: ' + ui.value)
-							localTime = ui.value
-
-					sliderElement = binding.locate("slider")
-
-					$(sliderElement).slider
-						start: sliderStart
-						slide: sliderMove
-
-	# ## timeControl
-	#
-	# Controller for manipulating the time sequence for an annotation.
-	# Currently, just a text box for user to enter basic time data
-	#
-	Controller.namespace 'timeControl', (timeControl) ->
-		timeControl.initInstance = (args...) ->
-			MITHGrid.Controller.initInstance "OAC.Client.StreamingVideo.Controller.timeControl", args..., (that) ->
-				options = that.options
-				that.currentId = ''
-
-				# #### timeControl #applyBindings
-				that.applyBindings = (binding, opts) ->
-					timestart = binding.locate('timestart')
-					timeend = binding.locate('timeend')
-					submit = binding.locate('submit')
-					menudiv = binding.locate('menudiv')
-
-					$(menudiv).hide()
-
-					$(submit).bind 'click', ->
-						# **FIXME:** times can be in parts of seconds
-						start_time = parseInt($(timestart).val(), 10)
-						end_time = parseInt($(timeend).val(), 10)
-						if binding.currentId? and start_time? and end_time?
-							# update core data
-							binding.events.onUpdate.fire binding.currentId, start_time, end_time
-
-							$(menudiv).hide()
-
-					options.application.events.onActiveAnnotationChange.addListener (id) ->
-						if id?
-							$(menudiv).show()
-							$(timestart).val('')
-							$(timeend).val('')
-							binding.currentId = id
-						else
-							$(menudiv).hide()
