@@ -6,7 +6,7 @@ body {
   font:14px/1.5 Lato, "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-weight: 300;
   line-height: 22px;
-  color: #252519;
+  color: #555; /* #252519; */
   margin: 0; padding: 0;
 }
 a {
@@ -29,7 +29,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 #background {
   position: fixed;
-  top: 0; left: 475px; right: 0; bottom: 0;
+  top: 0; left: 473px; right: 0; bottom: 0;
   background: #f5f5ff;
   border-left: 1px solid #e5e5ee;
   z-index: -1;
