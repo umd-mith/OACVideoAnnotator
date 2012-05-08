@@ -6,7 +6,7 @@ body {
   font:14px/1.5 Lato, "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-weight: 300;
   line-height: 22px;
-  color: #555; /* #252519; */
+  color: #252525;
   margin: 0; padding: 0;
 }
 a {
@@ -300,7 +300,7 @@ body .il { color: #666666 }                     /* Literal.Number.Integer.Long *
 	padding-top: 1em;
 	padding-left: 1em;
 	padding-right: 1em;
-	color: #aaa;
+	color: #bbb;
 	font-weight: bolder;
 	text-align: right;
 	padding-bottom: 1em;
