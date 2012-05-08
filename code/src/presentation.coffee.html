@@ -1,0 +1,433 @@
+---
+layout: docco
+title: OACVideoAnnotator/code/src/presentation.coffee.html
+---
+<div id="container"><div id="background"></div><div id="jump_to">Jump To &hellip;<div id="jump_wrapper"><div id="jump_page"><a href="../index.html" class="source"><span class="file_name">README</span></a><a href="../src/application.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">application.coffee</span></a><a href="../src/component.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">component.coffee</span></a><a href="../src/controller.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">controller.coffee</span></a><a href="../src/driver-framework.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">driver-framework.coffee</span></a><a href="../src/drivers/dummy.coffee.html" class="source "><span class="base_path">src / drivers / </span><span class="file_name">dummy.coffee</span></a><a href="../src/drivers/html5.coffee.html" class="source "><span class="base_path">src / drivers / </span><span class="file_name">html5.coffee</span></a><a href="../src/intro.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">intro.coffee</span></a><a href="../src/outro.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">outro.coffee</span></a><a href="../src/presentation.coffee.html" class="source selected"><span class="base_path">src / </span><span class="file_name">presentation.coffee</span></a></div></div></div><table cellpadding="0" cellspacing="0"><thead><tr><th class="docs"><h1>presentation.coffee</h1><div class="filepath">src/</div></th><th class="code"></th></tr></thead><tbody><tr id="section-1"><td class="docs"><div class="pilwrap"><a href="#section-1" class="pilcrow">&#182;</a></div><h1>Presentations</h1>
+
+<p>Presentations for OAC:ASP Application
+@author Grant Dickie, Jim Smith</p>
+</td><td class="code"><div class="highlight"><pre></pre></div></td></tr><tr id="section-2"><td class="docs"><div class="pilwrap"><a href="#section-2" class="pilcrow">&#182;</a></div><h2>AnnotationList</h2>
+
+<p>Presentation that extends SimpleText in order to add new
+functionality for Annotation HTML lens</p>
+</td><td class="code"><div class="highlight"><pre><span class="nx">OAC</span><span class="p">.</span><span class="nx">Client</span><span class="p">.</span><span class="nx">StreamingVideo</span><span class="p">.</span><span class="nx">namespace</span> <span class="s">&quot;Presentation&quot;</span><span class="p">,</span> <span class="nf">(Presentation) -&gt;</span>
+  <span class="nx">Presentation</span><span class="p">.</span><span class="nx">namespace</span> <span class="s">&quot;AnnotationList&quot;</span><span class="p">,</span> <span class="nf">(AnnotationList) -&gt;</span>
+    <span class="nv">AnnotationList.initInstance = </span><span class="nf">(args...) -&gt;</span>
+      <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">Presentation</span><span class="p">.</span><span class="nx">initInstance</span> <span class="s">&quot;OAC.Client.StreamingVideo.Presentation.AnnotationList&quot;</span><span class="p">,</span> <span class="nx">args</span><span class="p">...,</span> <span class="nf">(that, container) -&gt;</span>
+        <span class="nv">options = </span><span class="nx">that</span><span class="p">.</span><span class="nx">options</span>
+        <span class="nv">app = </span><span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">()</span>
+      </pre></div></td></tr><tr id="section-3"><td class="docs"><div class="pilwrap"><a href="#section-3" class="pilcrow">&#182;</a></div><h3>#initTextLens</h3>
+
+<p>Initializes a basic text lens.</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li>container - the container holding the lens content</li>
+<li>view - the presentation managing the collection of renderings</li>
+<li>model - the data store or data view holding information abut the item to be rendered</li>
+<li>itemId - the item ID of the item to be rendered</li>
+</ul>
+
+<p>Returns:</p>
+
+<p>The basic lens object.</p>
+</td><td class="code"><div class="highlight"><pre>        <span class="nv">that.initTextLens = </span><span class="nf">(container, view, model, itemId, cb) -&gt;</span>
+          <span class="nv">lens = </span><span class="p">{}</span>
+          <span class="nv">item = </span><span class="nx">model</span><span class="p">.</span><span class="nx">getItem</span> <span class="nx">itemId</span></pre></div></td></tr><tr id="section-4"><td class="docs"><div class="pilwrap"><a href="#section-4" class="pilcrow">&#182;</a></div><p>We put together a template representing the text annotations associated with any shape.</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="nv">itemEl = </span><span class="nx">$</span><span class="p">(</span><span class="s">&quot;&quot;&quot;</span>
+<span class="s">            &lt;div class=&quot;annotation-body&quot;&gt;</span>
+<span class="s">              &lt;div class=&quot;annotation-body-text&quot;&gt;</span>
+<span class="s">                &lt;div class=&quot;body-content&quot;&gt;</span>
+<span class="s">                &lt;/div&gt;</span>
+<span class="s">              &lt;/div&gt;</span>
+<span class="s">            &lt;/div&gt;</span>
+<span class="s">          &quot;&quot;&quot;</span><span class="p">)</span></pre></div></td></tr><tr id="section-5"><td class="docs"><div class="pilwrap"><a href="#section-5" class="pilcrow">&#182;</a></div><p>We capture the parts of the annotation presentation for use later.</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="nv">bodyContent = </span><span class="nx">$</span><span class="p">(</span><span class="nx">itemEl</span><span class="p">).</span><span class="nx">find</span> <span class="s">&quot;.body-content&quot;</span>
+
+          <span class="nx">$</span><span class="p">(</span><span class="nx">bodyContent</span><span class="p">).</span><span class="nx">text</span> <span class="nx">item</span><span class="p">.</span><span class="nx">bodyContent</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></pre></div></td></tr><tr id="section-6"><td class="docs"><div class="pilwrap"><a href="#section-6" class="pilcrow">&#182;</a></div><p>We attach the rendering to the container and hide the edit area.</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="nv">lens.el = </span><span class="nx">itemEl</span>
+          <span class="nx">$</span><span class="p">(</span><span class="nx">container</span><span class="p">).</span><span class="nx">append</span> <span class="nx">itemEl</span></pre></div></td></tr><tr id="section-7"><td class="docs"><div class="pilwrap"><a href="#section-7" class="pilcrow">&#182;</a></div><p>We then construct the following methods:</p>
+
+<h4>#eventFocus</h4>
+
+<p>Called when this rendering receives the selection focus. The default implementation adds the
+.selected CSS class.</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="nv">lens.eventFocus = </span><span class="o">-&gt;</span> <span class="nx">itemEl</span><span class="p">.</span><span class="nx">addClass</span> <span class="s">&#39;selected&#39;</span></pre></div></td></tr><tr id="section-8"><td class="docs"><div class="pilwrap"><a href="#section-8" class="pilcrow">&#182;</a></div><h4>#eventUnfocus</h4>
+
+<p>Called when this rendering loses the selection focus. The default implementation removes the
+.selected CSS class.</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="nv">lens.eventUnfocus = </span><span class="o">-&gt;</span> <span class="nx">itemEl</span><span class="p">.</span><span class="nx">removeClass</span> <span class="s">&#39;selected&#39;</span></pre></div></td></tr><tr id="section-9"><td class="docs"><div class="pilwrap"><a href="#section-9" class="pilcrow">&#182;</a></div><h4>#eventUpdate</h4>
+
+<p>Called when the text annotation body is updated. This will update the data store with the new body.</p>
+
+<p>The rendering is update if and only if the id passed in matches the id of the rendered item.</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li>id - the item ID of the item to be updated</li>
+<li>data - the object holding the current data associated with the item ID</li>
+</ul>
+
+<p>Returns: Nothing.</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="nv">lens.eventUpdate = </span><span class="nf">(data) -&gt;</span>
+            <span class="nx">model</span><span class="p">.</span><span class="nx">updateItems</span> <span class="p">[</span>
+              <span class="nv">id: </span><span class="nx">itemId</span>
+              <span class="nv">bodyContent: </span><span class="nx">data</span>
+            <span class="p">]</span></pre></div></td></tr><tr id="section-10"><td class="docs"><div class="pilwrap"><a href="#section-10" class="pilcrow">&#182;</a></div><h4>#eventDelete</h4>
+
+<p>Called when the data item represented by this rendering is to be deleted. The default implementation
+passes the deletion request to the data store with the item ID represented by the rendering.</p>
+
+<p>The data item is removed if and only if the id passed in matches the id of the rendered item.</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li>id - the item ID of the item to be deleted</li>
+</ul>
+
+<p>Returns: Nothing.</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="nv">lens.eventDelete = </span><span class="o">-&gt;</span>
+            <span class="nx">model</span><span class="p">.</span><span class="nx">removeItems</span> <span class="p">[</span><span class="nx">itemId</span><span class="p">]</span></pre></div></td></tr><tr id="section-11"><td class="docs"><div class="pilwrap"><a href="#section-11" class="pilcrow">&#182;</a></div><h4>#update</h4>
+
+<p>Called when the underlying data represented by the rendering changes. The rendering is updated to
+reflect the item data.</p>
+
+<p>The rendering is update if and only if the id passed in matches the id of the rendered item.</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li>data - the object holding the current data associated with the item ID</li>
+</ul>
+
+<p>Returns: Nothing.</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="nv">lens.update = </span><span class="nf">(item) -&gt;</span>
+            <span class="nx">$</span><span class="p">(</span><span class="nx">bodyContent</span><span class="p">).</span><span class="nx">text</span> <span class="nx">item</span><span class="p">.</span><span class="nx">bodyContent</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></pre></div></td></tr><tr id="section-12"><td class="docs"><div class="pilwrap"><a href="#section-12" class="pilcrow">&#182;</a></div><h4>#remove</h4>
+
+<p>Called to remove the rendering from the presentation.</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="nv">lens.remove = </span><span class="o">-&gt;</span> <span class="nx">$</span><span class="p">(</span><span class="nx">itemEl</span><span class="p">).</span><span class="nx">remove</span><span class="p">()</span>
+
+          <span class="k">if</span> <span class="nx">cb</span><span class="o">?</span>
+            <span class="nx">cb</span> <span class="nx">lens</span>
+
+          <span class="nx">lens</span></pre></div></td></tr><tr id="section-13"><td class="docs"><div class="pilwrap"><a href="#section-13" class="pilcrow">&#182;</a></div><h2>RaphaelCanvas</h2>
+
+<p>Presentation for the Canvas area - area that the Raphael canvas is drawn on</p>
+</td><td class="code"><div class="highlight"><pre>  <span class="nx">Presentation</span><span class="p">.</span><span class="nx">namespace</span> <span class="s">&quot;RaphaelCanvas&quot;</span><span class="p">,</span> <span class="nf">(RaphaelCanvas) -&gt;</span>
+    <span class="nv">counter = </span><span class="mi">1</span>
+    <span class="nv">RaphaelCanvas.initInstance = </span><span class="nf">(args...) -&gt;</span>
+      <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">Presentation</span><span class="p">.</span><span class="nx">initInstance</span> <span class="s">&quot;OAC.StreamingVideo.Client.Presentation.RaphaelCanvas&quot;</span><span class="p">,</span> <span class="nx">args</span><span class="p">...,</span> <span class="nf">(that, container) -&gt;</span>
+        <span class="k">if</span> <span class="o">!</span><span class="nx">container</span><span class="o">?</span>
+          <span class="nv">id = </span><span class="s">&quot;oac-raphael-presentation-canvas-</span><span class="si">#{</span><span class="nx">counter</span><span class="si">}</span><span class="s">&quot;</span>
+          <span class="nx">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+          <span class="nv">container = </span><span class="nx">$</span><span class="p">(</span><span class="s">&quot;&lt;div id=&#39;</span><span class="si">#{</span><span class="nx">id</span><span class="si">}</span><span class="s">&#39;&gt;&lt;/div&gt;&quot;</span><span class="p">)</span>
+          <span class="nx">$</span><span class="p">(</span><span class="s">&quot;body&quot;</span><span class="p">).</span><span class="nx">append</span><span class="p">(</span><span class="nx">container</span><span class="p">)</span>
+        <span class="k">else</span>
+          <span class="nv">id = </span><span class="nx">$</span><span class="p">(</span><span class="nx">container</span><span class="p">).</span><span class="nx">attr</span><span class="p">(</span><span class="s">&#39;id&#39;</span><span class="p">)</span>
+          <span class="k">if</span> <span class="o">!</span><span class="nx">id</span><span class="o">?</span>
+            <span class="nv">id = </span><span class="s">&quot;oac-raphael-presentation-canvas-</span><span class="si">#{</span><span class="nx">counter</span><span class="si">}</span><span class="s">&quot;</span>
+            <span class="nx">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="nx">$</span><span class="p">(</span><span class="nx">container</span><span class="p">).</span><span class="nx">attr</span>
+              <span class="nv">id: </span><span class="nx">id</span>
+    
+        <span class="nv">options = </span><span class="nx">that</span><span class="p">.</span><span class="nx">options</span>
+      
+        <span class="nv">app = </span><span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">()</span>
+        <span class="nv">screenSize =</span>
+          <span class="nv">width: </span><span class="mi">0</span>
+          <span class="nv">height: </span><span class="mi">0</span>
+          </pre></div></td></tr><tr id="section-14"><td class="docs"><div class="pilwrap"><a href="#section-14" class="pilcrow">&#182;</a></div><p>Setting up local names for the assigned presentation controllers</p>
+</td><td class="code"><div class="highlight"><pre>        <span class="nv">canvasController = </span><span class="nx">options</span><span class="p">.</span><span class="nx">controllers</span><span class="p">.</span><span class="nx">canvas</span>
+
+        <span class="nv">that.canvas = </span><span class="k">new</span> <span class="nx">Raphael</span><span class="p">(</span><span class="nx">$</span><span class="p">(</span><span class="nx">container</span><span class="p">),</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+
+        <span class="nx">$</span><span class="p">(</span><span class="nx">that</span><span class="p">.</span><span class="nx">canvas</span><span class="p">.</span><span class="nx">canvas</span><span class="p">).</span><span class="nx">css</span>
+          <span class="s">&quot;pointer-events&quot;</span><span class="o">:</span> <span class="s">&quot;none&quot;</span>
+      </pre></div></td></tr><tr id="section-15"><td class="docs"><div class="pilwrap"><a href="#section-15" class="pilcrow">&#182;</a></div><p>attach binding
+<strong>FIXME:</strong> We need to change this. If we have multiple videos on a page, this will break.</p>
+</td><td class="code"><div class="highlight"><pre>        <span class="nv">canvasBinding = </span><span class="nx">canvasController</span><span class="p">.</span><span class="nx">bind</span> <span class="nx">$</span><span class="p">(</span><span class="nx">container</span><span class="p">),</span>
+          <span class="nv">closeEnough: </span><span class="mi">5</span>
+          <span class="nv">paper: </span><span class="nx">that</span><span class="p">.</span><span class="nx">canvas</span>
+      
+        <span class="nv">boundingBoxComponent = </span><span class="nx">OAC</span><span class="p">.</span><span class="nx">Client</span><span class="p">.</span><span class="nx">StreamingVideo</span><span class="p">.</span><span class="nx">Component</span><span class="p">.</span><span class="nx">ShapeEditBox</span><span class="p">.</span><span class="nx">initInstance</span> <span class="nx">that</span><span class="p">.</span><span class="nx">canvas</span>
+            
+        <span class="nv">shapeCreateBoxComponent = </span><span class="nx">OAC</span><span class="p">.</span><span class="nx">Client</span><span class="p">.</span><span class="nx">StreamingVideo</span><span class="p">.</span><span class="nx">Component</span><span class="p">.</span><span class="nx">ShapeCreateBox</span><span class="p">.</span><span class="nx">initInstance</span> <span class="nx">that</span><span class="p">.</span><span class="nx">canvas</span>
+
+        <span class="nx">boundingBoxComponent</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onResize</span><span class="p">.</span><span class="nx">addListener</span> <span class="nf">(pos) -&gt;</span>
+          <span class="nv">activeRendering = </span><span class="nx">that</span><span class="p">.</span><span class="nx">getFocusedRendering</span><span class="p">()</span>
+          <span class="k">if</span> <span class="nx">activeRendering</span><span class="o">?</span> <span class="o">and</span> <span class="nx">activeRendering</span><span class="p">.</span><span class="nx">eventResize</span><span class="o">?</span>
+            <span class="nx">activeRendering</span><span class="p">.</span><span class="nx">eventResize</span><span class="p">(</span><span class="nx">pos</span><span class="p">)</span>
+
+        <span class="nx">boundingBoxComponent</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onMove</span><span class="p">.</span><span class="nx">addListener</span> <span class="nf">(pos) -&gt;</span>
+          <span class="nv">activeRendering = </span><span class="nx">that</span><span class="p">.</span><span class="nx">getFocusedRendering</span><span class="p">()</span>
+          <span class="k">if</span> <span class="nx">activeRendering</span><span class="o">?</span> <span class="o">and</span> <span class="nx">activeRendering</span><span class="p">.</span><span class="nx">eventMove</span><span class="o">?</span>
+            <span class="nx">activeRendering</span><span class="p">.</span><span class="nx">eventMove</span><span class="p">(</span><span class="nx">pos</span><span class="p">)</span>
+
+        <span class="nx">boundingBoxComponent</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onDelete</span><span class="p">.</span><span class="nx">addListener</span> <span class="o">-&gt;</span>
+          <span class="nv">activeRendering = </span><span class="nx">that</span><span class="p">.</span><span class="nx">getFocusedRendering</span><span class="p">()</span>
+          <span class="k">if</span> <span class="nx">activeRendering</span><span class="o">?</span> <span class="o">and</span> <span class="nx">activeRendering</span><span class="p">.</span><span class="nx">eventDelete</span><span class="o">?</span>
+            <span class="nx">activeRendering</span><span class="p">.</span><span class="nx">eventDelete</span><span class="p">()</span>
+            <span class="nx">boundingBoxComponent</span><span class="p">.</span><span class="nx">detachFromRendering</span><span class="p">()</span>
+
+        <span class="nx">app</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onCurrentModeChange</span><span class="p">.</span><span class="nx">addListener</span> <span class="nf">(newMode) -&gt;</span>
+          <span class="k">if</span> <span class="nx">app</span><span class="p">.</span><span class="nx">getCurrentModeClass</span><span class="p">()</span> <span class="o">==</span> <span class="s">&quot;select&quot;</span>
+            <span class="nv">activeRendering = </span><span class="nx">that</span><span class="p">.</span><span class="nx">getFocusedRendering</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nx">activeRendering</span><span class="o">?</span>
+              <span class="nx">boundingBoxComponent</span><span class="p">.</span><span class="nx">attachToRendering</span> <span class="nx">activeRendering</span>
+          <span class="k">else</span>
+            <span class="nx">boundingBoxComponent</span><span class="p">.</span><span class="nx">detachFromRendering</span><span class="p">()</span>
+            </pre></div></td></tr><tr id="section-16"><td class="docs"><div class="pilwrap"><a href="#section-16" class="pilcrow">&#182;</a></div><p>Adjusts the canvas area, canvas wrapper to fall directly over the
+player area</p>
+</td><td class="code"><div class="highlight"><pre>        <span class="nv">playerObj = </span><span class="nx">app</span><span class="p">.</span><span class="nx">getPlayer</span><span class="p">()</span>
+      
+        <span class="nv">updateLocation = </span><span class="o">-&gt;</span></pre></div></td></tr><tr id="section-17"><td class="docs"><div class="pilwrap"><a href="#section-17" class="pilcrow">&#182;</a></div><p>the following elements should be parts of this presentation</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="k">if</span> <span class="nx">playerObj</span><span class="o">?</span>
+            <span class="p">[</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">]</span> <span class="o">=</span> <span class="nx">playerObj</span><span class="p">.</span><span class="nx">getCoordinates</span><span class="p">()</span>
+            <span class="p">[</span><span class="nx">w</span><span class="p">,</span> <span class="nx">h</span><span class="p">]</span> <span class="o">=</span> <span class="nx">playerObj</span><span class="p">.</span><span class="nx">getSize</span><span class="p">()</span>
+            <span class="nv">screenSize =</span>
+              <span class="nv">width: </span><span class="nx">w</span>
+              <span class="nv">height: </span><span class="nx">h</span>
+
+            <span class="nx">$</span><span class="p">(</span><span class="nx">that</span><span class="p">.</span><span class="nx">canvas</span><span class="p">.</span><span class="nx">canvas</span><span class="p">).</span><span class="nx">css</span>
+              <span class="nv">left: </span><span class="nx">x</span> <span class="o">+</span> <span class="s">&#39;px&#39;</span>
+              <span class="nv">top: </span><span class="nx">y</span> <span class="o">+</span> <span class="s">&#39;px&#39;</span>
+              
+            <span class="nx">that</span><span class="p">.</span><span class="nx">canvas</span><span class="p">.</span><span class="nx">setSize</span> <span class="nx">w</span><span class="p">,</span> <span class="nx">h</span>
+
+        <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onWindowResize</span><span class="p">.</span><span class="nx">addListener</span> <span class="nx">updateLocation</span>
+      
+        <span class="k">if</span> <span class="nx">playerObj</span><span class="o">?</span>
+          <span class="nx">playerObj</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onResize</span><span class="p">.</span><span class="nx">addListener</span> <span class="nx">updateLocation</span>
+      
+        <span class="nx">updateLocation</span><span class="p">()</span>
+      </pre></div></td></tr><tr id="section-18"><td class="docs"><div class="pilwrap"><a href="#section-18" class="pilcrow">&#182;</a></div><p>to make sure we get things set up right</p>
+
+<p>Registering canvas special events for start, drag, stop</p>
+</td><td class="code"><div class="highlight"><pre>        <span class="nx">canvasBinding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onShapeStart</span><span class="p">.</span><span class="nx">addListener</span> <span class="nx">shapeCreateBoxComponent</span><span class="p">.</span><span class="nx">createGuide</span> 
+
+        <span class="nx">canvasBinding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onShapeDrag</span><span class="p">.</span><span class="nx">addListener</span> <span class="nx">shapeCreateBoxComponent</span><span class="p">.</span><span class="nx">resizeGuide</span>
+
+        <span class="nx">canvasBinding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onShapeDone</span><span class="p">.</span><span class="nx">addListener</span> <span class="nf">(coords) -&gt;</span></pre></div></td></tr><tr id="section-19"><td class="docs"><div class="pilwrap"><a href="#section-19" class="pilcrow">&#182;</a></div><p>Adjust x,y in order to fit data store
+model</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="nv">shape = </span><span class="nx">shapeCreateBoxComponent</span><span class="p">.</span><span class="nx">completeShape</span> <span class="nx">coords</span>
+          <span class="k">if</span> <span class="nx">shape</span><span class="p">.</span><span class="nx">height</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="o">and</span> <span class="nx">shape</span><span class="p">.</span><span class="nx">width</span> <span class="o">&gt;</span> <span class="mi">1</span>
+            <span class="nx">app</span><span class="p">.</span><span class="nx">insertShape</span> <span class="nx">shape</span>
+
+        <span class="nx">app</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onCurrentTimeChange</span><span class="p">.</span><span class="nx">addListener</span> <span class="nf">(npt) -&gt;</span>
+          <span class="nx">that</span><span class="p">.</span><span class="nx">visitRenderings</span> <span class="nf">(id, rendering) -&gt;</span>
+            <span class="k">if</span> <span class="nx">rendering</span><span class="p">.</span><span class="nx">eventCurrentTimeChange</span><span class="o">?</span>
+              <span class="nx">rendering</span><span class="p">.</span><span class="nx">eventCurrentTimeChange</span> <span class="nx">npt</span>
+
+        <span class="nx">app</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onTimeEasementChange</span><span class="p">.</span><span class="nx">addListener</span> <span class="nf">(te) -&gt;</span>
+          <span class="nx">that</span><span class="p">.</span><span class="nx">visitRenderings</span> <span class="nf">(id, rendering) -&gt;</span>
+            <span class="k">if</span> <span class="nx">rendering</span><span class="p">.</span><span class="nx">eventTimeEasementChange</span><span class="o">?</span>
+              <span class="nx">rendering</span><span class="p">.</span><span class="nx">eventTimeEasementChange</span> <span class="nx">te</span>
+
+        <span class="nv">superEventFocusChange = </span><span class="nx">that</span><span class="p">.</span><span class="nx">eventFocusChange</span>
+
+        <span class="nv">that.eventFocusChange = </span><span class="nf">(id) -&gt;</span>
+          <span class="nx">superEventFocusChange</span> <span class="nx">id</span>
+          <span class="k">if</span> <span class="nx">app</span><span class="p">.</span><span class="nx">getCurrentMode</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;Select&#39;</span>
+            <span class="nx">boundingBoxComponent</span><span class="p">.</span><span class="nx">attachToRendering</span> <span class="nx">that</span><span class="p">.</span><span class="nx">getFocusedRendering</span><span class="p">()</span>
+            <span class="nx">canvasBinding</span><span class="p">.</span><span class="nx">toBack</span><span class="p">()</span>
+        </pre></div></td></tr><tr id="section-20"><td class="docs"><div class="pilwrap"><a href="#section-20" class="pilcrow">&#182;</a></div><h3>#initShapeLens</h3>
+
+<p>Initializes a basic shape lens. The default methods expect the Raphaël SVG shape object to
+be held in the .shape property.</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li>container - the container holding the lens content</li>
+<li>view - the presentation managing the collection of renderings</li>
+<li>model - the data store or data view holding information about the item to be rendered</li>
+<li>itemId - the item ID of the item to be rendered</li>
+</ul>
+
+<p>Returns:</p>
+
+<p>The basic lens object with the following methods defined:</p>
+</td><td class="code"><div class="highlight"><pre>        <span class="nv">that.initShapeLens = </span><span class="nf">(container, view, model, itemId, cb) -&gt;</span>
+          <span class="nv">lens =</span>
+            <span class="nv">id: </span><span class="nx">itemId</span>
+          <span class="nv">item = </span><span class="nx">model</span><span class="p">.</span><span class="nx">getItem</span> <span class="nx">itemId</span>
+
+          <span class="nv">focused = </span><span class="kc">false</span>
+          <span class="nv">start = </span><span class="nx">item</span><span class="p">.</span><span class="nx">npt_start</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+          <span class="nv">end = </span><span class="nx">item</span><span class="p">.</span><span class="nx">npt_end</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+          <span class="nv">fstart = </span><span class="nx">start</span> <span class="o">-</span> <span class="nx">app</span><span class="p">.</span><span class="nx">getTimeEasement</span><span class="p">()</span>
+          <span class="nv">fend = </span><span class="nx">end</span> <span class="o">+</span> <span class="nx">app</span><span class="p">.</span><span class="nx">getTimeEasement</span><span class="p">()</span></pre></div></td></tr><tr id="section-21"><td class="docs"><div class="pilwrap"><a href="#section-21" class="pilcrow">&#182;</a></div><h3>#calcOpacity (private)</h3>
+
+<p>Calculate the opacity of the annotation shape rendering over the video.</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li>n - the current time of the play head</li>
+</ul>
+</td><td class="code"><div class="highlight"><pre>          <span class="nv">calcOpacity = </span><span class="nf">(n) -&gt;</span>
+            <span class="nv">val = </span><span class="mf">0.0</span>
+
+            <span class="k">if</span> <span class="nx">n</span> <span class="o">&gt;=</span> <span class="nx">fstart</span> <span class="o">and</span> <span class="nx">n</span> <span class="o">&lt;</span> <span class="nx">fend</span>
+              <span class="nv">e = </span><span class="nx">app</span><span class="p">.</span><span class="nx">getTimeEasement</span><span class="p">()</span>
+              <span class="k">if</span> <span class="nx">e</span> <span class="o">&gt;</span> <span class="mi">0</span>
+                <span class="k">if</span> <span class="nx">n</span> <span class="o">&lt;</span> <span class="nx">start</span></pre></div></td></tr><tr id="section-22"><td class="docs"><div class="pilwrap"><a href="#section-22" class="pilcrow">&#182;</a></div><p>fading in</p>
+</td><td class="code"><div class="highlight"><pre>                  <span class="nv">val = </span><span class="p">(</span><span class="nx">e</span> <span class="o">-</span> <span class="nx">start</span> <span class="o">+</span> <span class="nx">n</span><span class="p">)</span> <span class="o">/</span> <span class="nx">e</span>
+                <span class="k">else</span> <span class="k">if</span> <span class="nx">n</span> <span class="o">&gt;</span> <span class="nx">end</span></pre></div></td></tr><tr id="section-23"><td class="docs"><div class="pilwrap"><a href="#section-23" class="pilcrow">&#182;</a></div><p>fading out</p>
+</td><td class="code"><div class="highlight"><pre>                  <span class="nv">val = </span><span class="p">(</span><span class="nx">e</span> <span class="o">+</span> <span class="nx">end</span> <span class="o">-</span> <span class="nx">n</span><span class="p">)</span> <span class="o">/</span> <span class="nx">e</span>
+                <span class="k">else</span>
+                  <span class="nv">val = </span><span class="mf">1.0</span>
+              <span class="k">else</span>
+                <span class="nv">val = </span><span class="mf">1.0</span>
+            <span class="nx">val</span>
+
+          <span class="nv">lens.scalePoint = </span><span class="nf">(x, y, w, h) -&gt;</span>
+            <span class="k">if</span> <span class="nx">w</span><span class="o">?</span> <span class="o">and</span> <span class="nx">w</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">?</span>
+              <span class="nv">w = </span><span class="nx">w</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span>
+              <span class="nv">w = </span><span class="nx">screenSize</span><span class="p">.</span><span class="nx">width</span>
+            <span class="k">if</span> <span class="nx">h</span><span class="o">?</span> <span class="o">and</span> <span class="nx">h</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">?</span>
+              <span class="nv">h = </span><span class="nx">h</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span>
+              <span class="nv">h = </span><span class="nx">screenSize</span><span class="p">.</span><span class="nx">height</span>
+
+            <span class="k">if</span> <span class="nx">w</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">or</span> <span class="nx">h</span> <span class="o">==</span> <span class="mi">0</span>
+              <span class="p">[</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">]</span>
+            <span class="k">else</span>
+              <span class="p">[</span> <span class="nx">x</span> <span class="o">*</span> <span class="nx">screenSize</span><span class="p">.</span><span class="nx">width</span> <span class="o">/</span> <span class="nx">w</span><span class="p">,</span> <span class="nx">y</span> <span class="o">*</span> <span class="nx">screenSize</span><span class="p">.</span><span class="nx">height</span> <span class="o">/</span> <span class="nx">h</span> <span class="p">]</span></pre></div></td></tr><tr id="section-24"><td class="docs"><div class="pilwrap"><a href="#section-24" class="pilcrow">&#182;</a></div><h3>eventTimeEasementChange (private)</h3>
+
+<p>Handles event calls for when the user wants
+to see the annotation at a specific interval.
+By default, annotations are in view for the time period
+of the item being annotated. They are 'eased in', or fade in
+and out depending on the Easement variable, which is set
+here.</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li>v: when the annotation should be in view</li>
+</ul>
+</td><td class="code"><div class="highlight"><pre>          <span class="nv">lens.eventTimeEasementChange = </span><span class="nf">(v) -&gt;</span>
+            <span class="nv">fstart = </span><span class="nx">start</span> <span class="o">-</span> <span class="nx">v</span>
+            <span class="nv">fend = </span><span class="nx">end</span> <span class="o">+</span> <span class="nx">v</span>
+
+            <span class="nx">lens</span><span class="p">.</span><span class="nx">setOpacity</span> <span class="nx">calcOpacity</span><span class="p">(</span><span class="nx">app</span><span class="p">.</span><span class="nx">getCurrentTime</span><span class="p">())</span></pre></div></td></tr><tr id="section-25"><td class="docs"><div class="pilwrap"><a href="#section-25" class="pilcrow">&#182;</a></div><h3>eventCurrentTimeChange (private)</h3>
+
+<p>Handles when application advances the time</p>
+
+<p>Parameters:</p>
+
+<p>*n: current time of the video player</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="nv">lens.eventCurrentTimeChange = </span><span class="nf">(n) -&gt;</span>
+            <span class="nx">lens</span><span class="p">.</span><span class="nx">setOpacity</span> <span class="nx">calcOpacity</span><span class="p">(</span><span class="nx">n</span><span class="p">)</span>
+
+          <span class="nv">opacity = </span><span class="mf">0.0</span></pre></div></td></tr><tr id="section-26"><td class="docs"><div class="pilwrap"><a href="#section-26" class="pilcrow">&#182;</a></div><h4>#setOpacity</h4>
+
+<p>Sets the opacity for the SVG shape. This is moderated by the renderings focus. If in focus, then
+the full opacity is set. Otherwise, it is halved.</p>
+
+<p>If no value is given, then the shape's opacity is updated to reflect the currently set opacity and
+focus state.</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li>o - opacity when in focus</li>
+</ul>
+
+<p>Returns: Nothing.</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="nv">lens.setOpacity = </span><span class="nf">(o) -&gt;</span>
+            <span class="k">if</span> <span class="nx">o</span><span class="o">?</span>
+              <span class="nv">opacity = </span><span class="nx">o</span>
+
+            <span class="k">if</span> <span class="nx">lens</span><span class="p">.</span><span class="nx">shape</span><span class="o">?</span>
+              <span class="nx">lens</span><span class="p">.</span><span class="nx">shape</span><span class="p">.</span><span class="nx">attr</span>
+                <span class="nv">opacity: </span><span class="p">(</span><span class="k">if</span> <span class="nx">focused</span> <span class="k">then</span> <span class="mf">0.5</span> <span class="k">else</span> <span class="mf">0.25</span><span class="p">)</span> <span class="o">*</span> <span class="nx">opacity</span>
+
+          <span class="nv">lens.getOpacity = </span><span class="o">-&gt;</span> <span class="nx">opacity</span>
+
+          <span class="nx">lens</span><span class="p">.</span><span class="nx">setOpacity</span><span class="p">(</span><span class="nx">calcOpacity</span> <span class="nx">app</span><span class="p">.</span><span class="nx">getCurrentTime</span><span class="p">())</span></pre></div></td></tr><tr id="section-27"><td class="docs"><div class="pilwrap"><a href="#section-27" class="pilcrow">&#182;</a></div><h4>#eventFocus</h4>
+
+<p>Called when this rendering receives the selection focus. The default implementation brings the rendering
+to the front and makes it opaque.</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="nv">lens.eventFocus = </span><span class="o">-&gt;</span>
+            <span class="nv">focused = </span><span class="kc">true</span>
+            <span class="nx">lens</span><span class="p">.</span><span class="nx">setOpacity</span><span class="p">()</span>
+            <span class="nx">lens</span><span class="p">.</span><span class="nx">shape</span><span class="p">.</span><span class="nx">toFront</span><span class="p">()</span></pre></div></td></tr><tr id="section-28"><td class="docs"><div class="pilwrap"><a href="#section-28" class="pilcrow">&#182;</a></div><h4>#eventUnfocus</h4>
+
+<p>Called when this rendering loses the selection focus. The default implementation pushes the rendering
+to the back and makes it semi-transparent.</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="nv">lens.eventUnfocus = </span><span class="o">-&gt;</span>
+            <span class="nv">focused = </span><span class="kc">false</span>
+            <span class="nx">lens</span><span class="p">.</span><span class="nx">setOpacity</span><span class="p">()</span>
+            <span class="nx">lens</span><span class="p">.</span><span class="nx">shape</span><span class="p">.</span><span class="nx">toBack</span><span class="p">()</span></pre></div></td></tr><tr id="section-29"><td class="docs"><div class="pilwrap"><a href="#section-29" class="pilcrow">&#182;</a></div><h4>#eventDelete</h4>
+
+<p>Called when the data item represented by this rendering is to be deleted. The default implementation
+passes the deletion request to the data store with the item ID represented by the rendering.</p>
+
+<p>Parameters: None.</p>
+
+<p>Returns: Nothing.</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="nv">lens.eventDelete = </span><span class="o">-&gt;</span> <span class="nx">model</span><span class="p">.</span><span class="nx">removeItems</span> <span class="p">[</span><span class="nx">itemId</span><span class="p">]</span></pre></div></td></tr><tr id="section-30"><td class="docs"><div class="pilwrap"><a href="#section-30" class="pilcrow">&#182;</a></div><h4>#eventResize</h4>
+
+<p>Called when the bounding box of the rendering changes size. Note that we change the
+width and height of the targeted video to correspond to the current size of the play surface.</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li>pos - object containing the .width and .height properties</li>
+</ul>
+
+<p>Returns: Nothing.</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="nv">lens.eventResize = </span><span class="nf">(pos) -&gt;</span>
+            <span class="nx">model</span><span class="p">.</span><span class="nx">updateItems</span> <span class="p">[</span>
+              <span class="nv">id: </span><span class="nx">itemId</span>
+              <span class="nv">x: </span><span class="nx">pos</span><span class="p">.</span><span class="nx">x</span>
+              <span class="nv">y: </span><span class="nx">pos</span><span class="p">.</span><span class="nx">y</span>
+              <span class="nv">w: </span><span class="nx">pos</span><span class="p">.</span><span class="nx">width</span>
+              <span class="nv">h: </span><span class="nx">pos</span><span class="p">.</span><span class="nx">height</span>
+              <span class="nv">targetWidth: </span><span class="nx">screenSize</span><span class="p">.</span><span class="nx">width</span>
+              <span class="nv">targetHeight: </span><span class="nx">screenSize</span><span class="p">.</span><span class="nx">height</span>
+            <span class="p">]</span></pre></div></td></tr><tr id="section-31"><td class="docs"><div class="pilwrap"><a href="#section-31" class="pilcrow">&#182;</a></div><h4>#eventMove</h4>
+
+<p>Called when the bounding box of the rendering is moved.</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li>pos - object containing the .x and .y properties</li>
+</ul>
+
+<p>Returns: Nothing.</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="nv">lens.eventMove = </span><span class="nf">(pos) -&gt;</span>
+            <span class="nx">model</span><span class="p">.</span><span class="nx">updateItems</span> <span class="p">[</span>
+              <span class="nv">id: </span><span class="nx">itemId</span>
+              <span class="nv">x: </span><span class="nx">pos</span><span class="p">.</span><span class="nx">x</span>
+              <span class="nv">y: </span><span class="nx">pos</span><span class="p">.</span><span class="nx">y</span>
+            <span class="p">]</span></pre></div></td></tr><tr id="section-32"><td class="docs"><div class="pilwrap"><a href="#section-32" class="pilcrow">&#182;</a></div><h4>#update</h4>
+
+<p>Updates the rendering's opacity based on the current time and the time extent of the annotation.</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="nv">lens.update = </span><span class="nf">(item) -&gt;</span>
+            <span class="k">if</span> <span class="nx">item</span><span class="p">.</span><span class="nx">npt_start</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="nx">start</span> <span class="o">or</span> <span class="nx">item</span><span class="p">.</span><span class="nx">npt_end</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="nx">end</span>
+              <span class="nv">start = </span><span class="nx">item</span><span class="p">.</span><span class="nx">npt_start</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+              <span class="nv">end = </span><span class="nx">item</span><span class="p">.</span><span class="nx">npt_end</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+              <span class="nv">fstart = </span><span class="nx">start</span> <span class="o">-</span> <span class="nx">app</span><span class="p">.</span><span class="nx">getTimeEasement</span><span class="p">()</span>
+              <span class="nv">fend = </span><span class="nx">end</span> <span class="o">+</span> <span class="nx">app</span><span class="p">.</span><span class="nx">getTimeEasement</span><span class="p">()</span>
+              <span class="nx">lens</span><span class="p">.</span><span class="nx">setOpacity</span> <span class="nx">calcOpacity</span><span class="p">(</span><span class="nx">app</span><span class="p">.</span><span class="nx">getCurrentTime</span><span class="p">())</span></pre></div></td></tr><tr id="section-33"><td class="docs"><div class="pilwrap"><a href="#section-33" class="pilcrow">&#182;</a></div><h4>#remove</h4>
+
+<p>Called to remove the rendering from the presentation.</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="nv">lens.remove = </span><span class="nf">(item) -&gt;</span>
+            <span class="k">if</span> <span class="nx">lens</span><span class="p">.</span><span class="nx">shape</span><span class="o">?</span>
+              <span class="nx">lens</span><span class="p">.</span><span class="nx">shape</span><span class="p">.</span><span class="nx">remove</span><span class="p">()</span>
+              <span class="nv">lens.shape = </span><span class="kc">null</span>
+
+          <span class="k">if</span> <span class="nx">cb</span><span class="o">?</span>
+            <span class="nx">cb</span> <span class="nx">lens</span>
+          <span class="nx">lens</span>
+        </pre></div></td></tr><tr id="section-34"><td class="docs"><div class="pilwrap"><a href="#section-34" class="pilcrow">&#182;</a></div><p>End of Presentation constructors</p>
+</td><td class="code"><div class="highlight"><pre></pre></div></td></tr></tbody></table><div id="generated">generated Tue May 08 2012 15:18:01 GMT-0400 (EDT)  </div><div id="projectname"><a href="../index.html">Video Annotator</a></div></div>

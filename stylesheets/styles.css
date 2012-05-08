@@ -3,14 +3,14 @@
 @import url(https://fonts.googleapis.com/css?family=Lato:300italic,700italic,300,700);
 
 html {
-background: #000;
+background: #424242;
 }
 
 body {
 margin: 0px;
 padding: 0px;
 font: 14px/1.5 Lato, "Helvetica Neue", Helvetica, Arial, sans-serif;
-color: #777;
+color: #252525;
 font-weight: 300;
 background: #fff;
 }
@@ -214,7 +214,7 @@ float: left;
 }
 
 #top {
-background-color: black;
+background-color: #424242;
 margin-bottom: 1em;
 padding-bottom: 2em;
 padding-left: 0.5em;
@@ -222,12 +222,12 @@ padding-left: 0.5em;
 
 #bottom {
 clear: both;
-background-color: black;
+background-color: #424242;
 margin-top: 1em;
 padding-top: 1em;
 padding-left: 1em;
 padding-right: 1em;
-color: #aaa;
+color: #bbb;
 font-weight: bolder;
 text-align: right;
 padding-bottom: 1em;
@@ -243,7 +243,7 @@ font-weight: bolder;
 }
 
 #title {
-text-shadow: 0 0 3px #222;
+text-shadow: 0 0 3px #333;
 font-weight: bold;
 width: 860px;
 margin: 0 auto;
@@ -252,7 +252,7 @@ margin: 0 auto;
 #title h1, #description {
 padding: 0.5em 0 0;
 margin: 0;
-color: #aaa;
+color: #bbb;
 }
 
 #title h1 {

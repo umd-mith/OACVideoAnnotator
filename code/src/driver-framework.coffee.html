@@ -2,18 +2,18 @@
 layout: docco
 title: OACVideoAnnotator/code/src/driver-framework.coffee.html
 ---
-<div id="container"><div id="background"></div><div id="jump_to">Jump To &hellip;<div id="jump_wrapper"><div id="jump_page"><a href="../index.html" class="source"><span class="file_name">README</span></a><a href="../src/canvas.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">canvas.coffee</span></a><a href="../src/component.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">component.coffee</span></a><a href="../src/controllers.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">controllers.coffee</span></a><a href="../src/driver-framework.coffee.html" class="source selected"><span class="base_path">src / </span><span class="file_name">driver-framework.coffee</span></a><a href="../src/drivers/dummy.coffee.html" class="source "><span class="base_path">src / drivers / </span><span class="file_name">dummy.coffee</span></a><a href="../src/drivers/html5.coffee.html" class="source "><span class="base_path">src / drivers / </span><span class="file_name">html5.coffee</span></a><a href="../src/drivers/youtube.coffee.html" class="source "><span class="base_path">src / drivers / </span><span class="file_name">youtube.coffee</span></a><a href="../src/intro.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">intro.coffee</span></a><a href="../src/outro.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">outro.coffee</span></a><a href="../src/presentations.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">presentations.coffee</span></a></div></div></div><table cellpadding="0" cellspacing="0"><thead><tr><th class="docs"><h1>driver-framework.coffee</h1><div class="filepath">src/</div></th><th class="code"></th></tr></thead><tbody><tr id="section-1"><td class="docs"><div class="pilwrap"><a href="#section-1" class="pilcrow">&#182;</a></div>
-</td><td class="code"><div class="highlight"><pre><span class="nx">OAC</span><span class="p">.</span><span class="nx">Client</span><span class="p">.</span><span class="nx">StreamingVideo</span><span class="p">.</span><span class="nx">namespace</span> <span class="s">&quot;Player&quot;</span><span class="p">,</span> <span class="nf">(exports) -&gt;</span></pre></div></td></tr><tr id="section-2"><td class="docs"><div class="pilwrap"><a href="#section-2" class="pilcrow">&#182;</a></div><h1>Players</h1>
+<div id="container"><div id="background"></div><div id="jump_to">Jump To &hellip;<div id="jump_wrapper"><div id="jump_page"><a href="../index.html" class="source"><span class="file_name">README</span></a><a href="../src/application.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">application.coffee</span></a><a href="../src/component.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">component.coffee</span></a><a href="../src/controller.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">controller.coffee</span></a><a href="../src/driver-framework.coffee.html" class="source selected"><span class="base_path">src / </span><span class="file_name">driver-framework.coffee</span></a><a href="../src/drivers/dummy.coffee.html" class="source "><span class="base_path">src / drivers / </span><span class="file_name">dummy.coffee</span></a><a href="../src/drivers/html5.coffee.html" class="source "><span class="base_path">src / drivers / </span><span class="file_name">html5.coffee</span></a><a href="../src/intro.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">intro.coffee</span></a><a href="../src/outro.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">outro.coffee</span></a><a href="../src/presentation.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">presentation.coffee</span></a></div></div></div><table cellpadding="0" cellspacing="0"><thead><tr><th class="docs"><h1>driver-framework.coffee</h1><div class="filepath">src/</div></th><th class="code"></th></tr></thead><tbody><tr id="section-1"><td class="docs"><div class="pilwrap"><a href="#section-1" class="pilcrow">&#182;</a></div><h1>Player</h1>
 
-<p>Main class for OAC player driver framework. It manages the relation between the available players and their OAC
-drivers for the current page. This is a singleton, so no initInstance or other constructor.</p>
-</td><td class="code"><div class="highlight"><pre></pre></div></td></tr><tr id="section-3"><td class="docs"><div class="pilwrap"><a href="#section-3" class="pilcrow">&#182;</a></div><p>Private variable: players</p>
+<p>The Video Annotator provides a central video player registry. Video player drivers register a set of callbacks
+that are used to discover available video players and bind them to a MITHgrid-based object that provides a
+standard API for managing the player.</p>
 
-<p>The players array. DOM objects and drivers of drivers are stored here.</p>
-</td><td class="code"><div class="highlight"><pre>  <span class="nv">players = </span><span class="p">[]</span></pre></div></td></tr><tr id="section-4"><td class="docs"><div class="pilwrap"><a href="#section-4" class="pilcrow">&#182;</a></div><p>Private variable: callbacks</p>
+<p>The various functions that make up the registry are static functions: they aren't methods on a particular
+object instance.</p>
+</td><td class="code"><div class="highlight"><pre><span class="nx">OAC</span><span class="p">.</span><span class="nx">Client</span><span class="p">.</span><span class="nx">StreamingVideo</span><span class="p">.</span><span class="nx">namespace</span> <span class="s">&quot;Player&quot;</span><span class="p">,</span> <span class="nf">(exports) -&gt;</span>
 
-<p>The callbacks array. Functions called when new players are configured are stored here.</p>
-</td><td class="code"><div class="highlight"><pre>  <span class="nv">callbacks = </span><span class="p">[]</span></pre></div></td></tr><tr id="section-5"><td class="docs"><div class="pilwrap"><a href="#section-5" class="pilcrow">&#182;</a></div><h3>#player</h3>
+  <span class="nv">players = </span><span class="p">[]</span>
+  <span class="nv">callbacks = </span><span class="p">[]</span></pre></div></td></tr><tr id="section-2"><td class="docs"><div class="pilwrap"><a href="#section-2" class="pilcrow">&#182;</a></div><h2>player</h2>
 
 <p>Returns the DOM object for a certain player loaded on the page.</p>
 
@@ -29,13 +29,13 @@ drivers for the current page. This is a singleton, so no initInstance or other c
 
 <p>Examples:</p>
 
-<p>oacController.player().pause()</p>
-
-<p>oacController.player(1).play()</p>
+<pre><code>OAC.Client.StreamingVideo.Player.player().pause()
+OAC.Client.StreamingVideo.Player.player(1).play()
+</code></pre>
 </td><td class="code"><div class="highlight"><pre>  <span class="nv">exports.player = </span><span class="nf">(playerId) -&gt;</span>
     <span class="k">if</span> <span class="o">!</span><span class="nx">playerId</span><span class="o">?</span>
       <span class="nv">playerId = </span><span class="mi">0</span>
-    <span class="nx">players</span><span class="p">[</span><span class="nx">playerId</span><span class="p">]</span></pre></div></td></tr><tr id="section-6"><td class="docs"><div class="pilwrap"><a href="#section-6" class="pilcrow">&#182;</a></div><h3>#onNewPlayer</h3>
+    <span class="nx">players</span><span class="p">[</span><span class="nx">playerId</span><span class="p">]</span></pre></div></td></tr><tr id="section-3"><td class="docs"><div class="pilwrap"><a href="#section-3" class="pilcrow">&#182;</a></div><h2>onNewPlayer</h2>
 
 <p>Used by applications making use of the PlayerController to discover configured players.</p>
 
@@ -49,30 +49,35 @@ drivers for the current page. This is a singleton, so no initInstance or other c
 
 <p>Examples:</p>
 
-<p>oacController.onNewPlayer(function(player) {
+<pre><code>OAC.Client.StreamingVideo.Player.onNewPlayer(function(player) {
   -- do something with player
-});</p>
+});
+</code></pre>
 </td><td class="code"><div class="highlight"><pre>  <span class="nv">exports.onNewPlayer = </span><span class="nf">(callback) -&gt;</span>
     <span class="k">for</span> <span class="nx">player</span> <span class="k">in</span> <span class="nx">players</span>
       <span class="nx">callback</span><span class="p">(</span><span class="nx">player</span><span class="p">)</span>
-    <span class="nx">callbacks</span><span class="p">.</span><span class="nx">push</span> <span class="nx">callback</span></pre></div></td></tr><tr id="section-7"><td class="docs"><div class="pilwrap"><a href="#section-7" class="pilcrow">&#182;</a></div><h3>#register</h3>
+    <span class="nx">callbacks</span><span class="p">.</span><span class="nx">push</span> <span class="nx">callback</span></pre></div></td></tr><tr id="section-4"><td class="docs"><div class="pilwrap"><a href="#section-4" class="pilcrow">&#182;</a></div><h2>register</h2>
 
 <p>Used by drivers to let this object know which drivers are avalable and to initialize them.</p>
 
 <p>Parameters:</p>
 
 <ul>
-<li>driverclass - The JavaScript class (function object) implementing the driver.</li>
+<li>driverObjectCB - callback function that defines the functions needed to access driver objects</li>
 </ul>
 
-<p>Returns:</p>
-
-<p>A player's DOM object.</p>
+<p>Returns: Nothing.</p>
 
 <p>Examples:</p>
 
-<p>oacController.register(OACDummyPlayerDrv);</p>
-</td><td class="code"><div class="highlight"><pre>  <span class="nv">exports.register = </span><span class="nf">(driverObject) -&gt;</span>
+<pre><code>OAC.Client.StreamingVideo.Player.register(function(driverObject) {
+  driverObject.getAvailablePlayers = function() { ... };
+  driverObject.bindPlayer = function(player) { ... };
+});
+</code></pre>
+</td><td class="code"><div class="highlight"><pre>  <span class="nv">exports.register = </span><span class="nf">(driverObjectCB) -&gt;</span>
+    <span class="nv">driverObject = </span><span class="p">{}</span>
+    <span class="nx">driverObjectCB</span> <span class="nx">driverObject</span>
     <span class="nv">ps = </span><span class="nx">driverObject</span><span class="p">.</span><span class="nx">getAvailablePlayers</span><span class="p">()</span>
     <span class="k">for</span> <span class="nx">player</span> <span class="k">in</span> <span class="nx">ps</span>
       <span class="nx">$</span><span class="p">(</span><span class="nx">player</span><span class="p">).</span><span class="nx">data</span><span class="p">(</span><span class="s">&#39;driver&#39;</span><span class="p">,</span> <span class="nx">driverObject</span><span class="p">)</span>
@@ -80,9 +85,12 @@ drivers for the current page. This is a singleton, so no initInstance or other c
       <span class="nx">players</span><span class="p">.</span><span class="nx">push</span> <span class="nx">p</span>
       <span class="k">for</span> <span class="nx">cb</span> <span class="k">in</span> <span class="nx">callbacks</span>
         <span class="nx">cb</span><span class="p">.</span><span class="nx">call</span><span class="p">({},</span> <span class="nx">p</span><span class="p">)</span>
-  
-  <span class="nx">exports</span><span class="p">.</span><span class="nx">namespace</span> <span class="s">&quot;DriverBinding&quot;</span><span class="p">,</span> <span class="nf">(db) -&gt;</span>
+  </pre></div></td></tr><tr id="section-5"><td class="docs"><div class="pilwrap"><a href="#section-5" class="pilcrow">&#182;</a></div><h1>Player.DriverBinding</h1>
+
+<p>This is the super class for player driver bindings. Only used in the #bindPlayer() method defined when
+a driver is registered.</p>
+</td><td class="code"><div class="highlight"><pre>  <span class="nx">exports</span><span class="p">.</span><span class="nx">namespace</span> <span class="s">&quot;DriverBinding&quot;</span><span class="p">,</span> <span class="nf">(db) -&gt;</span>
     <span class="nv">db.initInstance = </span><span class="nf">(args...) -&gt;</span>
       <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">initInstance</span> <span class="s">&quot;OAC.Client.StreamingVideo.Player.DriverBinding&quot;</span><span class="p">,</span> <span class="nx">args</span><span class="p">...</span>
 
-</pre></div></td></tr></tbody></table><div id="generated">generated Sat Apr 28 2012 19:08:51 GMT-0400 (EDT)  </div><div id="projectname"><a href="../index.html">OAC Video Annotation Client</a></div></div>
+</pre></div></td></tr></tbody></table><div id="generated">generated Tue May 08 2012 15:18:00 GMT-0400 (EDT)  </div><div id="projectname"><a href="../index.html">Video Annotator</a></div></div>

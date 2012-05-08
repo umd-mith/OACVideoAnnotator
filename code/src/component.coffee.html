@@ -2,8 +2,39 @@
 layout: docco
 title: OACVideoAnnotator/code/src/component.coffee.html
 ---
-<div id="container"><div id="background"></div><div id="jump_to">Jump To &hellip;<div id="jump_wrapper"><div id="jump_page"><a href="../index.html" class="source"><span class="file_name">README</span></a><a href="../src/canvas.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">canvas.coffee</span></a><a href="../src/component.coffee.html" class="source selected"><span class="base_path">src / </span><span class="file_name">component.coffee</span></a><a href="../src/controllers.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">controllers.coffee</span></a><a href="../src/driver-framework.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">driver-framework.coffee</span></a><a href="../src/drivers/dummy.coffee.html" class="source "><span class="base_path">src / drivers / </span><span class="file_name">dummy.coffee</span></a><a href="../src/drivers/html5.coffee.html" class="source "><span class="base_path">src / drivers / </span><span class="file_name">html5.coffee</span></a><a href="../src/drivers/youtube.coffee.html" class="source "><span class="base_path">src / drivers / </span><span class="file_name">youtube.coffee</span></a><a href="../src/intro.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">intro.coffee</span></a><a href="../src/outro.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">outro.coffee</span></a><a href="../src/presentations.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">presentations.coffee</span></a></div></div></div><table cellpadding="0" cellspacing="0"><thead><tr><th class="docs"><h1>component.coffee</h1><div class="filepath">src/</div></th><th class="code"></th></tr></thead><tbody><tr id="section-1"><td class="docs"><div class="pilwrap"><a href="#section-1" class="pilcrow">&#182;</a></div><h1>Components</h1>
-</td><td class="code"><div class="highlight"><pre><span class="nx">OAC</span><span class="p">.</span><span class="nx">Client</span><span class="p">.</span><span class="nx">StreamingVideo</span><span class="p">.</span><span class="nx">namespace</span> <span class="s">&#39;Component&#39;</span><span class="p">,</span> <span class="nf">(Component) -&gt;</span></pre></div></td></tr><tr id="section-2"><td class="docs"><div class="pilwrap"><a href="#section-2" class="pilcrow">&#182;</a></div><h2>BoundingBox</h2>
+<div id="container"><div id="background"></div><div id="jump_to">Jump To &hellip;<div id="jump_wrapper"><div id="jump_page"><a href="../index.html" class="source"><span class="file_name">README</span></a><a href="../src/application.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">application.coffee</span></a><a href="../src/component.coffee.html" class="source selected"><span class="base_path">src / </span><span class="file_name">component.coffee</span></a><a href="../src/controller.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">controller.coffee</span></a><a href="../src/driver-framework.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">driver-framework.coffee</span></a><a href="../src/drivers/dummy.coffee.html" class="source "><span class="base_path">src / drivers / </span><span class="file_name">dummy.coffee</span></a><a href="../src/drivers/html5.coffee.html" class="source "><span class="base_path">src / drivers / </span><span class="file_name">html5.coffee</span></a><a href="../src/intro.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">intro.coffee</span></a><a href="../src/outro.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">outro.coffee</span></a><a href="../src/presentation.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">presentation.coffee</span></a></div></div></div><table cellpadding="0" cellspacing="0"><thead><tr><th class="docs"><h1>component.coffee</h1><div class="filepath">src/</div></th><th class="code"></th></tr></thead><tbody><tr id="section-1"><td class="docs"><div class="pilwrap"><a href="#section-1" class="pilcrow">&#182;</a></div><h1>Components</h1>
+</td><td class="code"><div class="highlight"><pre><span class="nx">OAC</span><span class="p">.</span><span class="nx">Client</span><span class="p">.</span><span class="nx">StreamingVideo</span><span class="p">.</span><span class="nx">namespace</span> <span class="s">&#39;Component&#39;</span><span class="p">,</span> <span class="nf">(Component) -&gt;</span></pre></div></td></tr><tr id="section-2"><td class="docs"><div class="pilwrap"><a href="#section-2" class="pilcrow">&#182;</a></div><h2>ModeButton</h2>
+
+<p>Controls the Annotation Creation Tools set by app.buttonFeature</p>
+</td><td class="code"><div class="highlight"><pre>  <span class="nx">Component</span><span class="p">.</span><span class="nx">namespace</span> <span class="s">&#39;ModeButton&#39;</span><span class="p">,</span> <span class="nf">(ModeButton) -&gt;</span>
+    <span class="nv">ModeButton.initInstance = </span><span class="nf">(args...) -&gt;</span>
+      <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">initInstance</span> <span class="s">&quot;OAC.Client.StreamingVideo.Component.ModeButton&quot;</span><span class="p">,</span> <span class="nx">args</span><span class="p">...,</span> <span class="nf">(that, buttonEl) -&gt;</span>
+        <span class="nv">options = </span><span class="nx">that</span><span class="p">.</span><span class="nx">options</span></pre></div></td></tr><tr id="section-3"><td class="docs"><div class="pilwrap"><a href="#section-3" class="pilcrow">&#182;</a></div><h4>AnnotationCreationButton #applyBindings</h4>
+</td><td class="code"><div class="highlight"><pre>        <span class="nv">active = </span><span class="kc">false</span></pre></div></td></tr><tr id="section-4"><td class="docs"><div class="pilwrap"><a href="#section-4" class="pilcrow">&#182;</a></div><p>Mousedown: activate button - set as active mode</p>
+
+<p>Mousedown #2: de-activate button - unset active mode</p>
+
+<p>onCurrentModeChange: if != id passed, deactivate, else do nothing</p>
+</td><td class="code"><div class="highlight"><pre>        </pre></div></td></tr><tr id="section-5"><td class="docs"><div class="pilwrap"><a href="#section-5" class="pilcrow">&#182;</a></div><p>Attach binding to the mousedown</p>
+</td><td class="code"><div class="highlight"><pre>        <span class="nx">$</span><span class="p">(</span><span class="nx">buttonEl</span><span class="p">).</span><span class="nx">mousedown</span> <span class="nf">(e) -&gt;</span>
+          <span class="k">if</span> <span class="nx">active</span> <span class="o">==</span> <span class="kc">false</span>
+            <span class="nv">active = </span><span class="kc">true</span>
+            <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">().</span><span class="nx">setCurrentMode</span><span class="p">(</span><span class="nx">options</span><span class="p">.</span><span class="nx">mode</span><span class="p">)</span>
+            <span class="nx">$</span><span class="p">(</span><span class="nx">buttonEl</span><span class="p">).</span><span class="nx">addClass</span><span class="p">(</span><span class="s">&quot;active&quot;</span><span class="p">)</span>
+          <span class="k">else</span> <span class="k">if</span> <span class="nx">active</span> <span class="o">==</span> <span class="kc">true</span>
+            <span class="nv">active = </span><span class="kc">false</span>
+            <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">().</span><span class="nx">setCurrentMode</span><span class="p">(</span><span class="kc">undefined</span><span class="p">)</span>
+            <span class="nx">$</span><span class="p">(</span><span class="nx">buttonEl</span><span class="p">).</span><span class="nx">removeClass</span><span class="p">(</span><span class="s">&quot;active&quot;</span><span class="p">)</span></pre></div></td></tr><tr id="section-6"><td class="docs"><div class="pilwrap"><a href="#section-6" class="pilcrow">&#182;</a></div><p>Handles when the mode is changed externally from controller</p>
+
+<p>Parameters:
+* action - name of new mode</p>
+</td><td class="code"><div class="highlight"><pre>        <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">().</span><span class="nx">events</span><span class="p">.</span><span class="nx">onCurrentModeChange</span><span class="p">.</span><span class="nx">addListener</span> <span class="nf">(action) -&gt;</span>
+          <span class="k">if</span> <span class="nx">action</span> <span class="o">==</span> <span class="nx">options</span><span class="p">.</span><span class="nx">mode</span>
+            <span class="nv">active = </span><span class="kc">true</span>
+            <span class="nx">$</span><span class="p">(</span><span class="nx">buttonEl</span><span class="p">).</span><span class="nx">addClass</span><span class="p">(</span><span class="s">&#39;active&#39;</span><span class="p">)</span>
+          <span class="k">else</span>
+            <span class="nv">active = </span><span class="kc">false</span>
+            <span class="nx">$</span><span class="p">(</span><span class="nx">buttonEl</span><span class="p">).</span><span class="nx">removeClass</span><span class="p">(</span><span class="s">&quot;active&quot;</span><span class="p">)</span></pre></div></td></tr><tr id="section-7"><td class="docs"><div class="pilwrap"><a href="#section-7" class="pilcrow">&#182;</a></div><h2>BoundingBox</h2>
 
 <p>Creates and manages a SVG bounding box with resize handles and center drag handle.</p>
 </td><td class="code"><div class="highlight"><pre>  <span class="nx">Component</span><span class="p">.</span><span class="nx">namespace</span> <span class="s">&quot;ShapeEditBox&quot;</span><span class="p">,</span> <span class="nf">(ShapeEditBox) -&gt;</span>
@@ -11,7 +42,7 @@ title: OACVideoAnnotator/code/src/component.coffee.html
     <span class="nv">ShapeEditBox.initInstance = </span><span class="nf">(args...) -&gt;</span>
       <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">initInstance</span> <span class="s">&quot;OAC.Client.StreamingVideo.Component.ShapeEditBox&quot;</span><span class="p">,</span> <span class="nx">args</span><span class="p">...,</span> <span class="nf">(that, paper) -&gt;</span>
         <span class="nv">options = </span><span class="nx">that</span><span class="p">.</span><span class="nx">options</span>
-        <span class="nv">dragController = </span><span class="nx">OAC</span><span class="p">.</span><span class="nx">Client</span><span class="p">.</span><span class="nx">StreamingVideo</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">Drag</span><span class="p">.</span><span class="nx">initController</span> <span class="p">{}</span>
+        <span class="nv">dragController = </span><span class="nx">OAC</span><span class="p">.</span><span class="nx">Client</span><span class="p">.</span><span class="nx">StreamingVideo</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">Drag</span><span class="p">.</span><span class="nx">initInstance</span> <span class="p">{}</span>
         <span class="nv">handleSet = </span><span class="p">{}</span>
         <span class="nv">handles = </span><span class="p">{}</span>
         <span class="nv">activeRendering = </span><span class="kc">null</span>
@@ -21,7 +52,7 @@ title: OACVideoAnnotator/code/src/component.coffee.html
         <span class="nv">extents = </span><span class="p">{}</span>
         <span class="nv">factors = </span><span class="p">{}</span>
         <span class="nv">svgBBox = </span><span class="kc">null</span>
-        <span class="nv">midDrag = </span><span class="kc">null</span></pre></div></td></tr><tr id="section-3"><td class="docs"><div class="pilwrap"><a href="#section-3" class="pilcrow">&#182;</a></div><p>The padding is how big the resize handles should be</p>
+        <span class="nv">midDrag = </span><span class="kc">null</span></pre></div></td></tr><tr id="section-8"><td class="docs"><div class="pilwrap"><a href="#section-8" class="pilcrow">&#182;</a></div><p>The padding is how big the resize handles should be</p>
 </td><td class="code"><div class="highlight"><pre>        <span class="nv">padding = </span><span class="mi">5</span>
         <span class="nv">dirs = </span><span class="nx">options</span><span class="p">.</span><span class="nx">dirs</span>
   
@@ -67,9 +98,9 @@ title: OACVideoAnnotator/code/src/component.coffee.html
           <span class="nv">args.width = </span><span class="nb">Math</span><span class="p">.</span><span class="nx">abs</span><span class="p">(</span><span class="nx">brx</span> <span class="o">-</span> <span class="nx">tlx</span><span class="p">)</span>
           <span class="nv">args.height = </span><span class="nb">Math</span><span class="p">.</span><span class="nx">abs</span><span class="p">(</span><span class="nx">bry</span> <span class="o">-</span> <span class="nx">tly</span><span class="p">)</span>
           <span class="nx">args</span>
-          </pre></div></td></tr><tr id="section-4"><td class="docs"><div class="pilwrap"><a href="#section-4" class="pilcrow">&#182;</a></div><p>Goes through handle object array and
+          </pre></div></td></tr><tr id="section-9"><td class="docs"><div class="pilwrap"><a href="#section-9" class="pilcrow">&#182;</a></div><p>Goes through handle object array and
 sets each handle box coordinate</p>
-</td><td class="code"><div class="highlight"><pre>        <span class="nv">calcHandles = </span><span class="nf">(args) -&gt;</span></pre></div></td></tr><tr id="section-5"><td class="docs"><div class="pilwrap"><a href="#section-5" class="pilcrow">&#182;</a></div><p>calculate where the resize handles
+</td><td class="code"><div class="highlight"><pre>        <span class="nv">calcHandles = </span><span class="nf">(args) -&gt;</span></pre></div></td></tr><tr id="section-10"><td class="docs"><div class="pilwrap"><a href="#section-10" class="pilcrow">&#182;</a></div><p>calculate where the resize handles
 will be located</p>
 </td><td class="code"><div class="highlight"><pre>          <span class="nx">calcXYHeightWidth</span> <span class="nx">args</span>
           
@@ -92,7 +123,7 @@ will be located</p>
                 <span class="nx">recalcHandle</span><span class="p">(</span><span class="nx">handles</span><span class="p">[</span><span class="nx">o</span><span class="p">],</span> <span class="nx">data</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nx">data</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
               <span class="k">else</span>
                 <span class="nx">handles</span><span class="p">[</span><span class="nx">o</span><span class="p">]</span> <span class="o">=</span> <span class="nx">calcHandle</span><span class="p">(</span><span class="nx">data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nx">data</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nx">data</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
-        </pre></div></td></tr><tr id="section-6"><td class="docs"><div class="pilwrap"><a href="#section-6" class="pilcrow">&#182;</a></div><h5>calcFactors (private)</h5>
+        </pre></div></td></tr><tr id="section-11"><td class="docs"><div class="pilwrap"><a href="#section-11" class="pilcrow">&#182;</a></div><h5>calcFactors (private)</h5>
 
 <p>Measures where the handles should be on mousemove.</p>
 
@@ -100,7 +131,7 @@ will be located</p>
 
 <p>Returns: Nothing.</p>
 </td><td class="code"><div class="highlight"><pre>        <span class="nv">calcFactors = </span><span class="o">-&gt;</span>
-          <span class="nv">extents = </span><span class="nx">activeRendering</span><span class="p">.</span><span class="nx">getExtents</span><span class="p">()</span></pre></div></td></tr><tr id="section-7"><td class="docs"><div class="pilwrap"><a href="#section-7" class="pilcrow">&#182;</a></div><p>create offset factors for
+          <span class="nv">extents = </span><span class="nx">activeRendering</span><span class="p">.</span><span class="nx">getExtents</span><span class="p">()</span></pre></div></td></tr><tr id="section-12"><td class="docs"><div class="pilwrap"><a href="#section-12" class="pilcrow">&#182;</a></div><p>create offset factors for
 bounding box
 calculate width - height to be larger
 than shape</p>
@@ -113,7 +144,7 @@ than shape</p>
             <span class="nv">dy: </span><span class="mi">0</span>
             
           <span class="nx">calcHandles</span> <span class="nx">attrs</span>
-  </pre></div></td></tr><tr id="section-8"><td class="docs"><div class="pilwrap"><a href="#section-8" class="pilcrow">&#182;</a></div><h4>drawHandles (private)</h4>
+  </pre></div></td></tr><tr id="section-13"><td class="docs"><div class="pilwrap"><a href="#section-13" class="pilcrow">&#182;</a></div><h4>drawHandles (private)</h4>
 
 <p>Draws the handles defined in dirs as SVG rectangles and draws the SVG bounding box</p>
 
@@ -121,20 +152,24 @@ than shape</p>
 
 <p>Returns: Nothing.</p>
 </td><td class="code"><div class="highlight"><pre>        <span class="nv">drawHandles = </span><span class="o">-&gt;</span>    
-          <span class="k">if</span> <span class="nx">$</span><span class="p">.</span><span class="nx">isEmptyObject</span> <span class="nx">handleSet</span></pre></div></td></tr><tr id="section-9"><td class="docs"><div class="pilwrap"><a href="#section-9" class="pilcrow">&#182;</a></div><p>draw the corner and mid-point squares</p>
+          <span class="k">if</span> <span class="nx">$</span><span class="p">.</span><span class="nx">isEmptyObject</span> <span class="nx">handleSet</span></pre></div></td></tr><tr id="section-14"><td class="docs"><div class="pilwrap"><a href="#section-14" class="pilcrow">&#182;</a></div><p>draw the corner and mid-point squares</p>
 </td><td class="code"><div class="highlight"><pre>            <span class="nv">handleSet = </span><span class="nx">paper</span><span class="p">.</span><span class="nx">set</span><span class="p">()</span>
             <span class="k">for</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">o</span> <span class="k">of</span> <span class="nx">handles</span>
               <span class="k">if</span> <span class="nx">i</span> <span class="o">==</span> <span class="s">&#39;mid&#39;</span>
                 <span class="nv">midDrag = </span><span class="nx">paper</span><span class="p">.</span><span class="nx">rect</span><span class="p">(</span><span class="nx">o</span><span class="p">.</span><span class="nx">x</span><span class="p">,</span> <span class="nx">o</span><span class="p">.</span><span class="nx">y</span><span class="p">,</span> <span class="nx">padding</span><span class="p">,</span> <span class="nx">padding</span><span class="p">)</span>
+                <span class="nx">$</span><span class="p">(</span><span class="nx">midDrag</span><span class="p">.</span><span class="nx">node</span><span class="p">).</span><span class="nx">css</span>
+                  <span class="s">&quot;pointer-events&quot;</span><span class="o">:</span> <span class="s">&quot;auto&quot;</span>
                 <span class="nv">o.id = </span><span class="nx">midDrag</span><span class="p">.</span><span class="nx">id</span>
                 <span class="nv">o.el = </span><span class="nx">midDrag</span>
               <span class="k">else</span>
                 <span class="nv">h = </span><span class="nx">paper</span><span class="p">.</span><span class="nx">rect</span><span class="p">(</span><span class="nx">o</span><span class="p">.</span><span class="nx">x</span><span class="p">,</span> <span class="nx">o</span><span class="p">.</span><span class="nx">y</span><span class="p">,</span> <span class="nx">padding</span><span class="p">,</span> <span class="nx">padding</span><span class="p">)</span>
+                <span class="nx">$</span><span class="p">(</span><span class="nx">h</span><span class="p">.</span><span class="nx">node</span><span class="p">).</span><span class="nx">css</span>
+                  <span class="s">&quot;pointer-events&quot;</span><span class="o">:</span> <span class="s">&quot;auto&quot;</span>
                 <span class="nv">o.id = </span><span class="nx">h</span><span class="p">.</span><span class="nx">id</span>
                 <span class="nv">o.el = </span><span class="nx">h</span>
                 <span class="nx">h</span><span class="p">.</span><span class="nx">attr</span>
                   <span class="nv">cursor: </span><span class="nx">o</span><span class="p">.</span><span class="nx">cursor</span>
-                <span class="nx">handleSet</span><span class="p">.</span><span class="nx">push</span> <span class="nx">h</span></pre></div></td></tr><tr id="section-10"><td class="docs"><div class="pilwrap"><a href="#section-10" class="pilcrow">&#182;</a></div><p>make them all similar looking</p>
+                <span class="nx">handleSet</span><span class="p">.</span><span class="nx">push</span> <span class="nx">h</span></pre></div></td></tr><tr id="section-15"><td class="docs"><div class="pilwrap"><a href="#section-15" class="pilcrow">&#182;</a></div><p>make them all similar looking</p>
 </td><td class="code"><div class="highlight"><pre>            <span class="nx">handleSet</span><span class="p">.</span><span class="nx">attr</span>
               <span class="nv">fill: </span><span class="s">&#39;black&#39;</span>
               <span class="nv">stroke: </span><span class="s">&#39;black&#39;</span>
@@ -143,17 +178,17 @@ than shape</p>
               <span class="nx">midDrag</span><span class="p">.</span><span class="nx">attr</span>
                 <span class="nv">fill: </span><span class="s">&#39;black&#39;</span>
                 <span class="nv">stroke: </span><span class="s">&#39;black&#39;</span>
-                <span class="nv">cursor: </span><span class="s">&#39;move&#39;</span></pre></div></td></tr><tr id="section-11"><td class="docs"><div class="pilwrap"><a href="#section-11" class="pilcrow">&#182;</a></div><p>drawing bounding box</p>
+                <span class="nv">cursor: </span><span class="s">&#39;move&#39;</span></pre></div></td></tr><tr id="section-16"><td class="docs"><div class="pilwrap"><a href="#section-16" class="pilcrow">&#182;</a></div><p>drawing bounding box</p>
 </td><td class="code"><div class="highlight"><pre>            <span class="nx">calcXYHeightWidth</span> <span class="nx">attrs</span>
             <span class="nv">svgBBox = </span><span class="nx">paper</span><span class="p">.</span><span class="nx">rect</span><span class="p">(</span><span class="nx">attrs</span><span class="p">.</span><span class="nx">x</span><span class="p">,</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">y</span><span class="p">,</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">width</span><span class="p">,</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">height</span><span class="p">)</span>
             <span class="nx">svgBBox</span><span class="p">.</span><span class="nx">attr</span>
               <span class="nv">stroke: </span><span class="s">&#39;#333333&#39;</span>
               <span class="s">&#39;stroke-dasharray&#39;</span><span class="o">:</span> <span class="p">[</span><span class="s">&quot;--&quot;</span><span class="p">]</span>
 
-            <span class="k">if</span> <span class="o">not</span> <span class="nx">$</span><span class="p">.</span><span class="nx">isEmptyObject</span> <span class="nx">midDrag</span></pre></div></td></tr><tr id="section-12"><td class="docs"><div class="pilwrap"><a href="#section-12" class="pilcrow">&#182;</a></div><p>Attaching listener to drag-only handle (midDrag)</p>
+            <span class="k">if</span> <span class="o">not</span> <span class="nx">$</span><span class="p">.</span><span class="nx">isEmptyObject</span> <span class="nx">midDrag</span></pre></div></td></tr><tr id="section-17"><td class="docs"><div class="pilwrap"><a href="#section-17" class="pilcrow">&#182;</a></div><p>Attaching listener to drag-only handle (midDrag)</p>
 </td><td class="code"><div class="highlight"><pre>              <span class="nv">midDragDragBinding = </span><span class="nx">dragController</span><span class="p">.</span><span class="nx">bind</span> <span class="nx">midDrag</span>
         
-              <span class="nx">midDragDragBinding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onUpdate</span><span class="p">.</span><span class="nx">addListener</span> <span class="nf">(dx, dy) -&gt;</span></pre></div></td></tr><tr id="section-13"><td class="docs"><div class="pilwrap"><a href="#section-13" class="pilcrow">&#182;</a></div><p>dragging means that the svgBBox stays padding-distance
+              <span class="nx">midDragDragBinding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onUpdate</span><span class="p">.</span><span class="nx">addListener</span> <span class="nf">(dx, dy) -&gt;</span></pre></div></td></tr><tr id="section-18"><td class="docs"><div class="pilwrap"><a href="#section-18" class="pilcrow">&#182;</a></div><p>dragging means that the svgBBox stays padding-distance
 away from the lens' shape and the lens shape gets updated
 in dataStore</p>
 </td><td class="code"><div class="highlight"><pre>                <span class="nv">attrs.dx = </span><span class="nx">dx</span>
@@ -165,22 +200,24 @@ in dataStore</p>
                   <span class="nv">x: </span><span class="nx">attrs</span><span class="p">.</span><span class="nx">x</span>
                   <span class="nv">y: </span><span class="nx">attrs</span><span class="p">.</span><span class="nx">y</span>
 
-              <span class="nx">midDragDragBinding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onFocus</span><span class="p">.</span><span class="nx">addListener</span> <span class="nf">(x, y) -&gt;</span></pre></div></td></tr><tr id="section-14"><td class="docs"><div class="pilwrap"><a href="#section-14" class="pilcrow">&#182;</a></div><p>start</p>
-</td><td class="code"><div class="highlight"><pre>                  <span class="nv">factors.x = </span><span class="mi">0</span>
+              <span class="nx">midDragDragBinding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onFocus</span><span class="p">.</span><span class="nx">addListener</span> <span class="nf">(x, y) -&gt;</span></pre></div></td></tr><tr id="section-19"><td class="docs"><div class="pilwrap"><a href="#section-19" class="pilcrow">&#182;</a></div><p>start</p>
+</td><td class="code"><div class="highlight"><pre>                  <span class="nx">that</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onFocus</span><span class="p">.</span><span class="nx">fire</span><span class="p">()</span>
+                  <span class="nv">factors.x = </span><span class="mi">0</span>
                   <span class="nv">factors.y = </span><span class="mi">0</span>
                   <span class="nx">calcFactors</span><span class="p">()</span>
                   <span class="nx">activeRendering</span><span class="p">.</span><span class="nx">shape</span><span class="p">.</span><span class="nx">attr</span>
                     <span class="nv">cursor: </span><span class="s">&#39;move&#39;</span>
         
-              <span class="nx">midDragDragBinding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onUnfocus</span><span class="p">.</span><span class="nx">addListener</span> <span class="o">-&gt;</span></pre></div></td></tr><tr id="section-15"><td class="docs"><div class="pilwrap"><a href="#section-15" class="pilcrow">&#182;</a></div><p>end</p>
+              <span class="nx">midDragDragBinding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onUnfocus</span><span class="p">.</span><span class="nx">addListener</span> <span class="o">-&gt;</span></pre></div></td></tr><tr id="section-20"><td class="docs"><div class="pilwrap"><a href="#section-20" class="pilcrow">&#182;</a></div><p>end</p>
 </td><td class="code"><div class="highlight"><pre>                  <span class="nx">calcXYHeightWidth</span> <span class="nx">attrs</span>
                   <span class="nx">that</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onMove</span><span class="p">.</span><span class="nx">fire</span>
                     <span class="nv">x: </span><span class="nx">attrs</span><span class="p">.</span><span class="nx">x</span> <span class="o">+</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">width</span><span class="o">/</span><span class="mi">2</span>
-                    <span class="nv">y: </span><span class="nx">attrs</span><span class="p">.</span><span class="nx">y</span> <span class="o">+</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">height</span><span class="o">/</span><span class="mi">2</span></pre></div></td></tr><tr id="section-16"><td class="docs"><div class="pilwrap"><a href="#section-16" class="pilcrow">&#182;</a></div><p>Attaching drag and resize handlers</p>
+                    <span class="nv">y: </span><span class="nx">attrs</span><span class="p">.</span><span class="nx">y</span> <span class="o">+</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">height</span><span class="o">/</span><span class="mi">2</span>
+                  <span class="nx">that</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onUnfocus</span><span class="p">.</span><span class="nx">fire</span><span class="p">()</span></pre></div></td></tr><tr id="section-21"><td class="docs"><div class="pilwrap"><a href="#section-21" class="pilcrow">&#182;</a></div><p>Attaching drag and resize handlers</p>
 </td><td class="code"><div class="highlight"><pre>            <span class="nx">handleSet</span><span class="p">.</span><span class="nx">forEach</span> <span class="nf">(handle) -&gt;</span>
               <span class="nv">handleBinding = </span><span class="nx">dragController</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="nx">handle</span><span class="p">)</span>
         
-              <span class="nx">handleBinding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onUpdate</span><span class="p">.</span><span class="nx">addListener</span> <span class="nf">(dx, dy) -&gt;</span></pre></div></td></tr><tr id="section-17"><td class="docs"><div class="pilwrap"><a href="#section-17" class="pilcrow">&#182;</a></div><p>onmove function - handles dragging
+              <span class="nx">handleBinding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onUpdate</span><span class="p">.</span><span class="nx">addListener</span> <span class="nf">(dx, dy) -&gt;</span></pre></div></td></tr><tr id="section-22"><td class="docs"><div class="pilwrap"><a href="#section-22" class="pilcrow">&#182;</a></div><p>onmove function - handles dragging
 dragging here means that the shape is being resized;
 the factor determines in which direction the
 shape is pulled</p>
@@ -196,8 +233,9 @@ shape is pulled</p>
                   <span class="nv">height: </span><span class="nx">attrs</span><span class="p">.</span><span class="nx">height</span>
 
         
-              <span class="nx">handleBinding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onFocus</span><span class="p">.</span><span class="nx">addListener</span> <span class="nf">(x, y) -&gt;</span></pre></div></td></tr><tr id="section-18"><td class="docs"><div class="pilwrap"><a href="#section-18" class="pilcrow">&#182;</a></div><p>onstart function</p>
-</td><td class="code"><div class="highlight"><pre>                <span class="nv">extents = </span><span class="nx">activeRendering</span><span class="p">.</span><span class="nx">getExtents</span><span class="p">()</span></pre></div></td></tr><tr id="section-19"><td class="docs"><div class="pilwrap"><a href="#section-19" class="pilcrow">&#182;</a></div><p>extents: x, y, width, height</p>
+              <span class="nx">handleBinding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onFocus</span><span class="p">.</span><span class="nx">addListener</span> <span class="nf">(x, y) -&gt;</span></pre></div></td></tr><tr id="section-23"><td class="docs"><div class="pilwrap"><a href="#section-23" class="pilcrow">&#182;</a></div><p>onstart function</p>
+</td><td class="code"><div class="highlight"><pre>                <span class="nv">extents = </span><span class="nx">activeRendering</span><span class="p">.</span><span class="nx">getExtents</span><span class="p">()</span>
+                <span class="nx">that</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onFocus</span><span class="p">.</span><span class="nx">fire</span><span class="p">()</span></pre></div></td></tr><tr id="section-24"><td class="docs"><div class="pilwrap"><a href="#section-24" class="pilcrow">&#182;</a></div><p>extents: x, y, width, height</p>
 </td><td class="code"><div class="highlight"><pre>                <span class="nv">px = </span><span class="p">(</span><span class="mi">8</span> <span class="o">*</span> <span class="p">(</span><span class="nx">x</span> <span class="o">-</span> <span class="nx">extents</span><span class="p">.</span><span class="nx">x</span><span class="p">)</span> <span class="o">/</span> <span class="nx">extents</span><span class="p">.</span><span class="nx">width</span><span class="p">)</span> <span class="o">+</span> <span class="mi">4</span>
                 <span class="nv">py = </span><span class="p">(</span><span class="mi">8</span> <span class="o">*</span> <span class="p">(</span><span class="nx">y</span> <span class="o">-</span> <span class="nx">extents</span><span class="p">.</span><span class="nx">y</span><span class="p">)</span> <span class="o">/</span> <span class="nx">extents</span><span class="p">.</span><span class="nx">height</span><span class="p">)</span> <span class="o">+</span> <span class="mi">4</span>
                 <span class="k">if</span> <span class="nx">px</span> <span class="o">&lt;</span> <span class="mi">3</span>
@@ -214,21 +252,21 @@ shape is pulled</p>
                   <span class="nv">factors.y = </span><span class="mi">1</span>
                 <span class="nx">calcFactors</span><span class="p">()</span>
         
-              <span class="nx">handleBinding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onUnfocus</span><span class="p">.</span><span class="nx">addListener</span> <span class="o">-&gt;</span></pre></div></td></tr><tr id="section-20"><td class="docs"><div class="pilwrap"><a href="#section-20" class="pilcrow">&#182;</a></div><p>onend function
+              <span class="nx">handleBinding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onUnfocus</span><span class="p">.</span><span class="nx">addListener</span> <span class="o">-&gt;</span></pre></div></td></tr><tr id="section-25"><td class="docs"><div class="pilwrap"><a href="#section-25" class="pilcrow">&#182;</a></div><p>onend function
 update</p>
 </td><td class="code"><div class="highlight"><pre>                <span class="nx">calcXYHeightWidth</span> <span class="nx">attrs</span>
-                
                 <span class="nx">that</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onResize</span><span class="p">.</span><span class="nx">fire</span>
                   <span class="nv">x: </span><span class="nx">attrs</span><span class="p">.</span><span class="nx">x</span> <span class="o">+</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">width</span><span class="o">/</span><span class="mi">2</span>
                   <span class="nv">y: </span><span class="nx">attrs</span><span class="p">.</span><span class="nx">y</span> <span class="o">+</span> <span class="nx">attrs</span><span class="p">.</span><span class="nx">height</span><span class="o">/</span><span class="mi">2</span>
                   <span class="nv">width: </span><span class="nx">attrs</span><span class="p">.</span><span class="nx">width</span>
                   <span class="nv">height: </span><span class="nx">attrs</span><span class="p">.</span><span class="nx">height</span>
+                <span class="nx">that</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onUnfocus</span><span class="p">.</span><span class="nx">fire</span><span class="p">()</span>
               <span class="nx">svgBBox</span><span class="p">.</span><span class="nx">toFront</span><span class="p">()</span>
               <span class="nx">handleSet</span><span class="p">.</span><span class="nx">toFront</span><span class="p">()</span>
               <span class="nx">midDrag</span><span class="p">.</span><span class="nx">toFront</span><span class="p">()</span>
-          <span class="k">else</span></pre></div></td></tr><tr id="section-21"><td class="docs"><div class="pilwrap"><a href="#section-21" class="pilcrow">&#182;</a></div><p>show all the boxes and
+          <span class="k">else</span></pre></div></td></tr><tr id="section-26"><td class="docs"><div class="pilwrap"><a href="#section-26" class="pilcrow">&#182;</a></div><p>show all the boxes and
 handles</p>
-</td><td class="code"><div class="highlight"><pre>            <span class="nx">svgBBox</span><span class="p">.</span><span class="nx">show</span><span class="p">().</span><span class="nx">toFront</span><span class="p">()</span></pre></div></td></tr><tr id="section-22"><td class="docs"><div class="pilwrap"><a href="#section-22" class="pilcrow">&#182;</a></div><p>adjust the SvgBBox to be around new
+</td><td class="code"><div class="highlight"><pre>            <span class="nx">svgBBox</span><span class="p">.</span><span class="nx">show</span><span class="p">().</span><span class="nx">toFront</span><span class="p">()</span></pre></div></td></tr><tr id="section-27"><td class="docs"><div class="pilwrap"><a href="#section-27" class="pilcrow">&#182;</a></div><p>adjust the SvgBBox to be around new
 shape</p>
 </td><td class="code"><div class="highlight"><pre>            <span class="nx">svgBBox</span><span class="p">.</span><span class="nx">attr</span>
               <span class="nv">x: </span><span class="nx">attrs</span><span class="p">.</span><span class="nx">x</span>
@@ -252,26 +290,28 @@ shape</p>
           <span class="nx">that</span><span class="p">.</span><span class="nx">detachFromRendering</span><span class="p">()</span>
 
           <span class="k">if</span> <span class="o">!</span><span class="nx">newRendering</span><span class="o">?</span>
-            <span class="k">return</span></pre></div></td></tr><tr id="section-23"><td class="docs"><div class="pilwrap"><a href="#section-23" class="pilcrow">&#182;</a></div><p>register the rendering</p>
+            <span class="k">return</span></pre></div></td></tr><tr id="section-28"><td class="docs"><div class="pilwrap"><a href="#section-28" class="pilcrow">&#182;</a></div><p>register the rendering</p>
 </td><td class="code"><div class="highlight"><pre>          <span class="nv">activeRendering = </span><span class="nx">newRendering</span>
-          <span class="nx">that</span><span class="p">.</span><span class="nx">show</span><span class="p">()</span></pre></div></td></tr><tr id="section-24"><td class="docs"><div class="pilwrap"><a href="#section-24" class="pilcrow">&#182;</a></div><p>Function to call in order to "de-activate" the edit box
+          <span class="nx">that</span><span class="p">.</span><span class="nx">show</span><span class="p">()</span></pre></div></td></tr><tr id="section-29"><td class="docs"><div class="pilwrap"><a href="#section-29" class="pilcrow">&#182;</a></div><p>Function to call in order to "de-activate" the edit box
 (i.e. make it hidden)</p>
 </td><td class="code"><div class="highlight"><pre>        <span class="nv">that.detachFromRendering = </span><span class="nf">() -&gt;</span>
           <span class="nv">activeRendering = </span><span class="kc">null</span>
-          <span class="nx">that</span><span class="p">.</span><span class="nx">hide</span><span class="p">()</span></pre></div></td></tr><tr id="section-25"><td class="docs"><div class="pilwrap"><a href="#section-25" class="pilcrow">&#182;</a></div><h2>ShapeCreateBox</h2>
+          <span class="nx">that</span><span class="p">.</span><span class="nx">hide</span><span class="p">()</span></pre></div></td></tr><tr id="section-30"><td class="docs"><div class="pilwrap"><a href="#section-30" class="pilcrow">&#182;</a></div><h2>ShapeCreateBox</h2>
 
 <p>Creates an SVG shape with a dotted border to be used as a guide for drawing shapes. Listens for user mousedown, which
 activates the appearance of the box at the x,y where the mousedown coords are, then finishes when user mouseup call is made</p>
+
+<p><strong>TODO:</strong> See if the bindings in the presentation can be moved here and have a simple event from here go back to
+the presentation to create the shape.</p>
 </td><td class="code"><div class="highlight"><pre>  <span class="nx">Component</span><span class="p">.</span><span class="nx">namespace</span> <span class="s">&#39;ShapeCreateBox&#39;</span><span class="p">,</span> <span class="nf">(ShapeCreateBox) -&gt;</span>
     <span class="nv">ShapeCreateBox.initInstance = </span><span class="nf">(args...) -&gt;</span>
-      <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">initController</span> <span class="s">&quot;OAC.Client.StreamingVideo.Component.ShapeCreateBox&quot;</span><span class="p">,</span> <span class="nx">args</span><span class="p">...,</span> <span class="nf">(that, paper) -&gt;</span>
-        <span class="nv">options = </span><span class="nx">that</span><span class="p">.</span><span class="nx">options</span></pre></div></td></tr><tr id="section-26"><td class="docs"><div class="pilwrap"><a href="#section-26" class="pilcrow">&#182;</a></div><p>Bounding box is created once in memory - it should be bound to the
+      <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">initInstance</span> <span class="s">&quot;OAC.Client.StreamingVideo.Component.ShapeCreateBox&quot;</span><span class="p">,</span> <span class="nx">args</span><span class="p">...,</span> <span class="nf">(that, paper) -&gt;</span>
+        <span class="nv">options = </span><span class="nx">that</span><span class="p">.</span><span class="nx">options</span></pre></div></td></tr><tr id="section-31"><td class="docs"><div class="pilwrap"><a href="#section-31" class="pilcrow">&#182;</a></div><p>Bounding box is created once in memory - it should be bound to the
 canvas/paper object or something that contains more than 1 shape.</p>
 </td><td class="code"><div class="highlight"><pre>        <span class="nv">svgBBox = </span><span class="p">{}</span>
         <span class="nv">factors = </span><span class="p">{}</span>
-        <span class="nv">attrs = </span><span class="p">{}</span>
-        <span class="nv">padding = </span><span class="mi">10</span>
-        <span class="nv">shapeAttrs = </span><span class="p">{}</span></pre></div></td></tr><tr id="section-27"><td class="docs"><div class="pilwrap"><a href="#section-27" class="pilcrow">&#182;</a></div><h4>createGuide</h4>
+        <span class="nv">attrs = </span><span class="p">{}</span></pre></div></td></tr><tr id="section-32"><td class="docs"><div class="pilwrap"><a href="#section-32" class="pilcrow">&#182;</a></div><p>padding = 10</p>
+</td><td class="code"><div class="highlight"><pre>        <span class="nv">shapeAttrs = </span><span class="p">{}</span></pre></div></td></tr><tr id="section-33"><td class="docs"><div class="pilwrap"><a href="#section-33" class="pilcrow">&#182;</a></div><h4>createGuide</h4>
 
 <p>Creates the SVGBBOX which acts as a guide to the user
 of how big their shape will be once shapeDone is fired</p>
@@ -281,7 +321,7 @@ of how big their shape will be once shapeDone is fired</p>
 <ul>
 <li>coords - object that has x,y coordinates for user mousedown. This is where the left and top of the box will start</li>
 </ul>
-</td><td class="code"><div class="highlight"><pre>        <span class="nv">that.createGuide = </span><span class="nf">(coords) -&gt;</span></pre></div></td></tr><tr id="section-28"><td class="docs"><div class="pilwrap"><a href="#section-28" class="pilcrow">&#182;</a></div><p>coordinates are top x,y values</p>
+</td><td class="code"><div class="highlight"><pre>        <span class="nv">that.createGuide = </span><span class="nf">(coords) -&gt;</span></pre></div></td></tr><tr id="section-34"><td class="docs"><div class="pilwrap"><a href="#section-34" class="pilcrow">&#182;</a></div><p>coordinates are top x,y values</p>
 </td><td class="code"><div class="highlight"><pre>          <span class="nv">attrs.x = </span><span class="nx">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
           <span class="nv">attrs.y = </span><span class="nx">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
           <span class="nv">attrs.width = </span><span class="mi">0</span>
@@ -291,15 +331,15 @@ of how big their shape will be once shapeDone is fired</p>
             <span class="nx">svgBBox</span><span class="p">.</span><span class="nx">attr</span>
               <span class="nv">stroke: </span><span class="s">&#39;#333333&#39;</span>
               <span class="s">&#39;stroke-dasharray&#39;</span><span class="o">:</span> <span class="p">[</span><span class="s">&quot;--&quot;</span><span class="p">]</span>
-          <span class="k">else</span></pre></div></td></tr><tr id="section-29"><td class="docs"><div class="pilwrap"><a href="#section-29" class="pilcrow">&#182;</a></div><p>show all the boxes and
+          <span class="k">else</span></pre></div></td></tr><tr id="section-35"><td class="docs"><div class="pilwrap"><a href="#section-35" class="pilcrow">&#182;</a></div><p>show all the boxes and
 handles</p>
-</td><td class="code"><div class="highlight"><pre>            <span class="nx">svgBBox</span><span class="p">.</span><span class="nx">show</span><span class="p">()</span></pre></div></td></tr><tr id="section-30"><td class="docs"><div class="pilwrap"><a href="#section-30" class="pilcrow">&#182;</a></div><p>adjust the SvgBBox to be around new
+</td><td class="code"><div class="highlight"><pre>            <span class="nx">svgBBox</span><span class="p">.</span><span class="nx">show</span><span class="p">()</span></pre></div></td></tr><tr id="section-36"><td class="docs"><div class="pilwrap"><a href="#section-36" class="pilcrow">&#182;</a></div><p>adjust the SvgBBox to be around new
 shape</p>
 </td><td class="code"><div class="highlight"><pre>            <span class="nx">svgBBox</span><span class="p">.</span><span class="nx">attr</span>
               <span class="nv">x: </span><span class="nx">attrs</span><span class="p">.</span><span class="nx">x</span>
               <span class="nv">y: </span><span class="nx">attrs</span><span class="p">.</span><span class="nx">y</span>
               <span class="nv">width: </span><span class="nx">attrs</span><span class="p">.</span><span class="nx">width</span>
-              <span class="nv">height: </span><span class="nx">attrs</span><span class="p">.</span><span class="nx">height</span></pre></div></td></tr><tr id="section-31"><td class="docs"><div class="pilwrap"><a href="#section-31" class="pilcrow">&#182;</a></div><h4>resizeGuide</h4>
+              <span class="nv">height: </span><span class="nx">attrs</span><span class="p">.</span><span class="nx">height</span></pre></div></td></tr><tr id="section-37"><td class="docs"><div class="pilwrap"><a href="#section-37" class="pilcrow">&#182;</a></div><h4>resizeGuide</h4>
 
 <p>Take passed x,y coords and set as bottom-right, not
 top left</p>
@@ -337,7 +377,7 @@ top left</p>
               <span class="nv">width: </span><span class="nx">attrs</span><span class="p">.</span><span class="nx">width</span>
               <span class="nv">height: </span><span class="nx">attrs</span><span class="p">.</span><span class="nx">height</span>
               <span class="nv">x: </span><span class="nx">attrs</span><span class="p">.</span><span class="nx">x</span>
-              <span class="nv">y: </span><span class="nx">attrs</span><span class="p">.</span><span class="nx">y</span></pre></div></td></tr><tr id="section-32"><td class="docs"><div class="pilwrap"><a href="#section-32" class="pilcrow">&#182;</a></div><h4>completeShape</h4>
+              <span class="nv">y: </span><span class="nx">attrs</span><span class="p">.</span><span class="nx">y</span></pre></div></td></tr><tr id="section-38"><td class="docs"><div class="pilwrap"><a href="#section-38" class="pilcrow">&#182;</a></div><h4>completeShape</h4>
 
 <p>Take the saved coordinates and pass them back
 to the calling function</p>
@@ -368,4 +408,4 @@ Coordinates object with properties x, y, width, and height</p>
             <span class="nv">height: </span><span class="nx">attrs</span><span class="p">.</span><span class="nx">height</span>
           <span class="p">}</span>
 
-</pre></div></td></tr></tbody></table><div id="generated">generated Sat Apr 28 2012 19:08:51 GMT-0400 (EDT)  </div><div id="projectname"><a href="../index.html">OAC Video Annotation Client</a></div></div>
+</pre></div></td></tr></tbody></table><div id="generated">generated Tue May 08 2012 15:17:59 GMT-0400 (EDT)  </div><div id="projectname"><a href="../index.html">Video Annotator</a></div></div>
