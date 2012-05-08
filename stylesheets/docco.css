@@ -287,7 +287,7 @@ body .vi { color: #19469D }                     /* Name.Variable.Instance */
 body .il { color: #666666 }                     /* Literal.Number.Integer.Long */
 
 #top {
-	background-color: black;
+	background-color: #424242;
 	margin-bottom: 1em;
 	padding-bottom: 2em;
 	padding-left: 0.5em;
@@ -295,7 +295,7 @@ body .il { color: #666666 }                     /* Literal.Number.Integer.Long *
 
 #bottom {
 	clear: both;
-	background-color: black;
+	background-color: #424242;
 	margin-top: 1em;
 	padding-top: 1em;
 	padding-left: 1em;
@@ -318,7 +318,7 @@ body .il { color: #666666 }                     /* Literal.Number.Integer.Long *
 }
 
 #title {
-	text-shadow: 0 0 3px #222;
+	text-shadow: 0 0 3px #333;
 	font-weight: bold;
 	width: 860px;
 	margin: 0 auto;
@@ -327,7 +327,7 @@ body .il { color: #666666 }                     /* Literal.Number.Integer.Long *
 #title h1, #description {
 	padding: 0.5em 0 0;
 	margin: 0;
-	color: #aaa;
+	color: #bbb;
 }
 
 #title h1 a {
