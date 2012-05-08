@@ -46,7 +46,7 @@ $(document).ready ->
 		#
 		driver.bindPlayer = (domObj) ->
 			#
-			# OAC.Client.StreamingVideo.Player.DriverBinding is the super MITHgrid object class for
+			# OAC.Client.StreamingVideo.Player.DriverBinding is the MITHgrid super class for
 			# driver bindings.
 			#
 			OAC.Client.StreamingVideo.Player.DriverBinding.initInstance (that) ->
