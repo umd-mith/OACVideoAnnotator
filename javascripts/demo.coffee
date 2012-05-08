@@ -46,6 +46,7 @@ OAC.Client.StreamingVideo.namespace "Demo", (Demo) ->
 			MITHGrid.initInstance "OAC.Client.StreamingVideo.Demo.TextControls", args..., (that, container) ->
 				options = that.options
 				app = options.application()
+				appFn = options.application
 				shown = false
 
 				$(document).ready ->
@@ -91,6 +92,7 @@ OAC.Client.StreamingVideo.namespace "Demo", (Demo) ->
 				# We begin by creating an instance of the Video Annotator application.
 				# This requires the player object passed in by the onNewPlayer function above.
 				#
+				appFn = -> app
 
 				#
 				# Running the application causes all of the DOM elements, presentations, and other components to be
@@ -105,7 +107,7 @@ OAC.Client.StreamingVideo.namespace "Demo", (Demo) ->
 					annotations = OAC.Client.StreamingVideo.Presentation.AnnotationList.initInstance '#annotation-text',
 						dataView: app.dataView.currentAnnotations
 						lensKey: ['.bodyType']
-						application: -> app
+						application: appFn
 
 					#
 					# we can use the default bare-bones text display provided by the annotation client.
@@ -114,7 +116,8 @@ OAC.Client.StreamingVideo.namespace "Demo", (Demo) ->
 					# the shape on the video.
 					#
 					hoverController = OAC.Client.StreamingVideo.Demo.Hover.initInstance()
-					textControls = OAC.Client.StreamingVideo.Demo.TextControls.initInstance "#text-controls"
+					textControls = OAC.Client.StreamingVideo.Demo.TextControls.initInstance "#text-controls",
+						application: appFn
 			
 					app.events.onActiveAnnotationChange.addListener annotations.eventFocusChange
 										
@@ -195,19 +198,19 @@ OAC.Client.StreamingVideo.namespace "Demo", (Demo) ->
 					  # be the name of a shapeType.
 					OAC.Client.StreamingVideo.Component.ModeButton.initInstance "#modeRectangle",
 						mode: "Rectangle"
-						application: -> app
+						application: appFn
 
 					OAC.Client.StreamingVideo.Component.ModeButton.initInstance "#modeEllipse",
 						mode: "Ellipse"
-						application: -> app
+						application: appFn
 
 					OAC.Client.StreamingVideo.Component.ModeButton.initInstance "#modeSelect",
 						mode: "Select"
-						application: -> app
+						application: appFn
 
 					OAC.Client.StreamingVideo.Component.ModeButton.initInstance "#modeWatch",
 						mode: "Watch"
-						application: -> app
+						application: appFn
 
 					$("#export-button").click ->
 						data = app.exportData()
