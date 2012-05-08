@@ -2,70 +2,105 @@
 layout: docco
 title: OACVideoAnnotator/code/src/drivers/html5.coffee.html
 ---
-<div id="container"><div id="background"></div><div id="jump_to">Jump To &hellip;<div id="jump_wrapper"><div id="jump_page"><a href="../../index.html" class="source"><span class="file_name">README</span></a><a href="../../src/canvas.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">canvas.coffee</span></a><a href="../../src/component.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">component.coffee</span></a><a href="../../src/controllers.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">controllers.coffee</span></a><a href="../../src/driver-framework.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">driver-framework.coffee</span></a><a href="../../src/drivers/dummy.coffee.html" class="source "><span class="base_path">src / drivers / </span><span class="file_name">dummy.coffee</span></a><a href="../../src/drivers/html5.coffee.html" class="source selected"><span class="base_path">src / drivers / </span><span class="file_name">html5.coffee</span></a><a href="../../src/drivers/youtube.coffee.html" class="source "><span class="base_path">src / drivers / </span><span class="file_name">youtube.coffee</span></a><a href="../../src/intro.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">intro.coffee</span></a><a href="../../src/outro.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">outro.coffee</span></a><a href="../../src/presentations.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">presentations.coffee</span></a></div></div></div><table cellpadding="0" cellspacing="0"><thead><tr><th class="docs"><h1>html5.coffee</h1><div class="filepath">src/drivers/</div></th><th class="code"></th></tr></thead><tbody><tr id="section-1"><td class="docs"><div class="pilwrap"><a href="#section-1" class="pilcrow">&#182;</a></div><p>Function: ready</p>
+<div id="container"><div id="background"></div><div id="jump_to">Jump To &hellip;<div id="jump_wrapper"><div id="jump_page"><a href="../../index.html" class="source"><span class="file_name">README</span></a><a href="../../src/application.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">application.coffee</span></a><a href="../../src/component.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">component.coffee</span></a><a href="../../src/controller.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">controller.coffee</span></a><a href="../../src/driver-framework.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">driver-framework.coffee</span></a><a href="../../src/drivers/dummy.coffee.html" class="source "><span class="base_path">src / drivers / </span><span class="file_name">dummy.coffee</span></a><a href="../../src/drivers/html5.coffee.html" class="source selected"><span class="base_path">src / drivers / </span><span class="file_name">html5.coffee</span></a><a href="../../src/intro.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">intro.coffee</span></a><a href="../../src/outro.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">outro.coffee</span></a><a href="../../src/presentation.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">presentation.coffee</span></a></div></div></div><table cellpadding="0" cellspacing="0"><thead><tr><th class="docs"><h1>html5.coffee</h1><div class="filepath">src/drivers/</div></th><th class="code"></th></tr></thead><tbody><tr id="section-1"><td class="docs"><div class="pilwrap"><a href="#section-1" class="pilcrow">&#182;</a></div><h1>HTML5 Player Driver</h1>
 
-<p>Start point required to call OAC driver register. It initializes the OAC driver.</p>
+<p>This driver provides support for the <code>&lt;video/&gt;</code> HTML 5 tag. The target URI should be added to the <code>&lt;video/&gt;</code> tag
+as the <code>@data-oatarget</code> attribute. For example, the following is the <code>&lt;video/&gt;</code> tag from the demonstration page:</p>
+
+<pre><code>&lt;video preload="metadata" 
+       data-oatarget="http://html5demos.com/assets/dizzy" 
+       controls&gt;
+    &lt;source src="./assets/dizzy.mp4" type="video/mp4" /&gt;
+    &lt;source src="./assets/dizzy.webm" type="video/webm" /&gt;
+    &lt;source src="./assets/dizzy.ogv" type="video/ogv" /&gt;
+&lt;/video&gt;
+</code></pre>
+
+<p><strong>N.B.</strong>: All <code>&lt;video/&gt;</code> objects in the page will have a driver binding attached, and this driver binding will be passed
+to all of the functions registered through OAC.Client.StreamingVideo.Player.onNewPlayer().</p>
+
+<p>As soon as the player driver is comfortable, it can register itself with the Video Annotator framework by calling
+the OAC.Client.StreamingVideo.Player.register function with a callback. The register function will call this
+callback with a plain JavaScript object that should be filled in with the following properties:</p>
 </td><td class="code"><div class="highlight"><pre><span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">ready</span> <span class="o">-&gt;</span>
-  <span class="nx">OAC</span><span class="p">.</span><span class="nx">Client</span><span class="p">.</span><span class="nx">StreamingVideo</span><span class="p">.</span><span class="nx">Player</span><span class="p">.</span><span class="nx">register</span> <span class="nx">initHTML5PlayerDrv</span><span class="p">()</span></pre></div></td></tr><tr id="section-2"><td class="docs"><div class="pilwrap"><a href="#section-2" class="pilcrow">&#182;</a></div><p>Class: OACDummyPlayerDrv</p>
+  <span class="nx">OAC</span><span class="p">.</span><span class="nx">Client</span><span class="p">.</span><span class="nx">StreamingVideo</span><span class="p">.</span><span class="nx">Player</span><span class="p">.</span><span class="nx">register</span> <span class="nf">(driver) -&gt;</span></pre></div></td></tr><tr id="section-2"><td class="docs"><div class="pilwrap"><a href="#section-2" class="pilcrow">&#182;</a></div><h2>getAvailablePlayers</h2>
 
-<p>OAC driver for Dummy Player.</p>
-</td><td class="code"><div class="highlight"><pre><span class="nv">initHTML5PlayerDrv = </span><span class="o">-&gt;</span>
-  <span class="nv">driver = </span><span class="p">{}</span></pre></div></td></tr><tr id="section-3"><td class="docs"><div class="pilwrap"><a href="#section-3" class="pilcrow">&#182;</a></div><p>Function: getAvailablePlayers
-Returns all players available on the page, that can be controlled with this driver.
-Returns:
-An array of DOM objects.</p>
-</td><td class="code"><div class="highlight"><pre>  <span class="nv">driver.getAvailablePlayers = </span><span class="o">-&gt;</span> <span class="nx">$</span><span class="p">(</span><span class="s">&#39;video&#39;</span><span class="p">)</span>
-      
-  <span class="nv">driver.getOACVersion = </span><span class="o">-&gt;</span> <span class="s">&quot;1.0&quot;</span>
-  
-  <span class="nv">driver.bindPlayer = </span><span class="nf">(domObj) -&gt;</span>
-    <span class="nx">OAC</span><span class="p">.</span><span class="nx">Client</span><span class="p">.</span><span class="nx">StreamingVideo</span><span class="p">.</span><span class="nx">Player</span><span class="p">.</span><span class="nx">DriverBinding</span><span class="p">.</span><span class="nx">initInstance</span> <span class="nf">(that) -&gt;</span>
-      <span class="nx">$</span><span class="p">(</span><span class="nx">domObj</span><span class="p">).</span><span class="nx">bind</span> <span class="s">&#39;loadedmetadata&#39;</span><span class="p">,</span> <span class="o">-&gt;</span>
-        <span class="nx">that</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onResize</span><span class="p">.</span><span class="nx">fire</span> <span class="nx">that</span><span class="p">.</span><span class="nx">getsize</span><span class="p">()</span>
-      
-      <span class="nx">$</span><span class="p">(</span><span class="nx">domObj</span><span class="p">).</span><span class="nx">bind</span> <span class="s">&#39;timeupdate&#39;</span><span class="p">,</span> <span class="o">-&gt;</span>
-        <span class="nx">that</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onPlayheadUpdate</span><span class="p">.</span><span class="nx">fire</span> <span class="nx">domObj</span><span class="p">.</span><span class="nx">currentTime</span></pre></div></td></tr><tr id="section-4"><td class="docs"><div class="pilwrap"><a href="#section-4" class="pilcrow">&#182;</a></div><p>Function: onplayheadupdate
-Customizable callback to set a function that is going to be called on each second.
-Parameters:
-callback - User function</p>
-</td><td class="code"><div class="highlight"><pre>      <span class="nv">that.onPlayheadUpdate = </span><span class="nf">(cb) -&gt;</span>
+<p>Returns all player DOM objects available on the page, that can be controlled with this driver.
+All of the DOM objects will be passed individually to the #bindPlayer method. The returned binding
+objects will be passed to any callbacks passed to OAC.Client.StreamingVideo.Player.onNewPlayer().</p>
+</td><td class="code"><div class="highlight"><pre>    <span class="nv">driver.getAvailablePlayers = </span><span class="o">-&gt;</span> <span class="nx">$</span><span class="p">(</span><span class="s">&#39;video&#39;</span><span class="p">)</span>
+    </pre></div></td></tr><tr id="section-3"><td class="docs"><div class="pilwrap"><a href="#section-3" class="pilcrow">&#182;</a></div><h2>getOACVersion</h2>
+
+<p>Returns the version number of the API the player driver is implementing. "1.0" is the only option for now.</p>
+</td><td class="code"><div class="highlight"><pre>    <span class="nv">driver.getOACVersion = </span><span class="o">-&gt;</span> <span class="s">&quot;1.0&quot;</span>
+  </pre></div></td></tr><tr id="section-4"><td class="docs"><div class="pilwrap"><a href="#section-4" class="pilcrow">&#182;</a></div><h2>bindPlayer</h2>
+
+<p>Takes the DOM object and binds it to a JavaScript object that provides the OAC player API.
+The binding is then used by the Video Annotator to manage the player.</p>
+</td><td class="code"><div class="highlight"><pre>    <span class="nv">driver.bindPlayer = </span><span class="nf">(domObj) -&gt;</span></pre></div></td></tr><tr id="section-5"><td class="docs"><div class="pilwrap"><a href="#section-5" class="pilcrow">&#182;</a></div><p>OAC.Client.StreamingVideo.Player.DriverBinding is the MITHgrid super class for
+driver bindings.</p>
+</td><td class="code"><div class="highlight"><pre>      <span class="nx">OAC</span><span class="p">.</span><span class="nx">Client</span><span class="p">.</span><span class="nx">StreamingVideo</span><span class="p">.</span><span class="nx">Player</span><span class="p">.</span><span class="nx">DriverBinding</span><span class="p">.</span><span class="nx">initInstance</span> <span class="nf">(that) -&gt;</span></pre></div></td></tr><tr id="section-6"><td class="docs"><div class="pilwrap"><a href="#section-6" class="pilcrow">&#182;</a></div><p>We begin by binding appropriate events in the DOM object to the
+event firers in the driver binding object.</p>
+</td><td class="code"><div class="highlight"><pre>        </pre></div></td></tr><tr id="section-7"><td class="docs"><div class="pilwrap"><a href="#section-7" class="pilcrow">&#182;</a></div><p>We fire the onResize event when the video metadata has been loaded. This ensures
+that the Video Annotator has the correct size of the play surface once the video
+is loaded and the player has sized itself accordingly.</p>
+</td><td class="code"><div class="highlight"><pre>        <span class="nx">$</span><span class="p">(</span><span class="nx">domObj</span><span class="p">).</span><span class="nx">bind</span> <span class="s">&#39;loadedmetadata&#39;</span><span class="p">,</span> <span class="o">-&gt;</span>
+          <span class="nx">that</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onResize</span><span class="p">.</span><span class="nx">fire</span> <span class="nx">that</span><span class="p">.</span><span class="nx">getSize</span><span class="p">()</span>
+      </pre></div></td></tr><tr id="section-8"><td class="docs"><div class="pilwrap"><a href="#section-8" class="pilcrow">&#182;</a></div><p>We fire the onPlayheadUpdate event when the player fires the timeupdate event, but only if
+the new time is near the beginning or is different by at least 0.2 seconds from
+the last time we fired the event. This avoids firing off too many events.</p>
+</td><td class="code"><div class="highlight"><pre>        <span class="nv">lastTime = </span><span class="mi">0</span>
         <span class="nx">$</span><span class="p">(</span><span class="nx">domObj</span><span class="p">).</span><span class="nx">bind</span> <span class="s">&#39;timeupdate&#39;</span><span class="p">,</span> <span class="o">-&gt;</span>
-          <span class="nx">cb</span> <span class="nx">domObj</span><span class="p">.</span><span class="nx">currentTime</span>
-        </pre></div></td></tr><tr id="section-5"><td class="docs"><div class="pilwrap"><a href="#section-5" class="pilcrow">&#182;</a></div><p>Function: getcoordinates
-Returns the current player coordinates on screen
-Returns:
-An array of coordinates(0 is X, 1 is Y).</p>
-</td><td class="code"><div class="highlight"><pre>      <span class="nv">that.getcoordinates = </span><span class="o">-&gt;</span> 
-        <span class="p">[</span>
-          <span class="nx">$</span><span class="p">(</span><span class="nx">domObj</span><span class="p">).</span><span class="nx">position</span><span class="p">().</span><span class="nx">left</span>
-          <span class="nx">$</span><span class="p">(</span><span class="nx">domObj</span><span class="p">).</span><span class="nx">position</span><span class="p">().</span><span class="nx">top</span>
-        <span class="p">]</span>
-  </pre></div></td></tr><tr id="section-6"><td class="docs"><div class="pilwrap"><a href="#section-6" class="pilcrow">&#182;</a></div><p>Function: getsize
-Returns the video size on current player.
-Returns:
-Array of pixel values ( 0 is width, 1 is height).</p>
-</td><td class="code"><div class="highlight"><pre>      <span class="nv">that.getsize = </span><span class="o">-&gt;</span> 
-        <span class="p">[</span>
-          <span class="nx">$</span><span class="p">(</span><span class="nx">domObj</span><span class="p">).</span><span class="nx">width</span><span class="p">()</span> <span class="o">-</span> <span class="mi">2</span>
-          <span class="nx">$</span><span class="p">(</span><span class="nx">domObj</span><span class="p">).</span><span class="nx">height</span><span class="p">()</span> <span class="o">-</span> <span class="mi">2</span>
-        <span class="p">]</span>
-  </pre></div></td></tr><tr id="section-7"><td class="docs"><div class="pilwrap"><a href="#section-7" class="pilcrow">&#182;</a></div><p>Function: play
-Plays video.</p>
-</td><td class="code"><div class="highlight"><pre>      <span class="nv">that.play = </span><span class="o">-&gt;</span> <span class="nx">domObj</span><span class="p">.</span><span class="nx">play</span><span class="p">()</span>
-  </pre></div></td></tr><tr id="section-8"><td class="docs"><div class="pilwrap"><a href="#section-8" class="pilcrow">&#182;</a></div><p>Function: pause
-Pauses video.</p>
-</td><td class="code"><div class="highlight"><pre>      <span class="nv">that.pause = </span><span class="o">-&gt;</span> <span class="nx">domObj</span><span class="p">.</span><span class="nx">pause</span><span class="p">()</span>
-  </pre></div></td></tr><tr id="section-9"><td class="docs"><div class="pilwrap"><a href="#section-9" class="pilcrow">&#182;</a></div><p>Function: getPlayhead
-Returns the current play head position
-Returns:
-Play head position</p>
-</td><td class="code"><div class="highlight"><pre>      <span class="nv">that.getPlayhead = </span><span class="o">-&gt;</span> <span class="nx">domObj</span><span class="p">.</span><span class="nx">currentTime</span>
-  </pre></div></td></tr><tr id="section-10"><td class="docs"><div class="pilwrap"><a href="#section-10" class="pilcrow">&#182;</a></div><p>Function: setPlayhead
-Sets the play head value to a certain position.
-Parameters:
-value - New play head value</p>
-</td><td class="code"><div class="highlight"><pre>      <span class="nv">that.setPlayhead = </span><span class="nf">(n) -&gt;</span>
-        <span class="nv">domObj.currentTime = </span><span class="nb">parseFloat</span> <span class="nx">n</span>
-  <span class="nx">driver</span>
+          <span class="nv">now = </span><span class="nx">domObj</span><span class="p">.</span><span class="nx">currentTime</span>
+          <span class="k">if</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">abs</span><span class="p">(</span><span class="nx">lastTime</span> <span class="o">-</span> <span class="nx">now</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mf">0.2</span> <span class="o">or</span> <span class="nx">now</span> <span class="o">&lt;</span> <span class="mf">0.1</span>
+            <span class="nv">lastTime = </span><span class="nx">now</span>
+            <span class="nx">that</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onPlayheadUpdate</span><span class="p">.</span><span class="nx">fire</span> <span class="nx">domObj</span><span class="p">.</span><span class="nx">currentTime</span>
+        </pre></div></td></tr><tr id="section-9"><td class="docs"><div class="pilwrap"><a href="#section-9" class="pilcrow">&#182;</a></div><h1>Player Driver API</h1>
 
-</pre></div></td></tr></tbody></table><div id="generated">generated Sat Apr 28 2012 19:08:52 GMT-0400 (EDT)  </div><div id="projectname"><a href="../../index.html">OAC Video Annotation Client</a></div></div>
+<p>The following methods are expected for the player driver binding.</p>
+</td><td class="code"><div class="highlight"><pre>        </pre></div></td></tr><tr id="section-10"><td class="docs"><div class="pilwrap"><a href="#section-10" class="pilcrow">&#182;</a></div><h3>getCoordinates</h3>
+
+<p>Returns the current player coordinates (left, top) on screen.</p>
+</td><td class="code"><div class="highlight"><pre>        <span class="nv">that.getCoordinates = </span><span class="o">-&gt;</span> 
+          <span class="p">[</span>
+            <span class="nx">$</span><span class="p">(</span><span class="nx">domObj</span><span class="p">).</span><span class="nx">position</span><span class="p">().</span><span class="nx">left</span>
+            <span class="nx">$</span><span class="p">(</span><span class="nx">domObj</span><span class="p">).</span><span class="nx">position</span><span class="p">().</span><span class="nx">top</span>
+          <span class="p">]</span>
+  </pre></div></td></tr><tr id="section-11"><td class="docs"><div class="pilwrap"><a href="#section-11" class="pilcrow">&#182;</a></div><h3>getSize</h3>
+
+<p>Returns the video size (width, height) of current player.</p>
+</td><td class="code"><div class="highlight"><pre>        <span class="nv">that.getSize = </span><span class="o">-&gt;</span> 
+          <span class="p">[</span>
+            <span class="nx">$</span><span class="p">(</span><span class="nx">domObj</span><span class="p">).</span><span class="nx">width</span><span class="p">()</span>
+            <span class="nx">$</span><span class="p">(</span><span class="nx">domObj</span><span class="p">).</span><span class="nx">height</span><span class="p">()</span>
+          <span class="p">]</span>
+      </pre></div></td></tr><tr id="section-12"><td class="docs"><div class="pilwrap"><a href="#section-12" class="pilcrow">&#182;</a></div><h3>getTargetURI</h3>
+
+<p>Returns the targetURI that should be used in an OAC annotation. This should represent the
+video being played by the player.</p>
+</td><td class="code"><div class="highlight"><pre>        <span class="nv">that.getTargetURI = </span><span class="o">-&gt;</span> <span class="nx">$</span><span class="p">(</span><span class="nx">domObj</span><span class="p">).</span><span class="nx">data</span><span class="p">(</span><span class="s">&#39;oatarget&#39;</span><span class="p">)</span>
+        </pre></div></td></tr><tr id="section-13"><td class="docs"><div class="pilwrap"><a href="#section-13" class="pilcrow">&#182;</a></div><h3>play</h3>
+
+<p>Starts playing the video.</p>
+</td><td class="code"><div class="highlight"><pre>        <span class="nv">that.play = </span><span class="o">-&gt;</span> <span class="nx">domObj</span><span class="p">.</span><span class="nx">play</span><span class="p">()</span>
+  </pre></div></td></tr><tr id="section-14"><td class="docs"><div class="pilwrap"><a href="#section-14" class="pilcrow">&#182;</a></div><h3>pause</h3>
+
+<p>Stops playing the video.</p>
+</td><td class="code"><div class="highlight"><pre>        <span class="nv">that.pause = </span><span class="o">-&gt;</span> <span class="nx">domObj</span><span class="p">.</span><span class="nx">pause</span><span class="p">()</span>
+  </pre></div></td></tr><tr id="section-15"><td class="docs"><div class="pilwrap"><a href="#section-15" class="pilcrow">&#182;</a></div><h3>getPlayhead</h3>
+
+<p>Returns the current play head position</p>
+</td><td class="code"><div class="highlight"><pre>        <span class="nv">that.getPlayhead = </span><span class="o">-&gt;</span> <span class="nx">domObj</span><span class="p">.</span><span class="nx">currentTime</span>
+  </pre></div></td></tr><tr id="section-16"><td class="docs"><div class="pilwrap"><a href="#section-16" class="pilcrow">&#182;</a></div><h3>setPlayhead</h3>
+
+<p>Sets the play head value to a certain position.</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li>value - New play head value</li>
+</ul>
+</td><td class="code"><div class="highlight"><pre>        <span class="nv">that.setPlayhead = </span><span class="nf">(n) -&gt;</span>
+          <span class="nv">domObj.currentTime = </span><span class="nb">parseFloat</span> <span class="nx">n</span>
+
+</pre></div></td></tr></tbody></table><div id="generated">generated Tue May 08 2012 15:18:00 GMT-0400 (EDT)  </div><div id="projectname"><a href="../../index.html">Video Annotator</a></div></div>

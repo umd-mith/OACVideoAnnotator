@@ -56,9 +56,10 @@
         args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
         clickController = Demo.Click.initInstance({});
         return MITHGrid.initInstance.apply(MITHGrid, ["OAC.Client.StreamingVideo.Demo.TextControls"].concat(__slice.call(args), [function(that, container) {
-          var app, options, shown;
+          var app, appFn, options, shown;
           options = that.options;
-          app = options.application;
+          app = options.application();
+          appFn = options.application;
           shown = false;
           $(document).ready(function() {
             var deleteBinding, deleteEl, editBinding, editEl, saveBinding, saveEl;
@@ -101,15 +102,21 @@
         var args, _ref;
         args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
         return (_ref = OAC.Client.StreamingVideo.Application).initInstance.apply(_ref, ["OAC.Client.StreamingVideo.Demo.Application"].concat(__slice.call(args), [function(app) {
+          var appFn;
+          appFn = function() {
+            return app;
+          };
           return app.ready(function() {
             var annotations, hoverController, textControls;
             annotations = OAC.Client.StreamingVideo.Presentation.AnnotationList.initInstance('#annotation-text', {
               dataView: app.dataView.currentAnnotations,
               lensKey: ['.bodyType'],
-              application: app
+              application: appFn
             });
             hoverController = OAC.Client.StreamingVideo.Demo.Hover.initInstance();
-            textControls = OAC.Client.StreamingVideo.Demo.TextControls.initInstance("#text-controls");
+            textControls = OAC.Client.StreamingVideo.Demo.TextControls.initInstance("#text-controls", {
+              application: appFn
+            });
             app.events.onActiveAnnotationChange.addListener(annotations.eventFocusChange);
             textControls.events.onEdit.addListener(function() {
               var rendering;
@@ -187,19 +194,23 @@
             });
             OAC.Client.StreamingVideo.Component.ModeButton.initInstance("#modeRectangle", {
               mode: "Rectangle",
-              application: app
+              application: appFn
             });
             OAC.Client.StreamingVideo.Component.ModeButton.initInstance("#modeEllipse", {
               mode: "Ellipse",
-              application: app
+              application: appFn
             });
             OAC.Client.StreamingVideo.Component.ModeButton.initInstance("#modeSelect", {
               mode: "Select",
-              application: app
+              application: appFn
             });
             OAC.Client.StreamingVideo.Component.ModeButton.initInstance("#modeWatch", {
               mode: "Watch",
-              application: app
+              application: appFn
+            });
+            $("#select-button").click(function() {
+              $("#export-text").focus();
+              return $("#export-text").select();
             });
             $("#export-button").click(function() {
               var data;
