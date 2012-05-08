@@ -208,6 +208,10 @@
               mode: "Watch",
               application: appFn
             });
+            $("#select-button").click(function() {
+              $("#export-text").focus();
+              return $("#export-text").select();
+            });
             $("#export-button").click(function() {
               var data;
               data = app.exportData();

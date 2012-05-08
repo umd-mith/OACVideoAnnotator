@@ -212,6 +212,10 @@ OAC.Client.StreamingVideo.namespace "Demo", (Demo) ->
 						mode: "Watch"
 						application: appFn
 
+					$("#select-button").click ->
+						$("#export-text").focus()
+						$("#export-text").select()
+						
 					$("#export-button").click ->
 						data = app.exportData()
 						$("#export-text").val jsl.format.formatJson JSON.stringify data
