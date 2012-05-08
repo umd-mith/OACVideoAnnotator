@@ -1,0 +1,626 @@
+---
+layout: docco
+title: OACVideoAnnotator/code/src/application.coffee.html
+---
+<div id="container"><div id="background"></div><div id="jump_to">Jump To &hellip;<div id="jump_wrapper"><div id="jump_page"><a href="../index.html" class="source"><span class="file_name">README</span></a><a href="../src/application.coffee.html" class="source selected"><span class="base_path">src / </span><span class="file_name">application.coffee</span></a><a href="../src/component.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">component.coffee</span></a><a href="../src/controllers.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">controllers.coffee</span></a><a href="../src/driver-framework.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">driver-framework.coffee</span></a><a href="../src/drivers/dummy.coffee.html" class="source "><span class="base_path">src / drivers / </span><span class="file_name">dummy.coffee</span></a><a href="../src/drivers/html5.coffee.html" class="source "><span class="base_path">src / drivers / </span><span class="file_name">html5.coffee</span></a><a href="../src/drivers/youtube.coffee.html" class="source "><span class="base_path">src / drivers / </span><span class="file_name">youtube.coffee</span></a><a href="../src/intro.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">intro.coffee</span></a><a href="../src/outro.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">outro.coffee</span></a><a href="../src/presentations.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">presentations.coffee</span></a></div></div></div><table cellpadding="0" cellspacing="0"><thead><tr><th class="docs"><h1>application.coffee</h1><div class="filepath">src/</div></th><th class="code"></th></tr></thead><tbody><tr id="section-1"><td class="docs"><div class="pilwrap"><a href="#section-1" class="pilcrow">&#182;</a></div><h1>Annotation Application</h1>
+
+<p>This is the heart of the Video Annotator library. This core application pulls together the major components needed to
+construct a video annotation client. Functions are provided to manage import and export of annotations in the OA model
+represented as RDF/JSON. Armed with the data schema outlined in the outro.coffee file, you can add other MITHgrid-based
+components to visualize the annotations.</p>
+</td><td class="code"><div class="highlight"><pre><span class="nx">OAC</span><span class="p">.</span><span class="nx">Client</span><span class="p">.</span><span class="nx">StreamingVideo</span><span class="p">.</span><span class="nx">namespace</span> <span class="s">&quot;Application&quot;</span><span class="p">,</span> <span class="nf">(Application) -&gt;</span></pre></div></td></tr><tr id="section-2"><td class="docs"><div class="pilwrap"><a href="#section-2" class="pilcrow">&#182;</a></div><p>The first thing we do is set up some private functions to generate unique identifiers. We use these when exporting
+the annotations since OA requires a number of blank nodes. We also use these to create unique item IDs for the
+MITHgrid data store.</p>
+</td><td class="code"><div class="highlight"><pre>  </pre></div></td></tr><tr id="section-3"><td class="docs"><div class="pilwrap"><a href="#section-3" class="pilcrow">&#182;</a></div><h3>S4 (private)</h3>
+
+<p>Generates a UUID value component. This is not a global uid.</p>
+
+<p>Returns:
+String with 4 hex digits.</p>
+</td><td class="code"><div class="highlight"><pre>  <span class="nv">S4 = </span><span class="o">-&gt;</span> <span class="p">(((</span><span class="mi">1</span> <span class="o">+</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">random</span><span class="p">())</span> <span class="o">*</span> <span class="mh">0x10000</span><span class="p">)</span> <span class="o">|</span> <span class="mi">0</span><span class="p">).</span><span class="nx">toString</span><span class="p">(</span><span class="mi">16</span><span class="p">).</span><span class="nx">substring</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></pre></div></td></tr><tr id="section-4"><td class="docs"><div class="pilwrap"><a href="#section-4" class="pilcrow">&#182;</a></div><h3>uuid (private)</h3>
+
+<p>Generates a UUID</p>
+
+<p>This is not a globally unique value. It could clash with another
+value, but such a clash is very unlikely.</p>
+
+<p><strong>FIXME:</strong> Abstract so that there is a server prefix component that ensures
+more of a GUID</p>
+</td><td class="code"><div class="highlight"><pre>  <span class="nv">uuid = </span><span class="o">-&gt;</span> <span class="p">(</span><span class="nx">S4</span><span class="p">()</span> <span class="o">+</span> <span class="nx">S4</span><span class="p">()</span> <span class="o">+</span> <span class="s">&quot;-&quot;</span> <span class="o">+</span> <span class="nx">S4</span><span class="p">()</span> <span class="o">+</span> <span class="s">&quot;-&quot;</span> <span class="o">+</span> <span class="nx">S4</span><span class="p">()</span> <span class="o">+</span> <span class="s">&quot;-&quot;</span> <span class="o">+</span> <span class="nx">S4</span><span class="p">()</span> <span class="o">+</span> <span class="s">&quot;-&quot;</span> <span class="o">+</span> <span class="nx">S4</span><span class="p">()</span> <span class="o">+</span> <span class="nx">S4</span><span class="p">()</span> <span class="o">+</span> <span class="nx">S4</span><span class="p">())</span>
+  </pre></div></td></tr><tr id="section-5"><td class="docs"><div class="pilwrap"><a href="#section-5" class="pilcrow">&#182;</a></div><h2>StreamingVideo.initInstance</h2>
+
+<p>Options:</p>
+
+<ul>
+<li><p>player - the player driver binding object that provides the standard OAC API for video players</p></li>
+<li><p>url - that target URL for annotations managed by this application instance. If this is not provided, then
+    we look to the player driver binding object to provide this value through its #targetURI method.</p></li>
+</ul>
+
+<hr />
+</td><td class="code"><div class="highlight"><pre>    
+  <span class="nv">Application.initInstance = </span><span class="nf">(args...) -&gt;</span></pre></div></td></tr><tr id="section-6"><td class="docs"><div class="pilwrap"><a href="#section-6" class="pilcrow">&#182;</a></div><p>We store the application object in <code>appOb</code> so it's available to the <code>isSelectable</code> callback. Note that
+this is the same object as the <code>app</code> parameter in the callback provided to the initInstance method.</p>
+</td><td class="code"><div class="highlight"><pre>    <span class="nv">appOb = </span><span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">Application</span><span class="p">.</span><span class="nx">initInstance</span> <span class="s">&quot;OAC.Client.StreamingVideo.Application&quot;</span><span class="p">,</span> <span class="nx">args</span><span class="p">...,</span> <span class="p">{</span>
+      <span class="nv">controllers:</span>
+        <span class="nv">selectShape:</span>
+          <span class="nv">isSelectable: </span><span class="o">-&gt;</span> <span class="nx">appOb</span><span class="p">.</span><span class="nx">getCurrentMode</span><span class="p">()</span> <span class="o">==</span> <span class="s">&quot;Select&quot;</span>
+    <span class="p">},</span> <span class="nf">(app) -&gt;</span>
+      <span class="nv">shapeTypes = </span><span class="p">{}</span>
+      <span class="nv">screenSize = </span><span class="p">{}</span>
+      <span class="nv">shapeAnnotationId = </span><span class="mi">0</span>
+      <span class="nv">xy = </span><span class="p">[]</span>
+      <span class="nv">wh = </span><span class="p">[]</span>
+          
+      <span class="nv">options = </span><span class="nx">app</span><span class="p">.</span><span class="nx">options</span>
+    </pre></div></td></tr><tr id="section-7"><td class="docs"><div class="pilwrap"><a href="#section-7" class="pilcrow">&#182;</a></div><p>We isolate the player object through a closure so it won't change on us.
+We expect one application instance per player binding object.</p>
+</td><td class="code"><div class="highlight"><pre>      <span class="nv">playerObj = </span><span class="nx">options</span><span class="p">.</span><span class="nx">player</span>
+    
+      <span class="nx">options</span><span class="p">.</span><span class="nx">url</span> <span class="o">?=</span> <span class="nx">playerObj</span><span class="p">.</span><span class="nx">getTargetURI</span><span class="p">()</span>
+    
+      <span class="k">if</span> <span class="nx">playerObj</span><span class="o">?</span>
+        <span class="p">[</span> <span class="nx">screenSize</span><span class="p">.</span><span class="nx">width</span><span class="p">,</span> <span class="nx">screenSize</span><span class="p">.</span><span class="nx">height</span> <span class="p">]</span> <span class="o">=</span> <span class="nx">playerObj</span><span class="p">.</span><span class="nx">getSize</span><span class="p">()</span>
+    
+        <span class="nx">playerObj</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onResize</span><span class="p">.</span><span class="nx">addListener</span> <span class="nf">(s) -&gt;</span>
+          <span class="p">[</span> <span class="nx">screenSize</span><span class="p">.</span><span class="nx">width</span><span class="p">,</span> <span class="nx">screenSize</span><span class="p">.</span><span class="nx">height</span> <span class="p">]</span> <span class="o">=</span> <span class="nx">s</span></pre></div></td></tr><tr id="section-8"><td class="docs"><div class="pilwrap"><a href="#section-8" class="pilcrow">&#182;</a></div><h3>#getPlayer</h3>
+
+<p>Returns the player binding object associated with this application instance.</p>
+</td><td class="code"><div class="highlight"><pre>      <span class="nv">app.getPlayer = </span><span class="o">-&gt;</span> <span class="nx">playerObj</span>
+  </pre></div></td></tr><tr id="section-9"><td class="docs"><div class="pilwrap"><a href="#section-9" class="pilcrow">&#182;</a></div><p>We wait until the application is ready before we make the initShapeLens method available. Otherwise,
+app.presentation.raphsvg won't be defined.</p>
+</td><td class="code"><div class="highlight"><pre>      <span class="nx">app</span><span class="p">.</span><span class="nx">ready</span> <span class="o">-&gt;</span>
+        <span class="nv">app.initShapeLens = </span><span class="nx">app</span><span class="p">.</span><span class="nx">presentation</span><span class="p">.</span><span class="nx">raphsvg</span><span class="p">.</span><span class="nx">initShapeLens</span></pre></div></td></tr><tr id="section-10"><td class="docs"><div class="pilwrap"><a href="#section-10" class="pilcrow">&#182;</a></div><h3>#getCurrentModeClass</h3>
+
+<p>Returns the type of mode currently set. This can be null or one of the following values:</p>
+
+<ul>
+<li><p><strong>shape</strong>: current mode is a shape that can be drawn on the play surface</p></li>
+<li><p><strong>select</strong>: application is set to select a shape shown on the play surface</p></li>
+<li><p><strong>video</strong>: application is set to allow control of the video instead of editing/creating annotations</p></li>
+</ul>
+</td><td class="code"><div class="highlight"><pre>      <span class="nv">app.getCurrentModeClass = </span><span class="o">-&gt;</span>
+        <span class="nv">m = </span><span class="nx">app</span><span class="p">.</span><span class="nx">getCurrentMode</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nx">shapeTypes</span><span class="p">[</span><span class="nx">m</span><span class="p">]</span><span class="o">?</span>
+          <span class="s">&quot;shape&quot;</span>
+        <span class="k">else</span>
+          <span class="k">switch</span> <span class="nx">m</span>
+            <span class="k">when</span> <span class="s">&quot;Select&quot;</span> <span class="k">then</span> <span class="s">&quot;select&quot;</span>
+            <span class="k">when</span> <span class="s">&quot;Watch&quot;</span>  <span class="k">then</span> <span class="s">&quot;video&quot;</span>
+            <span class="k">else</span>
+              <span class="kc">null</span></pre></div></td></tr><tr id="section-11"><td class="docs"><div class="pilwrap"><a href="#section-11" class="pilcrow">&#182;</a></div><h3>#addShapeType</h3>
+
+<p>Adds a shape type. This includes a lens, and a set of callbacks for creating an item and handling
+import/export.</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li>type - the internal shape name</li>
+<li>args - an object containing the following items:
+<ul><li>calc - an optional callback function for creating data for the new shape being added to the data store</li>
+<li>lens - the lens rendering function for rendering the shape on the SVG overlay</li>
+<li>renderAsSVG - callback that will return the SVG fragment representing the shape</li>
+<li>rootSVGElement - an array of root SVG elements that may represent this shape</li>
+<li>extractFromSVG - callback that returns the MITHgrid data store information representing
+                 the parameters for this shape extracted from the SVG XML document</li></ul></li>
+</ul>
+
+<p>Returns: Nothing.</p>
+</td><td class="code"><div class="highlight"><pre>      <span class="nv">app.addShapeType = </span><span class="nf">(type, args) -&gt;</span>
+        <span class="nx">shapeTypes</span><span class="p">[</span><span class="nx">type</span><span class="p">]</span> <span class="o">=</span> <span class="nx">args</span>
+        <span class="nx">app</span><span class="p">.</span><span class="nx">presentation</span><span class="p">.</span><span class="nx">raphsvg</span><span class="p">.</span><span class="nx">addLens</span><span class="p">(</span><span class="nx">type</span><span class="p">,</span> <span class="nx">args</span><span class="p">.</span><span class="nx">lens</span><span class="p">)</span></pre></div></td></tr><tr id="section-12"><td class="docs"><div class="pilwrap"><a href="#section-12" class="pilcrow">&#182;</a></div><h3>#insertShape</h3>
+
+<p>Inserts a new annotation into the data store using the passed coordinates. An empty text annotation body
+is added. The application CurrentMode variable determines the shape. The default time span is 5 seconds 
+on either side of the CurrentTime variable.</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li>coords - the coordinates of the center of the shape in the .x, .y, .width, and .height properties.
+       .npt<em>start and .npt</em>end may be included.</li>
+</ul>
+
+<p>Returns:</p>
+
+<p>The item id of the inserted annotation item.</p>
+
+<hr />
+</td><td class="code"><div class="highlight"><pre>      
+  
+      <span class="nv">app.insertShape = </span><span class="nf">(coords) -&gt;</span>
+        <span class="nv">npt_start = </span><span class="k">if</span> <span class="nx">coords</span><span class="p">.</span><span class="nx">npt_start</span><span class="o">?</span> <span class="k">then</span> <span class="nx">coords</span><span class="p">.</span><span class="nx">npt_start</span> <span class="k">else</span> <span class="nb">parseFloat</span><span class="p">(</span><span class="nx">app</span><span class="p">.</span><span class="nx">getCurrentTime</span><span class="p">())</span> <span class="o">-</span> <span class="mi">5</span>
+        <span class="nv">npt_end = </span><span class="k">if</span> <span class="nx">coords</span><span class="p">.</span><span class="nx">npt_end</span><span class="o">?</span> <span class="k">then</span> <span class="nx">coords</span><span class="p">.</span><span class="nx">npt_end</span> <span class="k">else</span> <span class="nb">parseFloat</span><span class="p">(</span><span class="nx">app</span><span class="p">.</span><span class="nx">getCurrentTime</span><span class="p">())</span> <span class="o">+</span> <span class="mi">5</span>
+        <span class="nv">curMode = </span><span class="nx">app</span><span class="p">.</span><span class="nx">getCurrentMode</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="nx">shapeTypes</span><span class="p">[</span><span class="nx">curMode</span><span class="p">]</span><span class="o">?</span>
+          <span class="nv">shape = </span><span class="k">if</span> <span class="nx">shapeTypes</span><span class="p">[</span><span class="nx">curMode</span><span class="p">].</span><span class="nx">calc</span><span class="o">?</span> <span class="k">then</span> <span class="nx">shapeTypes</span><span class="p">[</span><span class="nx">curMode</span><span class="p">].</span><span class="nx">calc</span><span class="p">(</span><span class="nx">coords</span><span class="p">)</span> <span class="k">else</span> <span class="p">{}</span></pre></div></td></tr><tr id="section-13"><td class="docs"><div class="pilwrap"><a href="#section-13" class="pilcrow">&#182;</a></div><p><strong>FIXME:</strong> We should ensure that we don't have clashing IDs. We need to use UUIDs when possible.
+Using uuid() to generate local UUIDs - not truly a UUID, but close enough for now.</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="nv">shapeAnnotationId = </span><span class="nx">uuid</span><span class="p">()</span></pre></div></td></tr><tr id="section-14"><td class="docs"><div class="pilwrap"><a href="#section-14" class="pilcrow">&#182;</a></div><p>We do not allow shapes to define any of these properties:</p>
+
+<ul>
+<li>id</li>
+<li>type</li>
+<li>bodyType</li>
+<li>bodyContent</li>
+<li>shapeType</li>
+<li>targetURI</li>
+<li>targetHeight</li>
+<li>targetWidth</li>
+<li>npt_start</li>
+<li>npt_end</li>
+<li>x</li>
+<li>y</li>
+<li>w</li>
+<li>h</li>
+</ul>
+
+<p>x, y, w, h define the bounding box about the shape based on the center and width/height.</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="nv">shape.id           = </span><span class="s">&quot;_:anno&quot;</span> <span class="o">+</span> <span class="nx">shapeAnnotationId</span>
+          <span class="nv">shape.type         = </span><span class="s">&quot;Annotation&quot;</span>
+          <span class="nv">shape.bodyType     = </span><span class="s">&quot;Text&quot;</span>
+          <span class="nv">shape.bodyContent  = </span><span class="s">&quot;This is an annotation for &quot;</span> <span class="o">+</span> <span class="nx">curMode</span>
+          <span class="nv">shape.shapeType    = </span><span class="nx">curMode</span>
+          <span class="nv">shape.targetURI    = </span><span class="nx">app</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">url</span>
+          <span class="nv">shape.targetHeight = </span><span class="nx">screenSize</span><span class="p">.</span><span class="nx">height</span>
+          <span class="nv">shape.targetWidth  = </span><span class="nx">screenSize</span><span class="p">.</span><span class="nx">width</span>
+          <span class="nv">shape.npt_start    = </span><span class="k">if</span><span class="p">(</span><span class="nx">npt_start</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">)</span> <span class="k">then</span> <span class="mi">0</span> <span class="k">else</span> <span class="nx">npt_start</span>
+          <span class="nv">shape.npt_end      = </span><span class="nx">npt_end</span>
+          <span class="nv">shape.x            = </span><span class="nx">coords</span><span class="p">.</span><span class="nx">x</span> <span class="o">+</span> <span class="p">(</span><span class="nx">coords</span><span class="p">.</span><span class="nx">width</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+          <span class="nv">shape.y            = </span><span class="nx">coords</span><span class="p">.</span><span class="nx">y</span> <span class="o">+</span> <span class="p">(</span><span class="nx">coords</span><span class="p">.</span><span class="nx">height</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+          <span class="nv">shape.w            = </span><span class="nx">coords</span><span class="p">.</span><span class="nx">width</span>
+          <span class="nv">shape.h            = </span><span class="nx">coords</span><span class="p">.</span><span class="nx">height</span>
+
+          <span class="nx">app</span><span class="p">.</span><span class="nx">dataStore</span><span class="p">.</span><span class="nx">canvas</span><span class="p">.</span><span class="nx">loadItems</span> <span class="p">[</span><span class="nx">shape</span><span class="p">]</span>
+          <span class="nx">app</span><span class="p">.</span><span class="nx">setActiveAnnotation</span> <span class="nx">shape</span><span class="p">.</span><span class="nx">id</span>
+          <span class="nx">shape</span><span class="p">.</span><span class="nx">id</span>
+  </pre></div></td></tr><tr id="section-15"><td class="docs"><div class="pilwrap"><a href="#section-15" class="pilcrow">&#182;</a></div><p>We have a few namespaces we expect. Anything not understood by the import/export
+routines is ignored.</p>
+</td><td class="code"><div class="highlight"><pre>      <span class="nv">NS = </span>
+        <span class="nv">OA: </span><span class="s">&quot;http://www.w3.org/ns/openannotation/core&quot;</span>
+        <span class="nv">OAX: </span><span class="s">&quot;http://www.w3.org/ns/openannotation/extensions&quot;</span>
+        <span class="nv">RDF: </span><span class="s">&quot;http://www.w3.org/1999/02/22-rdf-syntax-ns</span><span class="err">#</span><span class="s">&quot;</span>
+        <span class="nv">CNT: </span><span class="s">&quot;http://www.w3.org/2008/content</span><span class="err">#</span><span class="s">&quot;</span>
+        <span class="nv">DC: </span><span class="s">&quot;http://purl.org/dc/elements/1.1/&quot;</span>
+        <span class="nv">EXIF: </span><span class="s">&quot;http://www.w3.org/2003/12/exif/ns</span><span class="err">#</span><span class="s">&quot;</span>
+    </pre></div></td></tr><tr id="section-16"><td class="docs"><div class="pilwrap"><a href="#section-16" class="pilcrow">&#182;</a></div><h3>parseNPT (private)</h3>
+
+<p>Given a string representing a timing, parse into a float representing seconds.</p>
+
+<p>Examples:</p>
+
+<p>parseNPT("30") == 30</p>
+
+<p>parseNPT("1:20") == 80 (1 minute, 20 seconds)</p>
+
+<p>parseNPT("1:2:3.4") == 3723.4 (1 hour, 2 minutes, 3.4 seconds)</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li>npt - string representing timing</li>
+</ul>
+
+<p>Returns:
+A float representing the timing in seconds.</p>
+</td><td class="code"><div class="highlight"><pre>      <span class="nv">parseNPT = </span><span class="nf">(npt) -&gt;</span>
+        <span class="k">if</span> <span class="nx">npt</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="s">&#39;:&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span>
+          <span class="nv">seconds = </span><span class="nb">parseFloat</span> <span class="nx">npt</span>
+          <span class="nv">minutes = </span><span class="mi">0</span>
+          <span class="nv">hours = </span><span class="mi">0</span>
+        <span class="k">else</span>
+          <span class="nv">bits = </span><span class="p">((</span><span class="nb">parseFloat</span> <span class="nx">b</span><span class="p">)</span> <span class="k">for</span> <span class="nx">b</span> <span class="k">in</span> <span class="nx">npt</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s">&#39;:&#39;</span><span class="p">))</span>
+          <span class="nv">seconds = </span><span class="nx">bits</span><span class="p">.</span><span class="nx">pop</span><span class="p">()</span>
+          <span class="k">if</span> <span class="nx">bits</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">0</span>
+            <span class="nv">minutes = </span><span class="nx">bits</span><span class="p">.</span><span class="nx">pop</span><span class="p">()</span>
+          <span class="k">else</span>
+            <span class="nv">minutes = </span><span class="mi">0</span>
+          <span class="k">if</span> <span class="nx">bits</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">0</span>
+            <span class="nv">hours = </span><span class="nx">bits</span><span class="p">.</span><span class="nx">pop</span><span class="p">()</span>
+          <span class="k">else</span>
+            <span class="nv">hours = </span><span class="mi">0</span>
+        <span class="p">(</span><span class="nx">hours</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">+</span> <span class="nx">minutes</span><span class="p">)</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">+</span> <span class="nx">seconds</span>
+      </pre></div></td></tr><tr id="section-17"><td class="docs"><div class="pilwrap"><a href="#section-17" class="pilcrow">&#182;</a></div><h3>#importData</h3>
+
+<p>Finds annotations targeting the video given the target URI provided in the application configuration or
+by the player driver binding.</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li>data - RDF/JSON representation of OAC annotations</li>
+</ul>
+
+<p>Returns:
+Nothing.</p>
+
+<hr />
+</td><td class="code"><div class="highlight"><pre>      <span class="nv">app.importData = </span><span class="nf">(data) -&gt;</span>
+        <span class="nv">tempstore = </span><span class="p">[]</span>
+        <span class="k">for</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">o</span> <span class="k">of</span> <span class="nx">data</span></pre></div></td></tr><tr id="section-18"><td class="docs"><div class="pilwrap"><a href="#section-18" class="pilcrow">&#182;</a></div><p>We consider items with oa:Annotation as our starting point. Everything else we import must be
+found by tracing pointers from these items.</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="k">if</span> <span class="s">&quot;</span><span class="si">#{</span><span class="nx">NS</span><span class="p">.</span><span class="nx">OA</span><span class="si">}</span><span class="s">Annotation&quot;</span> <span class="k">in</span> <span class="p">(</span><span class="nx">t</span><span class="p">.</span><span class="nx">value</span> <span class="k">for</span> <span class="nx">t</span> <span class="k">in</span> <span class="nx">o</span><span class="p">[</span><span class="s">&quot;</span><span class="si">#{</span><span class="nx">NS</span><span class="p">.</span><span class="nx">RDF</span><span class="si">}</span><span class="s">type&quot;</span><span class="p">])</span>
+            <span class="nv">temp = </span>
+              <span class="nv">id: </span><span class="nx">i</span>
+              <span class="nv">type: </span><span class="s">&quot;Annotation&quot;</span>
+              <span class="nv">bodyContent: </span><span class="s">&#39;&#39;</span>
+              <span class="nv">bodyType: </span><span class="s">&#39;Text&#39;</span>
+              <span class="nv">targetURI: </span><span class="nx">options</span><span class="p">.</span><span class="nx">url</span>
+          </pre></div></td></tr><tr id="section-19"><td class="docs"><div class="pilwrap"><a href="#section-19" class="pilcrow">&#182;</a></div><p>If the item has a pointer through oa:hasBody, then we follow it and get the cnt:chars
+value for the bodyContent property for the internal data model.</p>
+</td><td class="code"><div class="highlight"><pre>            <span class="k">if</span> <span class="nx">o</span><span class="p">[</span><span class="s">&quot;</span><span class="si">#{</span><span class="nx">NS</span><span class="p">.</span><span class="nx">OA</span><span class="si">}</span><span class="s">hasBody&quot;</span><span class="p">]</span><span class="o">?</span> <span class="o">and</span> <span class="nx">o</span><span class="p">[</span><span class="s">&quot;</span><span class="si">#{</span><span class="nx">NS</span><span class="p">.</span><span class="nx">OA</span><span class="si">}</span><span class="s">hasBody&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">?</span> <span class="o">and</span> <span class="nx">data</span><span class="p">[</span><span class="nx">o</span><span class="p">[</span><span class="s">&quot;</span><span class="si">#{</span><span class="nx">NS</span><span class="p">.</span><span class="nx">OA</span><span class="si">}</span><span class="s">hasBody&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">].</span><span class="nx">value</span><span class="p">]</span><span class="o">?</span>
+              <span class="nv">temp.bodyContent = </span><span class="nx">data</span><span class="p">[</span><span class="nx">o</span><span class="p">[</span><span class="s">&quot;</span><span class="si">#{</span><span class="nx">NS</span><span class="p">.</span><span class="nx">OA</span><span class="si">}</span><span class="s">hasBody&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">].</span><span class="nx">value</span><span class="p">][</span><span class="s">&quot;</span><span class="si">#{</span><span class="nx">NS</span><span class="p">.</span><span class="nx">CNT</span><span class="si">}</span><span class="s">chars&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">].</span><span class="nx">value</span></pre></div></td></tr><tr id="section-20"><td class="docs"><div class="pilwrap"><a href="#section-20" class="pilcrow">&#182;</a></div><p>If the item has a pointer through oa:hasTarget, then we need to check which ones are
+pointing to our video. <strong>N.B.:</strong> If the item is not targeting our video, we will not
+reach the code that inserts the <code>temp</code> object into our MITHgrid data store.</p>
+</td><td class="code"><div class="highlight"><pre>            <span class="k">if</span> <span class="nx">o</span><span class="p">[</span><span class="s">&quot;</span><span class="si">#{</span><span class="nx">NS</span><span class="p">.</span><span class="nx">OA</span><span class="si">}</span><span class="s">hasTarget&quot;</span><span class="p">]</span><span class="o">?</span>
+              <span class="k">for</span> <span class="nx">hasTarget</span> <span class="k">in</span> <span class="p">(</span><span class="nx">v</span><span class="p">.</span><span class="nx">value</span> <span class="k">for</span> <span class="nx">v</span> <span class="k">in</span> <span class="nx">o</span><span class="p">[</span><span class="s">&quot;</span><span class="si">#{</span><span class="nx">NS</span><span class="p">.</span><span class="nx">OA</span><span class="si">}</span><span class="s">hasTarget&quot;</span><span class="p">])</span>
+                <span class="k">if</span> <span class="nx">data</span><span class="p">[</span><span class="nx">hasTarget</span><span class="p">]</span><span class="o">?</span> <span class="o">and</span> <span class="nx">data</span><span class="p">[</span><span class="nx">hasTarget</span><span class="p">][</span><span class="s">&quot;</span><span class="si">#{</span><span class="nx">NS</span><span class="p">.</span><span class="nx">OA</span><span class="si">}</span><span class="s">hasSource&quot;</span><span class="p">]</span><span class="o">?</span>
+                  <span class="k">if</span> <span class="p">(</span><span class="nx">options</span><span class="p">.</span><span class="nx">url</span> <span class="k">in</span> <span class="p">(</span><span class="nx">s</span><span class="p">.</span><span class="nx">value</span> <span class="k">for</span> <span class="nx">s</span> <span class="k">in</span> <span class="nx">data</span><span class="p">[</span><span class="nx">hasTarget</span><span class="p">][</span><span class="s">&quot;</span><span class="si">#{</span><span class="nx">NS</span><span class="p">.</span><span class="nx">OA</span><span class="si">}</span><span class="s">hasSource&quot;</span><span class="p">]))</span></pre></div></td></tr><tr id="section-21"><td class="docs"><div class="pilwrap"><a href="#section-21" class="pilcrow">&#182;</a></div><p>For each selector that the target source points to, we see if it's an
+oax:CompositeSelector. If not, we aren't interested since we want annotations
+targeting parts of video frames for time spans within the video.</p>
+</td><td class="code"><div class="highlight"><pre>                    <span class="k">for</span> <span class="nx">hasSelector</span> <span class="k">in</span> <span class="p">(</span><span class="nx">v</span><span class="p">.</span><span class="nx">value</span> <span class="k">for</span> <span class="nx">v</span> <span class="k">in</span> <span class="nx">data</span><span class="p">[</span><span class="nx">hasTarget</span><span class="p">][</span><span class="s">&quot;</span><span class="si">#{</span><span class="nx">NS</span><span class="p">.</span><span class="nx">OA</span><span class="si">}</span><span class="s">hasSelector&quot;</span><span class="p">])</span>
+                      <span class="k">if</span> <span class="nx">data</span><span class="p">[</span><span class="nx">hasSelector</span><span class="p">]</span><span class="o">?</span> <span class="o">and</span> <span class="p">(</span><span class="s">&quot;</span><span class="si">#{</span><span class="nx">NS</span><span class="p">.</span><span class="nx">OAX</span><span class="si">}</span><span class="s">CompositeSelector&quot;</span> <span class="k">in</span> <span class="p">(</span><span class="nx">t</span><span class="p">.</span><span class="nx">value</span> <span class="k">for</span> <span class="nx">t</span> <span class="k">in</span> <span class="nx">data</span><span class="p">[</span><span class="nx">hasSelector</span><span class="p">][</span><span class="s">&quot;</span><span class="si">#{</span><span class="nx">NS</span><span class="p">.</span><span class="nx">RDF</span><span class="si">}</span><span class="s">type&quot;</span><span class="p">]))</span>
+                        <span class="k">for</span> <span class="nx">hasSubSelector</span> <span class="k">in</span> <span class="p">(</span><span class="nx">v</span><span class="p">.</span><span class="nx">value</span> <span class="k">for</span> <span class="nx">v</span> <span class="k">in</span> <span class="nx">data</span><span class="p">[</span><span class="nx">hasSelector</span><span class="p">][</span><span class="s">&quot;</span><span class="si">#{</span><span class="nx">NS</span><span class="p">.</span><span class="nx">OA</span><span class="si">}</span><span class="s">hasSelector&quot;</span><span class="p">])</span>
+                          <span class="k">if</span> <span class="nx">data</span><span class="p">[</span><span class="nx">hasSubSelector</span><span class="p">]</span><span class="o">?</span></pre></div></td></tr><tr id="section-22"><td class="docs"><div class="pilwrap"><a href="#section-22" class="pilcrow">&#182;</a></div><p>We go ahead and extract the types for this selector because someone
+might collapse multiple selector types into a single RDF node since
+oax:SvgSelector and oa:FragSelector don't share properties.</p>
+</td><td class="code"><div class="highlight"><pre>                            <span class="nv">types = </span><span class="p">(</span><span class="nx">t</span><span class="p">.</span><span class="nx">value</span> <span class="k">for</span> <span class="nx">t</span> <span class="k">in</span> <span class="nx">data</span><span class="p">[</span><span class="nx">hasSubSelector</span><span class="p">][</span><span class="s">&quot;</span><span class="si">#{</span><span class="nx">NS</span><span class="p">.</span><span class="nx">RDF</span><span class="si">}</span><span class="s">type&quot;</span><span class="p">])</span></pre></div></td></tr><tr id="section-23"><td class="docs"><div class="pilwrap"><a href="#section-23" class="pilcrow">&#182;</a></div><p>We expect SVG constraints to be found through oax:SvgSelector nodes.</p>
+</td><td class="code"><div class="highlight"><pre>                            <span class="k">if</span> <span class="s">&quot;</span><span class="si">#{</span><span class="nx">NS</span><span class="p">.</span><span class="nx">OAX</span><span class="si">}</span><span class="s">SvgSelector&quot;</span> <span class="k">in</span> <span class="nx">types</span>
+                              <span class="k">if</span> <span class="nx">data</span><span class="p">[</span><span class="nx">hasSubSelector</span><span class="p">][</span><span class="s">&quot;</span><span class="si">#{</span><span class="nx">NS</span><span class="p">.</span><span class="nx">CNT</span><span class="si">}</span><span class="s">chars&quot;</span><span class="p">]</span><span class="o">?</span> <span class="o">and</span> <span class="nx">data</span><span class="p">[</span><span class="nx">hasSubSelector</span><span class="p">][</span><span class="s">&quot;</span><span class="si">#{</span><span class="nx">NS</span><span class="p">.</span><span class="nx">CNT</span><span class="si">}</span><span class="s">chars&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">?</span>
+                                <span class="nv">svg = </span><span class="nx">data</span><span class="p">[</span><span class="nx">hasSubSelector</span><span class="p">][</span><span class="s">&quot;</span><span class="si">#{</span><span class="nx">NS</span><span class="p">.</span><span class="nx">CNT</span><span class="si">}</span><span class="s">chars&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">].</span><span class="nx">value</span>
+                                <span class="nv">dom = </span><span class="nx">$</span><span class="p">.</span><span class="nx">parseXML</span> <span class="nx">svg</span></pre></div></td></tr><tr id="section-24"><td class="docs"><div class="pilwrap"><a href="#section-24" class="pilcrow">&#182;</a></div><p>Based on the root element, we interogate the shape info to see
+which one wants to handle extracting the extents/etc. from the svg.</p>
+</td><td class="code"><div class="highlight"><pre>                                <span class="k">if</span> <span class="nx">dom</span><span class="o">?</span>
+                                  <span class="nv">doc = </span><span class="nx">dom</span><span class="p">.</span><span class="nx">documentElement</span>
+                                  <span class="nv">rootName = </span><span class="nx">doc</span><span class="p">.</span><span class="nx">nodeName</span>
+                                  <span class="k">for</span> <span class="nx">t</span><span class="p">,</span> <span class="nx">info</span> <span class="k">of</span> <span class="nx">shapeTypes</span>
+                                    <span class="k">if</span> <span class="nx">info</span><span class="p">.</span><span class="nx">extractFromSVG</span><span class="o">?</span> <span class="o">and</span> <span class="nx">rootName</span> <span class="k">in</span> <span class="nx">info</span><span class="p">.</span><span class="nx">rootSVGElement</span>
+                                      <span class="nv">shapeInfo = </span><span class="nx">info</span><span class="p">.</span><span class="nx">extractFromSVG</span> <span class="nx">doc</span>
+                                      <span class="k">if</span> <span class="nx">shapeInfo</span><span class="o">?</span>
+                                        <span class="nx">$</span><span class="p">.</span><span class="nx">extend</span><span class="p">(</span><span class="nx">temp</span><span class="p">,</span> <span class="nx">shapeInfo</span><span class="p">)</span>
+                                        <span class="nv">temp.shapeType = </span><span class="nx">t</span>
+                                        <span class="k">if</span> <span class="nx">data</span><span class="p">[</span><span class="nx">hasSubSelector</span><span class="p">][</span><span class="s">&quot;</span><span class="si">#{</span><span class="nx">NS</span><span class="p">.</span><span class="nx">EXIF</span><span class="si">}</span><span class="s">width&quot;</span><span class="p">]</span><span class="o">?</span> <span class="o">and</span> <span class="nx">data</span><span class="p">[</span><span class="nx">hasSubSelector</span><span class="p">][</span><span class="s">&quot;</span><span class="si">#{</span><span class="nx">NS</span><span class="p">.</span><span class="nx">EXIF</span><span class="si">}</span><span class="s">width&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">?</span>
+                                          <span class="nv">temp.targetWidth = </span><span class="nb">parseFloat</span> <span class="nx">data</span><span class="p">[</span><span class="nx">hasSubSelector</span><span class="p">][</span><span class="s">&quot;</span><span class="si">#{</span><span class="nx">NS</span><span class="p">.</span><span class="nx">EXIF</span><span class="si">}</span><span class="s">width&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">].</span><span class="nx">value</span>
+                                        <span class="k">if</span> <span class="nx">data</span><span class="p">[</span><span class="nx">hasSubSelector</span><span class="p">][</span><span class="s">&quot;</span><span class="si">#{</span><span class="nx">NS</span><span class="p">.</span><span class="nx">EXIF</span><span class="si">}</span><span class="s">height&quot;</span><span class="p">]</span><span class="o">?</span> <span class="o">and</span> <span class="nx">data</span><span class="p">[</span><span class="nx">hasSubSelector</span><span class="p">][</span><span class="s">&quot;</span><span class="si">#{</span><span class="nx">NS</span><span class="p">.</span><span class="nx">EXIF</span><span class="si">}</span><span class="s">height&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">?</span>
+                                          <span class="nv">temp.targetHeight = </span><span class="nb">parseFloat</span> <span class="nx">data</span><span class="p">[</span><span class="nx">hasSubSelector</span><span class="p">][</span><span class="s">&quot;</span><span class="si">#{</span><span class="nx">NS</span><span class="p">.</span><span class="nx">EXIF</span><span class="si">}</span><span class="s">height&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">].</span><span class="nx">value</span>
+                                      
+                              </pre></div></td></tr><tr id="section-25"><td class="docs"><div class="pilwrap"><a href="#section-25" class="pilcrow">&#182;</a></div><p>We get timing information from the oa:FragSelector.</p>
+</td><td class="code"><div class="highlight"><pre>                            <span class="k">if</span> <span class="s">&quot;</span><span class="si">#{</span><span class="nx">NS</span><span class="p">.</span><span class="nx">OA</span><span class="si">}</span><span class="s">FragSelector&quot;</span> <span class="k">in</span> <span class="nx">types</span>
+                              <span class="k">if</span> <span class="nx">data</span><span class="p">[</span><span class="nx">hasSubSelector</span><span class="p">][</span><span class="s">&quot;</span><span class="si">#{</span><span class="nx">NS</span><span class="p">.</span><span class="nx">RDF</span><span class="si">}</span><span class="s">value&quot;</span><span class="p">]</span><span class="o">?</span> <span class="o">and</span> <span class="nx">data</span><span class="p">[</span><span class="nx">hasSubSelector</span><span class="p">][</span><span class="s">&quot;</span><span class="si">#{</span><span class="nx">NS</span><span class="p">.</span><span class="nx">RDF</span><span class="si">}</span><span class="s">value&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">?</span>
+                                <span class="nv">fragment = </span><span class="nx">data</span><span class="p">[</span><span class="nx">hasSubSelector</span><span class="p">][</span><span class="s">&quot;</span><span class="si">#{</span><span class="nx">NS</span><span class="p">.</span><span class="nx">RDF</span><span class="si">}</span><span class="s">value&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">].</span><span class="nx">value</span>
+                                <span class="nv">fragment = </span><span class="nx">fragment</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="sr">/^t=npt:/</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">)</span>
+                                <span class="nv">bits = </span><span class="nx">fragment</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">)</span>
+                                <span class="nv">temp.npt_start = </span><span class="nx">parseNPT</span> <span class="nx">bits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                                <span class="nv">temp.npt_end   = </span><span class="nx">parseNPT</span> <span class="nx">bits</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> </pre></div></td></tr><tr id="section-26"><td class="docs"><div class="pilwrap"><a href="#section-26" class="pilcrow">&#182;</a></div><p>We only load an annotation if it has a shape type or a beginning or end time. Otherwise,
+we're not interested since it doesn't represent anything we know what to do with.</p>
+</td><td class="code"><div class="highlight"><pre>            <span class="k">if</span> <span class="nx">temp</span><span class="p">.</span><span class="nx">npt_start</span><span class="o">?</span> <span class="o">or</span> <span class="nx">temp</span><span class="p">.</span><span class="nx">npt_end</span><span class="o">?</span> <span class="o">or</span> <span class="nx">temp</span><span class="p">.</span><span class="nx">shapeType</span><span class="o">?</span>
+              <span class="nx">tempstore</span><span class="p">.</span><span class="nx">push</span> <span class="nx">temp</span>
+
+        <span class="nx">app</span><span class="p">.</span><span class="nx">dataStore</span><span class="p">.</span><span class="nx">canvas</span><span class="p">.</span><span class="nx">loadItems</span> <span class="nx">tempstore</span></pre></div></td></tr><tr id="section-27"><td class="docs"><div class="pilwrap"><a href="#section-27" class="pilcrow">&#182;</a></div><h3>exportData</h3>
+
+<p>Produces a OAC-based RDF/JSON representation of the annotations in the MITHgrid data store.</p>
+
+<p>Parameters: None.</p>
+
+<p>Returns:</p>
+
+<p>RDF/JSON that conforms to the OAC data model.</p>
+</td><td class="code"><div class="highlight"><pre>      <span class="nv">app.exportData = </span><span class="nf">() -&gt;</span>
+        <span class="nv">data = </span><span class="p">{}</span>
+        <span class="nv">tempstore = </span><span class="p">{}</span>
+        <span class="nv">findAnnos = </span><span class="nx">app</span><span class="p">.</span><span class="nx">dataStore</span><span class="p">.</span><span class="nx">canvas</span><span class="p">.</span><span class="nx">prepare</span> <span class="p">[</span><span class="s">&#39;!type&#39;</span><span class="p">]</span>
+    
+    
+        <span class="nv">node = </span><span class="nf">(s, pns, p, t, o) -&gt;</span>
+          <span class="k">if</span> <span class="o">!</span><span class="nx">tempstore</span><span class="p">[</span><span class="nx">s</span><span class="p">]</span><span class="o">?</span>
+            <span class="nx">tempstore</span><span class="p">[</span><span class="nx">s</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+          <span class="k">if</span> <span class="o">!</span><span class="nx">tempstore</span><span class="p">[</span><span class="nx">s</span><span class="p">][</span><span class="nx">pns</span><span class="o">+</span><span class="nx">p</span><span class="p">]</span><span class="o">?</span>
+            <span class="nx">tempstore</span><span class="p">[</span><span class="nx">s</span><span class="p">][</span><span class="nx">pns</span><span class="o">+</span><span class="nx">p</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+          <span class="nx">tempstore</span><span class="p">[</span><span class="nx">s</span><span class="p">][</span><span class="nx">pns</span><span class="o">+</span><span class="nx">p</span><span class="p">].</span><span class="nx">push</span>
+            <span class="s">&#39;type&#39;</span><span class="o">:</span> <span class="nx">t</span>
+            <span class="s">&#39;value&#39;</span><span class="o">:</span> <span class="nx">o</span>
+    
+        <span class="nv">bnode = </span>  <span class="nf">(s, pns, p, o) -&gt;</span> <span class="nx">node</span> <span class="nx">s</span><span class="p">,</span> <span class="nx">pns</span><span class="p">,</span> <span class="nx">p</span><span class="p">,</span> <span class="s">&#39;bnode&#39;</span><span class="p">,</span>   <span class="nx">o</span>
+        <span class="nv">uri = </span>    <span class="nf">(s, pns, p, o) -&gt;</span> <span class="nx">node</span> <span class="nx">s</span><span class="p">,</span> <span class="nx">pns</span><span class="p">,</span> <span class="nx">p</span><span class="p">,</span> <span class="s">&#39;uri&#39;</span><span class="p">,</span>     <span class="nx">o</span>
+        <span class="nv">literal = </span><span class="nf">(s, pns, p, o) -&gt;</span> <span class="nx">node</span> <span class="nx">s</span><span class="p">,</span> <span class="nx">pns</span><span class="p">,</span> <span class="nx">p</span><span class="p">,</span> <span class="s">&#39;literal&#39;</span><span class="p">,</span> <span class="nx">o</span></pre></div></td></tr><tr id="section-28"><td class="docs"><div class="pilwrap"><a href="#section-28" class="pilcrow">&#182;</a></div><h4>genBody (private)</h4>
+
+<p>Generates the body oject and adds it to tempstore</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li><p>obj - DataStore item</p></li>
+<li><p>ids - Object holding ids for various parts of the RDF graph:</p>
+
+<ul><li>id - annotation resource (required)</li>
+<li>buid - body resource</li>
+<li>tuid - target resource</li>
+<li>suid - selector resource</li>
+<li>svgid - SvgSelector resource</li>
+<li>fgid - FragSelector resource</li></ul></li>
+</ul>
+</td><td class="code"><div class="highlight"><pre>        <span class="nv">genBody = </span><span class="nf">(obj, ids) -&gt;</span></pre></div></td></tr><tr id="section-29"><td class="docs"><div class="pilwrap"><a href="#section-29" class="pilcrow">&#182;</a></div><p>Generating body element</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="nx">uri</span>     <span class="nx">ids</span><span class="p">.</span><span class="nx">buid</span><span class="p">,</span> <span class="nx">NS</span><span class="p">.</span><span class="nx">RDF</span><span class="p">,</span> <span class="s">&quot;type&quot;</span><span class="p">,</span>   <span class="s">&quot;</span><span class="si">#{</span><span class="nx">NS</span><span class="p">.</span><span class="nx">OA</span><span class="si">}</span><span class="s">Body&quot;</span>
+          <span class="nx">literal</span> <span class="nx">ids</span><span class="p">.</span><span class="nx">buid</span><span class="p">,</span> <span class="nx">NS</span><span class="p">.</span><span class="nx">DC</span><span class="p">,</span>  <span class="s">&quot;format&quot;</span><span class="p">,</span> <span class="s">&quot;text/plain&quot;</span>
+          <span class="nx">literal</span> <span class="nx">ids</span><span class="p">.</span><span class="nx">buid</span><span class="p">,</span> <span class="nx">NS</span><span class="p">.</span><span class="nx">CNT</span><span class="p">,</span> <span class="s">&quot;characterEncoding&quot;</span><span class="p">,</span> <span class="s">&quot;utf-8&quot;</span>
+          <span class="nx">literal</span> <span class="nx">ids</span><span class="p">.</span><span class="nx">buid</span><span class="p">,</span> <span class="nx">NS</span><span class="p">.</span><span class="nx">CNT</span><span class="p">,</span> <span class="s">&quot;chars&quot;</span><span class="p">,</span>  <span class="nx">obj</span><span class="p">.</span><span class="nx">bodyContent</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></pre></div></td></tr><tr id="section-30"><td class="docs"><div class="pilwrap"><a href="#section-30" class="pilcrow">&#182;</a></div><h4>genTarget (private)</h4>
+
+<p>Generates a JSON object representing a target and adds it to tempstore</p>
+
+<p>Parameters</p>
+
+<ul>
+<li><p>obj - dataStore item</p></li>
+<li><p>ids - Object holding ids for various parts of the RDF graph:</p>
+
+<ul><li>id - annotation resource (required)</li>
+<li>buid - body resource</li>
+<li>tuid - target resource</li>
+<li>suid - selector resource</li>
+<li>svgid - SvgSelector resource</li>
+<li>fgid - FragSelector resource</li></ul></li>
+</ul>
+</td><td class="code"><div class="highlight"><pre>        <span class="nv">genTarget = </span><span class="nf">(obj, ids) -&gt;</span></pre></div></td></tr><tr id="section-31"><td class="docs"><div class="pilwrap"><a href="#section-31" class="pilcrow">&#182;</a></div><p>Unique Identifiers for pieces of Target</p>
+</td><td class="code"><div class="highlight"><pre>      </pre></div></td></tr><tr id="section-32"><td class="docs"><div class="pilwrap"><a href="#section-32" class="pilcrow">&#182;</a></div><p>Generating target element</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="nx">uri</span>   <span class="nx">ids</span><span class="p">.</span><span class="nx">tuid</span><span class="p">,</span> <span class="nx">NS</span><span class="p">.</span><span class="nx">RDF</span><span class="p">,</span> <span class="s">&quot;type&quot;</span><span class="p">,</span>       <span class="s">&quot;</span><span class="si">#{</span><span class="nx">NS</span><span class="p">.</span><span class="nx">OA</span><span class="si">}</span><span class="s">SpecificResource&quot;</span>
+          <span class="nx">uri</span>   <span class="nx">ids</span><span class="p">.</span><span class="nx">tuid</span><span class="p">,</span> <span class="nx">NS</span><span class="p">.</span><span class="nx">OA</span><span class="p">,</span>  <span class="s">&quot;hasSource&quot;</span><span class="p">,</span>  <span class="nx">obj</span><span class="p">.</span><span class="nx">targetURI</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+          <span class="nx">bnode</span> <span class="nx">ids</span><span class="p">.</span><span class="nx">tuid</span><span class="p">,</span> <span class="nx">NS</span><span class="p">.</span><span class="nx">OA</span><span class="p">,</span>  <span class="s">&quot;hasSelector&quot;</span><span class="p">,</span> <span class="nx">ids</span><span class="p">.</span><span class="nx">suid</span></pre></div></td></tr><tr id="section-33"><td class="docs"><div class="pilwrap"><a href="#section-33" class="pilcrow">&#182;</a></div><p>Selector element, which points to the SVG constraint and NPT constraint</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="nx">uri</span>   <span class="nx">ids</span><span class="p">.</span><span class="nx">suid</span><span class="p">,</span> <span class="nx">NS</span><span class="p">.</span><span class="nx">RDF</span><span class="p">,</span> <span class="s">&quot;type&quot;</span><span class="p">,</span>       <span class="s">&quot;</span><span class="si">#{</span><span class="nx">NS</span><span class="p">.</span><span class="nx">OAX</span><span class="si">}</span><span class="s">CompositeSelector&quot;</span>
+          <span class="nx">bnode</span> <span class="nx">ids</span><span class="p">.</span><span class="nx">suid</span><span class="p">,</span> <span class="nx">NS</span><span class="p">.</span><span class="nx">OA</span><span class="p">,</span>  <span class="s">&quot;hasSelector&quot;</span><span class="p">,</span> <span class="nx">ids</span><span class="p">.</span><span class="nx">svgid</span>
+          <span class="nx">bnode</span> <span class="nx">ids</span><span class="p">.</span><span class="nx">suid</span><span class="p">,</span> <span class="nx">NS</span><span class="p">.</span><span class="nx">OA</span><span class="p">,</span>  <span class="s">&quot;hasSelector&quot;</span><span class="p">,</span> <span class="nx">ids</span><span class="p">.</span><span class="nx">fgid</span>
+        
+          <span class="k">if</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">shapeType</span><span class="o">?</span>
+            <span class="nv">svglens = </span><span class="nx">shapeTypes</span><span class="p">[</span><span class="nx">obj</span><span class="p">.</span><span class="nx">shapeType</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">?</span><span class="p">.</span><span class="nx">renderAsSVG</span>
+
+          <span class="k">if</span> <span class="nx">svglens</span><span class="o">?</span></pre></div></td></tr><tr id="section-34"><td class="docs"><div class="pilwrap"><a href="#section-34" class="pilcrow">&#182;</a></div><p>Targets have selectors, which then have svg and npt elements</p>
+</td><td class="code"><div class="highlight"><pre>            <span class="nx">uri</span>     <span class="nx">ids</span><span class="p">.</span><span class="nx">svgid</span><span class="p">,</span> <span class="nx">NS</span><span class="p">.</span><span class="nx">RDF</span><span class="p">,</span>  <span class="s">&quot;type&quot;</span><span class="p">,</span>              <span class="s">&quot;</span><span class="si">#{</span><span class="nx">NS</span><span class="p">.</span><span class="nx">OAX</span><span class="si">}</span><span class="s">SvgSelector&quot;</span>
+            <span class="nx">literal</span> <span class="nx">ids</span><span class="p">.</span><span class="nx">svgid</span><span class="p">,</span> <span class="nx">NS</span><span class="p">.</span><span class="nx">DC</span><span class="p">,</span>   <span class="s">&quot;format&quot;</span><span class="p">,</span>            <span class="s">&quot;text/svg+xml&quot;</span>
+            <span class="nx">literal</span> <span class="nx">ids</span><span class="p">.</span><span class="nx">svgid</span><span class="p">,</span> <span class="nx">NS</span><span class="p">.</span><span class="nx">CNT</span><span class="p">,</span>  <span class="s">&quot;characterEncoding&quot;</span><span class="p">,</span> <span class="s">&quot;utf-8&quot;</span>
+            <span class="nx">literal</span> <span class="nx">ids</span><span class="p">.</span><span class="nx">svgid</span><span class="p">,</span> <span class="nx">NS</span><span class="p">.</span><span class="nx">CNT</span><span class="p">,</span>  <span class="s">&quot;chars&quot;</span><span class="p">,</span>             <span class="nx">svglens</span><span class="p">(</span><span class="nx">app</span><span class="p">.</span><span class="nx">dataStore</span><span class="p">.</span><span class="nx">canvas</span><span class="p">,</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">id</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">if</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">targetHeight</span><span class="o">?</span> <span class="o">and</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">targetHeight</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">?</span>
+              <span class="nx">literal</span> <span class="nx">ids</span><span class="p">.</span><span class="nx">svgid</span><span class="p">,</span> <span class="nx">NS</span><span class="p">.</span><span class="nx">EXIF</span><span class="p">,</span> <span class="s">&quot;height&quot;</span><span class="p">,</span>        <span class="nx">obj</span><span class="p">.</span><span class="nx">targetHeight</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span>
+              <span class="nx">literal</span> <span class="nx">ids</span><span class="p">.</span><span class="nx">svgid</span><span class="p">,</span> <span class="nx">NS</span><span class="p">.</span><span class="nx">EXIF</span><span class="p">,</span> <span class="s">&quot;height&quot;</span><span class="p">,</span>        <span class="nx">screenSize</span><span class="p">.</span><span class="nx">height</span>
+            <span class="k">if</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">targetWidth</span><span class="o">?</span> <span class="o">and</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">targetWidth</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">?</span>
+              <span class="nx">literal</span> <span class="nx">ids</span><span class="p">.</span><span class="nx">svgid</span><span class="p">,</span> <span class="nx">NS</span><span class="p">.</span><span class="nx">EXIF</span><span class="p">,</span> <span class="s">&quot;width&quot;</span><span class="p">,</span>         <span class="nx">obj</span><span class="p">.</span><span class="nx">targetWidth</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span>
+              <span class="nx">literal</span> <span class="nx">ids</span><span class="p">.</span><span class="nx">svgid</span><span class="p">,</span> <span class="nx">NS</span><span class="p">.</span><span class="nx">EXIF</span><span class="p">,</span> <span class="s">&quot;width&quot;</span><span class="p">,</span>         <span class="nx">screenSize</span><span class="p">.</span><span class="nx">width</span>
+    </pre></div></td></tr><tr id="section-35"><td class="docs"><div class="pilwrap"><a href="#section-35" class="pilcrow">&#182;</a></div><p>This is inserted regardless of the shape type - it's a function of this being a
+streaming video annotation client</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="nx">uri</span>     <span class="nx">ids</span><span class="p">.</span><span class="nx">fgid</span><span class="p">,</span> <span class="nx">NS</span><span class="p">.</span><span class="nx">RDF</span><span class="p">,</span> <span class="s">&quot;type&quot;</span><span class="p">,</span>  <span class="s">&quot;</span><span class="si">#{</span><span class="nx">NS</span><span class="p">.</span><span class="nx">OA</span><span class="si">}</span><span class="s">FragSelector&quot;</span>
+          <span class="nx">literal</span> <span class="nx">ids</span><span class="p">.</span><span class="nx">fgid</span><span class="p">,</span> <span class="nx">NS</span><span class="p">.</span><span class="nx">RDF</span><span class="p">,</span> <span class="s">&quot;value&quot;</span><span class="p">,</span> <span class="s">&#39;t=npt:&#39;</span> <span class="o">+</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">npt_start</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s">&#39;,&#39;</span> <span class="o">+</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">npt_end</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></pre></div></td></tr><tr id="section-36"><td class="docs"><div class="pilwrap"><a href="#section-36" class="pilcrow">&#182;</a></div><h4>createJSONObjSeries (private)</h4>
+
+<p>Creates the necessary series of objects to be inserted
+into the exported JSON. Only called if there isn't already a RDF:JSON object that was imported with a matching ID</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li>ids - Object holding ids for various parts of the RDF graph:
+<ul><li>id - annotation resource (required)</li>
+<li>buid - body resource</li>
+<li>tuid - target resource</li>
+<li>suid - selector resource</li>
+<li>svgid - SvgSelector resource</li>
+<li>fgid - FragSelector resource</li></ul></li>
+</ul>
+</td><td class="code"><div class="highlight"><pre>        <span class="nv">createJSONObjSeries = </span><span class="nf">(ids) -&gt;</span>
+          <span class="nv">obj = </span><span class="nx">app</span><span class="p">.</span><span class="nx">dataStore</span><span class="p">.</span><span class="nx">canvas</span><span class="p">.</span><span class="nx">getItem</span> <span class="nx">ids</span><span class="p">.</span><span class="nx">id</span>
+          <span class="nx">ids</span><span class="p">.</span><span class="nx">buid</span> <span class="o">?=</span> <span class="s">&#39;_:b&#39;</span> <span class="o">+</span> <span class="nx">uuid</span><span class="p">()</span>
+          <span class="nx">ids</span><span class="p">.</span><span class="nx">tuid</span> <span class="o">?=</span> <span class="s">&#39;_:t&#39;</span> <span class="o">+</span> <span class="nx">uuid</span><span class="p">()</span>
+          <span class="nx">ids</span><span class="p">.</span><span class="nx">suid</span> <span class="o">?=</span> <span class="s">&#39;_:sel&#39;</span> <span class="o">+</span> <span class="nx">uuid</span><span class="p">()</span>
+          <span class="nx">ids</span><span class="p">.</span><span class="nx">svgid</span> <span class="o">?=</span> <span class="s">&#39;_:sel&#39;</span> <span class="o">+</span> <span class="nx">uuid</span><span class="p">()</span>
+          <span class="nx">ids</span><span class="p">.</span><span class="nx">fgid</span> <span class="o">?=</span> <span class="s">&#39;_:sel&#39;</span> <span class="o">+</span> <span class="nx">uuid</span><span class="p">()</span>
+
+          <span class="nx">uri</span>   <span class="nx">ids</span><span class="p">.</span><span class="nx">id</span><span class="p">,</span> <span class="nx">NS</span><span class="p">.</span><span class="nx">RDF</span><span class="p">,</span> <span class="s">&quot;type&quot;</span><span class="p">,</span>      <span class="s">&quot;</span><span class="si">#{</span><span class="nx">NS</span><span class="p">.</span><span class="nx">OA</span><span class="si">}</span><span class="s">Annotation&quot;</span>
+          <span class="nx">bnode</span> <span class="nx">ids</span><span class="p">.</span><span class="nx">id</span><span class="p">,</span> <span class="nx">NS</span><span class="p">.</span><span class="nx">OA</span><span class="p">,</span>  <span class="s">&quot;hasBody&quot;</span><span class="p">,</span>   <span class="nx">ids</span><span class="p">.</span><span class="nx">buid</span>
+          <span class="nx">bnode</span> <span class="nx">ids</span><span class="p">.</span><span class="nx">id</span><span class="p">,</span> <span class="nx">NS</span><span class="p">.</span><span class="nx">OA</span><span class="p">,</span>  <span class="s">&quot;hasTarget&quot;</span><span class="p">,</span> <span class="nx">ids</span><span class="p">.</span><span class="nx">tuid</span>
+
+          <span class="nx">genBody</span> <span class="nx">obj</span><span class="p">,</span> <span class="nx">ids</span>
+          <span class="nx">genTarget</span> <span class="nx">obj</span><span class="p">,</span> <span class="nx">ids</span>
+
+        <span class="nv">mergeData = </span><span class="nf">(id) -&gt;</span>
+          <span class="nv">obj = </span><span class="nx">app</span><span class="p">.</span><span class="nx">dataStore</span><span class="p">.</span><span class="nx">canvas</span><span class="p">.</span><span class="nx">getItem</span> <span class="nx">id</span>
+          </pre></div></td></tr><tr id="section-37"><td class="docs"><div class="pilwrap"><a href="#section-37" class="pilcrow">&#182;</a></div><p>TODO: Rebuild the merging functionality that allows us to correct a prior version of the
+annotations. For now, mergeData simply exports the data regardless of what's in the data
+variable.</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="nx">createJSONObjSeries</span> 
+            <span class="nv">id: </span><span class="nx">obj</span><span class="p">.</span><span class="nx">id</span>
+
+        <span class="k">for</span> <span class="nx">o</span> <span class="k">in</span> <span class="nx">findAnnos</span><span class="p">.</span><span class="nx">evaluate</span><span class="p">(</span><span class="s">&#39;Annotation&#39;</span><span class="p">)</span>
+          <span class="nx">mergeData</span> <span class="nx">o</span>
+
+        <span class="nx">tempstore</span></pre></div></td></tr><tr id="section-38"><td class="docs"><div class="pilwrap"><a href="#section-38" class="pilcrow">&#182;</a></div><h2>Application Configuration</h2>
+
+<p>The rest of this prepares the annotation application once it's in the up-and-running process.</p>
+
+<p>We wrap all of this in the app.ready() call so we will have all of the events, presentations,
+data stores, etc., instantiated for us.</p>
+</td><td class="code"><div class="highlight"><pre>      <span class="nx">app</span><span class="p">.</span><span class="nx">ready</span> <span class="o">-&gt;</span></pre></div></td></tr><tr id="section-39"><td class="docs"><div class="pilwrap"><a href="#section-39" class="pilcrow">&#182;</a></div><p>We want the SVG overlay and the annotation body presentation to react to changes in
+the selection focus.</p>
+</td><td class="code"><div class="highlight"><pre>        <span class="nx">app</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onActiveAnnotationChange</span><span class="p">.</span><span class="nx">addListener</span> <span class="nx">app</span><span class="p">.</span><span class="nx">presentation</span><span class="p">.</span><span class="nx">raphsvg</span><span class="p">.</span><span class="nx">eventFocusChange</span></pre></div></td></tr><tr id="section-40"><td class="docs"><div class="pilwrap"><a href="#section-40" class="pilcrow">&#182;</a></div><p>We always want the current annotation list to include anything that covers a time within five seconds
+of the current time.</p>
+</td><td class="code"><div class="highlight"><pre>        <span class="nx">app</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onCurrentTimeChange</span><span class="p">.</span><span class="nx">addListener</span> <span class="nf">(t) -&gt;</span>
+          <span class="nx">app</span><span class="p">.</span><span class="nx">dataView</span><span class="p">.</span><span class="nx">currentAnnotations</span><span class="p">.</span><span class="nx">setKeyRange</span><span class="p">(</span><span class="nx">t</span> <span class="o">-</span> <span class="mi">5</span><span class="p">,</span> <span class="nx">t</span> <span class="o">+</span> <span class="mi">5</span><span class="p">)</span>
+          <span class="nx">playerObj</span><span class="p">.</span><span class="nx">setPlayhead</span> <span class="nx">t</span></pre></div></td></tr><tr id="section-41"><td class="docs"><div class="pilwrap"><a href="#section-41" class="pilcrow">&#182;</a></div><p>Making sure that none of the button items are still active while video is playing
+(Can't draw a shape while video is playing - force user to re-click item)</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="k">if</span> <span class="nx">app</span><span class="p">.</span><span class="nx">getCurrentMode</span><span class="p">()</span> <span class="o">!=</span> <span class="s">&quot;Watch&quot;</span>
+            <span class="nx">app</span><span class="p">.</span><span class="nx">setCurrentMode</span> <span class="kc">null</span>
+
+        <span class="nx">app</span><span class="p">.</span><span class="nx">setCurrentTime</span> <span class="nx">playerObj</span><span class="p">.</span><span class="nx">getPlayhead</span><span class="p">()</span>
+        <span class="nx">playerObj</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onPlayheadUpdate</span><span class="p">.</span><span class="nx">addListener</span> <span class="nx">app</span><span class="p">.</span><span class="nx">setCurrentTime</span>
+
+        <span class="nx">app</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onCurrentModeChange</span><span class="p">.</span><span class="nx">addListener</span> <span class="nf">(nmode) -&gt;</span>
+          <span class="k">if</span> <span class="nx">nmode</span> <span class="o">!=</span> <span class="s">&#39;Watch&#39;</span>
+            <span class="nx">playerObj</span><span class="p">.</span><span class="nx">pause</span><span class="p">()</span>
+          <span class="k">else</span> <span class="k">if</span> <span class="nx">nmode</span> <span class="o">==</span> <span class="s">&#39;Watch&#39;</span>
+            <span class="nx">playerObj</span><span class="p">.</span><span class="nx">play</span><span class="p">()</span></pre></div></td></tr><tr id="section-42"><td class="docs"><div class="pilwrap"><a href="#section-42" class="pilcrow">&#182;</a></div><p>We want to populate the available shapes with the rectangle and ellipse. These are considered stock
+shapes for annotations.</p>
+</td><td class="code"><div class="highlight"><pre>      <span class="nx">app</span><span class="p">.</span><span class="nx">ready</span> <span class="o">-&gt;</span></pre></div></td></tr><tr id="section-43"><td class="docs"><div class="pilwrap"><a href="#section-43" class="pilcrow">&#182;</a></div><p>Using addShapeType to add Rectangle to the array of possible SVG
+shapes</p>
+</td><td class="code"><div class="highlight"><pre>        <span class="nx">app</span><span class="p">.</span><span class="nx">addShapeType</span> <span class="s">&quot;Rectangle&quot;</span><span class="p">,</span></pre></div></td></tr><tr id="section-44"><td class="docs"><div class="pilwrap"><a href="#section-44" class="pilcrow">&#182;</a></div><p>Renders the SVG <rect/> element representing the rectangle</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li><p>model - the data store or data view holding information abut the item to be rendered</p></li>
+<li><p>itemId - the item ID of the item to be rendered</p></li>
+</ul>
+</td><td class="code"><div class="highlight"><pre>          <span class="nv">renderAsSVG: </span><span class="nf">(model, itemId) -&gt;</span>
+            <span class="nv">item = </span><span class="nx">model</span><span class="p">.</span><span class="nx">getItem</span> <span class="nx">itemId</span>
+            <span class="s">&quot;&lt;rect x=&#39;</span><span class="si">#{</span><span class="nx">item</span><span class="p">.</span><span class="nx">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s">&#39; y=&#39;</span><span class="si">#{</span><span class="nx">item</span><span class="p">.</span><span class="nx">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s">&#39; width=&#39;</span><span class="si">#{</span><span class="nx">item</span><span class="p">.</span><span class="nx">w</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s">&#39; height=&#39;</span><span class="si">#{</span><span class="nx">item</span><span class="p">.</span><span class="nx">h</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s">&#39; /&gt;&quot;</span></pre></div></td></tr><tr id="section-45"><td class="docs"><div class="pilwrap"><a href="#section-45" class="pilcrow">&#182;</a></div><p>We are interested in <rect/> elements. If the SvgConstraint is a <rect/> element, then
+the import routine will call the extractFromSVG() function and the imported annotation
+will have a shapeType of "Rectangle"</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="nv">rootSVGElement: </span><span class="p">[</span><span class="s">&quot;rect&quot;</span><span class="p">]</span>
+                
+          <span class="nv">extractFromSVG: </span><span class="nf">(svg) -&gt;</span>
+            <span class="nv">info = </span><span class="p">{}</span>
+            <span class="nv">info.w = </span><span class="nb">parseFloat</span> <span class="nx">svg</span><span class="p">.</span><span class="nx">getAttribute</span><span class="p">(</span><span class="s">&#39;width&#39;</span><span class="p">)</span>
+            <span class="nv">info.h = </span><span class="nb">parseFloat</span> <span class="nx">svg</span><span class="p">.</span><span class="nx">getAttribute</span><span class="p">(</span><span class="s">&#39;height&#39;</span><span class="p">)</span>
+            <span class="nv">info.x = </span><span class="nb">parseFloat</span> <span class="nx">svg</span><span class="p">.</span><span class="nx">getAttribute</span><span class="p">(</span><span class="s">&#39;x&#39;</span><span class="p">)</span>
+            <span class="nv">info.y = </span><span class="nb">parseFloat</span> <span class="nx">svg</span><span class="p">.</span><span class="nx">getAttribute</span><span class="p">(</span><span class="s">&#39;y&#39;</span><span class="p">)</span>
+            <span class="nx">info</span>
+        </pre></div></td></tr><tr id="section-46"><td class="docs"><div class="pilwrap"><a href="#section-46" class="pilcrow">&#182;</a></div><p>Renders the rectangular constraint on the video target.</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li><p>container - the container holding the lens content</p></li>
+<li><p>view - the presentation managing the collection of renderings</p></li>
+<li><p>model - the data store or data view holding information abut the item to be rendered</p></li>
+<li><p>itemId - the item ID of the item to be rendered</p></li>
+</ul>
+
+<p>Returns:</p>
+
+<p>The rendering object.</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="nv">lens: </span><span class="nf">(container, view, model, itemId) -&gt;</span></pre></div></td></tr><tr id="section-47"><td class="docs"><div class="pilwrap"><a href="#section-47" class="pilcrow">&#182;</a></div><p>Note: Rectangle measurements x,y start at CENTER
+Initiate object with super-class methods and variables</p>
+</td><td class="code"><div class="highlight"><pre>            <span class="nx">app</span><span class="p">.</span><span class="nx">initShapeLens</span> <span class="nx">container</span><span class="p">,</span> <span class="nx">view</span><span class="p">,</span> <span class="nx">model</span><span class="p">,</span> <span class="nx">itemId</span><span class="p">,</span> <span class="nf">(that) -&gt;</span>
+              <span class="nv">item = </span><span class="nx">model</span><span class="p">.</span><span class="nx">getItem</span> <span class="nx">itemId</span></pre></div></td></tr><tr id="section-48"><td class="docs"><div class="pilwrap"><a href="#section-48" class="pilcrow">&#182;</a></div><p>Accessing the view.canvas Object that was created in MITHGrid.Presentation.RaphSVG</p>
+</td><td class="code"><div class="highlight"><pre>              <span class="p">[</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">]</span> <span class="o">=</span> <span class="nx">that</span><span class="p">.</span><span class="nx">scalePoint</span> <span class="nx">item</span><span class="p">.</span><span class="nx">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="nx">item</span><span class="p">.</span><span class="nx">w</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span> <span class="nx">item</span><span class="p">.</span><span class="nx">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="nx">item</span><span class="p">.</span><span class="nx">h</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span> <span class="nx">item</span><span class="p">.</span><span class="nx">targetWidth</span><span class="p">,</span> <span class="nx">item</span><span class="p">.</span><span class="nx">targetHeight</span>
+              <span class="p">[</span><span class="nx">w</span><span class="p">,</span> <span class="nx">h</span><span class="p">]</span> <span class="o">=</span> <span class="nx">that</span><span class="p">.</span><span class="nx">scalePoint</span> <span class="nx">item</span><span class="p">.</span><span class="nx">w</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nx">item</span><span class="p">.</span><span class="nx">h</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nx">item</span><span class="p">.</span><span class="nx">targetWidth</span><span class="p">,</span> <span class="nx">item</span><span class="p">.</span><span class="nx">targetHeight</span>
+          
+              <span class="nv">c = </span><span class="nx">view</span><span class="p">.</span><span class="nx">canvas</span><span class="p">.</span><span class="nx">rect</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">,</span> <span class="nx">w</span><span class="p">,</span> <span class="nx">h</span><span class="p">)</span>
+
+              <span class="nv">that.shape = </span><span class="nx">c</span></pre></div></td></tr><tr id="section-49"><td class="docs"><div class="pilwrap"><a href="#section-49" class="pilcrow">&#182;</a></div><p>fill and set opacity</p>
+</td><td class="code"><div class="highlight"><pre>              <span class="nx">c</span><span class="p">.</span><span class="nx">attr</span>
+                <span class="nv">fill: </span><span class="s">&quot;silver&quot;</span>
+                <span class="nv">border: </span><span class="s">&quot;grey&quot;</span>
+              <span class="nx">that</span><span class="p">.</span><span class="nx">setOpacity</span><span class="p">()</span>
+
+              <span class="nx">$</span><span class="p">(</span><span class="nx">c</span><span class="p">.</span><span class="nx">node</span><span class="p">).</span><span class="nx">css</span>
+                <span class="s">&quot;pointer-events&quot;</span><span class="o">:</span> <span class="s">&quot;auto&quot;</span>
+
+              <span class="nv">selectBinding = </span><span class="nx">app</span><span class="p">.</span><span class="nx">controller</span><span class="p">.</span><span class="nx">selectShape</span><span class="p">.</span><span class="nx">bind</span> <span class="nx">c</span>
+              <span class="nx">selectBinding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onSelect</span><span class="p">.</span><span class="nx">addListener</span> <span class="o">-&gt;</span>
+                <span class="nx">app</span><span class="p">.</span><span class="nx">setActiveAnnotation</span><span class="p">(</span><span class="nx">itemId</span><span class="p">)</span>
+
+              <span class="nv">superUpdate = </span><span class="nx">that</span><span class="p">.</span><span class="nx">update</span>
+              <span class="nv">that.update = </span><span class="nf">(newItem) -&gt;</span></pre></div></td></tr><tr id="section-50"><td class="docs"><div class="pilwrap"><a href="#section-50" class="pilcrow">&#182;</a></div><p>receiving the Object passed through
+model.updateItems in move()</p>
+</td><td class="code"><div class="highlight"><pre>                <span class="nv">item = </span><span class="nx">newItem</span>
+                <span class="nx">superUpdate</span> <span class="nx">item</span>
+                <span class="k">if</span> <span class="nx">item</span><span class="p">.</span><span class="nx">x</span><span class="o">?</span> <span class="o">and</span> <span class="nx">item</span><span class="p">.</span><span class="nx">y</span><span class="o">?</span> <span class="o">and</span> <span class="nx">item</span><span class="p">.</span><span class="nx">w</span><span class="o">?</span> <span class="o">and</span> <span class="nx">item</span><span class="p">.</span><span class="nx">h</span><span class="o">?</span>
+                  <span class="p">[</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">]</span> <span class="o">=</span> <span class="nx">that</span><span class="p">.</span><span class="nx">scalePoint</span> <span class="nx">item</span><span class="p">.</span><span class="nx">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nx">item</span><span class="p">.</span><span class="nx">y</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nx">item</span><span class="p">.</span><span class="nx">targetWidth</span><span class="p">,</span> <span class="nx">item</span><span class="p">.</span><span class="nx">targetHeight</span>
+                  <span class="p">[</span><span class="nx">w</span><span class="p">,</span> <span class="nx">h</span><span class="p">]</span> <span class="o">=</span> <span class="nx">that</span><span class="p">.</span><span class="nx">scalePoint</span> <span class="nx">item</span><span class="p">.</span><span class="nx">w</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nx">item</span><span class="p">.</span><span class="nx">h</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nx">item</span><span class="p">.</span><span class="nx">targetWidth</span><span class="p">,</span> <span class="nx">item</span><span class="p">.</span><span class="nx">targetHeight</span>
+                  <span class="nx">c</span><span class="p">.</span><span class="nx">attr</span>
+                    <span class="nv">x: </span><span class="nx">x</span> <span class="o">-</span> <span class="nx">w</span> <span class="o">/</span> <span class="mi">2</span>
+                    <span class="nv">y: </span><span class="nx">y</span> <span class="o">-</span> <span class="nx">h</span> <span class="o">/</span> <span class="mi">2</span>
+                    <span class="nv">width: </span><span class="nx">w</span>
+                    <span class="nv">height: </span><span class="nx">h</span></pre></div></td></tr><tr id="section-51"><td class="docs"><div class="pilwrap"><a href="#section-51" class="pilcrow">&#182;</a></div><p>calculate the extents (x, y, width, height)
+of this type of shape</p>
+</td><td class="code"><div class="highlight"><pre>              <span class="nv">that.getExtents = </span><span class="o">-&gt;</span>
+                <span class="nv">x: </span><span class="nx">c</span><span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s">&quot;x&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="nx">c</span><span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s">&quot;width&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+                <span class="nv">y: </span><span class="nx">c</span><span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s">&quot;y&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="nx">c</span><span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s">&quot;height&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+                <span class="nv">width: </span><span class="nx">c</span><span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s">&quot;width&quot;</span><span class="p">)</span>
+                <span class="nv">height: </span><span class="nx">c</span><span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s">&quot;height&quot;</span><span class="p">)</span>
+
+        <span class="nx">app</span><span class="p">.</span><span class="nx">addShapeType</span> <span class="s">&quot;Ellipse&quot;</span><span class="p">,</span></pre></div></td></tr><tr id="section-52"><td class="docs"><div class="pilwrap"><a href="#section-52" class="pilcrow">&#182;</a></div><p>Generates a JSON object containing the measurements for an
+ellipse object but only using x, y, w, h</p>
+
+<p>Returns:
+JSON object
+calc: (coords) ->
+x: coords.x + (coords.width / 2)
+y: coords.y + (coords.height / 2)
+w: coords.width
+h: coords.height</p>
+</td><td class="code"><div class="highlight"><pre>          </pre></div></td></tr><tr id="section-53"><td class="docs"><div class="pilwrap"><a href="#section-53" class="pilcrow">&#182;</a></div><p>Renders the SVG <rect/> element representing the rectangle</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li><p>model - the data store or data view holding information abut the item to be rendered</p></li>
+<li><p>itemId - the item ID of the item to be rendered</p></li>
+</ul>
+</td><td class="code"><div class="highlight"><pre>          <span class="nv">renderAsSVG: </span><span class="nf">(model, itemId) -&gt;</span>
+            <span class="nv">item = </span><span class="nx">model</span><span class="p">.</span><span class="nx">getItem</span> <span class="nx">itemId</span>
+            <span class="s">&quot;&lt;elli x=&#39;</span><span class="si">#{</span><span class="nx">item</span><span class="p">.</span><span class="nx">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s">&#39; y=&#39;</span><span class="si">#{</span><span class="nx">item</span><span class="p">.</span><span class="nx">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s">&#39; width=&#39;</span><span class="si">#{</span><span class="nx">item</span><span class="p">.</span><span class="nx">w</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s">&#39; height=&#39;</span><span class="si">#{</span><span class="nx">item</span><span class="p">.</span><span class="nx">h</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s">&#39; /&gt;&quot;</span>
+          
+          <span class="nv">rootSVGElement: </span><span class="p">[</span><span class="s">&quot;elli&quot;</span><span class="p">]</span>
+        
+          <span class="nv">extractFromSVG: </span><span class="nf">(svg) -&gt;</span>
+            <span class="nv">info = </span><span class="p">{}</span>
+            <span class="nv">info.w = </span><span class="nb">parseFloat</span> <span class="nx">svg</span><span class="p">.</span><span class="nx">getAttribute</span><span class="p">(</span><span class="s">&#39;width&#39;</span><span class="p">)</span>
+            <span class="nv">info.h = </span><span class="nb">parseFloat</span> <span class="nx">svg</span><span class="p">.</span><span class="nx">getAttribute</span><span class="p">(</span><span class="s">&#39;height&#39;</span><span class="p">)</span>
+            <span class="nv">info.x = </span><span class="nb">parseFloat</span> <span class="nx">svg</span><span class="p">.</span><span class="nx">getAttribute</span><span class="p">(</span><span class="s">&#39;x&#39;</span><span class="p">)</span>
+            <span class="nv">info.y = </span><span class="nb">parseFloat</span> <span class="nx">svg</span><span class="p">.</span><span class="nx">getAttribute</span><span class="p">(</span><span class="s">&#39;y&#39;</span><span class="p">)</span>
+            <span class="nx">info</span></pre></div></td></tr><tr id="section-54"><td class="docs"><div class="pilwrap"><a href="#section-54" class="pilcrow">&#182;</a></div><p>Rendering Lens for the Ellipse SVG shape</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li><p>container - the container holding the lens content</p></li>
+<li><p>view - the presentation managing the collection of renderings</p></li>
+<li><p>model - the data store or data view holding information abut the item to be rendered</p></li>
+<li><p>itemId - the item ID of the item to be rendered</p></li>
+</ul>
+
+<p>Returns:</p>
+
+<p>The rendering object.</p>
+</td><td class="code"><div class="highlight"><pre>          <span class="nv">lens: </span><span class="nf">(container, view, model, itemId) -&gt;</span>
+            <span class="nx">app</span><span class="p">.</span><span class="nx">initShapeLens</span> <span class="nx">container</span><span class="p">,</span> <span class="nx">view</span><span class="p">,</span> <span class="nx">model</span><span class="p">,</span> <span class="nx">itemId</span><span class="p">,</span> <span class="nf">(that) -&gt;</span>
+              <span class="nv">item = </span><span class="nx">model</span><span class="p">.</span><span class="nx">getItem</span> <span class="nx">itemId</span></pre></div></td></tr><tr id="section-55"><td class="docs"><div class="pilwrap"><a href="#section-55" class="pilcrow">&#182;</a></div><p>create the shape</p>
+</td><td class="code"><div class="highlight"><pre>              <span class="p">[</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">]</span> <span class="o">=</span> <span class="nx">that</span><span class="p">.</span><span class="nx">scalePoint</span> <span class="nx">item</span><span class="p">.</span><span class="nx">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nx">item</span><span class="p">.</span><span class="nx">y</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nx">item</span><span class="p">.</span><span class="nx">targetWidth</span><span class="p">,</span> <span class="nx">item</span><span class="p">.</span><span class="nx">targetHeight</span>
+              <span class="p">[</span><span class="nx">w</span><span class="p">,</span> <span class="nx">h</span><span class="p">]</span> <span class="o">=</span> <span class="nx">that</span><span class="p">.</span><span class="nx">scalePoint</span> <span class="nx">item</span><span class="p">.</span><span class="nx">w</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="nx">item</span><span class="p">.</span><span class="nx">h</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="nx">item</span><span class="p">.</span><span class="nx">targetWidth</span><span class="p">,</span> <span class="nx">item</span><span class="p">.</span><span class="nx">targetHeight</span>
+              <span class="nv">c = </span><span class="nx">view</span><span class="p">.</span><span class="nx">canvas</span><span class="p">.</span><span class="nx">ellipse</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">,</span> <span class="nx">w</span><span class="p">,</span> <span class="nx">h</span><span class="p">)</span>
+              <span class="nv">that.shape = </span><span class="nx">c</span></pre></div></td></tr><tr id="section-56"><td class="docs"><div class="pilwrap"><a href="#section-56" class="pilcrow">&#182;</a></div><p>fill shape</p>
+</td><td class="code"><div class="highlight"><pre>              <span class="nx">c</span><span class="p">.</span><span class="nx">attr</span>
+                <span class="nv">fill: </span><span class="s">&quot;silver&quot;</span>
+                <span class="nv">border: </span><span class="s">&quot;grey&quot;</span>
+              <span class="nx">that</span><span class="p">.</span><span class="nx">setOpacity</span><span class="p">()</span>
+              <span class="nx">$</span><span class="p">(</span><span class="nx">c</span><span class="p">.</span><span class="nx">node</span><span class="p">).</span><span class="nx">css</span>
+                <span class="s">&quot;pointer-events&quot;</span><span class="o">:</span> <span class="s">&quot;auto&quot;</span>
+
+              <span class="nv">selectBinding = </span><span class="nx">app</span><span class="p">.</span><span class="nx">controller</span><span class="p">.</span><span class="nx">selectShape</span><span class="p">.</span><span class="nx">bind</span> <span class="nx">c</span>
+              <span class="nx">selectBinding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onSelect</span><span class="p">.</span><span class="nx">addListener</span> <span class="o">-&gt;</span>
+                <span class="nx">app</span><span class="p">.</span><span class="nx">setActiveAnnotation</span><span class="p">(</span><span class="nx">itemId</span><span class="p">)</span>
+
+              <span class="nv">superUpdate = </span><span class="nx">that</span><span class="p">.</span><span class="nx">update</span>
+
+              <span class="nv">that.update = </span><span class="nf">(item) -&gt;</span></pre></div></td></tr><tr id="section-57"><td class="docs"><div class="pilwrap"><a href="#section-57" class="pilcrow">&#182;</a></div><p>receiving the Object passed through
+model.updateItems in move()</p>
+</td><td class="code"><div class="highlight"><pre>                <span class="nx">superUpdate</span> <span class="nx">item</span>
+
+                <span class="k">if</span> <span class="nx">item</span><span class="p">.</span><span class="nx">x</span><span class="o">?</span> <span class="o">and</span> <span class="nx">item</span><span class="p">.</span><span class="nx">y</span><span class="o">?</span>
+                  <span class="p">[</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">]</span> <span class="o">=</span> <span class="nx">that</span><span class="p">.</span><span class="nx">scalePoint</span> <span class="nx">item</span><span class="p">.</span><span class="nx">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nx">item</span><span class="p">.</span><span class="nx">y</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nx">item</span><span class="p">.</span><span class="nx">targetWidth</span><span class="p">,</span> <span class="nx">item</span><span class="p">.</span><span class="nx">targetHeight</span>
+                  <span class="p">[</span><span class="nx">w</span><span class="p">,</span> <span class="nx">h</span><span class="p">]</span> <span class="o">=</span> <span class="nx">that</span><span class="p">.</span><span class="nx">scalePoint</span> <span class="nx">item</span><span class="p">.</span><span class="nx">w</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nx">item</span><span class="p">.</span><span class="nx">h</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nx">item</span><span class="p">.</span><span class="nx">targetWidth</span><span class="p">,</span> <span class="nx">item</span><span class="p">.</span><span class="nx">targetHeight</span>
+                  <span class="nx">c</span><span class="p">.</span><span class="nx">attr</span>
+                    <span class="nv">cx: </span><span class="nx">x</span>
+                    <span class="nv">cy: </span><span class="nx">y</span>
+                    <span class="nv">rx: </span><span class="nx">w</span> <span class="o">/</span> <span class="mi">2</span>
+                    <span class="nv">ry: </span><span class="nx">h</span> <span class="o">/</span> <span class="mi">2</span>
+          </pre></div></td></tr><tr id="section-58"><td class="docs"><div class="pilwrap"><a href="#section-58" class="pilcrow">&#182;</a></div><p>calculate the extents (x, y, width, height)
+of this type of shape</p>
+</td><td class="code"><div class="highlight"><pre>              <span class="nv">that.getExtents = </span><span class="o">-&gt;</span>
+                <span class="nv">x: </span><span class="nx">c</span><span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s">&quot;cx&quot;</span><span class="p">)</span>
+                <span class="nv">y: </span><span class="nx">c</span><span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s">&quot;cy&quot;</span><span class="p">)</span>
+                <span class="nv">width: </span><span class="p">(</span><span class="nx">c</span><span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s">&quot;rx&quot;</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
+                <span class="nv">height: </span><span class="p">(</span><span class="nx">c</span><span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s">&quot;ry&quot;</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="nx">app</span><span class="p">.</span><span class="nx">setCurrentTime</span> <span class="mi">0</span>
+
+</pre></div></td></tr></tbody></table><div id="generated">generated Tue May 08 2012 14:20:06 GMT-0400 (EDT)  </div><div id="projectname"><a href="../index.html">Video Annotator</a></div></div>

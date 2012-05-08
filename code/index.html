@@ -2,43 +2,39 @@
 layout: docco
 title: OACVideoAnnotator/code/index.html
 ---
-<div id="container"><div id="background"></div><div id="jump_to">Jump To &hellip;<div id="jump_wrapper"><div id="jump_page"><a href="./index.html" class="source"><span class="file_name">README</span></a><a href="./src/canvas.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">canvas.coffee</span></a><a href="./src/component.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">component.coffee</span></a><a href="./src/controllers.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">controllers.coffee</span></a><a href="./src/driver-framework.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">driver-framework.coffee</span></a><a href="./src/drivers/dummy.coffee.html" class="source "><span class="base_path">src / drivers / </span><span class="file_name">dummy.coffee</span></a><a href="./src/drivers/html5.coffee.html" class="source "><span class="base_path">src / drivers / </span><span class="file_name">html5.coffee</span></a><a href="./src/drivers/youtube.coffee.html" class="source "><span class="base_path">src / drivers / </span><span class="file_name">youtube.coffee</span></a><a href="./src/intro.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">intro.coffee</span></a><a href="./src/outro.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">outro.coffee</span></a><a href="./src/presentations.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">presentations.coffee</span></a></div></div></div><table cellpadding="0" cellspacing="0"><thead><tr><th class="docs"></th><th class="code"></th></tr></thead><tbody><tr id="section"><td class="docs"><h1>OAC Video Annotation Client
-</h1><p>A JavaScript framework for providing annotation capabilities for embedded videos.</p><h3>Version</h3><p>0.0.1</p><h3>Author</h3><p>Maryland Institute for Technology in the Humanities (MITH)</p><h3>Contributors</h3><p>Grant Dickie</p><p>James Smith</p><h3>Repository</h3><p>git - git://github.com/umd-mith/OACVideoAnnotator.git</p><h3>Dependencies </h3><ul><li><b>jQuery </b><span>1.6.1</span></li><li><b>Raphael.js </b><span>1.5.2</span></li><li><b>MITHgrid </b><span>latest</span></li></ul><p><h3>Stats</h3><pre class="code_stats">
-http://cloc.sourceforge.net v 1.55  T=0.5 s (20.0 files/s, 6230.0 lines/s)
+<div id="container"><div id="background"></div><div id="jump_to">Jump To &hellip;<div id="jump_wrapper"><div id="jump_page"><a href="./index.html" class="source"><span class="file_name">README</span></a><a href="./src/application.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">application.coffee</span></a><a href="./src/component.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">component.coffee</span></a><a href="./src/controllers.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">controllers.coffee</span></a><a href="./src/driver-framework.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">driver-framework.coffee</span></a><a href="./src/drivers/dummy.coffee.html" class="source "><span class="base_path">src / drivers / </span><span class="file_name">dummy.coffee</span></a><a href="./src/drivers/html5.coffee.html" class="source "><span class="base_path">src / drivers / </span><span class="file_name">html5.coffee</span></a><a href="./src/drivers/youtube.coffee.html" class="source "><span class="base_path">src / drivers / </span><span class="file_name">youtube.coffee</span></a><a href="./src/intro.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">intro.coffee</span></a><a href="./src/outro.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">outro.coffee</span></a><a href="./src/presentations.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">presentations.coffee</span></a></div></div></div><table cellpadding="0" cellspacing="0"><thead><tr><th class="docs"></th><th class="code"></th></tr></thead><tbody><tr id="section"><td class="docs"><h1>Video Annotator
+</h1><p>Developer toolkit for adding annotation to streaming video presentations.</p><h3>Version</h3><p>0.0.1</p><h3>Repository</h3><p>git - git://github.com/umd-mith/OACVideoAnnotator.git</p><h3>Dependencies </h3><ul><li><b>jQuery </b><span>1.7.1</span></li><li><b>Raphael.js </b><span>1.5.2</span></li><li><b>MITHgrid </b><span>latest</span></li></ul><p><h3>Stats</h3><pre class="code_stats">
+http://cloc.sourceforge.net v 1.55  T=0.5 s (20.0 files/s, 5482.0 lines/s)
 -------------------------------------------------------------------------------
 Language                     files          blank        comment           code
 -------------------------------------------------------------------------------
-CoffeeScript                    10            384           1225           1506
+CoffeeScript                    10            315           1167           1259
 -------------------------------------------------------------------------------
-SUM:                            10            384           1225           1506
+SUM:                            10            315           1167           1259
 -------------------------------------------------------------------------------
-</pre></p></td><td id="content" class="code"><h1>OAC Video Annotation Tool</h1>
+</pre></p></td><td id="content" class="code"><h1>Video Annotator</h1>
 
-<p>for use in the Alexander Street Press online streaming video window. </p>
-
-<p>Authors:</p>
-
-<ul>
-<li>Grant Dickie</li>
-<li>Jim Smith</li>
-</ul>
+<p>The Video Annotator developer library is the result of an experiment run as part of the
+<a href="http://www.openannotation.org">Open Annotation</a> collaboration to test the 
+<a href="http://www.openannotation.org/spec/beta/">OA data model</a> 
+for use in exchanging annotations of streaming video.</p>
 
 <p>See license.txt for licensing details</p>
 
 <h2>Setting up the OAC Annotation Tool</h2>
 
-<h2>What you will need for your site</h2>
+<h3>What you will need for your site</h3>
 
 <p>The following code libraries are required and are listed in the order
 in which to include them:</p>
 
 <ul>
 <li>jQuery</li>
-<li>RaphaelJS</li>
-<li>MITHGrid </li>
+<li>Raphaël.js</li>
+<li>MITHgrid </li>
 </ul>
 
-<h2>What you will need for building OAC Video Annotator</h2>
+<h3>What you will need for building Video Annotator</h3>
 
 <p>A Makefile has been included with this distribution to allow for running system-level commands to minimize the code and provide a distribution directory <code>dist/</code> with two files, <code>videoanno.js</code> which is the full, human-readable version of the Javascript code, and <code>videoanno.min.js</code>, which is a compressed version of the core code library intended for quick-loading in the browser. The minified version is, of course, much less readable than the full version.</p>
 
@@ -48,16 +44,16 @@ in which to include them:</p>
 
 <p>Linux/BSD users should use their appropriate package managers to install make, git, and node.</p>
 
-<h2>How to build your own OAC Video Annotator</h2>
+<h3>How to build your own Video Annotator</h3>
 
 <p>First, use the <em>git</em> command <em>git clone</em> to copy the remote repository to your directory, like so: <code>git clone git://github.com/umd_mith/OACVideoAnnotator.git</code>.</p>
 
-<p>Then, to get a complete, minified, jslinted version of the OACVideoAnnotator, <code>cd</code> to the directory containing the files for OACVideoAnnotator and type <code>make</code>.  If you don't have Node installed and/or want to make a basic, uncompressed, unlinted version of OACVideoAnnotator, use <code>make videoanno</code> instead of <code>make</code>.</p>
+<p>Then, to get a complete, minified, jslinted version of Video Annotator, <code>cd</code> to the directory containing the files for Video Annotator and type <code>make</code>.  If you don't have Node installed and/or want to make a basic, uncompressed, unlinted version of Video Annotator, use <code>make videoanno</code> instead of <code>make</code>.</p>
 
 <p>The built version of OACVideoAnnotator will be in the <code>dist/</code> subdirectory.</p>
 
 <p>To remove all built files, run <code>make clean</code>.</p>
 
-<h2>Testing the OAC Video Annotator</h2>
+<h3>Testing Video Annotator</h3>
 
-<p>Direct your browser to <code>/your installation directory/tests/</code> and it will display the QUnit tests that have been set up with this release. For more information on QUnit and how you can set up your own tests, visit <a href="http://docs.jquery.com/Qunit">the QUnit documentation</a> </p>  </td></tr></tbody></table><div id="generated">generated Sat Apr 28 2012 19:08:50 GMT-0400 (EDT)  </div><div id="projectname"><a href="./index.html">OAC Video Annotation Client</a></div></div>
+<p>Direct your browser to <code>/your installation directory/tests/</code> and it will display the QUnit tests that have been set up with this release. For more information on QUnit and how you can set up your own tests, visit <a href="http://docs.jquery.com/Qunit">the QUnit documentation</a> </p>  </td></tr></tbody></table><div id="generated">generated Tue May 08 2012 14:20:06 GMT-0400 (EDT)  </div><div id="projectname"><a href="./index.html">Video Annotator</a></div></div>
