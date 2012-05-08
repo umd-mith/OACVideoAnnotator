@@ -4,121 +4,13 @@
 # # Default Configurations
 #
 
-MITHGrid.defaults "OAC.Client.StreamingVideo.Player.DriverBinding",
-	events:
-		onResize: null
-		onPlayheadUpdate: null
-
-# ## Component.ShapeEditBox
+# ## Application
 #
-# Bindings created by this controller will have the following events:
-#
-# - onResize
-# - onMove
-# - onEdit
-# - onDelete
-# - onCurrentModeChange
-MITHGrid.defaults "OAC.Client.StreamingVideo.Component.ShapeEditBox",
-	dirs: ['ul', 'top', 'ur', 'lft', 'lr', 'btm', 'll', 'rgt', 'mid']
-	events:
-		onResize: null
-		onMove: null
-		onEdit: null
-		onDelete: null
-		onCurrentModeChange: null
-
-
-# ## Controller.CanvasClickController
-#
-# Bindings created by this controller will have the following events:
-#
-# - onClick
-# - onShapeStart
-# - onShapeDrag
-# - onShapeDone
-MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.CanvasClickController",
-	bind:
-		events:
-			onClick: null
-			onShapeStart: null
-			onShapeDrag: null
-			onShapeDone: null
-
-# ## Controller.TextBodyEditor
-#
-# Bindings created by this controller will have the following events:
-#
-# - onClick
-# - onDelete
-# - onUpdate
-MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.TextBodyEditor",
-	bind:
-		events:
-			onClick: null
-			onDelete: null
-			onUpdate: null
-
-# ## Controller.KeyboardListener
-#
-# Bindings created by this controller will have the following events:
-#
-# - onDelete
-MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.KeyboardListener",
-	bind:
-		events:
-			onDelete: ["preventable", "unicast"]
-
-# ## Component.ModeButton
-#
-# Bindings created by this controller will have the following events:
-#
-# - onCurrentModeChange
-MITHGrid.defaults "OAC.Client.StreamingVideo.Component.ModeButton",
-	bind:
-		events:
-			onCurrentModeChange: null
-
-# ## Controller.ShapeCreateBox
-#
-MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.ShapeCreateBox",
-	bind:
-		events: { }
-
-# ## Controller.Drag
-#
-MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.Drag",
-	bind:
-		events:
-			onFocus: null
-			onUnfocus: null
-			onUpdate: null
-
-# ## Controller.Select
-#
-MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.Select",
-	bind:
-		events:
-			onSelect: null
-	isSelectable: -> true
-
-# ## Controller.timeControl
-#
-# Bindings created by this controller will have the following events:
-#
-# - onUpdate
-MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.timeControl",
-	bind:
-		events:
-			onUpdate: null
-
-# ## Annotation Client
+# The Video Annotator core application has the basic set of components needed to provide video annotation.
 #
 MITHGrid.defaults "OAC.Client.StreamingVideo.Application",
+	# ### Controllers
 	controllers:
-		keyboard:
-			type: OAC.Client.StreamingVideo.Controller.KeyboardListener
-			selectors:
-				doc: ''
 		canvas:
 			type: OAC.Client.StreamingVideo.Controller.CanvasClickController
 			selectors:
@@ -127,6 +19,7 @@ MITHGrid.defaults "OAC.Client.StreamingVideo.Application",
 			type: OAC.Client.StreamingVideo.Controller.Select
 			selectors:
 				raphael: ''
+	# ### Variables
 	variables:
 		# **ActiveAnnotation** holds the item ID of the annotation currently receiving selection focus.
 		#
@@ -164,7 +57,7 @@ MITHGrid.defaults "OAC.Client.StreamingVideo.Application",
 		# - events.onCurrentModeChange fires when the CurrentMode value changes
 		CurrentMode:
 			is: 'rw'
-
+	# ### Data Views
 	dataViews:
 		# **currentAnnotations** pages a range of times through the annotation store selecting those
 		# annotations which have a time range (.npt\_start through .npt\_end) that fall within the time
@@ -175,33 +68,66 @@ MITHGrid.defaults "OAC.Client.StreamingVideo.Application",
 			leftExpressions: [ '.npt_start' ]
 			rightExpressions: [ '.npt_end' ]
 
-	# Data store for the Application
+	# ### Data Store
 	dataStores:
 		# **canvas** holds all of the annotation data for the client.
 		canvas:
+			# #### Types
 			types:
 				# All annotation items are of type "Annotation"
 				Annotation: {}
-			# The following properties are understood by the annotation client:
+			# #### Properties
 			properties:
-				# - shapeType indicates which shape is used as the SVG constraint within the frame (e.g., Rectangle or Ellipse)
-				shapeType:
+				# The following properties are understood by the annotation client:
+				
+				# - bodyContent holds the byte stream associated with the annotation body
+				bodyContent:
 					valueType: 'text'
 				# - bodyType indicates what kind of body the annotation associates with the target (e.g., Text)
 				bodyType:
 					valueType: 'text'
-				# - bodyContent holds the byte stream associated with the annotation body
-				bodyContent:
+				
+				# - the play head position at which this annotation ceases being active/current
+				npt_end: 
+					valueType: 'numeric'
+				# - the play head position at which this annotation becomes active/current
+				npt_start:
+					valueType: 'numeric'
+				# - shapeType indicates which shape is used as the SVG constraint within the frame (e.g., Rectangle or Ellipse)
+				shapeType:
 					valueType: 'text'
+				
 				# - targetURI points to the annotation target video without time constraints
 				targetURI:
 					valueType: 'uri'
-				# - the play head position at which this annotation becomes active/current
-				npt_start:
-					valueType: "numeric"
-				# - the play head position at which this annotation ceases being active/current
-				npt_end: 
-					valueType: "numeric"
+
+				
+				# The following properties are used by the Rectangle and Ellipse shape types:
+				
+				# - h
+				h:
+					valueType: 'numeric'
+				# - targetHeight
+				targetHeight:
+					valueType: 'numeric'
+				# - targetWidth
+				targetWidth:
+					valueType: 'numeric'
+				# - w
+				w:
+					valueType: 'numeric'
+				# - x
+				x:
+					valueType: 'numeric'
+				# - y
+				y:
+					valueType: 'numeric'
+					
+	# ### Presentations
+	#
+	# We go ahead and define the overlay that will show the annotation shapes over the video. Any other presentation
+	# must be configured outside this application (or as a sub-class).
+	#
 	presentations: 
 		raphsvg:
 			type: OAC.Client.StreamingVideo.Presentation.RaphaelCanvas
@@ -212,15 +138,115 @@ MITHGrid.defaults "OAC.Client.StreamingVideo.Application",
 			# The controllers are configured for the application and passed in to the presentation's
 			# initInstance method as named here.
 			controllers:
-				keyboard: "keyboard"
 				canvas: "canvas"
-			events:
-				onOpacityChange: null
-			fadeStart: 5
-	# We create a general template that holds all of the different DOM elements we need:
+	# ### View Setup
 	#
-	# * the SVG view that will overlay the play surface (myCanvasId is the DOM id)
+	# We create a simple `<div/>` to hold the Raphaël canvas. Everything else in the UI is provided by a super class
+	# or the environment in which this application is being used.
 	#
 	viewSetup: """
 		<div class="canvas"></div>
 	"""
+
+
+
+# ## Component.ModeButton
+#
+# Instances of this component will have the following events:
+#
+# - onCurrentModeChange
+#
+MITHGrid.defaults "OAC.Client.StreamingVideo.Component.ModeButton",
+	bind:
+		events:
+			onCurrentModeChange: null
+
+# ## Component.ShapeCreateBox
+#
+# Instances of this component will have the following event:
+#
+# - onNewShape
+#
+MITHGrid.defaults "OAC.Client.StreamingVideo.Component.ShapeCreateBox",
+	bind:
+		events:
+			onNewShape: null
+						
+# ## Component.ShapeEditBox
+#
+# By default, this component will have eight handles around the edges of the bounding box and a handle in the center.
+#
+# Instances of this component will have the following events:
+#
+# - onResize
+# - onMove
+# - onDelete
+# - onFocus
+# - onUnfocus
+#
+MITHGrid.defaults "OAC.Client.StreamingVideo.Component.ShapeEditBox",
+	dirs: ['ul', 'top', 'ur', 'lft', 'lr', 'btm', 'll', 'rgt', 'mid']
+	events:
+		onResize: null
+		onMove: null
+		onDelete: null
+		onFocus: null
+		onUnfocus: null
+
+
+# ## Controller.CanvasClickController
+#
+# Bindings created by this controller will have the following events:
+#
+# - onShapeStart
+# - onShapeDrag
+# - onShapeDone
+#
+MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.CanvasClickController",
+	bind:
+		events:
+			onShapeStart: null
+			onShapeDrag: null
+			onShapeDone: null
+
+# ## Controller.Drag
+#
+# Bindings created by this controller will have the following events:
+#
+# - onFocus
+# - onUnfocus
+# - onUpdate
+#
+MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.Drag",
+	bind:
+		events:
+			onFocus: null
+			onUnfocus: null
+			onUpdate: null
+
+# ## Controller.Select
+#
+# This controller accepts the `isSelectable` configuration option as a function that is called to see
+# if the `onSelect` event should fire.
+#
+# Bindings created by this controller will have the following event:
+#
+# - onSelect
+#
+MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.Select",
+	bind:
+		events:
+			onSelect: null
+	isSelectable: -> true
+
+# ## Player.DriverBinding
+#
+# All driver bindings associating a driver object with a DOM player object have the following events:
+#
+# - onResize
+# - onPlayheadUpdate
+#
+MITHGrid.defaults "OAC.Client.StreamingVideo.Player.DriverBinding",
+	events:
+		onResize: null
+		onPlayheadUpdate: null
