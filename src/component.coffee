@@ -349,6 +349,8 @@ OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
 	# Creates an SVG shape with a dotted border to be used as a guide for drawing shapes. Listens for user mousedown, which
 	# activates the appearance of the box at the x,y where the mousedown coords are, then finishes when user mouseup call is made
 	#
+	# **TODO:** See if the bindings in the presentation can be moved here and have a simple event from here go back to
+	# the presentation to create the shape.
 	Component.namespace 'ShapeCreateBox', (ShapeCreateBox) ->
 		ShapeCreateBox.initInstance = (args...) ->
 			MITHGrid.initInstance "OAC.Client.StreamingVideo.Component.ShapeCreateBox", args..., (that, paper) ->
@@ -361,7 +363,7 @@ OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
 				svgBBox = {}
 				factors = {}
 				attrs = {}
-				padding = 10
+				#padding = 10
 				shapeAttrs = {}
 
 				# #### createGuide

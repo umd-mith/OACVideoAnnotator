@@ -64,10 +64,16 @@ $(document).ready ->
 					that.events.onResize.fire that.getSize()
 			
 				#
-				# We fire the onPlayheadUpdate event when the player fires the timeupdate event.
+				# We fire the onPlayheadUpdate event when the player fires the timeupdate event, but only if
+				# the new time is near the beginning or is different by at least 0.2 seconds from
+				# the last time we fired the event. This avoids firing off too many events.
 				#
+				lastTime = 0
 				$(domObj).bind 'timeupdate', ->
-					that.events.onPlayheadUpdate.fire domObj.currentTime
+					now = domObj.currentTime
+					if Math.abs(lastTime - now) >= 0.2 or now < 0.1
+						lastTime = now
+						that.events.onPlayheadUpdate.fire domObj.currentTime
 				
 				#
 				## Player Driver API
