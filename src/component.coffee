@@ -363,7 +363,6 @@ OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
 				svgBBox = {}
 				factors = {}
 				attrs = {}
-				#padding = 10
 				shapeAttrs = {}
 
 				# #### createGuide
