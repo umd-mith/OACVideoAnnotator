@@ -1,62 +1,61 @@
 # # Components
 #
-OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
+OAC.Client.StreamingVideo.namespace "Component", (Component) ->
 
 	# ## ModeButton
 	#
-	# Controls the Annotation Creation Tools set by app.buttonFeature
+	# Manages a modal button connected to the Video Annotator application's CurrentMode variable.
 	#
-	Component.namespace 'ModeButton', (ModeButton) ->
+	# Options:
+	#
+	# * application - a callback that returns the application instance
+	#
+	# * mode - a string indicating the application mode
+	#
+	# * * *
+	#
+	Component.namespace "ModeButton", (ModeButton) ->
 		ModeButton.initInstance = (args...) ->
 			MITHGrid.initInstance "OAC.Client.StreamingVideo.Component.ModeButton", args..., (that, buttonEl) ->
 				options = that.options
-
-				# #### AnnotationCreationButton #applyBindings
-				active = false
-
-				#
-				# Mousedown: activate button - set as active mode
-				#
-				# Mousedown #2: de-activate button - unset active mode
-				#
-				# onCurrentModeChange: if != id passed, deactivate, else do nothing
-				#
+				app = options.application()
 				
-				# Attach binding to the mousedown
-				$(buttonEl).mousedown (e) ->
-					if active == false
-						active = true
-						options.application().setCurrentMode(options.mode)
-						$(buttonEl).addClass("active")
-					else if active == true
-						active = false
-						options.application().setCurrentMode(undefined)
-						$(buttonEl).removeClass("active")
-
-				# Handles when the mode is changed externally from controller
 				#
-				# Parameters:
-				# * action - name of new mode
-				#
-				options.application().events.onCurrentModeChange.addListener (action) ->
-					if action == options.mode
-						active = true
-						$(buttonEl).addClass('active')
+				# If the button is clicked and it isn't the current mode, then it is made the current mode.
+				# Otherwise, if it is the current mode, then the current mode is made undefined. The effect is
+				# that the button is a toggle for its mode.
+				# 
+				$(buttonEl).mousedown ->
+					if $(buttonEl).hasClass("active")
+						app.setCurrentMode null
 					else
-						active = false
+						app.setCurrentMode options.mode
+
+				#
+				# We listen for changes in the current application mode and reflect them in the button's
+				# CSS class.
+				#
+				app.events.onCurrentModeChange.addListener (action) ->
+					if action == options.mode
+						$(buttonEl).addClass("active")
+					else
 						$(buttonEl).removeClass("active")
 
-# ## BoundingBox
-#
-# Creates and manages a SVG bounding box with resize handles and center drag handle.
-#
+	# ## ShapeEditBox
+	#
+	# Creates and manages a SVG bounding box with resize handles and center drag handle.
+	#
+	# Options:
+	#
+	# * * *
+	#
 	Component.namespace "ShapeEditBox", (ShapeEditBox) ->
+		dragController = OAC.Client.StreamingVideo.Controller.Drag.initInstance {}
 
 		ShapeEditBox.initInstance = (args...) ->
 			MITHGrid.initInstance "OAC.Client.StreamingVideo.Component.ShapeEditBox", args..., (that, paper) ->
 				options = that.options
-				dragController = OAC.Client.StreamingVideo.Controller.Drag.initInstance {}
-				handleSet = {}
+				handleSet = null
 				handles = {}
 				activeRendering = null
 				attrs = {}
@@ -66,8 +65,7 @@ OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
 				factors = {}
 				svgBBox = null
 				midDrag = null
-				# The padding is how big the resize handles should be
-				padding = 5
+				handleSize = 5
 				dirs = options.dirs
 	
 				handleCalculationData =
@@ -81,6 +79,14 @@ OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
 					lft: ['w',  0, 1]
 					mid: ['pointer', 1, 1]
 
+				#
+				# ### calcXYHeightWidth (private)
+				#
+				# Translates the top-left, bottom-right dx/dy information we're tracking as part of the
+				# handle drag operation into the x/y width/height needed to draw the bounding box. This
+				# allows the mouse to move such that we "flip" the box around (e.g., the left side becomes
+				# the right side).
+				#
 				calcXYHeightWidth = (args) ->
 					brx = args.brx
 					tlx = args.tlx
@@ -114,8 +120,10 @@ OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
 					args
 					
 				#
-				# Goes through handle object array and
-				# sets each handle box coordinate
+				# ### calcHandles (private)
+				#
+				# Calculates the positions of each of the bounding box resize/move handles given the
+				# object holding the drag information.
 				#
 				calcHandles = (args) ->
 					# calculate where the resize handles
@@ -123,13 +131,13 @@ OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
 					calcXYHeightWidth args
 					
 					calcHandle = (type, xn, yn) ->
-						x: args.x + xn * args.width / 2 - padding / 2
-						y: args.y + yn * args.height / 2 - padding / 2
+						x: args.x + xn * args.width / 2 - handleSize / 2
+						y: args.y + yn * args.height / 2 - handleSize / 2
 						cursor: if type.length > 2 then type else type + "-resize"
 
 					recalcHandle = (info, xn, yn) ->
-						info.x = args.x + xn * args.width / 2 - padding / 2
-						info.y = args.y + yn * args.height / 2 - padding / 2
+						info.x = args.x + xn * args.width / 2 - handleSize / 2
+						info.y = args.y + yn * args.height / 2 - handleSize / 2
 						info.el.attr
 							x: info.x
 							y: info.y
@@ -142,20 +150,14 @@ OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
 							else
 								handles[o] = calcHandle(data[0], data[1], data[2])
 				
-				# ##### calcFactors (private)
+				# ### calcFactors (private)
 				#
-				# Measures where the handles should be on mousemove.
-				#
-				# Parameters: None.
-				#
-				# Returns: Nothing.
+				# Sets up object for tracking drag-related information based on the extents of the
+				# currently active rendering.
 				#
 				calcFactors = ->
 					extents = activeRendering.getExtents()
-					# create offset factors for
-					# bounding box
-					# calculate width - height to be larger
-					# than shape
+				
 					attrs =
 						tlx: (extents.x) - (extents.width / 2)
 						tly: (extents.y) - (extents.height / 2)
@@ -166,28 +168,23 @@ OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
 						
 					calcHandles attrs
 	
-				# #### drawHandles (private)
+				# ### drawHandles (private)
 				#
-				# Draws the handles defined in dirs as SVG rectangles and draws the SVG bounding box
-				#
-				# Parameters: None.
-				#
-				# Returns: Nothing.
+				# Draws the handles defined in dirs as SVG rectangles and draws the SVG bounding box.
 				#
 				drawHandles = ->		
-					if $.isEmptyObject handleSet
+					if not handleSet?
 
-						# draw the corner and mid-point squares
 						handleSet = paper.set()
 						for i, o of handles
 							if i == 'mid'
-								midDrag = paper.rect(o.x, o.y, padding, padding)
+								midDrag = paper.rect(o.x, o.y, handleSize, handleSize)
 								$(midDrag.node).css
 									"pointer-events": "auto"
 								o.id = midDrag.id
 								o.el = midDrag
 							else
-								h = paper.rect(o.x, o.y, padding, padding)
+								h = paper.rect(o.x, o.y, handleSize, handleSize)
 								$(h.node).css
 									"pointer-events": "auto"
 								o.id = h.id
@@ -196,7 +193,6 @@ OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
 									cursor: o.cursor
 								handleSet.push h
 
-						# make them all similar looking
 						handleSet.attr
 							fill: 'black'
 							stroke: 'black'
@@ -207,22 +203,20 @@ OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
 								stroke: 'black'
 								cursor: 'move'
 
-						# drawing bounding box
 						calcXYHeightWidth attrs
+						
 						svgBBox = paper.rect(attrs.x, attrs.y, attrs.width, attrs.height)
 						svgBBox.attr
 							stroke: '#333333'
 							'stroke-dasharray': ["--"]
 
-						if not $.isEmptyObject midDrag
-
-							# Attaching listener to drag-only handle (midDrag)
+						#
+						# Bind the middle drag handle to the drag controller.
+						#
+						if midDrag?
 							midDragDragBinding = dragController.bind midDrag
 				
-							midDragDragBinding.events.onUpdate.addListener (dx, dy) ->
-								# dragging means that the svgBBox stays padding-distance
-								# away from the lens' shape and the lens shape gets updated
-								# in dataStore
+							midDragDragBinding.events.onUpdate.addListener (dx, dy) ->			
 								attrs.dx = dx
 								attrs.dy = dy
 
@@ -233,7 +227,6 @@ OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
 									y: attrs.y
 
 							midDragDragBinding.events.onFocus.addListener (x, y) ->
-									# start
 									that.events.onFocus.fire()
 									factors.x = 0
 									factors.y = 0
@@ -242,22 +235,19 @@ OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
 										cursor: 'move'
 				
 							midDragDragBinding.events.onUnfocus.addListener ->
-									# end
 									calcXYHeightWidth attrs
 									that.events.onMove.fire
 										x: attrs.x + attrs.width/2
 										y: attrs.y + attrs.height/2
 									that.events.onUnfocus.fire()
 
-						# Attaching drag and resize handlers
+						#
+						# Bind each of the boundary handles to the drag controller.
+						#
 						handleSet.forEach (handle) ->
 							handleBinding = dragController.bind(handle)
 				
 							handleBinding.events.onUpdate.addListener (dx, dy) ->
-								# onmove function - handles dragging
-								# dragging here means that the shape is being resized;
-								# the factor determines in which direction the
-								# shape is pulled
 								attrs.dx = dx
 								attrs.dy = dy
 								
@@ -271,10 +261,10 @@ OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
 
 				
 							handleBinding.events.onFocus.addListener (x, y) ->
-								# onstart function
 								extents = activeRendering.getExtents()
+
 								that.events.onFocus.fire()
-								# extents: x, y, width, height
+
 								px = (8 * (x - extents.x) / extents.width) + 4
 								py = (8 * (y - extents.y) / extents.height) + 4
 								if px < 3
@@ -292,65 +282,94 @@ OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
 								calcFactors()
 				
 							handleBinding.events.onUnfocus.addListener ->
-								# onend function
-								# update
 								calcXYHeightWidth attrs
+								
+								#
+								# We pass along the center and size to the listener instead of the
+								# top-left and size.
+								#
 								that.events.onResize.fire
 									x: attrs.x + attrs.width/2
 									y: attrs.y + attrs.height/2
 									width: attrs.width
 									height: attrs.height
+									
 								that.events.onUnfocus.fire()
+							
 							svgBBox.toFront()
 							handleSet.toFront()
 							midDrag.toFront()
 					else
-						# show all the boxes and
-						# handles
 						svgBBox.show().toFront()
-						# adjust the SvgBBox to be around new
-						# shape
+
 						svgBBox.attr
 							x: attrs.x
 							y: attrs.y
 							width: attrs.width
 							height: attrs.height
+							
 						handleSet.show().toFront()
 						midDrag.show().toFront()
 	
+				#
+				# ### #show
+				#
+				# Makes the bounding box visible.
+				#
 				that.show = ->
 					calcFactors()
 					drawHandles()
 	
+				#
+				# ### #hide
+				#
+				# Makes the bounding box invisible.
+				#
 				that.hide = ->
 					if not $.isEmptyObject handleSet
 						handleSet.hide()
 						svgBBox.hide()
 						midDrag.hide()
 				
+				#
+				# ### #attachToRendering
+				#
+				# Records the rendering as the currently active rendering and makes sure the bounding box is visible.
+				#
+				# Parameters:
+				#
+				# * newRendering - the currently active rendering
+				#
+				# Returns: Nothing.
+				#
 				that.attachToRendering = (newRendering) ->
 					that.detachFromRendering()
 
 					if !newRendering?
 						return
 
-					# register the rendering
 					activeRendering = newRendering
 					that.show()
 
-				# Function to call in order to "de-activate" the edit box
-				# (i.e. make it hidden)
+				#
+				# ### #detachFromRendering
+				#
+				# Hides the bounding box and forgets the currently active rendering.
+				#
 				that.detachFromRendering = () ->
 					activeRendering = null
 					that.hide()
 
+	#
 	# ## ShapeCreateBox
 	#
-	# Creates an SVG shape with a dotted border to be used as a guide for drawing shapes. Listens for user mousedown, which
-	# activates the appearance of the box at the x,y where the mousedown coords are, then finishes when user mouseup call is made
+	# Draws and manages the bounding box used to create a new annotation.
+	#
+	# The container is the Raphaël paper on which the bounding box is drawn.
 	#
 	# **TODO:** See if the bindings in the presentation can be moved here and have a simple event from here go back to
 	# the presentation to create the shape.
+	#
 	Component.namespace 'ShapeCreateBox', (ShapeCreateBox) ->
 		ShapeCreateBox.initInstance = (args...) ->
 			MITHGrid.initInstance "OAC.Client.StreamingVideo.Component.ShapeCreateBox", args..., (that, paper) ->
@@ -360,12 +379,12 @@ OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
 				# Bounding box is created once in memory - it should be bound to the
 				# canvas/paper object or something that contains more than 1 shape.
 				#
-				svgBBox = {}
+				svgBBox = null
 				factors = {}
 				attrs = {}
 				shapeAttrs = {}
 
-				# #### createGuide
+				# ### #createGuide
 				#
 				# Creates the SVGBBOX which acts as a guide to the user
 				# of how big their shape will be once shapeDone is fired
@@ -375,36 +394,34 @@ OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
 				# * coords - object that has x,y coordinates for user mousedown. This is where the left and top of the box will start
 				#
 				that.createGuide = (coords) ->
-					# coordinates are top x,y values
 					attrs.x = coords[0]
 					attrs.y = coords[1]
 					attrs.width = 0
 					attrs.height = 0
-					if $.isEmptyObject(svgBBox)
+					if not svgBBox?
 						svgBBox = paper.rect(attrs.x, attrs.y, attrs.width, attrs.height)
 						svgBBox.attr
 							stroke: '#333333'
 							'stroke-dasharray': ["--"]
 					else
-						# show all the boxes and
-						# handles
 						svgBBox.show()
-						# adjust the SvgBBox to be around new
-						# shape
+
 						svgBBox.attr
 							x: attrs.x
 							y: attrs.y
 							width: attrs.width
 							height: attrs.height
 
-				# #### resizeGuide
+				# ### #resizeGuide
 				#
-				# Take passed x,y coords and set as bottom-right, not
-				# top left
+				# Resize the bounding box to have the passed coordinates be the opposite corner from the initial
+				# coordinates.
 				#
 				# Parameters:
 				#
 				# * coords - array of x,y coordinates to use as bottom-right coords of the box
+				#
+				# Returns: Nothing.
 				#
 				that.resizeGuide = (coords) ->
 					attrs.width = (coords[0] - attrs.x)
@@ -436,7 +453,7 @@ OAC.Client.StreamingVideo.namespace 'Component', (Component) ->
 							x: attrs.x
 							y: attrs.y
 
-				# #### completeShape
+				# ### #completeShape
 				#
 				# Take the saved coordinates and pass them back
 				# to the calling function

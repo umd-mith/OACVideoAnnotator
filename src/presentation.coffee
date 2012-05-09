@@ -1,9 +1,5 @@
 # # Presentations
 #
-#
-# Presentations for OAC:ASP Application
-# @author Grant Dickie, Jim Smith
-#
 
 # ## AnnotationList
 #
