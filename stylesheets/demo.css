@@ -151,7 +151,9 @@ background: url(../images/tools_edit_buttons_delete.png) no-repeat center center
 .demo-edit-buttons .edit a {
 background: url(../images/tools_edit_buttons_edit.png) no-repeat center center;
 }
-
+.demo-edit-buttons .cancel a {
+background: url(../images/tools_edit_buttons_cancel.png) no-repeat center center;
+}
 .demo-anno-item {
 margin: 8px 0 0 0;
 overflow: auto;
