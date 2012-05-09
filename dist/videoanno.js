@@ -5,7 +5,7 @@
 # The **OAC Video Annotation Tool** is a MITHGrid application providing annotation capabilities for streaming
 # video embedded in a web page. 
 #  
-# Date: Tue May 8 15:18:13 2012 -0400
+# Date: Wed May 9 14:36:46 2012 -0400
 #  
 # Educational Community License, Version 2.0
 # 
@@ -110,8 +110,7 @@
             options = that.options;
             overlay = null;
             return that.applyBindings = function(binding, opts) {
-              var captureMouse, closeEnough, drawOverlay, drawShape, mouseCaptured, paper, removeOverlay, renderings, selectShape, svgWrapper, uncaptureMouse;
-              closeEnough = opts.closeEnough;
+              var captureMouse, drawOverlay, drawShape, mouseCaptured, paper, removeOverlay, renderings, selectShape, svgWrapper, uncaptureMouse;
               renderings = {};
               paper = opts.paper;
               svgWrapper = binding.locate('svgwrapper');
@@ -204,7 +203,7 @@
               selectShape = function(container) {
                 drawOverlay();
                 overlay.unmousedown();
-                overlay.mousedown(function(e) {
+                overlay.mousedown(function() {
                   var activeId;
                   options.application().setActiveAnnotation(void 0);
                   activeId = null;
@@ -458,32 +457,26 @@
         };
       });
     });
-    OAC.Client.StreamingVideo.namespace('Component', function(Component) {
-      Component.namespace('ModeButton', function(ModeButton) {
+    OAC.Client.StreamingVideo.namespace("Component", function(Component) {
+      Component.namespace("ModeButton", function(ModeButton) {
         return ModeButton.initInstance = function() {
           var args;
           args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
           return MITHGrid.initInstance.apply(MITHGrid, ["OAC.Client.StreamingVideo.Component.ModeButton"].concat(__slice.call(args), [function(that, buttonEl) {
-            var active, options;
+            var app, options;
             options = that.options;
-            active = false;
-            $(buttonEl).mousedown(function(e) {
-              if (active === false) {
-                active = true;
-                options.application().setCurrentMode(options.mode);
-                return $(buttonEl).addClass("active");
-              } else if (active === true) {
-                active = false;
-                options.application().setCurrentMode(void 0);
-                return $(buttonEl).removeClass("active");
+            app = options.application();
+            $(buttonEl).mousedown(function() {
+              if ($(buttonEl).hasClass("active")) {
+                return app.setCurrentMode(null);
+              } else {
+                return app.setCurrentMode(options.mode);
               }
             });
-            return options.application().events.onCurrentModeChange.addListener(function(action) {
+            return app.events.onCurrentModeChange.addListener(function(action) {
               if (action === options.mode) {
-                active = true;
-                return $(buttonEl).addClass('active');
+                return $(buttonEl).addClass("active");
               } else {
-                active = false;
                 return $(buttonEl).removeClass("active");
               }
             });
@@ -491,14 +484,15 @@
         };
       });
       Component.namespace("ShapeEditBox", function(ShapeEditBox) {
+        var dragController;
+        dragController = OAC.Client.StreamingVideo.Controller.Drag.initInstance({});
         return ShapeEditBox.initInstance = function() {
           var args;
           args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
           return MITHGrid.initInstance.apply(MITHGrid, ["OAC.Client.StreamingVideo.Component.ShapeEditBox"].concat(__slice.call(args), [function(that, paper) {
-            var activeRendering, attrs, calcFactors, calcHandles, calcXYHeightWidth, dirs, dragController, drawHandles, extents, factors, handleAttrs, handleCalculationData, handleSet, handles, midDrag, options, padding, shapeAttrs, svgBBox;
+            var activeRendering, attrs, calcFactors, calcHandles, calcXYHeightWidth, dirs, drawHandles, extents, factors, handleAttrs, handleCalculationData, handleSet, handleSize, handles, midDrag, options, shapeAttrs, svgBBox;
             options = that.options;
-            dragController = OAC.Client.StreamingVideo.Controller.Drag.initInstance({});
-            handleSet = {};
+            handleSet = null;
             handles = {};
             activeRendering = null;
             attrs = {};
@@ -508,7 +502,7 @@
             factors = {};
             svgBBox = null;
             midDrag = null;
-            padding = 5;
+            handleSize = 5;
             dirs = options.dirs;
             handleCalculationData = {
               ul: ['nw', 0, 0],
@@ -563,14 +557,14 @@
               calcXYHeightWidth(args);
               calcHandle = function(type, xn, yn) {
                 return {
-                  x: args.x + xn * args.width / 2 - padding / 2,
-                  y: args.y + yn * args.height / 2 - padding / 2,
+                  x: args.x + xn * args.width / 2 - handleSize / 2,
+                  y: args.y + yn * args.height / 2 - handleSize / 2,
                   cursor: type.length > 2 ? type : type + "-resize"
                 };
               };
               recalcHandle = function(info, xn, yn) {
-                info.x = args.x + xn * args.width / 2 - padding / 2;
-                info.y = args.y + yn * args.height / 2 - padding / 2;
+                info.x = args.x + xn * args.width / 2 - handleSize / 2;
+                info.y = args.y + yn * args.height / 2 - handleSize / 2;
                 return info.el.attr({
                   x: info.x,
                   y: info.y
@@ -606,19 +600,19 @@
             };
             drawHandles = function() {
               var h, i, midDragDragBinding, o;
-              if ($.isEmptyObject(handleSet)) {
+              if (!(handleSet != null)) {
                 handleSet = paper.set();
                 for (i in handles) {
                   o = handles[i];
                   if (i === 'mid') {
-                    midDrag = paper.rect(o.x, o.y, padding, padding);
+                    midDrag = paper.rect(o.x, o.y, handleSize, handleSize);
                     $(midDrag.node).css({
                       "pointer-events": "auto"
                     });
                     o.id = midDrag.id;
                     o.el = midDrag;
                   } else {
-                    h = paper.rect(o.x, o.y, padding, padding);
+                    h = paper.rect(o.x, o.y, handleSize, handleSize);
                     $(h.node).css({
                       "pointer-events": "auto"
                     });
@@ -647,7 +641,7 @@
                   stroke: '#333333',
                   'stroke-dasharray': ["--"]
                 });
-                if (!$.isEmptyObject(midDrag)) {
+                if (midDrag != null) {
                   midDragDragBinding = dragController.bind(midDrag);
                   midDragDragBinding.events.onUpdate.addListener(function(dx, dy) {
                     attrs.dx = dx;
@@ -769,7 +763,7 @@
           return MITHGrid.initInstance.apply(MITHGrid, ["OAC.Client.StreamingVideo.Component.ShapeCreateBox"].concat(__slice.call(args), [function(that, paper) {
             var attrs, factors, options, shapeAttrs, svgBBox;
             options = that.options;
-            svgBBox = {};
+            svgBBox = null;
             factors = {};
             attrs = {};
             shapeAttrs = {};
@@ -778,7 +772,7 @@
               attrs.y = coords[1];
               attrs.width = 0;
               attrs.height = 0;
-              if ($.isEmptyObject(svgBBox)) {
+              if (!(svgBBox != null)) {
                 svgBBox = paper.rect(attrs.x, attrs.y, attrs.width, attrs.height);
                 return svgBBox.attr({
                   stroke: '#333333',
@@ -1596,9 +1590,9 @@
               renderAsSVG: function(model, itemId) {
                 var item;
                 item = model.getItem(itemId);
-                return "<elli x='" + item.x[0] + "' y='" + item.y[0] + "' width='" + item.w[0] + "' height='" + item.h[0] + "' />";
+                return "<ellipse x='" + item.x[0] + "' y='" + item.y[0] + "' width='" + item.w[0] + "' height='" + item.h[0] + "' />";
               },
-              rootSVGElement: ["elli"],
+              rootSVGElement: ["ellipse"],
               extractFromSVG: function(svg) {
                 var info;
                 info = {};

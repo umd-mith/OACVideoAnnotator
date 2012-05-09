@@ -3,8 +3,20 @@ layout: docco
 title: OACVideoAnnotator/code/src/controller.coffee.html
 ---
 <div id="container"><div id="background"></div><div id="jump_to">Jump To &hellip;<div id="jump_wrapper"><div id="jump_page"><a href="../index.html" class="source"><span class="file_name">README</span></a><a href="../src/application.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">application.coffee</span></a><a href="../src/component.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">component.coffee</span></a><a href="../src/controller.coffee.html" class="source selected"><span class="base_path">src / </span><span class="file_name">controller.coffee</span></a><a href="../src/driver-framework.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">driver-framework.coffee</span></a><a href="../src/drivers/dummy.coffee.html" class="source "><span class="base_path">src / drivers / </span><span class="file_name">dummy.coffee</span></a><a href="../src/drivers/html5.coffee.html" class="source "><span class="base_path">src / drivers / </span><span class="file_name">html5.coffee</span></a><a href="../src/intro.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">intro.coffee</span></a><a href="../src/outro.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">outro.coffee</span></a><a href="../src/presentation.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">presentation.coffee</span></a></div></div></div><table cellpadding="0" cellspacing="0"><thead><tr><th class="docs"><h1>controller.coffee</h1><div class="filepath">src/</div></th><th class="code"></th></tr></thead><tbody><tr id="section-1"><td class="docs"><div class="pilwrap"><a href="#section-1" class="pilcrow">&#182;</a></div><h1>Controllers</h1>
-</td><td class="code"><div class="highlight"><pre><span class="nx">OAC</span><span class="p">.</span><span class="nx">Client</span><span class="p">.</span><span class="nx">StreamingVideo</span><span class="p">.</span><span class="nx">namespace</span> <span class="s">&#39;Controller&#39;</span><span class="p">,</span> <span class="nf">(Controller) -&gt;</span>
-  <span class="nv">relativeCoords = </span><span class="nf">(currentElement, event) -&gt;</span>
+</td><td class="code"><div class="highlight"><pre><span class="nx">OAC</span><span class="p">.</span><span class="nx">Client</span><span class="p">.</span><span class="nx">StreamingVideo</span><span class="p">.</span><span class="nx">namespace</span> <span class="s">&#39;Controller&#39;</span><span class="p">,</span> <span class="nf">(Controller) -&gt;</span></pre></div></td></tr><tr id="section-2"><td class="docs"><div class="pilwrap"><a href="#section-2" class="pilcrow">&#182;</a></div><h3>relativeCoords</h3>
+
+<p>Calculates the coordinates of the event relative to the top-left of the currentElement parameter.</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li>currentElement - the element relative to which the coordinates should be returned</li>
+<li>event - the event whose coordinates should be returned relative to the currentElement</li>
+</ul>
+
+<p>Returns:
+The coordinates of the event relative to the top-left of the currentElement.</p>
+</td><td class="code"><div class="highlight"><pre>  <span class="nv">relativeCoords = </span><span class="nf">(currentElement, event) -&gt;</span>
     <span class="nv">totalOffsetX = </span><span class="mi">0</span>
     <span class="nv">totalOffsetY = </span><span class="mi">0</span>
     
@@ -15,17 +27,18 @@ title: OACVideoAnnotator/code/src/controller.coffee.html
     
     <span class="nv">x: </span><span class="nx">event</span><span class="p">.</span><span class="nx">pageX</span> <span class="o">-</span> <span class="nx">totalOffsetX</span>
     <span class="nv">y: </span><span class="nx">event</span><span class="p">.</span><span class="nx">pageY</span> <span class="o">-</span> <span class="nx">totalOffsetY</span>
-    </pre></div></td></tr><tr id="section-2"><td class="docs"><div class="pilwrap"><a href="#section-2" class="pilcrow">&#182;</a></div><h2>Drag</h2>
+  </pre></div></td></tr><tr id="section-3"><td class="docs"><div class="pilwrap"><a href="#section-3" class="pilcrow">&#182;</a></div><h2>Drag</h2>
 
-<p>Attaches to an SVG rendering and produces events at the start, middle, and end of a drag.</p>
-</td><td class="code"><div class="highlight"><pre>  <span class="nx">Controller</span><span class="p">.</span><span class="nx">namespace</span> <span class="s">&quot;Drag&quot;</span><span class="p">,</span> <span class="nf">(Drag) -&gt;</span></pre></div></td></tr><tr id="section-3"><td class="docs"><div class="pilwrap"><a href="#section-3" class="pilcrow">&#182;</a></div><h3>Drag.initInstance</h3>
-</td><td class="code"><div class="highlight"><pre>    <span class="nv">Drag.initInstance = </span><span class="nf">(args...) -&gt;</span>
+<p>Attaches to an SVG rendering and produces events at the start, middle, and end of a drag. Coordinates
+are relative to the bound element.</p>
+</td><td class="code"><div class="highlight"><pre>  <span class="nx">Controller</span><span class="p">.</span><span class="nx">namespace</span> <span class="s">&quot;Drag&quot;</span><span class="p">,</span> <span class="nf">(Drag) -&gt;</span>
+    <span class="nv">Drag.initInstance = </span><span class="nf">(args...) -&gt;</span>
       <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">Raphael</span><span class="p">.</span><span class="nx">initInstance</span> <span class="s">&quot;OAC.Client.StreamingVideo.Controller.Drag&quot;</span><span class="p">,</span> <span class="nx">args</span><span class="p">...,</span> <span class="nf">(that) -&gt;</span>
         <span class="nv">that.applyBindings = </span><span class="nf">(binding) -&gt;</span>
           <span class="nv">el = </span><span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s">&#39;raphael&#39;</span><span class="p">)</span>
 
-          <span class="nv">dstart = </span><span class="nf">(x, y, e) -&gt;</span></pre></div></td></tr><tr id="section-4"><td class="docs"><div class="pilwrap"><a href="#section-4" class="pilcrow">&#182;</a></div><p>We need to get the X/Y relative to the container we're bound to</p>
-</td><td class="code"><div class="highlight"><pre>            <span class="nv">pos = </span><span class="nx">relativeCoords</span> <span class="nx">el</span><span class="p">.</span><span class="nx">node</span><span class="p">,</span> <span class="nx">e</span>
+          <span class="nv">dstart = </span><span class="nf">(x, y, e) -&gt;</span>
+            <span class="nv">pos = </span><span class="nx">relativeCoords</span> <span class="nx">el</span><span class="p">.</span><span class="nx">node</span><span class="p">,</span> <span class="nx">e</span>
             <span class="nx">binding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onFocus</span><span class="p">.</span><span class="nx">fire</span> <span class="nx">pos</span><span class="p">.</span><span class="nx">x</span><span class="p">,</span> <span class="nx">pos</span><span class="p">.</span><span class="nx">y</span>
           <span class="nv">dend = </span><span class="o">-&gt;</span>
             <span class="nx">binding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onUnfocus</span><span class="p">.</span><span class="nx">fire</span><span class="p">()</span>
@@ -38,29 +51,18 @@ title: OACVideoAnnotator/code/src/controller.coffee.html
           <span class="nv">el = </span><span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s">&#39;raphael&#39;</span><span class="p">)</span>
           
           <span class="nx">el</span><span class="p">.</span><span class="nx">undrag</span>
-          </pre></div></td></tr><tr id="section-5"><td class="docs"><div class="pilwrap"><a href="#section-5" class="pilcrow">&#182;</a></div><h2>Select</h2>
+  </pre></div></td></tr><tr id="section-4"><td class="docs"><div class="pilwrap"><a href="#section-4" class="pilcrow">&#182;</a></div><h2>Select</h2>
 
 <p>Attaches a click handler to an SVG rendering and fires an onSelect event if the rendering is clicked AND
-the application is in a mode to select things.</p>
-</td><td class="code"><div class="highlight"><pre>  <span class="nx">Controller</span><span class="p">.</span><span class="nx">namespace</span> <span class="s">&quot;Select&quot;</span><span class="p">,</span> <span class="nf">(Select) -&gt;</span></pre></div></td></tr><tr id="section-6"><td class="docs"><div class="pilwrap"><a href="#section-6" class="pilcrow">&#182;</a></div><h3>Select.initInstance</h3>
+the optional <code>isSelectable</code> callback returns true.</p>
 
-<p>Parameters:</p>
-
-<ul>
-<li>options - object holding configuration information</li>
-</ul>
-
-<p>Returns:</p>
-
-<p>The configured controller object.</p>
-
-<p>Configuration Options:</p>
+<p>Options:</p>
 
 <ul>
-<li>isSelectable - function taking no arguments that should return "true" if the click should cause the
-           onSelect event to fire.</li>
+<li>isSelectable - callback that should return <code>true</code> if the onSelect event should fire</li>
 </ul>
-</td><td class="code"><div class="highlight"><pre>    <span class="nv">Select.initInstance = </span><span class="nf">(args...) -&gt;</span>
+</td><td class="code"><div class="highlight"><pre>  <span class="nx">Controller</span><span class="p">.</span><span class="nx">namespace</span> <span class="s">&quot;Select&quot;</span><span class="p">,</span> <span class="nf">(Select) -&gt;</span>
+    <span class="nv">Select.initInstance = </span><span class="nf">(args...) -&gt;</span>
       <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">Raphael</span><span class="p">.</span><span class="nx">initInstance</span> <span class="s">&quot;OAC.Client.StreamingVideo.Controller.Select&quot;</span><span class="p">,</span> <span class="nx">args</span><span class="p">...,</span> <span class="nf">(that) -&gt;</span>
         <span class="nv">options = </span><span class="nx">that</span><span class="p">.</span><span class="nx">options</span>
         <span class="nv">isSelectable = </span><span class="nx">options</span><span class="p">.</span><span class="nx">isSelectable</span> <span class="o">or</span> <span class="o">-&gt;</span> <span class="kc">true</span>
@@ -72,29 +74,31 @@ the application is in a mode to select things.</p>
           <span class="nx">el</span><span class="p">.</span><span class="nx">click</span> <span class="nf">(e) -&gt;</span>
             <span class="k">if</span> <span class="nx">isSelectable</span><span class="p">()</span>
               <span class="nx">binding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onSelect</span><span class="p">.</span><span class="nx">fire</span><span class="p">()</span>
-  </pre></div></td></tr><tr id="section-7"><td class="docs"><div class="pilwrap"><a href="#section-7" class="pilcrow">&#182;</a></div><h2>CanvasClickController</h2>
+  </pre></div></td></tr><tr id="section-5"><td class="docs"><div class="pilwrap"><a href="#section-5" class="pilcrow">&#182;</a></div><h2>CanvasClickController</h2>
 
-<p>Listens for all clicks on the canvas and connects shapes with the Edit controller above</p>
+<p>Listens for all clicks on the canvas. This controller does two things: enables creation of new annotations
+by firing the onShapeStart, onShapeDrag, and onShapeDone events; enables unselecting the current active annotation
+by clicking anywhere not on a shape. These need to be teased apart into two different components.</p>
 
-<p>Parameters:</p>
+<p>Options:</p>
 
 <ul>
-<li>options - Object that includes:
-<em>* paper - RaphaelSVG canvas object generated by Raphael Presentation
-*</em> closeEnough - value for how close (In RaphaelSVG units) a mouse-click has to be in order to be considered
-'clicking' an object</li>
+<li>paper - RaphaelSVG canvas object generated by Raphael Presentation</li>
 </ul>
+
+<hr />
 </td><td class="code"><div class="highlight"><pre>  <span class="nx">Controller</span><span class="p">.</span><span class="nx">namespace</span> <span class="s">&quot;CanvasClickController&quot;</span><span class="p">,</span> <span class="nf">(CanvasClickController) -&gt;</span>
     <span class="nv">CanvasClickController.initInstance = </span><span class="nf">(args...) -&gt;</span>
       <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">initInstance</span> <span class="s">&quot;OAC.Client.StreamingVideo.Controller.CanvasClickController&quot;</span><span class="p">,</span> <span class="nx">args</span><span class="p">...,</span> <span class="nf">(that) -&gt;</span>
         <span class="nv">options = </span><span class="nx">that</span><span class="p">.</span><span class="nx">options</span>
-        <span class="nv">overlay = </span><span class="kc">null</span></pre></div></td></tr><tr id="section-8"><td class="docs"><div class="pilwrap"><a href="#section-8" class="pilcrow">&#182;</a></div><h4>CanvasClickController #applyBindings</h4>
+        <span class="nv">overlay = </span><span class="kc">null</span></pre></div></td></tr><tr id="section-6"><td class="docs"><div class="pilwrap"><a href="#section-6" class="pilcrow">&#182;</a></div><h3>#applyBindings</h3>
 
 <p>Create the object passed back to the Presentation</p>
 </td><td class="code"><div class="highlight"><pre>        <span class="nv">that.applyBindings = </span><span class="nf">(binding, opts) -&gt;</span>
-          <span class="nv">closeEnough = </span><span class="nx">opts</span><span class="p">.</span><span class="nx">closeEnough</span>
           <span class="nv">renderings = </span><span class="p">{}</span>
           <span class="nv">paper = </span><span class="nx">opts</span><span class="p">.</span><span class="nx">paper</span>
+          </pre></div></td></tr><tr id="section-7"><td class="docs"><div class="pilwrap"><a href="#section-7" class="pilcrow">&#182;</a></div><p><strong>FIXME:</strong> we shouldn't rely on Raphael using SVG</p>
+</td><td class="code"><div class="highlight"><pre>          
           <span class="nv">svgWrapper = </span><span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s">&#39;svgwrapper&#39;</span><span class="p">)</span>
             
           <span class="nv">drawOverlay = </span><span class="o">-&gt;</span>
@@ -130,23 +134,26 @@ the application is in a mode to select things.</p>
           <span class="nv">uncaptureMouse = </span><span class="o">-&gt;</span>
             <span class="k">if</span> <span class="nx">mouseCaptured</span>
               <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">mouse</span><span class="p">.</span><span class="nx">uncapture</span><span class="p">()</span>
-              <span class="nv">mouseCaptured = </span><span class="kc">false</span></pre></div></td></tr><tr id="section-9"><td class="docs"><div class="pilwrap"><a href="#section-9" class="pilcrow">&#182;</a></div><h4>drawShape (private)</h4>
+              <span class="nv">mouseCaptured = </span><span class="kc">false</span></pre></div></td></tr><tr id="section-8"><td class="docs"><div class="pilwrap"><a href="#section-8" class="pilcrow">&#182;</a></div><h4>drawShape (private)</h4>
 
 <p>Using two html elements: container is for
 registering the offset of the screen (.section-canvas) and
 the svgEl is for registering mouse clicks on the svg element (svg)</p>
 
-<p>Parameters:
-* container - DOM element that contains the canvas
-* svgEl - SVG shape element that will have mouse bindings attached to it</p>
-</td><td class="code"><div class="highlight"><pre>          <span class="nv">drawShape = </span><span class="nf">(container) -&gt;</span></pre></div></td></tr><tr id="section-10"><td class="docs"><div class="pilwrap"><a href="#section-10" class="pilcrow">&#182;</a></div><p>Sets mousedown, mouseup, mousemove to draw a
-shape on the canvas.</p>
-</td><td class="code"><div class="highlight"><pre>            <span class="nv">mouseDown = </span><span class="kc">false</span>
+<p>Parameters:</p>
+
+<ul>
+<li>container - DOM element that contains the canvas</li>
+<li>svgEl - SVG shape element that will have mouse bindings attached to it</li>
+</ul>
+</td><td class="code"><div class="highlight"><pre>          <span class="nv">drawShape = </span><span class="nf">(container) -&gt;</span>
+            <span class="nv">mouseDown = </span><span class="kc">false</span>
             <span class="nv">mouseCaptured = </span><span class="kc">false</span>
             <span class="nv">topLeft = </span><span class="p">[]</span>
             <span class="nv">bottomRight = </span><span class="p">[]</span>
-            <span class="nx">drawOverlay</span><span class="p">()</span></pre></div></td></tr><tr id="section-11"><td class="docs"><div class="pilwrap"><a href="#section-11" class="pilcrow">&#182;</a></div><p>remove all previous bindings</p>
-</td><td class="code"><div class="highlight"><pre>            <span class="nx">overlay</span><span class="p">.</span><span class="nx">unmousedown</span><span class="p">()</span>
+            <span class="nx">drawOverlay</span><span class="p">()</span>
+
+            <span class="nx">overlay</span><span class="p">.</span><span class="nx">unmousedown</span><span class="p">()</span>
             <span class="nx">overlay</span><span class="p">.</span><span class="nx">unmouseup</span><span class="p">()</span>
             <span class="nx">overlay</span><span class="p">.</span><span class="nx">unmousemove</span><span class="p">()</span>
             
@@ -190,23 +197,28 @@ shape on the canvas.</p>
               <span class="nv">mousedown: </span><span class="nx">mousedown</span>
               <span class="nv">mouseup: </span><span class="nx">mouseup</span>
               <span class="nv">mousemove: </span><span class="nx">mousemove</span>
-            </pre></div></td></tr><tr id="section-12"><td class="docs"><div class="pilwrap"><a href="#section-12" class="pilcrow">&#182;</a></div><h4>selectShape (private)</h4>
+          </pre></div></td></tr><tr id="section-9"><td class="docs"><div class="pilwrap"><a href="#section-9" class="pilcrow">&#182;</a></div><h4>selectShape (private)</h4>
 
-<p>Creates a binding for the canvas to listen for mousedowns to select a shape</p>
+<p>Creates a binding for the canvas to listen for mousedowns to select a shape instead of drawing a shape.</p>
 
-<p>Parameters:
-* container - HTML element housing the canvas</p>
-</td><td class="code"><div class="highlight"><pre>          <span class="nv">selectShape = </span><span class="nf">(container) -&gt;</span></pre></div></td></tr><tr id="section-13"><td class="docs"><div class="pilwrap"><a href="#section-13" class="pilcrow">&#182;</a></div><p>Sets mousedown events to select shapes, not to draw
-them.</p>
-</td><td class="code"><div class="highlight"><pre>            <span class="nx">drawOverlay</span><span class="p">()</span>
+<p>Parameters:</p>
+
+<ul>
+<li>container - HTML element housing the canvas</li>
+</ul>
+</td><td class="code"><div class="highlight"><pre>          <span class="nv">selectShape = </span><span class="nf">(container) -&gt;</span>
+            <span class="nx">drawOverlay</span><span class="p">()</span>
+            
             <span class="nx">overlay</span><span class="p">.</span><span class="nx">unmousedown</span><span class="p">()</span>
-            <span class="nx">overlay</span><span class="p">.</span><span class="nx">mousedown</span> <span class="nf">(e) -&gt;</span></pre></div></td></tr><tr id="section-14"><td class="docs"><div class="pilwrap"><a href="#section-14" class="pilcrow">&#182;</a></div><p>By default, nullifies all selections</p>
-</td><td class="code"><div class="highlight"><pre>              <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">().</span><span class="nx">setActiveAnnotation</span><span class="p">(</span><span class="kc">undefined</span><span class="p">)</span>
+            
+            <span class="nx">overlay</span><span class="p">.</span><span class="nx">mousedown</span> <span class="o">-&gt;</span>
+              <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">().</span><span class="nx">setActiveAnnotation</span><span class="p">(</span><span class="kc">undefined</span><span class="p">)</span>
               <span class="nv">activeId = </span><span class="kc">null</span>
               <span class="nx">overlay</span><span class="p">.</span><span class="nx">toBack</span><span class="p">()</span>
+            
             <span class="nx">overlay</span><span class="p">.</span><span class="nx">toBack</span><span class="p">()</span>
-          </pre></div></td></tr><tr id="section-15"><td class="docs"><div class="pilwrap"><a href="#section-15" class="pilcrow">&#182;</a></div><p>Change the mouse actions depending on what class of Mode the application is currently in</p>
-</td><td class="code"><div class="highlight"><pre>          <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">().</span><span class="nx">events</span><span class="p">.</span><span class="nx">onCurrentModeChange</span><span class="p">.</span><span class="nx">addListener</span> <span class="nf">(mode) -&gt;</span>
+          
+          <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">().</span><span class="nx">events</span><span class="p">.</span><span class="nx">onCurrentModeChange</span><span class="p">.</span><span class="nx">addListener</span> <span class="nf">(mode) -&gt;</span>
             <span class="nx">removeOverlay</span><span class="p">()</span>
             <span class="k">switch</span> <span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">().</span><span class="nx">getCurrentModeClass</span><span class="p">()</span>
               <span class="k">when</span> <span class="s">&quot;shape&quot;</span>  <span class="k">then</span> <span class="nx">drawShape</span> <span class="nx">svgWrapper</span>
@@ -218,4 +230,4 @@ them.</p>
             <span class="k">if</span> <span class="nx">overlay</span><span class="o">?</span>
               <span class="nx">overlay</span><span class="p">.</span><span class="nx">toBack</span><span class="p">()</span>
 
-</pre></div></td></tr></tbody></table><div id="generated">generated Tue May 08 2012 15:18:00 GMT-0400 (EDT)  </div><div id="projectname"><a href="../index.html">Video Annotator</a></div></div>
+</pre></div></td></tr></tbody></table><div id="generated">generated Wed May 09 2012 14:36:53 GMT-0400 (EDT)  </div><div id="projectname"><a href="../index.html">Video Annotator</a></div></div>
