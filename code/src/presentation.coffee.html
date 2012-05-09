@@ -3,9 +3,6 @@ layout: docco
 title: OACVideoAnnotator/code/src/presentation.coffee.html
 ---
 <div id="container"><div id="background"></div><div id="jump_to">Jump To &hellip;<div id="jump_wrapper"><div id="jump_page"><a href="../index.html" class="source"><span class="file_name">README</span></a><a href="../src/application.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">application.coffee</span></a><a href="../src/component.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">component.coffee</span></a><a href="../src/controller.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">controller.coffee</span></a><a href="../src/driver-framework.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">driver-framework.coffee</span></a><a href="../src/drivers/dummy.coffee.html" class="source "><span class="base_path">src / drivers / </span><span class="file_name">dummy.coffee</span></a><a href="../src/drivers/html5.coffee.html" class="source "><span class="base_path">src / drivers / </span><span class="file_name">html5.coffee</span></a><a href="../src/intro.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">intro.coffee</span></a><a href="../src/outro.coffee.html" class="source "><span class="base_path">src / </span><span class="file_name">outro.coffee</span></a><a href="../src/presentation.coffee.html" class="source selected"><span class="base_path">src / </span><span class="file_name">presentation.coffee</span></a></div></div></div><table cellpadding="0" cellspacing="0"><thead><tr><th class="docs"><h1>presentation.coffee</h1><div class="filepath">src/</div></th><th class="code"></th></tr></thead><tbody><tr id="section-1"><td class="docs"><div class="pilwrap"><a href="#section-1" class="pilcrow">&#182;</a></div><h1>Presentations</h1>
-
-<p>Presentations for OAC:ASP Application
-@author Grant Dickie, Jim Smith</p>
 </td><td class="code"><div class="highlight"><pre></pre></div></td></tr><tr id="section-2"><td class="docs"><div class="pilwrap"><a href="#section-2" class="pilcrow">&#182;</a></div><h2>AnnotationList</h2>
 
 <p>Presentation that extends SimpleText in order to add new
@@ -232,7 +229,8 @@ model</p>
           <span class="nx">superEventFocusChange</span> <span class="nx">id</span>
           <span class="k">if</span> <span class="nx">app</span><span class="p">.</span><span class="nx">getCurrentMode</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;Select&#39;</span>
             <span class="nx">boundingBoxComponent</span><span class="p">.</span><span class="nx">attachToRendering</span> <span class="nx">that</span><span class="p">.</span><span class="nx">getFocusedRendering</span><span class="p">()</span>
-            <span class="nx">canvasBinding</span><span class="p">.</span><span class="nx">toBack</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nx">canvasBinding</span><span class="o">?</span>
+              <span class="nx">canvasBinding</span><span class="p">.</span><span class="nx">toBack</span><span class="p">()</span>
         </pre></div></td></tr><tr id="section-20"><td class="docs"><div class="pilwrap"><a href="#section-20" class="pilcrow">&#182;</a></div><h3>#initShapeLens</h3>
 
 <p>Initializes a basic shape lens. The default methods expect the Raphaël SVG shape object to
@@ -357,14 +355,16 @@ to the front and makes it opaque.</p>
 </td><td class="code"><div class="highlight"><pre>          <span class="nv">lens.eventFocus = </span><span class="o">-&gt;</span>
             <span class="nv">focused = </span><span class="kc">true</span>
             <span class="nx">lens</span><span class="p">.</span><span class="nx">setOpacity</span><span class="p">()</span>
-            <span class="nx">lens</span><span class="p">.</span><span class="nx">shape</span><span class="p">.</span><span class="nx">toFront</span><span class="p">()</span></pre></div></td></tr><tr id="section-28"><td class="docs"><div class="pilwrap"><a href="#section-28" class="pilcrow">&#182;</a></div><h4>#eventUnfocus</h4>
+            <span class="k">if</span> <span class="nx">lens</span><span class="p">.</span><span class="nx">shape</span><span class="o">?</span>
+              <span class="nx">lens</span><span class="p">.</span><span class="nx">shape</span><span class="p">.</span><span class="nx">toFront</span><span class="p">()</span></pre></div></td></tr><tr id="section-28"><td class="docs"><div class="pilwrap"><a href="#section-28" class="pilcrow">&#182;</a></div><h4>#eventUnfocus</h4>
 
 <p>Called when this rendering loses the selection focus. The default implementation pushes the rendering
 to the back and makes it semi-transparent.</p>
 </td><td class="code"><div class="highlight"><pre>          <span class="nv">lens.eventUnfocus = </span><span class="o">-&gt;</span>
             <span class="nv">focused = </span><span class="kc">false</span>
             <span class="nx">lens</span><span class="p">.</span><span class="nx">setOpacity</span><span class="p">()</span>
-            <span class="nx">lens</span><span class="p">.</span><span class="nx">shape</span><span class="p">.</span><span class="nx">toBack</span><span class="p">()</span></pre></div></td></tr><tr id="section-29"><td class="docs"><div class="pilwrap"><a href="#section-29" class="pilcrow">&#182;</a></div><h4>#eventDelete</h4>
+            <span class="k">if</span> <span class="nx">lens</span><span class="p">.</span><span class="nx">shape</span><span class="o">?</span>
+              <span class="nx">lens</span><span class="p">.</span><span class="nx">shape</span><span class="p">.</span><span class="nx">toBack</span><span class="p">()</span></pre></div></td></tr><tr id="section-29"><td class="docs"><div class="pilwrap"><a href="#section-29" class="pilcrow">&#182;</a></div><h4>#eventDelete</h4>
 
 <p>Called when the data item represented by this rendering is to be deleted. The default implementation
 passes the deletion request to the data store with the item ID represented by the rendering.</p>
@@ -425,9 +425,11 @@ width and height of the targeted video to correspond to the current size of the 
             <span class="k">if</span> <span class="nx">lens</span><span class="p">.</span><span class="nx">shape</span><span class="o">?</span>
               <span class="nx">lens</span><span class="p">.</span><span class="nx">shape</span><span class="p">.</span><span class="nx">remove</span><span class="p">()</span>
               <span class="nv">lens.shape = </span><span class="kc">null</span>
+            <span class="k">if</span> <span class="nx">app</span><span class="p">.</span><span class="nx">getActiveAnnotation</span><span class="p">()</span> <span class="o">==</span> <span class="nx">itemId</span>
+              <span class="nx">app</span><span class="p">.</span><span class="nx">setActiveAnnotation</span> <span class="kc">null</span>
 
           <span class="k">if</span> <span class="nx">cb</span><span class="o">?</span>
             <span class="nx">cb</span> <span class="nx">lens</span>
           <span class="nx">lens</span>
         </pre></div></td></tr><tr id="section-34"><td class="docs"><div class="pilwrap"><a href="#section-34" class="pilcrow">&#182;</a></div><p>End of Presentation constructors</p>
-</td><td class="code"><div class="highlight"><pre></pre></div></td></tr></tbody></table><div id="generated">generated Tue May 08 2012 15:18:01 GMT-0400 (EDT)  </div><div id="projectname"><a href="../index.html">Video Annotator</a></div></div>
+</td><td class="code"><div class="highlight"><pre></pre></div></td></tr></tbody></table><div id="generated">generated Wed May 09 2012 14:36:54 GMT-0400 (EDT)  </div><div id="projectname"><a href="../index.html">Video Annotator</a></div></div>
