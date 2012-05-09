@@ -5,7 +5,7 @@
 # The **OAC Video Annotation Tool** is a MITHGrid application providing annotation capabilities for streaming
 # video embedded in a web page. 
 #  
-# Date: Mon May 7 14:50:44 2012 -0400
+# Date: Tue May 8 15:18:13 2012 -0400
 #  
 # Educational Community License, Version 2.0
 # 
@@ -327,6 +327,7 @@
               }
               return _results;
             };
+            that.getTargetURI = playerObj.getTargetURI;
             that.play = playerObj.play;
             that.pause = playerObj.pause;
             that.getPlayhead = playerObj.getplayhead;
@@ -336,6 +337,9 @@
         return initDummyPlayer = function(DOMObject, index) {
           var that;
           that = {};
+          that.getTargetURI = function() {
+            return $(DOMObject).data('oatarget');
+          };
           that.startDummyPlayer = function() {
             that.setAspect();
             that.setContent();
@@ -416,11 +420,18 @@
         };
         return driver.bindPlayer = function(domObj) {
           return OAC.Client.StreamingVideo.Player.DriverBinding.initInstance(function(that) {
+            var lastTime;
             $(domObj).bind('loadedmetadata', function() {
               return that.events.onResize.fire(that.getSize());
             });
+            lastTime = 0;
             $(domObj).bind('timeupdate', function() {
-              return that.events.onPlayheadUpdate.fire(domObj.currentTime);
+              var now;
+              now = domObj.currentTime;
+              if (Math.abs(lastTime - now) >= 0.2 || now < 0.1) {
+                lastTime = now;
+                return that.events.onPlayheadUpdate.fire(domObj.currentTime);
+              }
             });
             that.getCoordinates = function() {
               return [$(domObj).position().left, $(domObj).position().top];
@@ -756,12 +767,11 @@
           var args;
           args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
           return MITHGrid.initInstance.apply(MITHGrid, ["OAC.Client.StreamingVideo.Component.ShapeCreateBox"].concat(__slice.call(args), [function(that, paper) {
-            var attrs, factors, options, padding, shapeAttrs, svgBBox;
+            var attrs, factors, options, shapeAttrs, svgBBox;
             options = that.options;
             svgBBox = {};
             factors = {};
             attrs = {};
-            padding = 10;
             shapeAttrs = {};
             that.createGuide = function(coords) {
               attrs.x = coords[0];
@@ -1011,7 +1021,7 @@
               superEventFocusChange(id);
               if (app.getCurrentMode() === 'Select') {
                 boundingBoxComponent.attachToRendering(that.getFocusedRendering());
-                return canvasBinding.toBack();
+                if (canvasBinding != null) return canvasBinding.toBack();
               }
             };
             return that.initShapeLens = function(container, view, model, itemId, cb) {
@@ -1085,12 +1095,12 @@
               lens.eventFocus = function() {
                 focused = true;
                 lens.setOpacity();
-                return lens.shape.toFront();
+                if (lens.shape != null) return lens.shape.toFront();
               };
               lens.eventUnfocus = function() {
                 focused = false;
                 lens.setOpacity();
-                return lens.shape.toBack();
+                if (lens.shape != null) return lens.shape.toBack();
               };
               lens.eventDelete = function() {
                 return model.removeItems([itemId]);
@@ -1129,7 +1139,10 @@
               lens.remove = function(item) {
                 if (lens.shape != null) {
                   lens.shape.remove();
-                  return lens.shape = null;
+                  lens.shape = null;
+                }
+                if (app.getActiveAnnotation() === itemId) {
+                  return app.setActiveAnnotation(null);
                 }
               };
               if (cb != null) cb(lens);
@@ -1161,13 +1174,13 @@
         }], [function(app) {
           var NS, options, parseNPT, playerObj, screenSize, shapeAnnotationId, shapeTypes, wh, xy, _ref;
           shapeTypes = {};
+          screenSize = {};
           shapeAnnotationId = 0;
           xy = [];
           wh = [];
           options = app.options;
           playerObj = options.player;
-          options.url = options.url || playerObj.getTargetURI();
-          screenSize = {};
+          if (options.url == null) options.url = playerObj.getTargetURI();
           if (playerObj != null) {
             _ref = playerObj.getSize(), screenSize.width = _ref[0], screenSize.height = _ref[1];
             playerObj.events.onResize.addListener(function(s) {
@@ -1201,28 +1214,30 @@
             return app.presentation.raphsvg.addLens(type, args.lens);
           };
           app.insertShape = function(coords) {
-            var curMode, npt_end, npt_start, shape, shapeItem, t;
-            npt_start = parseFloat(app.getCurrentTime()) - 5;
-            npt_end = parseFloat(app.getCurrentTime()) + 5;
+            var curMode, npt_end, npt_start, shape;
+            npt_start = coords.npt_start != null ? coords.npt_start : parseFloat(app.getCurrentTime()) - 5;
+            npt_end = coords.npt_end != null ? coords.npt_end : parseFloat(app.getCurrentTime()) + 5;
             curMode = app.getCurrentMode();
             if (shapeTypes[curMode] != null) {
-              shape = shapeTypes[curMode].calc(coords);
+              shape = shapeTypes[curMode].calc != null ? shapeTypes[curMode].calc(coords) : {};
               shapeAnnotationId = uuid();
-              shapeItem = {
-                id: "_:anno" + shapeAnnotationId,
-                type: "Annotation",
-                bodyType: "Text",
-                bodyContent: "This is an annotation for " + curMode,
-                shapeType: curMode,
-                targetURI: app.options.url,
-                targetHeight: screenSize.height,
-                targetWidth: screenSize.width,
-                npt_start: npt_start < 0 ? 0 : npt_start,
-                npt_end: npt_end
-              };
-              app.dataStore.canvas.loadItems([t = $.extend(true, shapeItem, shape)]);
-              app.setActiveAnnotation(shapeItem.id);
-              return shapeItem.id;
+              shape.id = "_:anno" + shapeAnnotationId;
+              shape.type = "Annotation";
+              shape.bodyType = "Text";
+              shape.bodyContent = "This is an annotation for " + curMode;
+              shape.shapeType = curMode;
+              shape.targetURI = app.options.url;
+              shape.targetHeight = screenSize.height;
+              shape.targetWidth = screenSize.width;
+              shape.npt_start = npt_start < 0 ? 0 : npt_start;
+              shape.npt_end = npt_end;
+              shape.x = coords.x + (coords.width / 2);
+              shape.y = coords.y + (coords.height / 2);
+              shape.w = coords.width;
+              shape.h = coords.height;
+              app.dataStore.canvas.loadItems([shape]);
+              app.setActiveAnnotation(shape.id);
+              return shape.id;
             }
           };
           NS = {
@@ -1265,7 +1280,7 @@
             return (hours * 60 + minutes) * 60 + seconds;
           };
           app.importData = function(data) {
-            var bits, doc, dom, fragment, hasSelector, hasSubSelector, hasTarget, i, info, o, refd, rootName, s, shapeInfo, svg, t, temp, tempstore, types, v, _i, _j, _k, _len, _len2, _len3, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
+            var bits, doc, dom, fragment, hasSelector, hasSubSelector, hasTarget, i, info, o, rootName, s, shapeInfo, svg, t, temp, tempstore, types, v, _i, _j, _k, _len, _len2, _len3, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
             tempstore = [];
             for (i in data) {
               o = data[i];
@@ -1284,7 +1299,7 @@
                   type: "Annotation",
                   bodyContent: '',
                   bodyType: 'Text',
-                  targetURI: app.options.url
+                  targetURI: options.url
                 };
                 if ((o["" + NS.OA + "hasBody"] != null) && (o["" + NS.OA + "hasBody"][0] != null) && (data[o["" + NS.OA + "hasBody"][0].value] != null)) {
                   temp.bodyContent = data[o["" + NS.OA + "hasBody"][0].value]["" + NS.CNT + "chars"][0].value;
@@ -1303,7 +1318,7 @@
                   for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
                     hasTarget = _ref3[_i];
                     if ((data[hasTarget] != null) && (data[hasTarget]["" + NS.OA + "hasSource"] != null)) {
-                      refd = (_ref4 = app.options.url, __indexOf.call((function() {
+                      if ((_ref4 = options.url, __indexOf.call((function() {
                         var _j, _len2, _ref5, _results;
                         _ref5 = data[hasTarget]["" + NS.OA + "hasSource"];
                         _results = [];
@@ -1312,8 +1327,7 @@
                           _results.push(s.value);
                         }
                         return _results;
-                      })(), _ref4) >= 0);
-                      if (refd) {
+                      })(), _ref4) >= 0)) {
                         _ref5 = (function() {
                           var _k, _len2, _ref5, _results;
                           _ref5 = data[hasTarget]["" + NS.OA + "hasSelector"];
@@ -1326,7 +1340,7 @@
                         })();
                         for (_j = 0, _len2 = _ref5.length; _j < _len2; _j++) {
                           hasSelector = _ref5[_j];
-                          refd = (_ref6 = "" + NS.OAX + "CompositeSelector", __indexOf.call((function() {
+                          if ((data[hasSelector] != null) && (_ref6 = "" + NS.OAX + "CompositeSelector", __indexOf.call((function() {
                             var _k, _len3, _ref7, _results;
                             _ref7 = data[hasSelector]["" + NS.RDF + "type"];
                             _results = [];
@@ -1335,8 +1349,7 @@
                               _results.push(t.value);
                             }
                             return _results;
-                          })(), _ref6) >= 0);
-                          if ((data[hasSelector] != null) && refd) {
+                          })(), _ref6) >= 0)) {
                             _ref7 = (function() {
                               var _l, _len3, _ref7, _results;
                               _ref7 = data[hasSelector]["" + NS.OA + "hasSelector"];
@@ -1402,17 +1415,6 @@
                       }
                     }
                   }
-                } else {
-                  temp = {
-                    id: i,
-                    type: "Annotation",
-                    bodyContent: '',
-                    bodyType: 'Text',
-                    targetURI: app.options.url,
-                    shapeType: '',
-                    npt_start: 0,
-                    npt_end: 0
-                  };
                 }
                 if ((temp.npt_start != null) || (temp.npt_end != null) || (temp.shapeType != null)) {
                   tempstore.push(temp);
@@ -1421,8 +1423,9 @@
             }
             return app.dataStore.canvas.loadItems(tempstore);
           };
-          app.exportData = function(data) {
-            var bnode, createJSONObjSeries, findAnnos, genBody, genTarget, literal, mergeData, node, o, tempstore, uri, _i, _len, _ref2;
+          app.exportData = function() {
+            var bnode, createJSONObjSeries, data, findAnnos, genBody, genTarget, literal, mergeData, node, o, tempstore, uri, _i, _len, _ref2;
+            data = {};
             tempstore = {};
             findAnnos = app.dataStore.canvas.prepare(['!type']);
             node = function(s, pns, p, t, o) {
@@ -1442,126 +1445,63 @@
             literal = function(s, pns, p, o) {
               return node(s, pns, p, 'literal', o);
             };
-            genBody = function(obj, id) {
-              uri(id, NS.RDF, "type", "" + NS.OA + "Body");
-              literal(id, NS.DC, "format", "text/plain");
-              literal(id, NS.CNT, "characterEncoding", "utf-8");
-              return literal(id, NS.CNT, "chars", obj.bodyContent[0]);
+            genBody = function(obj, ids) {
+              uri(ids.buid, NS.RDF, "type", "" + NS.OA + "Body");
+              literal(ids.buid, NS.DC, "format", "text/plain");
+              literal(ids.buid, NS.CNT, "characterEncoding", "utf-8");
+              return literal(ids.buid, NS.CNT, "chars", obj.bodyContent[0]);
             };
-            genTarget = function(obj, id) {
+            genTarget = function(obj, ids) {
               var svglens, _ref2;
-              uri(id[0], NS.RDF, "type", "" + NS.OA + "SpecificResource");
-              uri(id[0], NS.OA, "hasSource", obj.targetURI[0]);
-              bnode(id[0], NS.OA, "hasSelector", id[1]);
-              uri(id[1], NS.RDF, "type", "" + NS.OAX + "CompositeSelector");
-              bnode(id[1], NS.OA, "hasSelector", id[2]);
-              bnode(id[1], NS.OA, "hasSelector", id[3]);
+              uri(ids.tuid, NS.RDF, "type", "" + NS.OA + "SpecificResource");
+              uri(ids.tuid, NS.OA, "hasSource", obj.targetURI[0]);
+              bnode(ids.tuid, NS.OA, "hasSelector", ids.suid);
+              uri(ids.suid, NS.RDF, "type", "" + NS.OAX + "CompositeSelector");
+              bnode(ids.suid, NS.OA, "hasSelector", ids.svgid);
+              bnode(ids.suid, NS.OA, "hasSelector", ids.fgid);
               if (obj.shapeType != null) {
                 svglens = (_ref2 = shapeTypes[obj.shapeType[0]]) != null ? _ref2.renderAsSVG : void 0;
               }
               if (svglens != null) {
-                uri(id[2], NS.RDF, "type", "" + NS.OAX + "SvgSelector");
-                literal(id[2], NS.DC, "format", "text/svg+xml");
-                literal(id[2], NS.CNT, "characterEncoding", "utf-8");
-                literal(id[2], NS.CNT, "chars", svglens(app.dataStore.canvas, obj.id[0]));
+                uri(ids.svgid, NS.RDF, "type", "" + NS.OAX + "SvgSelector");
+                literal(ids.svgid, NS.DC, "format", "text/svg+xml");
+                literal(ids.svgid, NS.CNT, "characterEncoding", "utf-8");
+                literal(ids.svgid, NS.CNT, "chars", svglens(app.dataStore.canvas, obj.id[0]));
                 if ((obj.targetHeight != null) && (obj.targetHeight[0] != null)) {
-                  literal(id[2], NS.EXIF, "height", obj.targetHeight[0]);
+                  literal(ids.svgid, NS.EXIF, "height", obj.targetHeight[0]);
                 } else {
-                  literal(id[2], NS.EXIF, "height", screenSize.height);
+                  literal(ids.svgid, NS.EXIF, "height", screenSize.height);
                 }
                 if ((obj.targetWidth != null) && (obj.targetWidth[0] != null)) {
-                  literal(id[2], NS.EXIF, "width", obj.targetWidth[0]);
+                  literal(ids.svgid, NS.EXIF, "width", obj.targetWidth[0]);
                 } else {
-                  literal(id[2], NS.EXIF, "width", screenSize.width);
+                  literal(ids.svgid, NS.EXIF, "width", screenSize.width);
                 }
               }
-              uri(id[3], NS.RDF, "type", "" + NS.OA + "FragSelector");
-              return literal(id[3], NS.RDF, "value", 't=npt:' + obj.npt_start[0] + ',' + obj.npt_end[0]);
+              uri(ids.fgid, NS.RDF, "type", "" + NS.OA + "FragSelector");
+              return literal(ids.fgid, NS.RDF, "value", 't=npt:' + obj.npt_start[0] + ',' + obj.npt_end[0]);
             };
-            createJSONObjSeries = function(id) {
-              var buid, fgid, obj, suid, svgid, tuid;
-              obj = app.dataStore.canvas.getItem(id[0]);
-              if (id.length > 1) {
-                buid = id[1];
-                tuid = id[2];
-                suid = id[3];
-                svgid = id[4];
-                fgid = id[5];
-              } else {
-                buid = '_:b' + uuid();
-                tuid = '_:t' + uuid();
-                suid = '_:sel' + uuid();
-                svgid = '_:sel' + uuid();
-                fgid = '_:sel' + uuid();
-              }
-              uri(id[0], NS.RDF, "type", "" + NS.OA + "Annotation");
-              bnode(id[0], NS.OA, "hasBody", buid);
-              bnode(id[0], NS.OA, "hasTarget", tuid);
-              genBody(obj, buid);
-              return genTarget(obj, [tuid, suid, svgid, fgid]);
+            createJSONObjSeries = function(ids) {
+              var obj;
+              obj = app.dataStore.canvas.getItem(ids.id);
+              if (ids.buid == null) ids.buid = '_:b' + uuid();
+              if (ids.tuid == null) ids.tuid = '_:t' + uuid();
+              if (ids.suid == null) ids.suid = '_:sel' + uuid();
+              if (ids.svgid == null) ids.svgid = '_:sel' + uuid();
+              if (ids.fgid == null) ids.fgid = '_:sel' + uuid();
+              uri(ids.id, NS.RDF, "type", "" + NS.OA + "Annotation");
+              bnode(ids.id, NS.OA, "hasBody", ids.buid);
+              bnode(ids.id, NS.OA, "hasTarget", ids.tuid);
+              genBody(obj, ids);
+              return genTarget(obj, ids);
             };
             mergeData = function(id) {
-              var buid, found, obj, seli, selo, seltype, selval, suid, tuid, type, value, _ref2, _ref3, _results;
+              var obj;
               obj = app.dataStore.canvas.getItem(id);
-              if (data[obj.id] != null) {
-                _ref2 = data[obj.id];
-                _results = [];
-                for (type in _ref2) {
-                  value = _ref2[type];
-                  switch (type) {
-                    case "" + NS.OA + "hasBody":
-                      buid = data[obj.id].hasBody[0].value;
-                      _results.push(data[buid].chars[0].value = obj.bodyContent);
-                      break;
-                    case "" + NS.OA + "hasTarget":
-                      if ((obj.targetURI[0] != null) && (obj.x[0] != null)) {
-                        tuid = data[obj.id].hasTarget[0].value;
-                        found = false;
-                        if (data[tuid].hasSource[0].value === obj.targetURI[0]) {
-                          suid = data[tuid].hasSelector[0].value;
-                          found = true;
-                          _ref3 = data[suid];
-                          for (seltype in _ref3) {
-                            selval = _ref3[seltype];
-                            if (seltype === 'hasSelector') {
-                              for (seli in selval) {
-                                selo = selval[seli];
-                                if (data[selo.value].type[0].value === OAC_NS.SVGConstraint) {
-                                  data[selo.value].chars = [
-                                    {
-                                      type: 'literal',
-                                      value: '<' + obj.shapeType[0].substring(0, 4).toLowerCase() + ' x="' + obj.x[0] + '" y="' + obj.y[0] + ' width="' + obj.w[0] + '" height="' + obj.h[0] + '" />'
-                                    }
-                                  ];
-                                } else if (data[selo.value].type[0].value === OAC_NS.FragSelector) {
-                                  data[selval].chars = [
-                                    {
-                                      'type': 'literal',
-                                      'value': 't=npt:' + obj.npt_start[0] + ',' + obj.npt_end[0]
-                                    }
-                                  ];
-                                }
-                              }
-                            }
-                          }
-                        }
-                        if (!found) {
-                          _results.push(genTarget(obj));
-                        } else {
-                          _results.push(void 0);
-                        }
-                      } else {
-                        _results.push(void 0);
-                      }
-                      break;
-                  }
-                }
-                return _results;
-              } else {
-                return createJSONObjSeries(obj.id);
-              }
+              return createJSONObjSeries({
+                id: obj.id
+              });
             };
-            data = data || {};
             _ref2 = findAnnos.evaluate('Annotation');
             for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
               o = _ref2[_i];
@@ -1590,14 +1530,6 @@
           });
           return app.ready(function() {
             app.addShapeType("Rectangle", {
-              calc: function(coords) {
-                return {
-                  x: coords.x + (coords.width / 2),
-                  y: coords.y + (coords.height / 2),
-                  w: coords.width,
-                  h: coords.height
-                };
-              },
               renderAsSVG: function(model, itemId) {
                 var item;
                 item = model.getItem(itemId);
@@ -1661,14 +1593,6 @@
               }
             });
             app.addShapeType("Ellipse", {
-              calc: function(coords) {
-                return {
-                  x: coords.x + (coords.width / 2),
-                  y: coords.y + (coords.height / 2),
-                  w: coords.width,
-                  h: coords.height
-                };
-              },
               renderAsSVG: function(model, itemId) {
                 var item;
                 item = model.getItem(itemId);
@@ -1737,69 +1661,6 @@
     });
   })(jQuery, MITHGrid, OAC);
 
-  MITHGrid.defaults("OAC.Client.StreamingVideo.Player.DriverBinding", {
-    events: {
-      onResize: null,
-      onPlayheadUpdate: null
-    }
-  });
-
-  MITHGrid.defaults("OAC.Client.StreamingVideo.Component.ShapeEditBox", {
-    dirs: ['ul', 'top', 'ur', 'lft', 'lr', 'btm', 'll', 'rgt', 'mid'],
-    events: {
-      onResize: null,
-      onMove: null,
-      onDelete: null,
-      onFocus: null,
-      onUnfocus: null
-    }
-  });
-
-  MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.CanvasClickController", {
-    bind: {
-      events: {
-        onShapeStart: null,
-        onShapeDrag: null,
-        onShapeDone: null
-      }
-    }
-  });
-
-  MITHGrid.defaults("OAC.Client.StreamingVideo.Component.ModeButton", {
-    bind: {
-      events: {
-        onCurrentModeChange: null
-      }
-    }
-  });
-
-  MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.ShapeCreateBox", {
-    bind: {
-      events: {}
-    }
-  });
-
-  MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.Drag", {
-    bind: {
-      events: {
-        onFocus: null,
-        onUnfocus: null,
-        onUpdate: null
-      }
-    }
-  });
-
-  MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.Select", {
-    bind: {
-      events: {
-        onSelect: null
-      }
-    },
-    isSelectable: function() {
-      return true;
-    }
-  });
-
   MITHGrid.defaults("OAC.Client.StreamingVideo.Application", {
     controllers: {
       canvas: {
@@ -1845,23 +1706,41 @@
           Annotation: {}
         },
         properties: {
-          shapeType: {
+          bodyContent: {
             valueType: 'text'
           },
           bodyType: {
             valueType: 'text'
           },
-          bodyContent: {
+          npt_end: {
+            valueType: 'numeric'
+          },
+          npt_start: {
+            valueType: 'numeric'
+          },
+          shapeType: {
             valueType: 'text'
           },
           targetURI: {
             valueType: 'uri'
           },
-          npt_start: {
-            valueType: "numeric"
+          h: {
+            valueType: 'numeric'
           },
-          npt_end: {
-            valueType: "numeric"
+          targetHeight: {
+            valueType: 'numeric'
+          },
+          targetWidth: {
+            valueType: 'numeric'
+          },
+          w: {
+            valueType: 'numeric'
+          },
+          x: {
+            valueType: 'numeric'
+          },
+          y: {
+            valueType: 'numeric'
           }
         }
       }
@@ -1879,6 +1758,71 @@
       }
     },
     viewSetup: "<div class=\"canvas\"></div>"
+  });
+
+  MITHGrid.defaults("OAC.Client.StreamingVideo.Component.ModeButton", {
+    bind: {
+      events: {
+        onCurrentModeChange: null
+      }
+    }
+  });
+
+  MITHGrid.defaults("OAC.Client.StreamingVideo.Component.ShapeCreateBox", {
+    bind: {
+      events: {
+        onNewShape: null
+      }
+    }
+  });
+
+  MITHGrid.defaults("OAC.Client.StreamingVideo.Component.ShapeEditBox", {
+    dirs: ['ul', 'top', 'ur', 'lft', 'lr', 'btm', 'll', 'rgt', 'mid'],
+    events: {
+      onResize: null,
+      onMove: null,
+      onDelete: null,
+      onFocus: null,
+      onUnfocus: null
+    }
+  });
+
+  MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.CanvasClickController", {
+    bind: {
+      events: {
+        onShapeStart: null,
+        onShapeDrag: null,
+        onShapeDone: null
+      }
+    }
+  });
+
+  MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.Drag", {
+    bind: {
+      events: {
+        onFocus: null,
+        onUnfocus: null,
+        onUpdate: null
+      }
+    }
+  });
+
+  MITHGrid.defaults("OAC.Client.StreamingVideo.Controller.Select", {
+    bind: {
+      events: {
+        onSelect: null
+      }
+    },
+    isSelectable: function() {
+      return true;
+    }
+  });
+
+  MITHGrid.defaults("OAC.Client.StreamingVideo.Player.DriverBinding", {
+    events: {
+      onResize: null,
+      onPlayheadUpdate: null
+    }
   });
 
 }).call(this);
