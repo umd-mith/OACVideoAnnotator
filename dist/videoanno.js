@@ -485,10 +485,13 @@
       });
       Component.namespace("ShapeEditBox", function(ShapeEditBox) {
         var dragController;
-        dragController = OAC.Client.StreamingVideo.Controller.Drag.initInstance({});
+        dragController = null;
         return ShapeEditBox.initInstance = function() {
           var args;
           args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+          if (dragController == null) {
+            dragController = OAC.Client.StreamingVideo.Controller.Drag.initInstance({});
+          }
           return MITHGrid.initInstance.apply(MITHGrid, ["OAC.Client.StreamingVideo.Component.ShapeEditBox"].concat(__slice.call(args), [function(that, paper) {
             var activeRendering, attrs, calcFactors, calcHandles, calcXYHeightWidth, dirs, drawHandles, extents, factors, handleAttrs, handleCalculationData, handleSet, handleSize, handles, midDrag, options, shapeAttrs, svgBBox;
             options = that.options;
@@ -1752,14 +1755,6 @@
       }
     },
     viewSetup: "<div class=\"canvas\"></div>"
-  });
-
-  MITHGrid.defaults("OAC.Client.StreamingVideo.Component.ModeButton", {
-    bind: {
-      events: {
-        onCurrentModeChange: null
-      }
-    }
   });
 
   MITHGrid.defaults("OAC.Client.StreamingVideo.Component.ShapeCreateBox", {
