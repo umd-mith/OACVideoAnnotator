@@ -68,7 +68,6 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
 			MITHGrid.Controller.Raphael.initInstance "OAC.Client.StreamingVideo.Controller.Select", args..., (that) ->
 				options = that.options
 				isSelectable = options.isSelectable or -> true
-				
 
 				that.applyBindings = (binding) ->
 					el = binding.locate("raphael")

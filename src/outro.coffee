@@ -148,19 +148,6 @@ MITHGrid.defaults "OAC.Client.StreamingVideo.Application",
 		<div class="canvas"></div>
 	"""
 
-
-
-# ## Component.ModeButton
-#
-# Instances of this component will have the following events:
-#
-# - onCurrentModeChange
-#
-MITHGrid.defaults "OAC.Client.StreamingVideo.Component.ModeButton",
-	bind:
-		events:
-			onCurrentModeChange: null
-
 # ## Component.ShapeCreateBox
 #
 # Instances of this component will have the following event:

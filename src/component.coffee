@@ -50,9 +50,15 @@ OAC.Client.StreamingVideo.namespace "Component", (Component) ->
 	# * * *
 	#
 	Component.namespace "ShapeEditBox", (ShapeEditBox) ->
-		dragController = OAC.Client.StreamingVideo.Controller.Drag.initInstance {}
+		dragController = null
+		
 
 		ShapeEditBox.initInstance = (args...) ->
+			#
+			# We delay creating the drag controller until we need it because we haven't defined the MITHGrid
+			# defaults for the binding events.
+			#
+			dragController ?= OAC.Client.StreamingVideo.Controller.Drag.initInstance {}
 			MITHGrid.initInstance "OAC.Client.StreamingVideo.Component.ShapeEditBox", args..., (that, paper) ->
 				options = that.options
 				handleSet = null
@@ -215,7 +221,7 @@ OAC.Client.StreamingVideo.namespace "Component", (Component) ->
 						#
 						if midDrag?
 							midDragDragBinding = dragController.bind midDrag
-				
+
 							midDragDragBinding.events.onUpdate.addListener (dx, dy) ->			
 								attrs.dx = dx
 								attrs.dy = dy
@@ -259,7 +265,6 @@ OAC.Client.StreamingVideo.namespace "Component", (Component) ->
 									width: attrs.width
 									height: attrs.height
 
-				
 							handleBinding.events.onFocus.addListener (x, y) ->
 								extents = activeRendering.getExtents()
 
