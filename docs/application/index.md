@@ -1,8 +1,8 @@
 ---
 layout: docs
-title: Applications
+title: Application
 ---
-# Applications
+# Application
 
 * auto-generated TOC:
 {:toc}
