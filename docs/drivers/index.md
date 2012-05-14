@@ -35,16 +35,15 @@ This function is useful for attaching Video Annotator instances to video players
 [demo](/OACVideoAnnotator/demo.html), the application instance is associated with the player binding object
 and then run:
 
-```js
-OAC.Client.StreamingVideo.Player.onNewPlayer(function(playerobj) {
 
-  var app = OAC.Client.StreamingVideo.Demo.Application.initInstance({
-    player: playerobj
-  });
+    OAC.Client.StreamingVideo.Player.onNewPlayer(function(playerobj) {
 
-  app.run();
-});
-```
+      var app = OAC.Client.StreamingVideo.Demo.Application.initInstance({
+        player: playerobj
+      });
+
+      app.run();
+    });
 
 ### OAC.Client.StreamingVideo.Player.player(id)
 
@@ -73,23 +72,19 @@ Each driver binding object returned by the `bindPlayer` driver method must imple
 Two events are expected as well: `onResize`, and `onPlayheadUpdate`. These event handlers are instantiated automatically
 if the `bindPLayer` driver method uses the following CoffeeScript template:
 
-```coffeescript
-driver.bindPlayer = (domObj) ->
-  OAC.Client.StreamingVideo.Player.DriverBinding.initInstance (that) ->
-    # implement methods here as properties of `that`
-    that.getCoordinates = -> ...
-```
+    driver.bindPlayer = (domObj) ->
+      OAC.Client.StreamingVideo.Player.DriverBinding.initInstance (that) ->
+        # implement methods here as properties of `that`
+        that.getCoordinates = -> ...
 
 In JavaScript, this would be
 
-```js
-driver.bindPlayer = function(domObj) {
-  return OAC.Client.StreamingVideo.Player.DriverBinding.initInstance(function(that) {
-    // implement methods here as properties of `that`
-    that.getCoordinates = function() { ... };
-  });
-};
-```
+    driver.bindPlayer = function(domObj) {
+      return OAC.Client.StreamingVideo.Player.DriverBinding.initInstance(function(that) {
+        // implement methods here as properties of `that`
+        that.getCoordinates = function() { ... };
+      });
+    };
 
 ### getCoordinates()
 
