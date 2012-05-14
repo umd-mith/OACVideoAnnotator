@@ -1,4 +1,4 @@
 ---
 layout: docs
-title: Data Stores
+title: Data Schema
 ---
