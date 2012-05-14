@@ -7,11 +7,13 @@ title: Controllers
 * auto-generated TOC:
 {:toc}
 
+**Namespace:** OAC.Client.StreamingVideo.Controller
+
 The Video Annotator library defines a number of controllers that may be useful in embedding the Video Annotator
 in your website. 
 See [the MITHgrid documentation on controllers](/mithgrid/docs/controllers/) for an overview of how controllers work.
 
-## OAC.Client.StreamingVideo.Controller.Drag
+## Drag
 
 **N.B.:** This controller may be moved to a Raphaël-specific part of the MITHgrid library since it is general.
 
@@ -23,9 +25,9 @@ The `onFocus` and `onUpdate` event firers pass the position coordinates (x, y) t
 first and second parameters. For the `onFocus` event, the position is relative to the position of the element.
 For the `onUpdate` event, the position is relative to the position passed to the `onFocus` listener.
 
-## OAC.Client.StreamingVideo.Controller.Select
+## Select
 
 **N.B.:** This controller may be moved to a Raphaël-specific part of the MITHgrid library since it is general.
 
-## OAC.Client.StreamingVideo.Controller.CanvasClickController
+## CanvasClickController
 

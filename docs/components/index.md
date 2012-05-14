@@ -7,11 +7,13 @@ title: Components
 * auto-generated TOC:
 {:toc}
 
+**Namespace:** OAC.Client.StreamingVideo.Component
+
 The Video Annotator library defines a number of components that may be useful in embedding the Video Annotator
 in your website. 
 
-## OAC.Client.StreamingVideo.Component.ModeButton
+## ModeButton
 
-## OAC.Client.StreamingVideo.Component.ShapeEditBox
+## ShapeEditBox
 
-## OAC.Client.StreamingVideo.Component.ShapeCreateBox
+## ShapeCreateBox

@@ -7,9 +7,11 @@ title: Presentations
 * auto-generated TOC:
 {:toc}
 
+**Namespace:** OAC.Client.StreamingVideo.Presentation
+
 The Video Annotator library defines a number of presentations that may be useful in embedding the Video Annotator
-in your website. 
+in your website.
 
-## OAC.Client.StreamingVideo.Presentation.AnnotationList
+## AnnotationList
 
-## OAC.Client.StreamingVideo.Presentation.RaphaelCanvas
+## RaphaelCanvas
