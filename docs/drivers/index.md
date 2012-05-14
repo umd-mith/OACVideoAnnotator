@@ -1,6 +1,6 @@
 ---
 layout: docs
-Title: Drivers
+title: Drivers
 ---
 Video Annotator doesn't know anything about how the video player works. Instead, a video player driver provides an interface
 between the Video Annotator and the specific driver. 
@@ -30,7 +30,7 @@ This function is useful for attaching Video Annotator instances to video players
 [demo](/OACVideoAnnotator/demo.html), the application instance is associated with the player binding object
 and then run:
 
-{% highlight js %}
+```
 OAC.Client.StreamingVideo.Player.onNewPlayer(function(playerobj) {
 
   var app = OAC.Client.StreamingVideo.Demo.Application.initInstance({
@@ -40,7 +40,7 @@ OAC.Client.StreamingVideo.Player.onNewPlayer(function(playerobj) {
 
   app.run();
 });
-{% endhighlight %}
+```
 
 ### OAC.Client.StreamingVideo.Player.player(id)
 
@@ -69,21 +69,22 @@ Each driver binding object returned by the `bindPlayer` driver method must imple
 Two events are expected as well: `onResize`, and `onPlayheadUpdate`. These event handlers are instantiated automatically
 if the `bindPLayer` driver method uses the following CoffeeScript template:
 
-{% highlight coffeescript %}
+```
 driver.bindPlayer = (domObj) ->
   OAC.Client.StreamingVideo.Player.DriverBinding.initInstance (that) ->
     # implement methods here as properties of `that`
 {% endhighlight %}
+```
 
 In JavaScript, this would be
 
-{% hightlight js %}
+```
 driver.bindPlayer = function(domObj) {
   return OAC.Client.StreamingVideo.Player.DriverBinding.initInstance(function(that) {
     // implement methods here as properties of `that`
   });
 };
-{% endhighlight %}
+```
 
 ### getCoordinates()
 
