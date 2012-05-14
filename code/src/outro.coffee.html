@@ -142,19 +142,7 @@ initInstance method as named here.</p>
 or the environment in which this application is being used.</p>
 </td><td class="code"><div class="highlight"><pre>  <span class="nv">viewSetup: </span><span class="s">&quot;&quot;&quot;</span>
 <span class="s">    &lt;div class=&quot;canvas&quot;&gt;&lt;/div&gt;</span>
-<span class="s">  &quot;&quot;&quot;</span></pre></div></td></tr><tr id="section-34"><td class="docs"><div class="pilwrap"><a href="#section-34" class="pilcrow">&#182;</a></div><h2>Component.ModeButton</h2>
-
-<p>Instances of this component will have the following events:</p>
-
-<ul>
-<li>onCurrentModeChange</li>
-</ul>
-
-<p>MITHGrid.defaults "OAC.Client.StreamingVideo.Component.ModeButton",
-bind:
-    events:
-        onCurrentModeChange: null</p>
-</td><td class="code"><div class="highlight"><pre></pre></div></td></tr><tr id="section-35"><td class="docs"><div class="pilwrap"><a href="#section-35" class="pilcrow">&#182;</a></div><h2>Component.ShapeCreateBox</h2>
+<span class="s">  &quot;&quot;&quot;</span></pre></div></td></tr><tr id="section-34"><td class="docs"><div class="pilwrap"><a href="#section-34" class="pilcrow">&#182;</a></div><h2>Component.ShapeCreateBox</h2>
 
 <p>Instances of this component will have the following event:</p>
 
@@ -165,7 +153,7 @@ bind:
   <span class="nv">bind:</span>
     <span class="nv">events:</span>
       <span class="nv">onNewShape: </span><span class="kc">null</span>
-            </pre></div></td></tr><tr id="section-36"><td class="docs"><div class="pilwrap"><a href="#section-36" class="pilcrow">&#182;</a></div><h2>Component.ShapeEditBox</h2>
+            </pre></div></td></tr><tr id="section-35"><td class="docs"><div class="pilwrap"><a href="#section-35" class="pilcrow">&#182;</a></div><h2>Component.ShapeEditBox</h2>
 
 <p>By default, this component will have eight handles around the edges of the bounding box and a handle in the center.</p>
 
@@ -185,7 +173,7 @@ bind:
     <span class="nv">onMove: </span><span class="kc">null</span>
     <span class="nv">onDelete: </span><span class="kc">null</span>
     <span class="nv">onFocus: </span><span class="kc">null</span>
-    <span class="nv">onUnfocus: </span><span class="kc">null</span></pre></div></td></tr><tr id="section-37"><td class="docs"><div class="pilwrap"><a href="#section-37" class="pilcrow">&#182;</a></div><h2>Controller.CanvasClickController</h2>
+    <span class="nv">onUnfocus: </span><span class="kc">null</span></pre></div></td></tr><tr id="section-36"><td class="docs"><div class="pilwrap"><a href="#section-36" class="pilcrow">&#182;</a></div><h2>Controller.CanvasClickController</h2>
 
 <p>Bindings created by this controller will have the following events:</p>
 
@@ -199,7 +187,7 @@ bind:
     <span class="nv">events:</span>
       <span class="nv">onShapeStart: </span><span class="kc">null</span>
       <span class="nv">onShapeDrag: </span><span class="kc">null</span>
-      <span class="nv">onShapeDone: </span><span class="kc">null</span></pre></div></td></tr><tr id="section-38"><td class="docs"><div class="pilwrap"><a href="#section-38" class="pilcrow">&#182;</a></div><h2>Controller.Drag</h2>
+      <span class="nv">onShapeDone: </span><span class="kc">null</span></pre></div></td></tr><tr id="section-37"><td class="docs"><div class="pilwrap"><a href="#section-37" class="pilcrow">&#182;</a></div><h2>Controller.Drag</h2>
 
 <p>Bindings created by this controller will have the following events:</p>
 
@@ -213,7 +201,7 @@ bind:
     <span class="nv">events:</span>
       <span class="nv">onFocus: </span><span class="kc">null</span>
       <span class="nv">onUnfocus: </span><span class="kc">null</span>
-      <span class="nv">onUpdate: </span><span class="kc">null</span></pre></div></td></tr><tr id="section-39"><td class="docs"><div class="pilwrap"><a href="#section-39" class="pilcrow">&#182;</a></div><h2>Controller.Select</h2>
+      <span class="nv">onUpdate: </span><span class="kc">null</span></pre></div></td></tr><tr id="section-38"><td class="docs"><div class="pilwrap"><a href="#section-38" class="pilcrow">&#182;</a></div><h2>Controller.Select</h2>
 
 <p>This controller accepts the <code>isSelectable</code> configuration option as a function that is called to see
 if the <code>onSelect</code> event should fire.</p>
@@ -227,7 +215,7 @@ if the <code>onSelect</code> event should fire.</p>
   <span class="nv">bind:</span>
     <span class="nv">events:</span>
       <span class="nv">onSelect: </span><span class="kc">null</span>
-  <span class="nv">isSelectable: </span><span class="o">-&gt;</span> <span class="kc">true</span></pre></div></td></tr><tr id="section-40"><td class="docs"><div class="pilwrap"><a href="#section-40" class="pilcrow">&#182;</a></div><h2>Player.DriverBinding</h2>
+  <span class="nv">isSelectable: </span><span class="o">-&gt;</span> <span class="kc">true</span></pre></div></td></tr><tr id="section-39"><td class="docs"><div class="pilwrap"><a href="#section-39" class="pilcrow">&#182;</a></div><h2>Player.DriverBinding</h2>
 
 <p>All driver bindings associating a driver object with a DOM player object have the following events:</p>
 
@@ -240,4 +228,4 @@ if the <code>onSelect</code> event should fire.</p>
     <span class="nv">onResize: </span><span class="kc">null</span>
     <span class="nv">onPlayheadUpdate: </span><span class="kc">null</span>
 
-</pre></div></td></tr></tbody></table><div id="generated">generated Fri May 11 2012 13:23:22 GMT-0400 (EDT)  </div><div id="projectname"><a href="../index.html">Video Annotator</a></div></div>
+</pre></div></td></tr></tbody></table><div id="generated">generated Mon May 14 2012 08:26:20 GMT-0400 (EDT)  </div><div id="projectname"><a href="../index.html">Video Annotator</a></div></div>
