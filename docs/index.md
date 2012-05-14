@@ -12,7 +12,6 @@ title: Main Page
 
 ## Video Annotator API Reference
 
-* [Video Annotator Core](/OACVideoAnnotator/docs/core/)
 * [Applications](/OACVideoAnnotator/docs/applications/)
 * [Components](/OACVideoAnnotator/docs/components/)
 * [Controllers](/OACVideoAnnotator/docs/controllers/)
