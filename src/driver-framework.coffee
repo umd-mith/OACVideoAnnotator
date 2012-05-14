@@ -72,16 +72,25 @@ OAC.Client.StreamingVideo.namespace "Player", (exports) ->
 	#       driverObject.bindPlayer = function(player) { ... };
 	#     });
 	#
+	driverCallbacks = []
+	
 	exports.register = (driverObjectCB) ->
-		driverObject = {}
-		driverObjectCB driverObject
-		ps = driverObject.getAvailablePlayers()
-		for player in ps
-			$(player).data('driver', driverObject)
-			p = driverObject.bindPlayer player
-			players.push p
-			for cb in callbacks
-				cb.call({}, p)
+		driverCallbacks.push driverObjectCB
+	
+	$(document).ready ->
+		exports.register = (driverObjectCB) ->
+			driverObject = {}
+			driverObjectCB driverObject
+			ps = driverObject.getAvailablePlayers()
+			for player in ps
+				$(player).data('driver', driverObject)
+				p = driverObject.bindPlayer player
+				players.push p
+				for cb in callbacks
+					cb.call({}, p)
+		
+		for cb in driverCallbacks
+			exports.register cb
 	
 	# # Player.DriverBinding
 	#
