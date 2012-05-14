@@ -2,6 +2,11 @@
 layout: docs
 title: Drivers
 ---
+# Drivers
+
+* auto-generated TOC:
+{:toc}
+
 Video Annotator doesn't know anything about how the video player works. Instead, a video player driver provides an interface
 between the Video Annotator and the specific driver. 
 See [the HTML 5 video driver](/OACVideoAnnotator/code/src/drivers/html5.coffee.html) for an example of how a driver 
@@ -36,7 +41,6 @@ OAC.Client.StreamingVideo.Player.onNewPlayer(function(playerobj) {
   var app = OAC.Client.StreamingVideo.Demo.Application.initInstance({
     player: playerobj
   });
-    
 
   app.run();
 });
@@ -73,6 +77,7 @@ if the `bindPLayer` driver method uses the following CoffeeScript template:
 driver.bindPlayer = (domObj) ->
   OAC.Client.StreamingVideo.Player.DriverBinding.initInstance (that) ->
     # implement methods here as properties of `that`
+    that.getCoordinates = -> ...
 ```
 
 In JavaScript, this would be
@@ -81,6 +86,7 @@ In JavaScript, this would be
 driver.bindPlayer = function(domObj) {
   return OAC.Client.StreamingVideo.Player.DriverBinding.initInstance(function(that) {
     // implement methods here as properties of `that`
+    that.getCoordinates = function() { ... };
   });
 };
 ```
@@ -112,4 +118,3 @@ This method starts the video playing.
 ### pause()
 
 This method stops the video playing and holds its position.
-

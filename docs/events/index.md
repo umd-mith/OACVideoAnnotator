@@ -2,6 +2,11 @@
 layout: docs
 title: Events
 ---
+# Events
+
+* auto-generated TOC:
+{:toc}
+
 Video Annotator uses events to notify components of changes in data or application state. For example, the video driver will fire
 events notifying components about the progress of the video as it plays, allowing annotations to be brought in and out of view.
 
