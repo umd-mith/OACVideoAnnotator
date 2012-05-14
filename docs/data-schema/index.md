@@ -4,6 +4,9 @@ title: Data Schema
 ---
 # Data Schema
 
+* auto-generated TOC:
+{:toc}
+
 A Video Annotator application instance uses [a MITHgrid data store](/mithgrid/docs/data-stores/) to manage annotation information.
 Video Annotator looks for items with type `Annotation` and expects the following properties.
 
