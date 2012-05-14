@@ -11,10 +11,11 @@ title: Main Page
 ## Video Annotator API Reference
 
 * [Video Annotator Core](/OACVideoAnnotator/docs/core/)
+* [Applications](/OACVideoAnnotator/docs/applications/)
 * [Components](/OACVideoAnnotator/docs/components/)
-* [Events](/OACVideoAnnotator/docs/events/)
 * [Controllers](/OACVideoAnnotator/docs/controllers/)
 * [Data Stores](/OACVideoAnnotator/docs/data-stores/)
 * [Data Views](/OACVideoAnnotator/docs/data-views/)
+* [Drivers](/OACVideoAnnotator/docs/drivers/)
+* [Events](/OACVideoAnnotator/docs/events/)
 * [Presentations](/OACVideoAnnotator/docs/presentations/)
-* [Applications](/OACVideoAnnotator/docs/applications/)
