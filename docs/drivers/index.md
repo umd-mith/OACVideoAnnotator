@@ -75,19 +75,23 @@ Each driver binding object returned by the `bindPlayer` driver method must imple
 Two events are expected as well: `onResize`, and `onPlayheadUpdate`. These event handlers are instantiated automatically
 if the `bindPLayer` driver method uses the following CoffeeScript template:
 
-    driver.bindPlayer = (domObj) ->
-      OAC.Client.StreamingVideo.Player.DriverBinding.initInstance (that) ->
-        # implement methods here as properties of `that`
-        that.getCoordinates = -> ...
+{% highlight coffeescript %}
+driver.bindPlayer = (domObj) ->
+  OAC.Client.StreamingVideo.Player.DriverBinding.initInstance (that) ->
+    # implement methods here as properties of `that`
+    that.getCoordinates = -> ...
+{% endhighlight %}
 
 In JavaScript, this would be
 
-    driver.bindPlayer = function(domObj) {
-      return OAC.Client.StreamingVideo.Player.DriverBinding.initInstance(function(that) {
-        // implement methods here as properties of `that`
-        that.getCoordinates = function() { ... };
-      });
-    };
+{% highlight js %}
+driver.bindPlayer = function(domObj) {
+  return OAC.Client.StreamingVideo.Player.DriverBinding.initInstance(function(that) {
+    // implement methods here as properties of `that`
+    that.getCoordinates = function() { ... };
+  });
+};
+{% endhighlight %}
 
 ### getCoordinates()
 
