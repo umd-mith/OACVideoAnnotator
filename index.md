@@ -19,7 +19,8 @@ video tags. We welcome drivers for other video players.
 ### Contributing to Video Annotator
 
 The easiest way to contribute to Video Annotator is to fork the github repository and create a pull request once
-you have implemented and tested your changes. We recommend that you join the mith-dev Google group and discuss
+you have implemented and tested your changes. We recommend that you join 
+[the mith-dev Google group](https://groups.google.com/d/forum/mith-dev) and discuss
 proposed changes to get feedback on their design and to make sure they fit in with the overall roadmap for
 Video Annotator.
 

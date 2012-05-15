@@ -2,6 +2,11 @@
 layout: docs
 title: Downloading Video Annotator
 ---
+# Downloading Video Annotator
+
+* auto-generated TOC:
+{:toc}
+
 ## About the Code
 
 Video Annotator is written in [CoffeeScript](http://coffeescript.org/) to make it more readable.
