@@ -37,15 +37,16 @@ This function is useful for attaching Video Annotator instances to video players
 [demo](/OACVideoAnnotator/demo.html), the application instance is associated with the player binding object
 and then run:
 
+{% highlight js %}
+OAC.Client.StreamingVideo.Player.onNewPlayer(function(playerobj) {
 
-    OAC.Client.StreamingVideo.Player.onNewPlayer(function(playerobj) {
+  var app = OAC.Client.StreamingVideo.Demo.Application.initInstance({
+    player: playerobj
+  });
 
-      var app = OAC.Client.StreamingVideo.Demo.Application.initInstance({
-        player: playerobj
-      });
-
-      app.run();
-    });
+  app.run();
+});
+{% endhighlight %}
 
 ### player(id)
 
