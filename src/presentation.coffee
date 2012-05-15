@@ -1,9 +1,5 @@
 # # Presentations
 #
-#
-# Presentations for OAC:ASP Application
-# @author Grant Dickie, Jim Smith
-#
 
 # ## AnnotationList
 #
@@ -263,7 +259,8 @@ OAC.Client.StreamingVideo.namespace "Presentation", (Presentation) ->
 					superEventFocusChange id
 					if app.getCurrentMode() == 'Select'
 						boundingBoxComponent.attachToRendering that.getFocusedRendering()
-						canvasBinding.toBack()
+						if canvasBinding?
+							canvasBinding.toBack()
 				
 				# ### #initShapeLens
 				#
@@ -398,7 +395,8 @@ OAC.Client.StreamingVideo.namespace "Presentation", (Presentation) ->
 					lens.eventFocus = ->
 						focused = true
 						lens.setOpacity()
-						lens.shape.toFront()
+						if lens.shape?
+							lens.shape.toFront()
 
 					# #### #eventUnfocus
 					#
@@ -408,7 +406,8 @@ OAC.Client.StreamingVideo.namespace "Presentation", (Presentation) ->
 					lens.eventUnfocus = ->
 						focused = false
 						lens.setOpacity()
-						lens.shape.toBack()
+						if lens.shape?
+							lens.shape.toBack()
 
 					# #### #eventDelete
 					#
@@ -481,6 +480,8 @@ OAC.Client.StreamingVideo.namespace "Presentation", (Presentation) ->
 						if lens.shape?
 							lens.shape.remove()
 							lens.shape = null
+						if app.getActiveAnnotation() == itemId
+							app.setActiveAnnotation null
 
 					if cb?
 						cb lens
