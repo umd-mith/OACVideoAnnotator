@@ -2,6 +2,11 @@
 layout: docs
 title: How Video Annotator Works
 ---
+# How Video Annotator Works
+
+* auto-generated TOC:
+{:toc}
+
 Video Annotator is a developer's toolkit consisting of a number of [MITHgrid](/mithgrid/) components that you can use to add
 annotation capabilities to videos embedded in your web site. See [the demo](/OACVideoAnnotator/demo.html) for an example of
 the toolkit providing a simple annotation capability with an HTML 5 video tag.

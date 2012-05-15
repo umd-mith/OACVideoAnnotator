@@ -2,6 +2,11 @@
 layout: docs
 title: Events
 ---
+# Events
+
+* auto-generated TOC:
+{:toc}
+
 Video Annotator uses events to notify components of changes in data or application state. For example, the video driver will fire
 events notifying components about the progress of the video as it plays, allowing annotations to be brought in and out of view.
 
@@ -19,7 +24,7 @@ Static events are available from the namespace instead of an instance.
 
 Unless otherwise noted, events are multicast and not preventable.
 
-## OAC.Client.StreamingVideo
+## OAC.Client.StreamingVideo.Application
 
 In addition to the following events, instances have a data store (`app.dataStore.canvas`) and a data view
 (`app.dataView.currentAnnotations`) that have their own events (assuming the instance is held in `app`). 
@@ -38,20 +43,33 @@ See the MITHgrid documentation for
 
 ## OAC.Client.StreamingVideo.Component.ShapeCreateBox
 
+### Events
+
+#### onNewShape
+
 ## OAC.Client.StreamingVideo.Component.ShapeEditBox
 
 ### Events
+
+#### onDelete
+
+#### onFocus
 
 #### onMove
 
 #### onResize
 
+#### onUnfocus
 
-## OAC.Client.StreamingVideo.Controller.KeyboardListener
+## OAC.Client.StreamingVideo.Controller.CanvasClickController
 
 ### Binding Events
 
-#### onDelete
+#### onShapeStart
+
+#### onShapeDrag
+
+#### onShapeDone
 
 ## OAC.Client.StreamingVideo.Controller.Drag
 
@@ -79,21 +97,7 @@ See the MITHgrid documentation for
 
 #### onUpdate
 
-## OAC.Client.StreamingVideo.Controller.CanvasClickController
 
-### Binding Events
-
-#### onShapeStart
-
-#### onShapeDrag
-
-#### onShapeDone
-
-## OAC.Client.StreamingVideo.Controller.timeControl
-
-### Binding Events
-
-#### onUpdate
 
 ## OAC.Client.StreamingVideo.Player
 
