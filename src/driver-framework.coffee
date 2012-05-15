@@ -1,22 +1,18 @@
-
+# # Player
+#
+# The Video Annotator provides a central video player registry. Video player drivers register a set of callbacks
+# that are used to discover available video players and bind them to a MITHgrid-based object that provides a
+# standard API for managing the player.
+#
+# The various functions that make up the registry are static functions: they aren't methods on a particular
+# object instance.
+#
 OAC.Client.StreamingVideo.namespace "Player", (exports) ->
-	# # Players
-	#
-	# Main class for OAC player driver framework. It manages the relation between the available players and their OAC
-	# drivers for the current page. This is a singleton, so no initInstance or other constructor.
-	#
 
-	# Private variable: players
-	#
-	# The players array. DOM objects and drivers of drivers are stored here.
 	players = []
-
-	# Private variable: callbacks
-	#
-	# The callbacks array. Functions called when new players are configured are stored here.
 	callbacks = []
 
-	# ### #player
+	# ## player
 	#
 	# Returns the DOM object for a certain player loaded on the page.
    	#
@@ -30,16 +26,15 @@ OAC.Client.StreamingVideo.namespace "Player", (exports) ->
 	#
 	# Examples:
 	#
-	# oacController.player().pause()
-	#
-	# oacController.player(1).play()
+	#     OAC.Client.StreamingVideo.Player.player().pause()
+	#     OAC.Client.StreamingVideo.Player.player(1).play()
 	#
 	exports.player = (playerId) ->
 		if !playerId?
 			playerId = 0
 		players[playerId]
 
-	# ### #onNewPlayer
+	# ## onNewPlayer
 	#
 	# Used by applications making use of the PlayerController to discover configured players.
 	#
@@ -51,42 +46,57 @@ OAC.Client.StreamingVideo.namespace "Player", (exports) ->
 	#
 	# Examples:
 	#
-	# oacController.onNewPlayer(function(player) {
-	#   -- do something with player
-	# });
+	#     OAC.Client.StreamingVideo.Player.onNewPlayer(function(player) {
+	#       -- do something with player
+	#     });
 	#
 	exports.onNewPlayer = (callback) ->
 		for player in players
 			callback(player)
 		callbacks.push callback
 
-	# ### #register
+	# ## register
 	#
 	# Used by drivers to let this object know which drivers are avalable and to initialize them.
 	#
 	# Parameters:
 	#
-	# * driverclass - The JavaScript class (function object) implementing the driver.
+	# * driverObjectCB - callback function that defines the functions needed to access driver objects
 	#
-	# Returns:
-	#
-	# A player's DOM object.
+	# Returns: Nothing.
 	#
 	# Examples:
 	#
-	# oacController.register(OACDummyPlayerDrv);
+	#     OAC.Client.StreamingVideo.Player.register(function(driverObject) {
+	#       driverObject.getAvailablePlayers = function() { ... };
+	#       driverObject.bindPlayer = function(player) { ... };
+	#     });
 	#
-	exports.register = (driverObjectCB) ->
-		driverObject = {}
-		driverObjectCB driverObject
-		ps = driverObject.getAvailablePlayers()
-		for player in ps
-			$(player).data('driver', driverObject)
-			p = driverObject.bindPlayer player
-			players.push p
-			for cb in callbacks
-				cb.call({}, p)
+	driverCallbacks = []
 	
+	exports.register = (driverObjectCB) ->
+		driverCallbacks.push driverObjectCB
+	
+	$(document).ready ->
+		exports.register = (driverObjectCB) ->
+			driverObject = {}
+			driverObjectCB driverObject
+			ps = driverObject.getAvailablePlayers()
+			for player in ps
+				$(player).data('driver', driverObject)
+				p = driverObject.bindPlayer player
+				players.push p
+				for cb in callbacks
+					cb.call({}, p)
+		
+		for cb in driverCallbacks
+			exports.register cb
+	
+	# # Player.DriverBinding
+	#
+	# This is the super class for player driver bindings. Only used in the #bindPlayer() method defined when
+	# a driver is registered.
+	#
 	exports.namespace "DriverBinding", (db) ->
 		db.initInstance = (args...) ->
 			MITHGrid.initInstance "OAC.Client.StreamingVideo.Player.DriverBinding", args...

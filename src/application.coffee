@@ -664,9 +664,9 @@ OAC.Client.StreamingVideo.namespace "Application", (Application) ->
 					# 
 					renderAsSVG: (model, itemId) ->
 						item = model.getItem itemId
-						"<elli x='#{item.x[0]}' y='#{item.y[0]}' width='#{item.w[0]}' height='#{item.h[0]}' />"
+						"<ellipse x='#{item.x[0]}' y='#{item.y[0]}' width='#{item.w[0]}' height='#{item.h[0]}' />"
 					
-					rootSVGElement: ["elli"]
+					rootSVGElement: ["ellipse"]
 				
 					extractFromSVG: (svg) ->
 						info = {}
