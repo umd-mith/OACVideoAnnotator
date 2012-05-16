@@ -231,29 +231,24 @@
       });
     });
     OAC.Client.StreamingVideo.namespace("Player", function(exports) {
-      var callbacks, driverCallbacks, players;
+      var driverCallbacks, players;
       players = [];
-      callbacks = [];
       exports.player = function(playerId) {
         if (!(playerId != null)) playerId = 0;
         return players[playerId];
       };
-      exports.onNewPlayer = function(callback) {
-        var player, _i, _len;
-        for (_i = 0, _len = players.length; _i < _len; _i++) {
-          player = players[_i];
-          callback(player);
-        }
-        return callbacks.push(callback);
-      };
+      exports.onNewPlayer = MITHGrid.initEventFirer(false, false, true);
       driverCallbacks = [];
+      exports.onNewPlayer.addListener(function(p) {
+        return players.push(p);
+      });
       exports.register = function(driverObjectCB) {
         return driverCallbacks.push(driverObjectCB);
       };
       $(document).ready(function() {
         var cb, _i, _len, _results;
         exports.register = function(driverObjectCB) {
-          var cb, driverObject, p, player, ps, _i, _len, _results;
+          var driverObject, player, ps, _i, _len, _results;
           driverObject = {};
           driverObjectCB(driverObject);
           ps = driverObject.getAvailablePlayers();
@@ -261,17 +256,7 @@
           for (_i = 0, _len = ps.length; _i < _len; _i++) {
             player = ps[_i];
             $(player).data('driver', driverObject);
-            p = driverObject.bindPlayer(player);
-            players.push(p);
-            _results.push((function() {
-              var _j, _len2, _results2;
-              _results2 = [];
-              for (_j = 0, _len2 = callbacks.length; _j < _len2; _j++) {
-                cb = callbacks[_j];
-                _results2.push(cb.call({}, p));
-              }
-              return _results2;
-            })());
+            _results.push(exports.onNewPlayer.fire(driverObject.bindPlayer(player)));
           }
           return _results;
         };

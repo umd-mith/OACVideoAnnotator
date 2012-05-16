@@ -21,21 +21,19 @@ title: Video Annotator Demo
 </div>
 
 <script type="text/javascript">//<!--
-$(document).ready(function() {
-  OAC.Client.StreamingVideo.Player.onNewPlayer(function(playerobj) {
-    /*
-     * We begin by creating an instance of the Video Annotator application.
-     * This requires the player object passed in by the onNewPlayer function above.
-     */
-    var app = OAC.Client.StreamingVideo.Demo.Application.initInstance({
-      player: playerobj
-    });
-
-    /*
-     * Running the application causes all of the DOM elements, presentations, and other components to be
-     * instantiated.
-     */
-    app.run();
+OAC.Client.StreamingVideo.Player.onNewPlayer.addListener(function(playerobj) {
+  /*
+   * We begin by creating an instance of the Video Annotator application.
+   * This requires the player object passed in by the onNewPlayer function above.
+   */
+  var app = OAC.Client.StreamingVideo.Demo.Application.initInstance({
+    player: playerobj
   });
+
+  /*
+   * Running the application causes all of the DOM elements, presentations, and other components to be
+   * instantiated.
+   */
+  app.run();
 });
 // --></script>
