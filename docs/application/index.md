@@ -13,6 +13,42 @@ There is a single Video Annotator application that should be sub-classed to add 
 behaviors that you need in your particular use case. See [the demo](/OACVideoAnnotator/demo.html) for an
 example of how this can be done.
 
+## Methods
+
+Each application instance has the following methods for managing the application's configuration or set of annotations.
+
+### Shapes
+
+The Video Annotator has a richer API for managing shapes than bodies because its focus is on the video. 
+
+#### addShapeType
+
+#### initShapeLens
+
+This method is exported from the SVG-based presentation once the presentation is set up, which happens after the `run` method
+is run.
+
+### Bodies
+
+#### addBodyType
+
+Because the video annotation application doesn't manage the presentation of annotation bodies, the `addBodyType` only
+manages information needed to import or export annotation bodies using the Open Annotation data model.
+
+### Data Import/Export
+
+#### insertAnnotation
+
+#### importData
+
+#### exportData
+
+### Miscellaneous
+
+#### getPlayer
+
+#### getCurrentModeClass
+
 ## Data Store
 
 Each application instance has a data store available as its `dataStores.canvas` property. See

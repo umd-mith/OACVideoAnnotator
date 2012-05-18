@@ -8,6 +8,7 @@ title: Main Page
 
 * [Downloading Video Annotator](/OACVideoAnnotator/docs/downloading.html)
 * [How Video Annotator Works](/OACVideoAnnotator/docs/how-videoanno-works.html)
+* [Building Your Own Annotation Application](/OACVideoAnnotator/docs/building-your-own-annotation-application.html)
 * [Frequently Asked Questions](/OACVideoAnnotator/docs/faq.html)
 
 ## Video Annotator API Reference
