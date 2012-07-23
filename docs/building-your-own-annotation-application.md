@@ -5,8 +5,11 @@ title: Building Your Own Annotation Application
 # Building Your Own Annotation Application
 
 Building your own annotation application is a simple matter of configuring the proper components and adding any
-application-specific user interface elements. We'll assume that you are using [CoffeeScript](http://coffeescript.org/), but
+application-specific user interface elements. We'll assume that you are using [CoffeeScript](http://coffeescript.org/) in a
+standalone file that will be compiled to JavaScript and then included in your web page, but
 everything translates easily to JavaScript.
+
+## Getting Started
 
 The first thing you need to do is create a function that will return an instance of your annotation application. The easiest
 way to do this is to declare a namespace that you will use for all of your MITHgrid-style components:
@@ -15,7 +18,8 @@ way to do this is to declare a namespace that you will use for all of your MITHg
 MITHGrid.globalnamespace 'My.AnnotationApp'
 
 My.AnnotationApp.namespace 'Application', (Application) ->
-  # Application.foo will show up as My.AnnotationApp.Application.foo outside this callback
+  # Application.foo will show up as My.AnnotationApp.Application.foo
+  # outside this callback
 {% endhighlight %}
 
 This does two things. It declares your own namespace that you can use to hold everything else you need in building your
@@ -67,3 +71,21 @@ If we have some way of loading annotations from a server, then we can import the
 RDF/JSON data to the `importData` method of our application. We can pull out an RDF/JSON representation of the
 annotations by calling the `exportData` method.
 
+## Adding Mode Buttons
+
+## Adding a Shape Type
+
+## Showing the Annotation Body
+
+## Full Listing
+
+{% highlight coffeescript %}
+MITHGrid.globalnamespace 'My.AnnotationApp'
+
+My.AnnotationApp.namespace 'Application', (Application) ->
+  # Application.foo will show up as My.AnnotationApp.Application.foo
+  # outside this callback
+  Application.initInstance = (args...) ->
+    MITHGrid.Application.initInstance "My.AnnotationApp.Application", args..., (that, container) ->
+      options = that.options
+{% endhighlight %}
