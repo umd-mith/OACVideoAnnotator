@@ -181,9 +181,10 @@ $(document).ready ->
 		
 		deepEqual obj.npt_start, [30], "Anno starts at the right time"
 		deepEqual obj.npt_end, [45], "Anno ends at the right time"
-				
+			
 		# going to test in ever-increasing time segments
 		#
+		oldEventCurrentTimeChange = rendering.eventCurrentTimeChange
 		checkIncreasing = (cb) ->
 			# opacity should be greater after each time update
 			checkRendering = (t, cb) ->
@@ -191,21 +192,23 @@ $(document).ready ->
 				o = (5 - 30 + t) / 5.0
 				if o < 0
 					o = 0
-				oldEventCurrentTimeChange = rendering.eventCurrentTimeChange
-				rendering.eventCurrentTimeChange = (n) ->
-					oldEventCurrentTimeChange(n)
-					start()
-					equal rendering.getOpacity(), o, "opacity is now #{o} for #{t}"
-					rendering.eventCurrentTimeChange = oldEventCurrentTimeChange
-					cb()
+				syncer = MITHGrid.initSynchronizer cb
 				
+				rendering.eventCurrentTimeChange = (n) ->
+					start()
+					oldEventCurrentTimeChange(n)
+					equal rendering.getOpacity(), o, "opacity is now #{o} for #{t}"
+					syncer.decrement()
+					
 				stop()
+				syncer.increment()
 				app.setCurrentTime t
-		
-			checkRendering 20, ->
-				checkRendering 26, ->
-					checkRendering 27, ->
-						checkRendering 28, ->
+				syncer.done()
+
+			checkRendering 26, ->
+				checkRendering 27, ->
+					checkRendering 28, ->
+						checkRendering 29, ->
 							checkRendering 30, cb
 
 		checkDecreasing = (cb) ->
@@ -217,16 +220,17 @@ $(document).ready ->
 					o = 0
 				if o > 1
 					o = 1
-				oldEventCurrentTimeChange = rendering.eventCurrentTimeChange
+				syncer = MITHGrid.initSynchronizer cb
 				rendering.eventCurrentTimeChange = (n) ->
 					oldEventCurrentTimeChange(n)
 					start()
 					equal rendering.getOpacity(), o, "opacity is now #{o} for #{t}"
-					rendering.eventCurrentTimeChange = oldEventCurrentTimeChange
-					cb()
+					syncer.decrement()
 
 				stop()
+				syncer.increment()
 				app.setCurrentTime t
+				syncer.done()
 
 			checkRendering 45, ->
 				checkRendering 47, ->
@@ -244,8 +248,8 @@ $(document).ready ->
 				app.events.onActiveAnnotationChange.addListener(changeListen)
 				obj = app.dataStore.canvas.getItem('anno1')
 				app.setActiveAnnotation('anno1');
-				rendering = app.presentation.raphsvg.renderingFor('anno1')
-				equal rendering.getOpacity(), 1.0, "Opacity now set to 1"
+				#rendering = app.presentation.raphsvg.renderingFor('anno1')
+				#equal rendering.getOpacity(), 1.0, "Opacity now set to 1"
 
 				app.events.onActiveAnnotationChange.removeListener(changeListen)
 
@@ -277,14 +281,16 @@ $(document).ready ->
 					'y' : 3
 					'width' : 100
 					'height' : 100
+					'npt_start': 19
+					'npt_end': 21
 				}
-				id = app.insertShape(coords)
+				id = app.insertAnnotation(coords)
 				rendering = app.presentation.raphsvg.renderingFor id
 				obj = app.dataStore.canvas.getItem id
 				ok rendering?, "Rendering of inserted shape available"
 				equal rendering.getOpacity(), 1, "Opacity is 1"
-				equal obj.npt_start[0], 15, "npt_start is 15"
-				equal obj.npt_end[0], 25, "npt_end is 25"
+				equal obj.npt_start[0], 19, "npt_start is 19"
+				equal obj.npt_end[0], 21, "npt_end is 21"
 
 				# advancing time frame -- seeing if shape stays as expected
 				app.setCurrentTime(22)

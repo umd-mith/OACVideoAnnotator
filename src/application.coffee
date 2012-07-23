@@ -120,7 +120,7 @@ OAC.Client.StreamingVideo.namespace "Application", (Application) ->
 			# Parameters:
 			#
 			# * type - the internal shape name
-			# * args - an object containing the following items:
+			# * args - an object containing the following properties:
 			#		* calc - an optional callback function for creating data for the new shape being added to the data store
 			#		* lens - the lens rendering function for rendering the shape on the SVG overlay
 			#		* renderAsSVG - callback that will return the SVG fragment representing the shape
@@ -131,10 +131,27 @@ OAC.Client.StreamingVideo.namespace "Application", (Application) ->
 			# Returns: Nothing.
 			#
 			app.addShapeType = (type, args) ->
-				shapeTypes[type] = args
-				app.presentation.raphsvg.addLens(type, args.lens)
+				app.ready ->
+					shapeTypes[type] = args
+					app.presentation.raphsvg.addLens(type, args.lens)
+			
+			# ### #addBodyType
+			#
+			# Adds a body type. This consists of a set of callbacks for creating an item and handling import/export.
+			#
+			# Parameters:
+			#
+			# * type - the internal body type name
+			# * args - an object containing the following properties:
+			# 		* renderAsOA - callback that will construct the Open Annotation body from the item
+			# 		* extractFromOA - callback that will construct the item from the Open Annotation body
+			#
+			# Returns: Nothing.
+			#
+			app.addBodyType = (type, args) ->
+				bodyTypes[type] = args
 
-			# ### #insertShape
+			# ### #insertAnnotation
 			#
 			# Inserts a new annotation into the data store using the passed coordinates. An empty text annotation body
 			# is added. The application CurrentMode variable determines the shape. The default time span is 5 seconds 
@@ -153,10 +170,10 @@ OAC.Client.StreamingVideo.namespace "Application", (Application) ->
 			#
 			
 	
-			app.insertShape = (coords) ->
+			app.insertAnnotation = (coords) ->
 				npt_start = if coords.npt_start? then coords.npt_start else parseFloat(app.getCurrentTime()) - 5
 				npt_end = if coords.npt_end? then coords.npt_end else parseFloat(app.getCurrentTime()) + 5
-				curMode = app.getCurrentMode()
+				curMode = if coords.shapeType? then coords.shapeType else app.getCurrentMode()
 
 				if shapeTypes[curMode]?
 					shape = if shapeTypes[curMode].calc? then shapeTypes[curMode].calc(coords) else {}
@@ -210,8 +227,8 @@ OAC.Client.StreamingVideo.namespace "Application", (Application) ->
 			# routines is ignored.
 			#
 			NS = 
-				OA: "http://www.w3.org/ns/openannotation/core"
-				OAX: "http://www.w3.org/ns/openannotation/extensions"
+				OA: "http://www.w3.org/ns/openannotation/core/"
+				OAX: "http://www.w3.org/ns/openannotation/extensions/"
 				RDF: "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 				CNT: "http://www.w3.org/2008/content#"
 				DC: "http://purl.org/dc/elements/1.1/"
