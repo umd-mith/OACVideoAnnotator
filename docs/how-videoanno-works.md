@@ -45,3 +45,4 @@ Video Annotator uses a simple HTML presentation for the annotation bodies.
 Video Annotator uses video player drivers to abstract the control of the video player. The library comes with an HTML 5
 video driver, but the interface is simple. All that is needed to support a new video player is an appropriate driver.
 Most of the time, you never need to think about which driver is being used.
+
