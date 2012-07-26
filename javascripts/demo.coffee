@@ -229,18 +229,16 @@ OAC.Client.StreamingVideo.namespace "Demo", (Demo) ->
 	#
 	# Typical usage of this would be similar to what we do in the [demo.html](/OACVideoAnnotator/demo.html) page:
 	#
-	#     $(document).ready(function() {
-	#       OAC.Client.StreamingVideo.Player.onNewPlayer(
-	#         function(playerobj) {
-	#           var app = 
-	#             OAC.Client.StreamingVideo.Demo.Application.initInstance({
-	#               player: playerobj
-	#             });
+	#     OAC.Client.StreamingVideo.Player.onNewPlayer.addListener(
+	#       function(playerobj) {
+	#         var app = 
+	#           OAC.Client.StreamingVideo.Demo.Application.initInstance({
+	#             player: playerobj
+	#           });
 	#  
-	#           app.run();
-	#         }
-	#       );
-	#     });
+	#         app.run();
+	#       }
+	#     );
 	#
 	Demo.namespace "Application", (Application) ->
 		#

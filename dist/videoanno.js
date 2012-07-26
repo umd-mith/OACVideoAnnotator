@@ -5,7 +5,7 @@
 # The **OAC Video Annotation Tool** is a MITHGrid application providing annotation capabilities for streaming
 # video embedded in a web page. 
 #  
-# Date: Mon May 14 08:30:13 2012 -0400
+# Date: Mon Jul 23 09:22:26 2012 -0400
 #  
 # Educational Community License, Version 2.0
 # 
@@ -39,17 +39,11 @@
     OAC.Client.StreamingVideo.namespace('Controller', function(Controller) {
       var relativeCoords;
       relativeCoords = function(currentElement, event) {
-        var totalOffsetX, totalOffsetY;
-        totalOffsetX = 0;
-        totalOffsetY = 0;
-        while (currentElement != null) {
-          totalOffsetX += currentElement.offsetLeft;
-          totalOffsetY += currentElement.offsetTop;
-          currentElement = currentElement.offsetParent;
-        }
+        var pos;
+        pos = $(currentElement).offset();
         return {
-          x: event.pageX - totalOffsetX,
-          y: event.pageY - totalOffsetY
+          x: event.pageX - pos.left,
+          y: event.pageY - pos.top
         };
       };
       Controller.namespace("Drag", function(Drag) {
@@ -231,57 +225,70 @@
       });
     });
     OAC.Client.StreamingVideo.namespace("Player", function(exports) {
-      var callbacks, driverCallbacks, players;
+      var driverCallbacks, drivers, pendingPlayers, players;
       players = [];
-      callbacks = [];
       exports.player = function(playerId) {
         if (!(playerId != null)) playerId = 0;
         return players[playerId];
       };
-      exports.onNewPlayer = function(callback) {
-        var player, _i, _len;
-        for (_i = 0, _len = players.length; _i < _len; _i++) {
-          player = players[_i];
-          callback(player);
-        }
-        return callbacks.push(callback);
-      };
+      exports.onNewPlayer = MITHGrid.initEventFirer(false, false, true);
       driverCallbacks = [];
-      exports.register = function(driverObjectCB) {
-        return driverCallbacks.push(driverObjectCB);
+      pendingPlayers = {};
+      drivers = {};
+      exports.onNewPlayer.addListener(function(p) {
+        return players.push(p);
+      });
+      exports.register = function(driverName, driverObjectCB) {
+        return driverCallbacks.push([driverName, driverObjectCB]);
       };
       $(document).ready(function() {
-        var cb, _i, _len, _results;
-        exports.register = function(driverObjectCB) {
-          var cb, driverObject, p, player, ps, _i, _len, _results;
+        var cb, _i, _len;
+        exports.register = function(driverName, driverObjectCB) {
+          var bp, driverObject, player, _i, _j, _len, _len2, _ref, _ref2, _results;
           driverObject = {};
           driverObjectCB(driverObject);
-          ps = driverObject.getAvailablePlayers();
-          _results = [];
-          for (_i = 0, _len = ps.length; _i < _len; _i++) {
-            player = ps[_i];
-            $(player).data('driver', driverObject);
-            p = driverObject.bindPlayer(player);
-            players.push(p);
-            _results.push((function() {
-              var _j, _len2, _results2;
-              _results2 = [];
-              for (_j = 0, _len2 = callbacks.length; _j < _len2; _j++) {
-                cb = callbacks[_j];
-                _results2.push(cb.call({}, p));
+          drivers[driverName] = {
+            bindPlayer: function(player) {
+              if ($(player).data('driver') !== driverObject) {
+                $(player).data('driver', driverObject);
+                return exports.onNewPlayer.fire(driverObject.bindPlayer(player));
               }
-              return _results2;
-            })());
+            }
+          };
+          bp = drivers[driverName].bindPlayer;
+          if (pendingPlayers[driverName] != null) {
+            _ref = pendingPlayers[driverName];
+            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+              player = _ref[_i];
+              bp(player);
+            }
+            delete pendingPlayers[driverName];
+          }
+          _ref2 = driverObject.getAvailablePlayers();
+          _results = [];
+          for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
+            player = _ref2[_j];
+            _results.push(bp(player));
           }
           return _results;
         };
-        _results = [];
         for (_i = 0, _len = driverCallbacks.length; _i < _len; _i++) {
           cb = driverCallbacks[_i];
-          _results.push(exports.register(cb));
+          exports.register(cb[0], cb[1]);
         }
-        return _results;
+        return driverCallbacks = null;
       });
+      exports.driver = function(driverName) {
+        return drivers[driverName];
+      };
+      exports.addPlayer = function(driverName, player) {
+        if (drivers[driverName] != null) {
+          return drivers[driverName].bindPlayer(player);
+        } else {
+          if (pendingPlayers[driverName] == null) pendingPlayers[driverName] = [];
+          return pendingPlayers[driverName].push(player);
+        }
+      };
       return exports.namespace("DriverBinding", function(db) {
         return db.initInstance = function() {
           var args;
@@ -290,7 +297,7 @@
         };
       });
     });
-    OAC.Client.StreamingVideo.Player.register(function(driver) {
+    OAC.Client.StreamingVideo.Player.register('Dummy', function(driver) {
       var initDummyPlayer;
       driver.getAvailablePlayers = function() {
         var index, p, player, _i, _len, _ref, _results;
@@ -420,7 +427,7 @@
         return that;
       };
     });
-    OAC.Client.StreamingVideo.Player.register(function(driver) {
+    OAC.Client.StreamingVideo.Player.register('HTML5', function(driver) {
       driver.getAvailablePlayers = function() {
         return $('video');
       };
@@ -429,17 +436,19 @@
       };
       return driver.bindPlayer = function(domObj) {
         return OAC.Client.StreamingVideo.Player.DriverBinding.initInstance(function(that) {
-          var lastTime;
+          var ignoreNextPlayheadUpdate, lastTime;
           $(domObj).bind('loadedmetadata', function() {
             return that.events.onResize.fire(that.getSize());
           });
           lastTime = 0;
+          ignoreNextPlayheadUpdate = false;
           $(domObj).bind('timeupdate', function() {
             var now;
             now = domObj.currentTime;
-            if (Math.abs(lastTime - now) >= 0.2 || now < 0.1) {
+            if (Math.abs(lastTime - now) >= 0.1 || now < 0.1) {
               lastTime = now;
-              return that.events.onPlayheadUpdate.fire(domObj.currentTime);
+              ignoreNextPlayheadUpdate = true;
+              return that.events.onPlayheadUpdate.fire(now);
             }
           });
           that.getCoordinates = function() {
@@ -461,7 +470,11 @@
             return domObj.currentTime;
           };
           return that.setPlayhead = function(n) {
-            return domObj.currentTime = parseFloat(n);
+            if (ignoreNextPlayheadUpdate) {
+              return ignoreNextPlayheadUpdate = false;
+            } else {
+              return domObj.currentTime = parseFloat(n);
+            }
           };
         });
       };
@@ -1005,7 +1018,8 @@
               var shape;
               shape = shapeCreateBoxComponent.completeShape(coords);
               if (shape.height > 1 && shape.width > 1) {
-                return app.insertShape(shape);
+                shape.shapeType = app.getCurrentMode();
+                return app.insertAnnotation(shape);
               }
             });
             app.events.onCurrentTimeChange.addListener(function(npt) {
@@ -1216,14 +1230,19 @@
             }
           };
           app.addShapeType = function(type, args) {
-            shapeTypes[type] = args;
-            return app.presentation.raphsvg.addLens(type, args.lens);
+            return app.ready(function() {
+              shapeTypes[type] = args;
+              return app.presentation.raphsvg.addLens(type, args.lens);
+            });
           };
-          app.insertShape = function(coords) {
+          app.addBodyType = function(type, args) {
+            return bodyTypes[type] = args;
+          };
+          app.insertAnnotation = function(coords) {
             var curMode, npt_end, npt_start, shape;
             npt_start = coords.npt_start != null ? coords.npt_start : parseFloat(app.getCurrentTime()) - 5;
             npt_end = coords.npt_end != null ? coords.npt_end : parseFloat(app.getCurrentTime()) + 5;
-            curMode = app.getCurrentMode();
+            curMode = coords.shapeType != null ? coords.shapeType : app.getCurrentMode();
             if (shapeTypes[curMode] != null) {
               shape = shapeTypes[curMode].calc != null ? shapeTypes[curMode].calc(coords) : {};
               shapeAnnotationId = uuid();
@@ -1247,8 +1266,8 @@
             }
           };
           NS = {
-            OA: "http://www.w3.org/ns/openannotation/core",
-            OAX: "http://www.w3.org/ns/openannotation/extensions",
+            OA: "http://www.w3.org/ns/openannotation/core/",
+            OAX: "http://www.w3.org/ns/openannotation/extensions/",
             RDF: "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
             CNT: "http://www.w3.org/2008/content#",
             DC: "http://purl.org/dc/elements/1.1/",
