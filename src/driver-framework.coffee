@@ -10,7 +10,6 @@
 OAC.Client.StreamingVideo.namespace "Player", (exports) ->
 
 	players = []
-	callbacks = []
 
 	# ## player
 	#
@@ -36,24 +35,15 @@ OAC.Client.StreamingVideo.namespace "Player", (exports) ->
 
 	# ## onNewPlayer
 	#
-	# Used by applications making use of the PlayerController to discover configured players.
-	#
-	# Parameters:
-	#
-	# * callback - A function to be called with the player object.
-	#
-	# Returns: Nothing.
+	# This event is used by applications making use of the PlayerController to discover configured players.
 	#
 	# Examples:
 	#
-	#     OAC.Client.StreamingVideo.Player.onNewPlayer(function(player) {
+	#     OAC.Client.StreamingVideo.Player.onNewPlayer.addListener(function(player) {
 	#       -- do something with player
 	#     });
 	#
-	exports.onNewPlayer = (callback) ->
-		for player in players
-			callback(player)
-		callbacks.push callback
+	exports.onNewPlayer = MITHGrid.initEventFirer(false, false, true)
 
 	# ## register
 	#
@@ -73,25 +63,48 @@ OAC.Client.StreamingVideo.namespace "Player", (exports) ->
 	#     });
 	#
 	driverCallbacks = []
+	pendingPlayers = {}
+	drivers = {}
 	
-	exports.register = (driverObjectCB) ->
-		driverCallbacks.push driverObjectCB
+	exports.onNewPlayer.addListener (p) ->
+		players.push p
+	
+	exports.register = (driverName, driverObjectCB) ->
+		driverCallbacks.push [ driverName, driverObjectCB ]
 	
 	$(document).ready ->
-		exports.register = (driverObjectCB) ->
+		exports.register = (driverName, driverObjectCB) ->
 			driverObject = {}
 			driverObjectCB driverObject
-			ps = driverObject.getAvailablePlayers()
-			for player in ps
-				$(player).data('driver', driverObject)
-				p = driverObject.bindPlayer player
-				players.push p
-				for cb in callbacks
-					cb.call({}, p)
 		
+			drivers[driverName] =
+				bindPlayer: (player) ->
+					if $(player).data('driver') != driverObject
+						$(player).data('driver', driverObject)
+						exports.onNewPlayer.fire driverObject.bindPlayer player
+			bp = drivers[driverName].bindPlayer
+			
+			if pendingPlayers[driverName]?
+				for player in pendingPlayers[driverName]
+					bp player
+				delete pendingPlayers[driverName]
+				
+			for player in driverObject.getAvailablePlayers()
+				bp player
+				
 		for cb in driverCallbacks
-			exports.register cb
+			exports.register cb[0], cb[1]
+		driverCallbacks = null
 	
+	exports.driver = (driverName) -> drivers[driverName]
+
+	exports.addPlayer = (driverName, player) ->
+		if drivers[driverName]?
+			drivers[driverName].bindPlayer player
+		else
+			pendingPlayers[driverName] ?= []
+			pendingPlayers[driverName].push player
+
 	# # Player.DriverBinding
 	#
 	# This is the super class for player driver bindings. Only used in the #bindPlayer() method defined when

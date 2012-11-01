@@ -25,7 +25,7 @@ $(document).ready ->
 		ok $.isFunction(app.getCurrentModeClass), "getCurrentModeClass"
 		
 		ok $.isFunction(app.addShapeType), "addShapeType"
-		ok $.isFunction(app.insertShape), "insertShape"
+		ok $.isFunction(app.insertAnnotation), "insertAnnotation"
 		ok $.isFunction(app.importData), "importData"
 		ok $.isFunction(app.exportData), "exportData"
 		
@@ -70,7 +70,7 @@ $(document).ready ->
 		
 		equal app.dataStore.canvas.items().length, 0, "Right number of items in data store"
 		
-		app.insertShape
+		app.insertAnnotation
 			x: 100
 			y: 100
 			width: 50
@@ -96,7 +96,7 @@ $(document).ready ->
 		app.setCurrentMode 'Rectangle'
 		
 		# add another annotation
-		app.insertShape
+		app.insertAnnotation
 			x:200
 			y:200
 			width:25

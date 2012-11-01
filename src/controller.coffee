@@ -15,16 +15,10 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
 	# The coordinates of the event relative to the top-left of the currentElement.
 	#
 	relativeCoords = (currentElement, event) ->
-		totalOffsetX = 0
-		totalOffsetY = 0
+		pos = $(currentElement).offset();
 		
-		while currentElement?
-			totalOffsetX += currentElement.offsetLeft
-			totalOffsetY += currentElement.offsetTop
-			currentElement = currentElement.offsetParent
-		
-		x: event.pageX - totalOffsetX
-		y: event.pageY - totalOffsetY
+		x: event.pageX - pos.left
+		y: event.pageY - pos.top
 	
 	#
 	# ## Drag
@@ -40,6 +34,8 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
 
 					dstart = (x, y, e) ->
 						pos = relativeCoords el.node, e
+						pos.x += el.attr('x')
+						pos.y += el.attr('y')
 						binding.events.onFocus.fire pos.x, pos.y
 					dend = ->
 						binding.events.onUnfocus.fire()

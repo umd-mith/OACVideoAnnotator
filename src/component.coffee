@@ -171,14 +171,14 @@ OAC.Client.StreamingVideo.namespace "Component", (Component) ->
 						bry: (extents.y) + (extents.height / 2)
 						dx: 0
 						dy: 0
-						
+					
 					calcHandles attrs
 	
 				# ### drawHandles (private)
 				#
 				# Draws the handles defined in dirs as SVG rectangles and draws the SVG bounding box.
 				#
-				drawHandles = ->		
+				drawHandles = ->
 					if not handleSet?
 
 						handleSet = paper.set()
@@ -256,7 +256,7 @@ OAC.Client.StreamingVideo.namespace "Component", (Component) ->
 							handleBinding.events.onUpdate.addListener (dx, dy) ->
 								attrs.dx = dx
 								attrs.dy = dy
-								
+
 								calcHandles attrs
 								
 								svgBBox.attr
