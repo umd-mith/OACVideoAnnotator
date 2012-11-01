@@ -57,6 +57,8 @@
               dstart = function(x, y, e) {
                 var pos;
                 pos = relativeCoords(el.node, e);
+                pos.x += el.attr('x');
+                pos.y += el.attr('y');
                 return binding.events.onFocus.fire(pos.x, pos.y);
               };
               dend = function() {

@@ -12,8 +12,7 @@ standard API for managing the player.</p>
 object instance.</p>
 </td><td class="code"><div class="highlight"><pre><span class="nx">OAC</span><span class="p">.</span><span class="nx">Client</span><span class="p">.</span><span class="nx">StreamingVideo</span><span class="p">.</span><span class="nx">namespace</span> <span class="s">&quot;Player&quot;</span><span class="p">,</span> <span class="nf">(exports) -&gt;</span>
 
-  <span class="nv">players = </span><span class="p">[]</span>
-  <span class="nv">callbacks = </span><span class="p">[]</span></pre></div></td></tr><tr id="section-2"><td class="docs"><div class="pilwrap"><a href="#section-2" class="pilcrow">&#182;</a></div><h2>player</h2>
+  <span class="nv">players = </span><span class="p">[]</span></pre></div></td></tr><tr id="section-2"><td class="docs"><div class="pilwrap"><a href="#section-2" class="pilcrow">&#182;</a></div><h2>player</h2>
 
 <p>Returns the DOM object for a certain player loaded on the page.</p>
 
@@ -37,26 +36,15 @@ OAC.Client.StreamingVideo.Player.player(1).play()
       <span class="nv">playerId = </span><span class="mi">0</span>
     <span class="nx">players</span><span class="p">[</span><span class="nx">playerId</span><span class="p">]</span></pre></div></td></tr><tr id="section-3"><td class="docs"><div class="pilwrap"><a href="#section-3" class="pilcrow">&#182;</a></div><h2>onNewPlayer</h2>
 
-<p>Used by applications making use of the PlayerController to discover configured players.</p>
-
-<p>Parameters:</p>
-
-<ul>
-<li>callback - A function to be called with the player object.</li>
-</ul>
-
-<p>Returns: Nothing.</p>
+<p>This event is used by applications making use of the PlayerController to discover configured players.</p>
 
 <p>Examples:</p>
 
-<pre><code>OAC.Client.StreamingVideo.Player.onNewPlayer(function(player) {
+<pre><code>OAC.Client.StreamingVideo.Player.onNewPlayer.addListener(function(player) {
   -- do something with player
 });
 </code></pre>
-</td><td class="code"><div class="highlight"><pre>  <span class="nv">exports.onNewPlayer = </span><span class="nf">(callback) -&gt;</span>
-    <span class="k">for</span> <span class="nx">player</span> <span class="k">in</span> <span class="nx">players</span>
-      <span class="nx">callback</span><span class="p">(</span><span class="nx">player</span><span class="p">)</span>
-    <span class="nx">callbacks</span><span class="p">.</span><span class="nx">push</span> <span class="nx">callback</span></pre></div></td></tr><tr id="section-4"><td class="docs"><div class="pilwrap"><a href="#section-4" class="pilcrow">&#182;</a></div><h2>register</h2>
+</td><td class="code"><div class="highlight"><pre>  <span class="nv">exports.onNewPlayer = </span><span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">initEventFirer</span><span class="p">(</span><span class="kc">false</span><span class="p">,</span> <span class="kc">false</span><span class="p">,</span> <span class="kc">true</span><span class="p">)</span></pre></div></td></tr><tr id="section-4"><td class="docs"><div class="pilwrap"><a href="#section-4" class="pilcrow">&#182;</a></div><h2>register</h2>
 
 <p>Used by drivers to let this object know which drivers are avalable and to initialize them.</p>
 
@@ -76,25 +64,47 @@ OAC.Client.StreamingVideo.Player.player(1).play()
 });
 </code></pre>
 </td><td class="code"><div class="highlight"><pre>  <span class="nv">driverCallbacks = </span><span class="p">[]</span>
+  <span class="nv">pendingPlayers = </span><span class="p">{}</span>
+  <span class="nv">drivers = </span><span class="p">{}</span>
   
-  <span class="nv">exports.register = </span><span class="nf">(driverObjectCB) -&gt;</span>
-    <span class="nx">driverCallbacks</span><span class="p">.</span><span class="nx">push</span> <span class="nx">driverObjectCB</span>
+  <span class="nx">exports</span><span class="p">.</span><span class="nx">onNewPlayer</span><span class="p">.</span><span class="nx">addListener</span> <span class="nf">(p) -&gt;</span>
+    <span class="nx">players</span><span class="p">.</span><span class="nx">push</span> <span class="nx">p</span>
+  
+  <span class="nv">exports.register = </span><span class="nf">(driverName, driverObjectCB) -&gt;</span>
+    <span class="nx">driverCallbacks</span><span class="p">.</span><span class="nx">push</span> <span class="p">[</span> <span class="nx">driverName</span><span class="p">,</span> <span class="nx">driverObjectCB</span> <span class="p">]</span>
   
   <span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">ready</span> <span class="o">-&gt;</span>
-    <span class="nv">exports.register = </span><span class="nf">(driverObjectCB) -&gt;</span>
+    <span class="nv">exports.register = </span><span class="nf">(driverName, driverObjectCB) -&gt;</span>
       <span class="nv">driverObject = </span><span class="p">{}</span>
       <span class="nx">driverObjectCB</span> <span class="nx">driverObject</span>
-      <span class="nv">ps = </span><span class="nx">driverObject</span><span class="p">.</span><span class="nx">getAvailablePlayers</span><span class="p">()</span>
-      <span class="k">for</span> <span class="nx">player</span> <span class="k">in</span> <span class="nx">ps</span>
-        <span class="nx">$</span><span class="p">(</span><span class="nx">player</span><span class="p">).</span><span class="nx">data</span><span class="p">(</span><span class="s">&#39;driver&#39;</span><span class="p">,</span> <span class="nx">driverObject</span><span class="p">)</span>
-        <span class="nv">p = </span><span class="nx">driverObject</span><span class="p">.</span><span class="nx">bindPlayer</span> <span class="nx">player</span>
-        <span class="nx">players</span><span class="p">.</span><span class="nx">push</span> <span class="nx">p</span>
-        <span class="k">for</span> <span class="nx">cb</span> <span class="k">in</span> <span class="nx">callbacks</span>
-          <span class="nx">cb</span><span class="p">.</span><span class="nx">call</span><span class="p">({},</span> <span class="nx">p</span><span class="p">)</span>
     
+      <span class="nx">drivers</span><span class="p">[</span><span class="nx">driverName</span><span class="p">]</span> <span class="o">=</span>
+        <span class="nv">bindPlayer: </span><span class="nf">(player) -&gt;</span>
+          <span class="k">if</span> <span class="nx">$</span><span class="p">(</span><span class="nx">player</span><span class="p">).</span><span class="nx">data</span><span class="p">(</span><span class="s">&#39;driver&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="nx">driverObject</span>
+            <span class="nx">$</span><span class="p">(</span><span class="nx">player</span><span class="p">).</span><span class="nx">data</span><span class="p">(</span><span class="s">&#39;driver&#39;</span><span class="p">,</span> <span class="nx">driverObject</span><span class="p">)</span>
+            <span class="nx">exports</span><span class="p">.</span><span class="nx">onNewPlayer</span><span class="p">.</span><span class="nx">fire</span> <span class="nx">driverObject</span><span class="p">.</span><span class="nx">bindPlayer</span> <span class="nx">player</span>
+      <span class="nv">bp = </span><span class="nx">drivers</span><span class="p">[</span><span class="nx">driverName</span><span class="p">].</span><span class="nx">bindPlayer</span>
+      
+      <span class="k">if</span> <span class="nx">pendingPlayers</span><span class="p">[</span><span class="nx">driverName</span><span class="p">]</span><span class="o">?</span>
+        <span class="k">for</span> <span class="nx">player</span> <span class="k">in</span> <span class="nx">pendingPlayers</span><span class="p">[</span><span class="nx">driverName</span><span class="p">]</span>
+          <span class="nx">bp</span> <span class="nx">player</span>
+        <span class="k">delete</span> <span class="nx">pendingPlayers</span><span class="p">[</span><span class="nx">driverName</span><span class="p">]</span>
+        
+      <span class="k">for</span> <span class="nx">player</span> <span class="k">in</span> <span class="nx">driverObject</span><span class="p">.</span><span class="nx">getAvailablePlayers</span><span class="p">()</span>
+        <span class="nx">bp</span> <span class="nx">player</span>
+        
     <span class="k">for</span> <span class="nx">cb</span> <span class="k">in</span> <span class="nx">driverCallbacks</span>
-      <span class="nx">exports</span><span class="p">.</span><span class="nx">register</span> <span class="nx">cb</span>
-  </pre></div></td></tr><tr id="section-5"><td class="docs"><div class="pilwrap"><a href="#section-5" class="pilcrow">&#182;</a></div><h1>Player.DriverBinding</h1>
+      <span class="nx">exports</span><span class="p">.</span><span class="nx">register</span> <span class="nx">cb</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nx">cb</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="nv">driverCallbacks = </span><span class="kc">null</span>
+  
+  <span class="nv">exports.driver = </span><span class="nf">(driverName) -&gt;</span> <span class="nx">drivers</span><span class="p">[</span><span class="nx">driverName</span><span class="p">]</span>
+
+  <span class="nv">exports.addPlayer = </span><span class="nf">(driverName, player) -&gt;</span>
+    <span class="k">if</span> <span class="nx">drivers</span><span class="p">[</span><span class="nx">driverName</span><span class="p">]</span><span class="o">?</span>
+      <span class="nx">drivers</span><span class="p">[</span><span class="nx">driverName</span><span class="p">].</span><span class="nx">bindPlayer</span> <span class="nx">player</span>
+    <span class="k">else</span>
+      <span class="nx">pendingPlayers</span><span class="p">[</span><span class="nx">driverName</span><span class="p">]</span> <span class="o">?=</span> <span class="p">[]</span>
+      <span class="nx">pendingPlayers</span><span class="p">[</span><span class="nx">driverName</span><span class="p">].</span><span class="nx">push</span> <span class="nx">player</span></pre></div></td></tr><tr id="section-5"><td class="docs"><div class="pilwrap"><a href="#section-5" class="pilcrow">&#182;</a></div><h1>Player.DriverBinding</h1>
 
 <p>This is the super class for player driver bindings. Only used in the #bindPlayer() method defined when
 a driver is registered.</p>
@@ -102,4 +112,4 @@ a driver is registered.</p>
     <span class="nv">db.initInstance = </span><span class="nf">(args...) -&gt;</span>
       <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">initInstance</span> <span class="s">&quot;OAC.Client.StreamingVideo.Player.DriverBinding&quot;</span><span class="p">,</span> <span class="nx">args</span><span class="p">...</span>
 
-</pre></div></td></tr></tbody></table><div id="generated">generated Mon May 14 2012 08:26:20 GMT-0400 (EDT)  </div><div id="projectname"><a href="../index.html">Video Annotator</a></div></div>
+</pre></div></td></tr></tbody></table><div id="generated">generated Thu Nov 01 2012 09:41:34 GMT-0400 (EDT)  </div><div id="projectname"><a href="../index.html">Video Annotator</a></div></div>
