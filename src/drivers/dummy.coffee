@@ -7,7 +7,7 @@
 # the OAC.Client.StreamingVideo.Player.register function with a callback. The register function will call this
 # callback with a plain JavaScript object that should be filled in with the following properties:
 #
-OAC.Client.StreamingVideo.Player.register (driver) ->
+OAC.Client.StreamingVideo.Player.register 'Dummy', (driver) ->
 
 	#
 	# ## getAvailablePlayers

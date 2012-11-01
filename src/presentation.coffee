@@ -241,7 +241,8 @@ OAC.Client.StreamingVideo.namespace "Presentation", (Presentation) ->
 					#
 					shape = shapeCreateBoxComponent.completeShape coords
 					if shape.height > 1 and shape.width > 1
-						app.insertShape shape
+						shape.shapeType = app.getCurrentMode()
+						app.insertAnnotation shape
 
 				app.events.onCurrentTimeChange.addListener (npt) ->
 					that.visitRenderings (id, rendering) ->
