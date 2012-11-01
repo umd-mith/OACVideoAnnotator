@@ -68,11 +68,13 @@ OAC.Client.StreamingVideo.Player.register 'HTML5', (driver) ->
 			# the last time we fired the event. This avoids firing off too many events.
 			#
 			lastTime = 0
+			ignoreNextPlayheadUpdate = false
 			$(domObj).bind 'timeupdate', ->
 				now = domObj.currentTime
-				if Math.abs(lastTime - now) >= 0.2 or now < 0.1
+				if Math.abs(lastTime - now) >= 0.1 or now < 0.1
 					lastTime = now
-					that.events.onPlayheadUpdate.fire domObj.currentTime
+					ignoreNextPlayheadUpdate = true
+					that.events.onPlayheadUpdate.fire now
 			
 			#
 			## Player Driver API
@@ -141,4 +143,7 @@ OAC.Client.StreamingVideo.Player.register 'HTML5', (driver) ->
 			# * value - New play head value
 			#
 			that.setPlayhead = (n) ->
-				domObj.currentTime = parseFloat n
+				if ignoreNextPlayheadUpdate
+					ignoreNextPlayheadUpdate = false
+				else
+					domObj.currentTime = parseFloat n

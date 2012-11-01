@@ -34,6 +34,8 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
 
 					dstart = (x, y, e) ->
 						pos = relativeCoords el.node, e
+						pos.x += el.attr('x')
+						pos.y += el.attr('y')
 						binding.events.onFocus.fire pos.x, pos.y
 					dend = ->
 						binding.events.onUnfocus.fire()
