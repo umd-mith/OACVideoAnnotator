@@ -22,7 +22,7 @@ to all of the functions registered through OAC.Client.StreamingVideo.Player.onNe
 <p>As soon as the player driver is comfortable, it can register itself with the Video Annotator framework by calling
 the OAC.Client.StreamingVideo.Player.register function with a callback. The register function will call this
 callback with a plain JavaScript object that should be filled in with the following properties:</p>
-</td><td class="code"><div class="highlight"><pre><span class="nx">OAC</span><span class="p">.</span><span class="nx">Client</span><span class="p">.</span><span class="nx">StreamingVideo</span><span class="p">.</span><span class="nx">Player</span><span class="p">.</span><span class="nx">register</span> <span class="nf">(driver) -&gt;</span></pre></div></td></tr><tr id="section-2"><td class="docs"><div class="pilwrap"><a href="#section-2" class="pilcrow">&#182;</a></div><h2>getAvailablePlayers</h2>
+</td><td class="code"><div class="highlight"><pre><span class="nx">OAC</span><span class="p">.</span><span class="nx">Client</span><span class="p">.</span><span class="nx">StreamingVideo</span><span class="p">.</span><span class="nx">Player</span><span class="p">.</span><span class="nx">register</span> <span class="s">&#39;HTML5&#39;</span><span class="p">,</span> <span class="nf">(driver) -&gt;</span></pre></div></td></tr><tr id="section-2"><td class="docs"><div class="pilwrap"><a href="#section-2" class="pilcrow">&#182;</a></div><h2>getAvailablePlayers</h2>
 
 <p>Returns all player DOM objects available on the page, that can be controlled with this driver.
 All of the DOM objects will be passed individually to the #bindPlayer method. The returned binding
@@ -48,11 +48,13 @@ is loaded and the player has sized itself accordingly.</p>
 the new time is near the beginning or is different by at least 0.2 seconds from
 the last time we fired the event. This avoids firing off too many events.</p>
 </td><td class="code"><div class="highlight"><pre>      <span class="nv">lastTime = </span><span class="mi">0</span>
+      <span class="nv">ignoreNextPlayheadUpdate = </span><span class="kc">false</span>
       <span class="nx">$</span><span class="p">(</span><span class="nx">domObj</span><span class="p">).</span><span class="nx">bind</span> <span class="s">&#39;timeupdate&#39;</span><span class="p">,</span> <span class="o">-&gt;</span>
         <span class="nv">now = </span><span class="nx">domObj</span><span class="p">.</span><span class="nx">currentTime</span>
-        <span class="k">if</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">abs</span><span class="p">(</span><span class="nx">lastTime</span> <span class="o">-</span> <span class="nx">now</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mf">0.2</span> <span class="o">or</span> <span class="nx">now</span> <span class="o">&lt;</span> <span class="mf">0.1</span>
+        <span class="k">if</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">abs</span><span class="p">(</span><span class="nx">lastTime</span> <span class="o">-</span> <span class="nx">now</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mf">0.1</span> <span class="o">or</span> <span class="nx">now</span> <span class="o">&lt;</span> <span class="mf">0.1</span>
           <span class="nv">lastTime = </span><span class="nx">now</span>
-          <span class="nx">that</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onPlayheadUpdate</span><span class="p">.</span><span class="nx">fire</span> <span class="nx">domObj</span><span class="p">.</span><span class="nx">currentTime</span>
+          <span class="nv">ignoreNextPlayheadUpdate = </span><span class="kc">true</span>
+          <span class="nx">that</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onPlayheadUpdate</span><span class="p">.</span><span class="nx">fire</span> <span class="nx">now</span>
       </pre></div></td></tr><tr id="section-9"><td class="docs"><div class="pilwrap"><a href="#section-9" class="pilcrow">&#182;</a></div><h1>Player Driver API</h1>
 
 <p>The following methods are expected for the player driver binding.</p>
@@ -95,6 +97,9 @@ video being played by the player.</p>
 <li>value - New play head value</li>
 </ul>
 </td><td class="code"><div class="highlight"><pre>      <span class="nv">that.setPlayhead = </span><span class="nf">(n) -&gt;</span>
-        <span class="nv">domObj.currentTime = </span><span class="nb">parseFloat</span> <span class="nx">n</span>
+        <span class="k">if</span> <span class="nx">ignoreNextPlayheadUpdate</span>
+          <span class="nv">ignoreNextPlayheadUpdate = </span><span class="kc">false</span>
+        <span class="k">else</span>
+          <span class="nv">domObj.currentTime = </span><span class="nb">parseFloat</span> <span class="nx">n</span>
 
-</pre></div></td></tr></tbody></table><div id="generated">generated Mon May 14 2012 08:26:20 GMT-0400 (EDT)  </div><div id="projectname"><a href="../../index.html">Video Annotator</a></div></div>
+</pre></div></td></tr></tbody></table><div id="generated">generated Thu Nov 01 2012 09:41:34 GMT-0400 (EDT)  </div><div id="projectname"><a href="../../index.html">Video Annotator</a></div></div>
