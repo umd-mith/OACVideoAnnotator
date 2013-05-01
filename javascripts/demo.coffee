@@ -41,7 +41,7 @@
 # - onFocus
 # - onUnfocus
 #
-MITHGrid.defaults "OAC.Client.StreamingVideo.Demo.Hover",
+MITHgrid.defaults "OAC.Client.StreamingVideo.Demo.Hover",
 	bind:
 		events:
 			onFocus: null
@@ -53,7 +53,7 @@ MITHGrid.defaults "OAC.Client.StreamingVideo.Demo.Hover",
 #
 # - onSelect
 #
-MITHGrid.defaults "OAC.Client.StreamingVideo.Demo.Click",
+MITHgrid.defaults "OAC.Client.StreamingVideo.Demo.Click",
 	bind:
 		events:
 			onSelect: null
@@ -69,7 +69,7 @@ MITHGrid.defaults "OAC.Client.StreamingVideo.Demo.Click",
 # Additionally, the text control DOM elements will be added to the container passed in to the
 # instance constructor.
 #
-MITHGrid.defaults "OAC.Client.StreamingVideo.Demo.TextControls",
+MITHgrid.defaults "OAC.Client.StreamingVideo.Demo.TextControls",
 	events:
 		onCancel: null
 		onDelete: null
@@ -92,7 +92,7 @@ OAC.Client.StreamingVideo.namespace "Demo", (Demo) ->
 	#
 	Demo.namespace "Click", (Click) ->
 		Click.initInstance = (args...) ->
-			MITHGrid.Controller.initInstance "OAC.Client.StreamingVideo.Demo.Click", args..., (that) ->
+			MITHgrid.Controller.initInstance "OAC.Client.StreamingVideo.Demo.Click", args..., (that) ->
 				that.applyBindings = (binding) ->
 					binding.locate('').click binding.events.onSelect.fire
 	
@@ -103,7 +103,7 @@ OAC.Client.StreamingVideo.namespace "Demo", (Demo) ->
 	#
 	Demo.namespace "Hover", (Hover) ->
 		Hover.initInstance = (args...) ->
-			MITHGrid.Controller.initInstance "OAC.Client.StreamingVideo.Demo.Hover", args..., (that) ->
+			MITHgrid.Controller.initInstance "OAC.Client.StreamingVideo.Demo.Hover", args..., (that) ->
 				that.applyBindings = (binding) ->
 					binding.locate('').hover binding.events.onFocus.fire, binding.events.onUnfocus.fire
 
@@ -118,7 +118,7 @@ OAC.Client.StreamingVideo.namespace "Demo", (Demo) ->
 		clickController = Demo.Click.initInstance {}
 		
 		TextControls.initInstance = (args...) ->	
-			MITHGrid.initInstance "OAC.Client.StreamingVideo.Demo.TextControls", args..., (that, container) ->
+			MITHgrid.initInstance "OAC.Client.StreamingVideo.Demo.TextControls", args..., (that, container) ->
 				options = that.options
 				app = options.application()
 				appFn = options.application

@@ -38,7 +38,7 @@ MITHgrid combines these configurations with any we provide when we instantiate a
 <ul>
 <li>onFocus</li>
 <li>onUnfocus</li>
-</ul>             </td>             <td class="code">               <div class="highlight"><pre><span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">defaults</span> <span class="s">&quot;OAC.Client.StreamingVideo.Demo.Hover&quot;</span><span class="p">,</span>
+</ul>             </td>             <td class="code">               <div class="highlight"><pre><span class="nx">MITHgrid</span><span class="p">.</span><span class="nx">defaults</span> <span class="s">&quot;OAC.Client.StreamingVideo.Demo.Hover&quot;</span><span class="p">,</span>
     <span class="nv">bind:</span>
         <span class="nv">events:</span>
             <span class="nv">onFocus: </span><span class="kc">null</span>
@@ -48,7 +48,7 @@ MITHgrid combines these configurations with any we provide when we instantiate a
 
 <ul>
 <li>onSelect</li>
-</ul>             </td>             <td class="code">               <div class="highlight"><pre><span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">defaults</span> <span class="s">&quot;OAC.Client.StreamingVideo.Demo.Click&quot;</span><span class="p">,</span>
+</ul>             </td>             <td class="code">               <div class="highlight"><pre><span class="nx">MITHgrid</span><span class="p">.</span><span class="nx">defaults</span> <span class="s">&quot;OAC.Client.StreamingVideo.Demo.Click&quot;</span><span class="p">,</span>
     <span class="nv">bind:</span>
         <span class="nv">events:</span>
             <span class="nv">onSelect: </span><span class="kc">null</span></pre></div>             </td>           </tr>                               <tr id="section-5">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-5">&#182;</a>               </div>               <h3>TextControls (component)</h3>
@@ -62,7 +62,7 @@ MITHgrid combines these configurations with any we provide when we instantiate a
 </ul>
 
 <p>Additionally, the text control DOM elements will be added to the container passed in to the
-instance constructor.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">defaults</span> <span class="s">&quot;OAC.Client.StreamingVideo.Demo.TextControls&quot;</span><span class="p">,</span>
+instance constructor.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nx">MITHgrid</span><span class="p">.</span><span class="nx">defaults</span> <span class="s">&quot;OAC.Client.StreamingVideo.Demo.TextControls&quot;</span><span class="p">,</span>
     <span class="nv">events:</span>
         <span class="nv">onCancel: </span><span class="kc">null</span>
         <span class="nv">onDelete: </span><span class="kc">null</span>
@@ -78,7 +78,7 @@ instance constructor.</p>             </td>             <td class="code">       
 <p>Attaches a click handler to an SVG rendering and fires an onSelect event if the rendering is clicked AND
 the application is in a mode to select things.</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nx">Demo</span><span class="p">.</span><span class="nx">namespace</span> <span class="s">&quot;Click&quot;</span><span class="p">,</span> <span class="nf">(Click) -&gt;</span>
         <span class="nv">Click.initInstance = </span><span class="nf">(args...) -&gt;</span>
-            <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">initInstance</span> <span class="s">&quot;OAC.Client.StreamingVideo.Demo.Click&quot;</span><span class="p">,</span> <span class="nx">args</span><span class="p">...,</span> <span class="nf">(that) -&gt;</span>
+            <span class="nx">MITHgrid</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">initInstance</span> <span class="s">&quot;OAC.Client.StreamingVideo.Demo.Click&quot;</span><span class="p">,</span> <span class="nx">args</span><span class="p">...,</span> <span class="nf">(that) -&gt;</span>
                 <span class="nv">that.applyBindings = </span><span class="nf">(binding) -&gt;</span>
                     <span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">).</span><span class="nx">click</span> <span class="nx">binding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onSelect</span><span class="p">.</span><span class="nx">fire</span>
     </pre></div>             </td>           </tr>                               <tr id="section-8">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-8">&#182;</a>               </div>               <h3>Hover (controller)</h3>
@@ -86,13 +86,13 @@ the application is in a mode to select things.</p>             </td>            
 <p>Attaches a set of hover handlers to a DOM element and fires onFocus and onUnfocus events as the
 mouse starts or stops hovering over the element.</p>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nx">Demo</span><span class="p">.</span><span class="nx">namespace</span> <span class="s">&quot;Hover&quot;</span><span class="p">,</span> <span class="nf">(Hover) -&gt;</span>
         <span class="nv">Hover.initInstance = </span><span class="nf">(args...) -&gt;</span>
-            <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">initInstance</span> <span class="s">&quot;OAC.Client.StreamingVideo.Demo.Hover&quot;</span><span class="p">,</span> <span class="nx">args</span><span class="p">...,</span> <span class="nf">(that) -&gt;</span>
+            <span class="nx">MITHgrid</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">initInstance</span> <span class="s">&quot;OAC.Client.StreamingVideo.Demo.Hover&quot;</span><span class="p">,</span> <span class="nx">args</span><span class="p">...,</span> <span class="nf">(that) -&gt;</span>
                 <span class="nv">that.applyBindings = </span><span class="nf">(binding) -&gt;</span>
                     <span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">).</span><span class="nx">hover</span> <span class="nx">binding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onFocus</span><span class="p">.</span><span class="nx">fire</span><span class="p">,</span> <span class="nx">binding</span><span class="p">.</span><span class="nx">events</span><span class="p">.</span><span class="nx">onUnfocus</span><span class="p">.</span><span class="nx">fire</span></pre></div>             </td>           </tr>                               <tr id="section-9">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-9">&#182;</a>               </div>               <h3>TextControls (component)</h3>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nx">Demo</span><span class="p">.</span><span class="nx">namespace</span> <span class="s">&quot;TextControls&quot;</span><span class="p">,</span> <span class="nf">(TextControls) -&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-10">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-10">&#182;</a>               </div>               <p>We have a global click controller since we don't have any particular configuration that
 is specific to the TextControls instance.</p>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="nv">clickController = </span><span class="nx">Demo</span><span class="p">.</span><span class="nx">Click</span><span class="p">.</span><span class="nx">initInstance</span> <span class="p">{}</span>
         
         <span class="nv">TextControls.initInstance = </span><span class="nf">(args...) -&gt;</span>    
-            <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">initInstance</span> <span class="s">&quot;OAC.Client.StreamingVideo.Demo.TextControls&quot;</span><span class="p">,</span> <span class="nx">args</span><span class="p">...,</span> <span class="nf">(that, container) -&gt;</span>
+            <span class="nx">MITHgrid</span><span class="p">.</span><span class="nx">initInstance</span> <span class="s">&quot;OAC.Client.StreamingVideo.Demo.TextControls&quot;</span><span class="p">,</span> <span class="nx">args</span><span class="p">...,</span> <span class="nf">(that, container) -&gt;</span>
                 <span class="nv">options = </span><span class="nx">that</span><span class="p">.</span><span class="nx">options</span>
                 <span class="nv">app = </span><span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">()</span>
                 <span class="nv">appFn = </span><span class="nx">options</span><span class="p">.</span><span class="nx">application</span>
@@ -176,18 +176,16 @@ to add our own annotation body display and edit controls. We also add an import/
 
 <p>Typical usage of this would be similar to what we do in the <a href="/OACVideoAnnotator/demo.html">demo.html</a> page:</p>
 
-<pre><code>$(document).ready(function() {
-  OAC.Client.StreamingVideo.Player.onNewPlayer(
-    function(playerobj) {
-      var app = 
-        OAC.Client.StreamingVideo.Demo.Application.initInstance({
-          player: playerobj
-        });
+<pre><code>OAC.Client.StreamingVideo.Player.onNewPlayer.addListener(
+  function(playerobj) {
+    var app = 
+      OAC.Client.StreamingVideo.Demo.Application.initInstance({
+        player: playerobj
+      });
 
-      app.run();
-    }
-  );
-});
+    app.run();
+  }
+);
 </code></pre>             </td>             <td class="code">               <div class="highlight"><pre>    <span class="nx">Demo</span><span class="p">.</span><span class="nx">namespace</span> <span class="s">&quot;Application&quot;</span><span class="p">,</span> <span class="nf">(Application) -&gt;</span></pre></div>             </td>           </tr>                               <tr id="section-18">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-18">&#182;</a>               </div>               <p>We have a few objects that aren't tied to a particular instance of our demo application, so we
 create them here. Controllers that are not configured based on the application instance are excellent
 candidates for this.</p>             </td>             <td class="code">               <div class="highlight"><pre>        <span class="nv">hoverController = </span><span class="nx">OAC</span><span class="p">.</span><span class="nx">Client</span><span class="p">.</span><span class="nx">StreamingVideo</span><span class="p">.</span><span class="nx">Demo</span><span class="p">.</span><span class="nx">Hover</span><span class="p">.</span><span class="nx">initInstance</span><span class="p">()</span>

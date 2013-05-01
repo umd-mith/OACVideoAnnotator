@@ -15,7 +15,7 @@ The first thing you need to do is create a function that will return an instance
 way to do this is to declare a namespace that you will use for all of your MITHgrid-style components:
 
 {% highlight coffeescript %}
-MITHGrid.globalnamespace 'My.AnnotationApp'
+MITHgrid.globalnamespace 'My.AnnotationApp'
 
 My.AnnotationApp.namespace 'Application', (Application) ->
   # Application.foo will show up as My.AnnotationApp.Application.foo
@@ -34,7 +34,7 @@ constructor. It assembles all of the methods and data that will be associated wi
 
 {% highlight coffeescript %}
   Application.initInstance = (args...) ->
-    MITHGrid.Application.initInstance "My.AnnotationApp.Application", args..., (that, container) ->
+    MITHgrid.Application.initInstance "My.AnnotationApp.Application", args..., (that, container) ->
       options = that.options
 {% endhighlight %}
 
@@ -80,12 +80,12 @@ annotations by calling the `exportData` method.
 ## Full Listing
 
 {% highlight coffeescript %}
-MITHGrid.globalnamespace 'My.AnnotationApp'
+MITHgrid.globalnamespace 'My.AnnotationApp'
 
 My.AnnotationApp.namespace 'Application', (Application) ->
   # Application.foo will show up as My.AnnotationApp.Application.foo
   # outside this callback
   Application.initInstance = (args...) ->
-    MITHGrid.Application.initInstance "My.AnnotationApp.Application", args..., (that, container) ->
+    MITHgrid.Application.initInstance "My.AnnotationApp.Application", args..., (that, container) ->
       options = that.options
 {% endhighlight %}
