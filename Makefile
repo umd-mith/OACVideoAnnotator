@@ -66,7 +66,7 @@ ${OAC_C}: ${MODULES} ${DIST_DIR}
 	@@echo "Building" ${OAC_C}
 	@@rm -f ${OAC_C}.tmp
 	@@for i in ${BASE_FILES}; do \
-		cat $$i | sed 's/^/	/' >> ${OAC_C}.tmp; \
+		cat $$i | sed 's/^/  /' >> ${OAC_C}.tmp; \
 		echo >> ${OAC_C}.tmp; \
 		done	
 	@@cat ${SRC_DIR}/intro.coffee ${OAC_C}.tmp ${SRC_DIR}/outro.coffee | \
