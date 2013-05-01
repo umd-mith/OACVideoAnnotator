@@ -27,7 +27,7 @@ The coordinates of the event relative to the top-left of the currentElement.</p>
 are relative to the bound element.</p>
 </td><td class="code"><div class="highlight"><pre>  <span class="nx">Controller</span><span class="p">.</span><span class="nx">namespace</span> <span class="s">&quot;Drag&quot;</span><span class="p">,</span> <span class="nf">(Drag) -&gt;</span>
     <span class="nv">Drag.initInstance = </span><span class="nf">(args...) -&gt;</span>
-      <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">Raphael</span><span class="p">.</span><span class="nx">initInstance</span> <span class="s">&quot;OAC.Client.StreamingVideo.Controller.Drag&quot;</span><span class="p">,</span> <span class="nx">args</span><span class="p">...,</span> <span class="nf">(that) -&gt;</span>
+      <span class="nx">MITHgrid</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">Raphael</span><span class="p">.</span><span class="nx">initInstance</span> <span class="s">&quot;OAC.Client.StreamingVideo.Controller.Drag&quot;</span><span class="p">,</span> <span class="nx">args</span><span class="p">...,</span> <span class="nf">(that) -&gt;</span>
         <span class="nv">that.applyBindings = </span><span class="nf">(binding) -&gt;</span>
           <span class="nv">el = </span><span class="nx">binding</span><span class="p">.</span><span class="nx">locate</span><span class="p">(</span><span class="s">&#39;raphael&#39;</span><span class="p">)</span>
 
@@ -59,7 +59,7 @@ the optional <code>isSelectable</code> callback returns true.</p>
 </ul>
 </td><td class="code"><div class="highlight"><pre>  <span class="nx">Controller</span><span class="p">.</span><span class="nx">namespace</span> <span class="s">&quot;Select&quot;</span><span class="p">,</span> <span class="nf">(Select) -&gt;</span>
     <span class="nv">Select.initInstance = </span><span class="nf">(args...) -&gt;</span>
-      <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">Raphael</span><span class="p">.</span><span class="nx">initInstance</span> <span class="s">&quot;OAC.Client.StreamingVideo.Controller.Select&quot;</span><span class="p">,</span> <span class="nx">args</span><span class="p">...,</span> <span class="nf">(that) -&gt;</span>
+      <span class="nx">MITHgrid</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">Raphael</span><span class="p">.</span><span class="nx">initInstance</span> <span class="s">&quot;OAC.Client.StreamingVideo.Controller.Select&quot;</span><span class="p">,</span> <span class="nx">args</span><span class="p">...,</span> <span class="nf">(that) -&gt;</span>
         <span class="nv">options = </span><span class="nx">that</span><span class="p">.</span><span class="nx">options</span>
         <span class="nv">isSelectable = </span><span class="nx">options</span><span class="p">.</span><span class="nx">isSelectable</span> <span class="o">or</span> <span class="o">-&gt;</span> <span class="kc">true</span>
 
@@ -84,7 +84,7 @@ by clicking anywhere not on a shape. These need to be teased apart into two diff
 <hr />
 </td><td class="code"><div class="highlight"><pre>  <span class="nx">Controller</span><span class="p">.</span><span class="nx">namespace</span> <span class="s">&quot;CanvasClickController&quot;</span><span class="p">,</span> <span class="nf">(CanvasClickController) -&gt;</span>
     <span class="nv">CanvasClickController.initInstance = </span><span class="nf">(args...) -&gt;</span>
-      <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">initInstance</span> <span class="s">&quot;OAC.Client.StreamingVideo.Controller.CanvasClickController&quot;</span><span class="p">,</span> <span class="nx">args</span><span class="p">...,</span> <span class="nf">(that) -&gt;</span>
+      <span class="nx">MITHgrid</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">initInstance</span> <span class="s">&quot;OAC.Client.StreamingVideo.Controller.CanvasClickController&quot;</span><span class="p">,</span> <span class="nx">args</span><span class="p">...,</span> <span class="nf">(that) -&gt;</span>
         <span class="nv">options = </span><span class="nx">that</span><span class="p">.</span><span class="nx">options</span>
         <span class="nv">overlay = </span><span class="kc">null</span></pre></div></td></tr><tr id="section-6"><td class="docs"><div class="pilwrap"><a href="#section-6" class="pilcrow">&#182;</a></div><h3>#applyBindings</h3>
 
@@ -122,13 +122,13 @@ by clicking anywhere not on a shape. These need to be teased apart into two diff
           <span class="nv">captureMouse = </span><span class="nf">(handlers) -&gt;</span>
             <span class="k">if</span> <span class="o">!</span><span class="nx">mouseCaptured</span>
               <span class="nv">mouseCaptured = </span><span class="kc">true</span>
-              <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">mouse</span><span class="p">.</span><span class="nx">capture</span> <span class="nf">(eType) -&gt;</span>
+              <span class="nx">MITHgrid</span><span class="p">.</span><span class="nx">mouse</span><span class="p">.</span><span class="nx">capture</span> <span class="nf">(eType) -&gt;</span>
                 <span class="k">if</span> <span class="nx">handlers</span><span class="p">[</span><span class="nx">eType</span><span class="p">]</span><span class="o">?</span>
                   <span class="nx">handlers</span><span class="p">[</span><span class="nx">eType</span><span class="p">](</span><span class="k">this</span><span class="p">)</span>
           
           <span class="nv">uncaptureMouse = </span><span class="o">-&gt;</span>
             <span class="k">if</span> <span class="nx">mouseCaptured</span>
-              <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">mouse</span><span class="p">.</span><span class="nx">uncapture</span><span class="p">()</span>
+              <span class="nx">MITHgrid</span><span class="p">.</span><span class="nx">mouse</span><span class="p">.</span><span class="nx">uncapture</span><span class="p">()</span>
               <span class="nv">mouseCaptured = </span><span class="kc">false</span></pre></div></td></tr><tr id="section-8"><td class="docs"><div class="pilwrap"><a href="#section-8" class="pilcrow">&#182;</a></div><h4>drawShape (private)</h4>
 
 <p>Using two html elements: container is for
@@ -225,4 +225,4 @@ the svgEl is for registering mouse clicks on the svg element (svg)</p>
             <span class="k">if</span> <span class="nx">overlay</span><span class="o">?</span>
               <span class="nx">overlay</span><span class="p">.</span><span class="nx">toBack</span><span class="p">()</span>
 
-</pre></div></td></tr></tbody></table><div id="generated">generated Thu Nov 01 2012 09:41:34 GMT-0400 (EDT)  </div><div id="projectname"><a href="../index.html">Video Annotator</a></div></div>
+</pre></div></td></tr></tbody></table><div id="generated">generated Wed May 01 2013 09:37:32 GMT-0400 (EDT)  </div><div id="projectname"><a href="../index.html">Video Annotator</a></div></div>
