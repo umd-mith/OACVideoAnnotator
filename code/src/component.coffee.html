@@ -17,7 +17,7 @@ title: OACVideoAnnotator/code/src/component.coffee.html
 <hr />
 </td><td class="code"><div class="highlight"><pre>  <span class="nx">Component</span><span class="p">.</span><span class="nx">namespace</span> <span class="s">&quot;ModeButton&quot;</span><span class="p">,</span> <span class="nf">(ModeButton) -&gt;</span>
     <span class="nv">ModeButton.initInstance = </span><span class="nf">(args...) -&gt;</span>
-      <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">initInstance</span> <span class="s">&quot;OAC.Client.StreamingVideo.Component.ModeButton&quot;</span><span class="p">,</span> <span class="nx">args</span><span class="p">...,</span> <span class="nf">(that, buttonEl) -&gt;</span>
+      <span class="nx">MITHgrid</span><span class="p">.</span><span class="nx">initInstance</span> <span class="s">&quot;OAC.Client.StreamingVideo.Component.ModeButton&quot;</span><span class="p">,</span> <span class="nx">args</span><span class="p">...,</span> <span class="nf">(that, buttonEl) -&gt;</span>
         <span class="nv">options = </span><span class="nx">that</span><span class="p">.</span><span class="nx">options</span>
         <span class="nv">app = </span><span class="nx">options</span><span class="p">.</span><span class="nx">application</span><span class="p">()</span>
         </pre></div></td></tr><tr id="section-3"><td class="docs"><div class="pilwrap"><a href="#section-3" class="pilcrow">&#182;</a></div><p>If the button is clicked and it isn't the current mode, then it is made the current mode.
@@ -44,10 +44,10 @@ CSS class.</p>
     <span class="nv">dragController = </span><span class="kc">null</span>
     
 
-    <span class="nv">ShapeEditBox.initInstance = </span><span class="nf">(args...) -&gt;</span></pre></div></td></tr><tr id="section-6"><td class="docs"><div class="pilwrap"><a href="#section-6" class="pilcrow">&#182;</a></div><p>We delay creating the drag controller until we need it because we haven't defined the MITHGrid
+    <span class="nv">ShapeEditBox.initInstance = </span><span class="nf">(args...) -&gt;</span></pre></div></td></tr><tr id="section-6"><td class="docs"><div class="pilwrap"><a href="#section-6" class="pilcrow">&#182;</a></div><p>We delay creating the drag controller until we need it because we haven't defined the MITHgrid
 defaults for the binding events.</p>
 </td><td class="code"><div class="highlight"><pre>      <span class="nx">dragController</span> <span class="o">?=</span> <span class="nx">OAC</span><span class="p">.</span><span class="nx">Client</span><span class="p">.</span><span class="nx">StreamingVideo</span><span class="p">.</span><span class="nx">Controller</span><span class="p">.</span><span class="nx">Drag</span><span class="p">.</span><span class="nx">initInstance</span> <span class="p">{}</span>
-      <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">initInstance</span> <span class="s">&quot;OAC.Client.StreamingVideo.Component.ShapeEditBox&quot;</span><span class="p">,</span> <span class="nx">args</span><span class="p">...,</span> <span class="nf">(that, paper) -&gt;</span>
+      <span class="nx">MITHgrid</span><span class="p">.</span><span class="nx">initInstance</span> <span class="s">&quot;OAC.Client.StreamingVideo.Component.ShapeEditBox&quot;</span><span class="p">,</span> <span class="nx">args</span><span class="p">...,</span> <span class="nf">(that, paper) -&gt;</span>
         <span class="nv">options = </span><span class="nx">that</span><span class="p">.</span><span class="nx">options</span>
         <span class="nv">handleSet = </span><span class="kc">null</span>
         <span class="nv">handles = </span><span class="p">{}</span>
@@ -327,7 +327,7 @@ top-left and size.</p>
 the presentation to create the shape.</p>
 </td><td class="code"><div class="highlight"><pre>  <span class="nx">Component</span><span class="p">.</span><span class="nx">namespace</span> <span class="s">&#39;ShapeCreateBox&#39;</span><span class="p">,</span> <span class="nf">(ShapeCreateBox) -&gt;</span>
     <span class="nv">ShapeCreateBox.initInstance = </span><span class="nf">(args...) -&gt;</span>
-      <span class="nx">MITHGrid</span><span class="p">.</span><span class="nx">initInstance</span> <span class="s">&quot;OAC.Client.StreamingVideo.Component.ShapeCreateBox&quot;</span><span class="p">,</span> <span class="nx">args</span><span class="p">...,</span> <span class="nf">(that, paper) -&gt;</span>
+      <span class="nx">MITHgrid</span><span class="p">.</span><span class="nx">initInstance</span> <span class="s">&quot;OAC.Client.StreamingVideo.Component.ShapeCreateBox&quot;</span><span class="p">,</span> <span class="nx">args</span><span class="p">...,</span> <span class="nf">(that, paper) -&gt;</span>
         <span class="nv">options = </span><span class="nx">that</span><span class="p">.</span><span class="nx">options</span></pre></div></td></tr><tr id="section-20"><td class="docs"><div class="pilwrap"><a href="#section-20" class="pilcrow">&#182;</a></div><p>Bounding box is created once in memory - it should be bound to the
 canvas/paper object or something that contains more than 1 shape.</p>
 </td><td class="code"><div class="highlight"><pre>        <span class="nv">svgBBox = </span><span class="kc">null</span>
@@ -431,4 +431,4 @@ Coordinates object with properties x, y, width, and height</p>
             <span class="nv">height: </span><span class="nx">attrs</span><span class="p">.</span><span class="nx">height</span>
           <span class="p">}</span>
 
-</pre></div></td></tr></tbody></table><div id="generated">generated Thu Nov 01 2012 09:41:34 GMT-0400 (EDT)  </div><div id="projectname"><a href="../index.html">Video Annotator</a></div></div>
+</pre></div></td></tr></tbody></table><div id="generated">generated Wed May 01 2013 09:37:32 GMT-0400 (EDT)  </div><div id="projectname"><a href="../index.html">Video Annotator</a></div></div>
