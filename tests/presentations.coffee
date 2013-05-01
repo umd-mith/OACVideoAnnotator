@@ -24,8 +24,8 @@ $(document).ready ->
 		getPlayhead: -> 
 			0
 		events:
-			onResize: MITHGrid.initEventFirer(true, true)
-			onPlayheadUpdate: MITHGrid.initEventFirer(true, true)
+			onResize: MITHgrid.initEventFirer(true, true)
+			onPlayheadUpdate: MITHgrid.initEventFirer(true, true)
 	}
 	# Generating some seemingly randomized data -- all the same
 	# except for npt start and end times, which is what we're testing
@@ -165,7 +165,7 @@ $(document).ready ->
 		
 		
 	test "Check Shape Lens", ->	
-		expect 21
+		expect 20
 		app = setupApp()
 				
 		# checking time easement
@@ -192,16 +192,18 @@ $(document).ready ->
 				o = (5 - 30 + t) / 5.0
 				if o < 0
 					o = 0
-				syncer = MITHGrid.initSynchronizer cb
+				syncer = MITHgrid.initSynchronizer cb
+				
+				stop()
+				syncer.increment()
 				
 				rendering.eventCurrentTimeChange = (n) ->
 					start()
 					oldEventCurrentTimeChange(n)
-					equal rendering.getOpacity(), o, "opacity is now #{o} for #{t}"
+					equal rendering.getOpacity(), o, "opacity is now #{o} for #{t} (increasing)"
 					syncer.decrement()
-					
-				stop()
-				syncer.increment()
+					rendering.eventCurrentTimeChange = oldEventCurrentTimeChange
+
 				app.setCurrentTime t
 				syncer.done()
 
@@ -220,15 +222,18 @@ $(document).ready ->
 					o = 0
 				if o > 1
 					o = 1
-				syncer = MITHGrid.initSynchronizer cb
+				syncer = MITHgrid.initSynchronizer cb
+				
+				stop()
+				syncer.increment()
+				
 				rendering.eventCurrentTimeChange = (n) ->
 					oldEventCurrentTimeChange(n)
 					start()
-					equal rendering.getOpacity(), o, "opacity is now #{o} for #{t}"
+					equal rendering.getOpacity(), o, "opacity is now #{o} for #{t} (decreasing)"
 					syncer.decrement()
+					rendering.eventCurrentTimeChange = oldEventCurrentTimeChange
 
-				stop()
-				syncer.increment()
 				app.setCurrentTime t
 				syncer.done()
 

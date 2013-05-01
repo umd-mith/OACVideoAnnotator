@@ -1,7 +1,7 @@
 ###
 # OAC Video Annotation Tool v@VERSION
 # 
-# The **OAC Video Annotation Tool** is a MITHGrid application providing annotation capabilities for streaming
+# The **OAC Video Annotation Tool** is a MITHgrid application providing annotation capabilities for streaming
 # video embedded in a web page. 
 #  
 # Date: @DATE
@@ -24,8 +24,8 @@
 ###
 
 # The plugin uses the OAC.Client.StreamingVideo namespace.
-OAC = MITHGrid.globalNamespace("OAC")
+OAC = MITHgrid.globalNamespace("OAC")
 OAC.namespace("Client")
 OAC.Client.namespace("StreamingVideo")
 
-(($, MITHGrid, OAC) ->
+(($, MITHgrid, OAC) ->

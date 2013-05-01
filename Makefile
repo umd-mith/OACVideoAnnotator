@@ -29,8 +29,11 @@ OAC = ${DIST_DIR}/videoanno.js
 OAC_MIN = ${DIST_DIR}/videoanno.min.js
 OAC_C = ${DIST_DIR}/videoanno.coffee
 
-OAC_VER = $(shell cat version.txt)
-VER = sed "s/@VERSION/${MG_VER}/"
+MG_MAJOR = $(shell cat version.txt)
+MG_MINOR = $(shell date +%y%j)
+N ?= 0
+
+VER = sed "s/@VERSION/${MG_MAJOR}.${MG_MINOR}${N}/"
 
 DATE=$(shell git log --pretty=format:%ad | head -1)
 
@@ -63,7 +66,7 @@ ${OAC_C}: ${MODULES} ${DIST_DIR}
 	@@echo "Building" ${OAC_C}
 	@@rm -f ${OAC_C}.tmp
 	@@for i in ${BASE_FILES}; do \
-		cat $$i | sed 's/^/	/' >> ${OAC_C}.tmp; \
+		cat $$i | sed 's/^/  /' >> ${OAC_C}.tmp; \
 		echo >> ${OAC_C}.tmp; \
 		done	
 	@@cat ${SRC_DIR}/intro.coffee ${OAC_C}.tmp ${SRC_DIR}/outro.coffee | \

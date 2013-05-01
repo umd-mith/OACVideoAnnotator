@@ -1,7 +1,7 @@
 $(document).ready ->
 	test "Check requirements", ->
 		expect 3
-		ok MITHGrid?, "MITHGrid"
+		ok MITHgrid?, "MITHgrid"
 		ok jQuery?, "jQuery"
 		ok Raphael?, "Raphael"
 		
