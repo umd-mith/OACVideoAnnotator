@@ -49,7 +49,7 @@ OAC.Client.StreamingVideo.namespace "Application", (Application) ->
     # We store the application object in `appOb` so it's available to the `isSelectable` callback. Note that
     # this is the same object as the `app` parameter in the callback provided to the initInstance method.
     #
-    appOb = MITHGrid.Application.initInstance "OAC.Client.StreamingVideo.Application", args..., {
+    appOb = MITHgrid.Application.initInstance "OAC.Client.StreamingVideo.Application", args..., {
       controllers:
         selectShape:
           isSelectable: -> appOb.getCurrentMode() == "Select"
@@ -227,11 +227,11 @@ OAC.Client.StreamingVideo.namespace "Application", (Application) ->
       # routines is ignored.
       #
       NS = 
-        OA: "http://www.w3.org/ns/openannotation/core/"
-        OAX: "http://www.w3.org/ns/openannotation/extensions/"
+        OA: "http://www.w3.org/ns/oa#"
         RDF: "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-        CNT: "http://www.w3.org/2008/content#"
+        CNT: "http://www.w3.org/2011/content#"
         DC: "http://purl.org/dc/elements/1.1/"
+        DCTERMS: "http://purl.org/dc/terms/"
         EXIF: "http://www.w3.org/2003/12/exif/ns#"
     
       #
@@ -322,8 +322,8 @@ OAC.Client.StreamingVideo.namespace "Application", (Application) ->
                     # targeting parts of video frames for time spans within the video.
                     #               
                     for hasSelector in (v.value for v in data[hasTarget]["#{NS.OA}hasSelector"])
-                      if data[hasSelector]? and ("#{NS.OAX}CompositeSelector" in (t.value for t in data[hasSelector]["#{NS.RDF}type"]))
-                        for hasSubSelector in (v.value for v in data[hasSelector]["#{NS.OA}hasSelector"])
+                      if data[hasSelector]? and ("#{NS.OA}Composite" in (t.value for t in data[hasSelector]["#{NS.RDF}type"]))
+                        for hasSubSelector in (v.value for v in data[hasSelector]["#{NS.OA}item"])
                           if data[hasSubSelector]?
                             #
                             # We go ahead and extract the types for this selector because someone
@@ -334,7 +334,7 @@ OAC.Client.StreamingVideo.namespace "Application", (Application) ->
                             #
                             # We expect SVG constraints to be found through oax:SvgSelector nodes.
                             #
-                            if "#{NS.OAX}SvgSelector" in types
+                            if "#{NS.OA}SvgSelector" in types
                               if data[hasSubSelector]["#{NS.CNT}chars"]? and data[hasSubSelector]["#{NS.CNT}chars"][0]?
                                 svg = data[hasSubSelector]["#{NS.CNT}chars"][0].value
                                 dom = $.parseXML svg
@@ -454,16 +454,16 @@ OAC.Client.StreamingVideo.namespace "Application", (Application) ->
           bnode ids.tuid, NS.OA,  "hasSelector", ids.suid
 
           # Selector element, which points to the SVG constraint and NPT constraint
-          uri   ids.suid, NS.RDF, "type",       "#{NS.OAX}CompositeSelector"
-          bnode ids.suid, NS.OA,  "hasSelector", ids.svgid
-          bnode ids.suid, NS.OA,  "hasSelector", ids.fgid
+          uri   ids.suid, NS.RDF, "type",       "#{NS.OA}Composite"
+          bnode ids.suid, NS.OA,  "item", ids.svgid
+          bnode ids.suid, NS.OA,  "item", ids.fgid
         
           if obj.shapeType?
             svglens = shapeTypes[obj.shapeType[0]]?.renderAsSVG
 
           if svglens?
             # Targets have selectors, which then have svg and npt elements
-            uri     ids.svgid, NS.RDF,  "type",              "#{NS.OAX}SvgSelector"
+            uri     ids.svgid, NS.RDF,  "type",              "#{NS.OA}SvgSelector"
             literal ids.svgid, NS.DC,   "format",            "text/svg+xml"
             literal ids.svgid, NS.CNT,  "characterEncoding", "utf-8"
             literal ids.svgid, NS.CNT,  "chars",             svglens(app.dataStore.canvas, obj.id[0])
@@ -480,6 +480,7 @@ OAC.Client.StreamingVideo.namespace "Application", (Application) ->
           # streaming video annotation client
           uri     ids.fgid, NS.RDF, "type",  "#{NS.OA}FragSelector"
           literal ids.fgid, NS.RDF, "value", 't=npt:' + obj.npt_start[0] + ',' + obj.npt_end[0]
+          uri     ids.fgid, NS.DCTERMS, "conformsTo", "http://www.w3.org/TR/media-frags/"
 
         # #### createJSONObjSeries (private)
         #
@@ -615,7 +616,7 @@ OAC.Client.StreamingVideo.namespace "Application", (Application) ->
             app.initShapeLens container, view, model, itemId, (that) ->
               item = model.getItem itemId
 
-              # Accessing the view.canvas Object that was created in MITHGrid.Presentation.RaphSVG
+              # Accessing the view.canvas Object that was created in MITHgrid.Presentation.RaphSVG
               [x, y] = that.scalePoint item.x[0] - (item.w[0] / 2), item.y[0] - (item.h[0] / 2), item.targetWidth, item.targetHeight
               [w, h] = that.scalePoint item.w[0], item.h[0], item.targetWidth, item.targetHeight
           

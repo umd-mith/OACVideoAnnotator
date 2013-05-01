@@ -1,5 +1,5 @@
   
-)(jQuery, MITHGrid, OAC)
+)(jQuery, MITHgrid, OAC)
 
 # # Default Configurations
 #
@@ -8,7 +8,7 @@
 #
 # The Video Annotator core application has the basic set of components needed to provide video annotation.
 #
-MITHGrid.defaults "OAC.Client.StreamingVideo.Application",
+MITHgrid.defaults "OAC.Client.StreamingVideo.Application",
   # ### Controllers
   controllers:
     canvas:
@@ -64,7 +64,7 @@ MITHGrid.defaults "OAC.Client.StreamingVideo.Application",
     # range set.
     currentAnnotations:
       dataStore: 'canvas'
-      type: MITHGrid.Data.RangePager
+      type: MITHgrid.Data.RangePager
       leftExpressions: [ '.npt_start' ]
       rightExpressions: [ '.npt_end' ]
 
@@ -154,7 +154,7 @@ MITHGrid.defaults "OAC.Client.StreamingVideo.Application",
 #
 # - onNewShape
 #
-MITHGrid.defaults "OAC.Client.StreamingVideo.Component.ShapeCreateBox",
+MITHgrid.defaults "OAC.Client.StreamingVideo.Component.ShapeCreateBox",
   bind:
     events:
       onNewShape: null
@@ -171,7 +171,7 @@ MITHGrid.defaults "OAC.Client.StreamingVideo.Component.ShapeCreateBox",
 # - onFocus
 # - onUnfocus
 #
-MITHGrid.defaults "OAC.Client.StreamingVideo.Component.ShapeEditBox",
+MITHgrid.defaults "OAC.Client.StreamingVideo.Component.ShapeEditBox",
   dirs: ['ul', 'top', 'ur', 'lft', 'lr', 'btm', 'll', 'rgt', 'mid']
   events:
     onResize: null
@@ -189,7 +189,7 @@ MITHGrid.defaults "OAC.Client.StreamingVideo.Component.ShapeEditBox",
 # - onShapeDrag
 # - onShapeDone
 #
-MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.CanvasClickController",
+MITHgrid.defaults "OAC.Client.StreamingVideo.Controller.CanvasClickController",
   bind:
     events:
       onShapeStart: null
@@ -204,7 +204,7 @@ MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.CanvasClickController",
 # - onUnfocus
 # - onUpdate
 #
-MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.Drag",
+MITHgrid.defaults "OAC.Client.StreamingVideo.Controller.Drag",
   bind:
     events:
       onFocus: null
@@ -220,7 +220,7 @@ MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.Drag",
 #
 # - onSelect
 #
-MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.Select",
+MITHgrid.defaults "OAC.Client.StreamingVideo.Controller.Select",
   bind:
     events:
       onSelect: null
@@ -233,7 +233,7 @@ MITHGrid.defaults "OAC.Client.StreamingVideo.Controller.Select",
 # - onResize
 # - onPlayheadUpdate
 #
-MITHGrid.defaults "OAC.Client.StreamingVideo.Player.DriverBinding",
+MITHgrid.defaults "OAC.Client.StreamingVideo.Player.DriverBinding",
   events:
     onResize: null
     onPlayheadUpdate: null

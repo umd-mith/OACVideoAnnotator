@@ -43,7 +43,7 @@ OAC.Client.StreamingVideo.namespace "Player", (exports) ->
   #       -- do something with player
   #     });
   #
-  exports.onNewPlayer = MITHGrid.initEventFirer(false, false, true)
+  exports.onNewPlayer = MITHgrid.initEventFirer(false, false, true)
 
   # ## register
   #
@@ -112,4 +112,4 @@ OAC.Client.StreamingVideo.namespace "Player", (exports) ->
   #
   exports.namespace "DriverBinding", (db) ->
     db.initInstance = (args...) ->
-      MITHGrid.initInstance "OAC.Client.StreamingVideo.Player.DriverBinding", args...
+      MITHgrid.initInstance "OAC.Client.StreamingVideo.Player.DriverBinding", args...

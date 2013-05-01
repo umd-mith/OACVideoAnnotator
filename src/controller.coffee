@@ -28,7 +28,7 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
   #
   Controller.namespace "Drag", (Drag) ->
     Drag.initInstance = (args...) ->
-      MITHGrid.Controller.Raphael.initInstance "OAC.Client.StreamingVideo.Controller.Drag", args..., (that) ->
+      MITHgrid.Controller.Raphael.initInstance "OAC.Client.StreamingVideo.Controller.Drag", args..., (that) ->
         that.applyBindings = (binding) ->
           el = binding.locate('raphael')
 
@@ -61,7 +61,7 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
   #
   Controller.namespace "Select", (Select) ->
     Select.initInstance = (args...) ->
-      MITHGrid.Controller.Raphael.initInstance "OAC.Client.StreamingVideo.Controller.Select", args..., (that) ->
+      MITHgrid.Controller.Raphael.initInstance "OAC.Client.StreamingVideo.Controller.Select", args..., (that) ->
         options = that.options
         isSelectable = options.isSelectable or -> true
 
@@ -87,7 +87,7 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
   #
   Controller.namespace "CanvasClickController", (CanvasClickController) ->
     CanvasClickController.initInstance = (args...) ->
-      MITHGrid.Controller.initInstance "OAC.Client.StreamingVideo.Controller.CanvasClickController", args..., (that) ->
+      MITHgrid.Controller.initInstance "OAC.Client.StreamingVideo.Controller.CanvasClickController", args..., (that) ->
         options = that.options
         overlay = null
 
@@ -130,13 +130,13 @@ OAC.Client.StreamingVideo.namespace 'Controller', (Controller) ->
           captureMouse = (handlers) ->
             if !mouseCaptured
               mouseCaptured = true
-              MITHGrid.mouse.capture (eType) ->
+              MITHgrid.mouse.capture (eType) ->
                 if handlers[eType]?
                   handlers[eType](this)
           
           uncaptureMouse = ->
             if mouseCaptured
-              MITHGrid.mouse.uncapture()
+              MITHgrid.mouse.uncapture()
               mouseCaptured = false
 
           #

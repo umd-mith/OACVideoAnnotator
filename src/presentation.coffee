@@ -9,7 +9,7 @@
 OAC.Client.StreamingVideo.namespace "Presentation", (Presentation) ->
   Presentation.namespace "AnnotationList", (AnnotationList) ->
     AnnotationList.initInstance = (args...) ->
-      MITHGrid.Presentation.initInstance "OAC.Client.StreamingVideo.Presentation.AnnotationList", args..., (that, container) ->
+      MITHgrid.Presentation.initInstance "OAC.Client.StreamingVideo.Presentation.AnnotationList", args..., (that, container) ->
         options = that.options
         app = options.application()
       
@@ -136,7 +136,7 @@ OAC.Client.StreamingVideo.namespace "Presentation", (Presentation) ->
   Presentation.namespace "RaphaelCanvas", (RaphaelCanvas) ->
     counter = 1
     RaphaelCanvas.initInstance = (args...) ->
-      MITHGrid.Presentation.initInstance "OAC.StreamingVideo.Client.Presentation.RaphaelCanvas", args..., (that, container) ->
+      MITHgrid.Presentation.initInstance "OAC.StreamingVideo.Client.Presentation.RaphaelCanvas", args..., (that, container) ->
         if !container?
           id = "oac-raphael-presentation-canvas-#{counter}"
           counter += 1
@@ -219,7 +219,7 @@ OAC.Client.StreamingVideo.namespace "Presentation", (Presentation) ->
               
             that.canvas.setSize w, h
 
-        MITHGrid.events.onWindowResize.addListener updateLocation
+        MITHgrid.events.onWindowResize.addListener updateLocation
       
         if playerObj?
           playerObj.events.onResize.addListener updateLocation

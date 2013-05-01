@@ -16,7 +16,7 @@ OAC.Client.StreamingVideo.namespace "Component", (Component) ->
   #
   Component.namespace "ModeButton", (ModeButton) ->
     ModeButton.initInstance = (args...) ->
-      MITHGrid.initInstance "OAC.Client.StreamingVideo.Component.ModeButton", args..., (that, buttonEl) ->
+      MITHgrid.initInstance "OAC.Client.StreamingVideo.Component.ModeButton", args..., (that, buttonEl) ->
         options = that.options
         app = options.application()
         
@@ -55,11 +55,11 @@ OAC.Client.StreamingVideo.namespace "Component", (Component) ->
 
     ShapeEditBox.initInstance = (args...) ->
       #
-      # We delay creating the drag controller until we need it because we haven't defined the MITHGrid
+      # We delay creating the drag controller until we need it because we haven't defined the MITHgrid
       # defaults for the binding events.
       #
       dragController ?= OAC.Client.StreamingVideo.Controller.Drag.initInstance {}
-      MITHGrid.initInstance "OAC.Client.StreamingVideo.Component.ShapeEditBox", args..., (that, paper) ->
+      MITHgrid.initInstance "OAC.Client.StreamingVideo.Component.ShapeEditBox", args..., (that, paper) ->
         options = that.options
         handleSet = null
         handles = {}
@@ -377,7 +377,7 @@ OAC.Client.StreamingVideo.namespace "Component", (Component) ->
   #
   Component.namespace 'ShapeCreateBox', (ShapeCreateBox) ->
     ShapeCreateBox.initInstance = (args...) ->
-      MITHGrid.initInstance "OAC.Client.StreamingVideo.Component.ShapeCreateBox", args..., (that, paper) ->
+      MITHgrid.initInstance "OAC.Client.StreamingVideo.Component.ShapeCreateBox", args..., (that, paper) ->
         options = that.options
 
         #

@@ -50,8 +50,8 @@ $(document).ready ->
 				0
 			getTargetURI: -> 'http://www.youtube.com/watch?v=HYLacuAp76U&feature=fvsr'
 			events:
-				onResize: MITHGrid.initEventFirer(true, true)
-				onPlayheadUpdate: MITHGrid.initEventFirer(true, true)
+				onResize: MITHgrid.initEventFirer(true, true)
+				onPlayheadUpdate: MITHgrid.initEventFirer(true, true)
 		}
 		
 		# We want to put a few annotations in
