@@ -1,0 +1,596 @@
+<?php
+
+/**
+  * @file
+  * Provides annotation capability for embedded videos with export/import serialization through Open Annotation.
+  */
+
+
+function video_annotator_permission() {
+  return array(
+    'video annotation resource create' => array(
+      'title' => t('Create video annotations'),
+      'description' => t('Allow users to create and store new annotations of embedded videos.'),
+    ),
+    'video annotation resource view any annotations' => array(
+      'title' => t('View any or all video annotations'),
+      'description' => t('Allow users to view any annotations associated with embedded videos.'),
+    ),
+    'video annotation resource edit any annotations' => array(
+      'title' => t('Edit any or all video annotations'),
+      'description' => t('Allow users to edit any annotations associated with embedded videos.'),
+    ),
+    'video annotation resource delete any annotations' => array(
+      'title' => t('Delete any or all video annotations'),
+      'description' => t('Allow users to remove any annotations associated with embedded videos.'),
+    ),
+    'video annotation resource view own annotations' => array(
+      'title' => t('View own annotations'),
+      'description' => t('Allow users to view their own annotations associated with embedded videos.'),
+    ),
+    'video annotation resource edit own annotations' => array(
+      'title' => t('Edit own annotations'),
+      'description' => t('Allow users to edit their own annotations associated with embedded videos.'),
+    ),
+    'video annotation resource delete own annotations' => array(
+      'title' => t('Delete own annotations'),
+      'description' => t('Allow users to remove their own annotations associated with embedded videos.'),
+    ),
+    'bypass video annotation access' => array(
+      'title' => t('Bypass video annotation access checks'),
+      'description' => t('Allow users to bypass any access checks when working with video annotations.'),
+    ),
+  );
+}
+
+function video_annotator_menu() {
+  $items = array();
+
+  $items['admin/config/media/video-annotation'] = array(
+    'title' => 'OAC Video Annotator',
+    'description' => 'Configuration of media settings for video annotation.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('video_annotator_media_configuration_form'),
+    'access arguments' => array('access administration pages'),
+  );
+
+  return $items;
+}
+
+function video_annotator_ctools_plugin_api($owner, $api) {
+  if($owner == "services" && $api == "services") {
+    return array(
+      'version' => 3,
+      'file' => 'video_annotator.services.inc',
+      'path' => drupal_get_path('module', 'video_annotator'),
+    );
+  }
+}
+
+function video_annotator_services_resources() {
+  return array(
+    'video_annotation' => array(
+      'retrieve' => array(
+        'help' => 'Retrieve a video annotation',
+        'file' => array('file' => 'inc', 'module' => 'video_annotation'),
+        'callback' => '_video_annotation_resource_retrieve',
+        'access callback' => '_video_annotation_access',
+        'access arguments' => array('view'),
+        'access arguments append' => TRUE,
+        'args' => array(
+          array(
+            'name' => 'id',
+            'type' => 'int',
+            'description' => 'The id of the video annotation to get',
+            'source' => array('path' => '0'),
+            'optional' => FALSE,
+          ),
+        ),
+      ),
+      'create' => array(
+        'help' => 'Create a video annotation',
+        'file' => array('file' => 'inc', 'module' => 'video_annotation'),
+        'callback' => '_video_annotation_resource_create',
+        'access arguments' => array('video annotation resource create'),
+        'access arguments append' => FALSE,
+        'args' => array(
+          array(
+            'name' => 'data',
+            'type' => 'struct',
+            'description' => 'The video annotation object',
+            'source' => 'data',
+            'optional' => FALSE,
+          ),
+        ),
+      ),
+      'update' => array(
+        'help' => 'Update a video annotation',
+        'file' => array('file' => 'inc', 'module' => 'video_annotation'),
+        'callback' => '_video_annotation_resource_update',
+        'access callback' => '_video_annotation_access',
+        'access arguments' => array('update'),
+        'access arguments append' => TRUE,
+        'args' => array(
+          array(
+            'name' => 'id',
+            'type' => 'int',
+            'description' => 'The id of the video annotation to update',
+            'source' => array('path' => '0'),
+            'optional' => FALSE,
+          ),
+        ),
+      ),
+      'delete' => array(
+        'help' => 'Delete a video annotation',
+        'file' => array('file' => 'inc', 'module' => 'video_annotation'),
+        'callback' => '_video_annotation_resource_delete',
+        'access callback' => '_video_annotation_access',
+        'access arguments' => array('delete'),
+        'access arguments append' => TRUE,
+        'args' => array(
+          array(
+            'name' => 'id',
+            'type' => 'int',
+            'description' => 'The id of the video annotation to delete',
+            'source' => array('path' => '0'),
+            'optional' => FALSE,
+          ),
+        ),
+      ),
+      'index' => array(
+        'help' => 'Retrieve a listing of video annotations',
+        'file' => array('file' => 'inc', 'module' => 'video_annotation'),
+        'callback' => '_video_annotation_resource_index',
+        'access callback' => 'user_access',
+        'access arguments' => array('access content'),
+        'access arguments append' => FALSE,
+        'args' => array(array(
+            'name' => 'page',
+            'type' => 'int',
+            'description' => '',
+            'source' => array(
+              'param' => 'page',
+            ),
+            'optional' => TRUE,
+            'default value' => 0,
+          ),
+          array(
+            'name' => 'parameters',
+            'type' => 'array',
+            'description' => '',
+            'source' => 'param',
+            'optional' => TRUE,
+            'default value' => array(),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+function _video_annotator_access($op, $args) {
+  global $user;
+  $access = FALSE;
+
+  switch($op) {
+    case 'view':
+      $anno = video_annotator_get_anno($args[0]);
+      break;
+    case 'update':
+      $anno = video_annotator_get_anno($args[0]->id);
+      $op = "edit";
+      break;
+    case 'delete':
+      $anno = video_annotator_get_anno($args[0]);
+      break;
+    default:
+      return FALSE;
+  }
+  $access = user_access("video annotation resource $op any annotations");
+  $access = $access || $anno->uid == $user->uid && user_access("video annotation resource $op own annotations");
+  return $access;
+}
+
+function video_annotator_get_video_annotation($id) {
+  $result = db_select('video_annotations')
+            -> condition('id', $id)
+            -> addTag('video_annotation_access')
+            -> execute();
+  if($result) {
+    return $result->fetchAssoc();
+  }
+  return FALSE;
+}
+
+function video_annotator_write_video_annotation($anno) {
+  $vid = db_insert('video_annotations')
+         -> fields($anno)
+         -> execute();
+}
+
+function video_annotator_delete_video_annotation($id) {
+  db_delete('video_annotations')
+  -> condition('id', $id)
+  -> addTag('video_annotation_access')
+  -> execute();
+}
+
+function video_annotator_get_video_annotations_for_node($node_id) {
+  $result = db_select('video_annotations')
+            -> condition('scope', $node_id)
+            -> addTag('video_annotation_access')
+            -> execute();
+  # returns the annotation data as a list of hashes
+  return $result->fetchAllAssoc('id');
+}
+
+function video_annotator_query_video_annotation_access_alter($query) {
+  #$query->distinct();
+  if(!$op = $query->getMetaData('op')) {
+    $op = 'view';
+  }
+  if(!user_access('bypass video annotation access')) {
+    if(!user_access("video annotation resource $op any annotations")) {
+      if(!user_access("video annotation resource $op own annotations")) {
+        $query -> condition('id', 0);
+      }
+      else {
+        $query -> condition('uid', $account_uid);
+      }
+    }
+    else {
+      # no limit on what the user can see in the query
+    }
+  }
+}
+
+function video_annotator_filter_info() {
+  $filters = array();
+  $filters['video_annotator_ui'] = array(
+    'title' => t('Video Annotator UI Elements'),
+    'description' => t('Enables various UI block elements in content markup.'),
+    'process callback' => 'video_annotator_ui_filter',
+  );
+  return $filters;
+}
+
+function video_annotator_ui_filter_callback($matches) {
+
+}
+
+function video_annotator_ui_filter($text, $filter) {
+
+}
+
+function video_annotator_controls() {
+  $controls = module_invoke_all('video_annotation_control_info');
+
+}
+
+function video_annotator_video_annotation_control_info() {
+  $controls = array();
+  $controls["rectangle"] = array(
+    "weight" => 0,
+    "type" => "constraint",
+    "mode" => "Rectangle",
+    "icon" => "",
+  );
+  $controls["ellipse"] = array(
+    "weight" => 1,
+    "type" => "constraint",
+    "mode" => "Ellipse",
+    "icon" => "",
+  );
+  $controls["select"] = array(
+    "weight" => 0,
+    "type" => "control",
+    "mode" => "Select",
+    "icon" => "",
+  );
+  $controls["play-toggle"] = array(
+    "weight" => 1,
+    "type" => "control",
+    "mode" => "Watch",
+    "icon" => "",
+  );
+  return $controls;
+}
+
+function _video_annotator_flatten_json($jsonld) {
+  if(!function_exists('jsonld_expand') || !function_exists('jsonld_flatten')) {
+    require_once('lib/jsonld.php');
+  }
+  $data = jsonld_expand($jsonld, array(
+    "keepFreeFloatingNodes" => TRUE
+  ));
+  if(!$data) {
+    return $data;
+  }
+
+  $context = array(
+    'oa' => 'http://www.w3.org/ns/oa#',
+    'rdf' => 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
+    'cnt' => 'http://www.w3.org/2011/content#',
+    'dc' => 'http://purl.org/dc/elements/1.1/',
+    'dcterms' => 'http://purl.org/dc/terms/',
+    'exif' => 'http://www.w3.org/2003/12/exif/ns#',
+    'height' => 'exif:height',
+    'width' => 'exif:width',
+    'id' => '@id',
+    'type' => '@type',
+    'graph' => '@graph',
+    'value' => 'rdf:value',
+    'annotatedBy' => array(
+      '@id' => 'oa:annotatedBy',
+      '@type' => '@id',
+    ),
+    'serializedBy' => array(
+      '@id' => 'oa:serializedBy',
+      '@type' => '@id',
+    ),
+    'motivatedBy' => array(
+      '@id' => 'oa:motivatedBy',
+      '@type' => '@id',
+    ),
+    'equivalentTo' => array(
+      '@id' => 'oa:equivalentTo',
+      '@type' => '@id',
+    ),
+    'styledBy' => array(
+      '@id' => 'oa:styledBy',
+      '@type' => '@id',
+    ),
+    'cachedSource' => array(
+      '@id' => 'oa:cachedSource',
+      '@type' => '@id',
+    ),
+    'conformsTo' => array(
+      '@id' => 'dcterms:conformsTo',
+      '@type' => '@id',
+    ),
+    'default' => array(
+      '@id' => 'oa:default',
+      '@type' => '@id',
+    ),
+    'first' => array(
+      '@id' => 'rdf:first',
+      '@type' => '@id',
+    ),
+    'rest' => array(
+      '@id' => 'rdf:rest',
+      '@container' => '@list',
+      '@type' => '@id',
+    ),
+    'body' => array(
+      '@id' => 'oa:hasBody',
+      '@type' => '@id',
+    ),
+    'target' => array(
+      '@id' => 'oa:hasTarget',
+      '@type' => '@id',
+    ),
+    'chars' => 'cnt:chars',
+    'format' => 'dc:format',
+    'source' => array(
+      '@id' => 'oa:hasSource',
+      '@type' => '@id',
+    ),
+    'selector' => array(
+      '@id' => 'oa:hasSelector',
+      '@type' => '@id',
+    ),
+    'scope' => array(
+      '@id' => 'oa:hasScope',
+      '@type' => '@id',
+    ),
+    'item' => array(
+      '@id' => 'oa:item',
+      '@type' => '@id',
+    ),
+  );
+
+  drupal_alter("video_annotation_context", $context);
+  $context = json_decode(json_encode($context), FALSE);
+  $data = jsonld_flatten($data, $context);
+  $return = array();
+  foreach($data->graph as $item) {
+    if(count((array)$item) > 1) {
+      $return[$item->id] = $item;
+    }
+  }
+  return $return;
+}
+
+function video_annotator_extract_annotations_from_jsonld($jsonld) {
+  $annos = array();
+
+  $data = _video_annotator_flatten_json($jsonld);
+
+  # we want to pull out all of the useful information that we care about in annotations
+  # we aren't going to store the annotations as-is
+  foreach($data as $id => $props) {
+    if(isset($props->type) && in_array("oa:Annotation", (array)$props->type)) {
+      # we skip anything not an annotation -- if we need it, we'll get to it because it's referenced by an annotation.
+      $anno = array();
+      if(isset($props->body) && isset($data[$props->body])) {
+        # pull out the body content -- we need this to be handled in a general way so that it can be extended through other plugins
+        $body = module_invoke_all("video_annotation_body_info", $props->body, $data);
+        #$body = call_user_func_array("array_merge", $body);
+      }
+      if(isset($props->target) && isset($data[$props->target])) {
+        $target = module_invoke_all("video_annotation_target_info", $props->target, $data);
+      }
+      $anno = array_merge($anno, $body, $target);
+      $annos[$id] = $anno;
+    }
+  }
+  return $annos;
+}
+
+function video_annotator_video_annotation_target_info($target_id, $data) {
+  $timing = array();
+  $shape = array();
+  $props = $data[$target_id];
+  #print_r($props);
+  if(isset($props->type) && in_array("oa:SpecificResource", (array)$props->type)) {
+    if(isset($props->selector) && isset($data[$props->selector])) {
+      if(isset($data[$props->selector]->item)) {
+        foreach($data[$props->selector]->item as $item) {
+          if(isset($data[$item])) {
+            $timing = array_merge_recursive($timing, module_invoke_all("video_annotation_timing_info", $item, $data));
+            #$timing = call_user_func_array("array_merge", $timing);
+
+            $shape = array_merge_recursive($shape, module_invoke_all("video_annotation_shape_info", $item, $data));
+            #$shape = call_user_func_array("array_merge", $shape);
+          }
+        }
+      }
+    }
+    if(isset($props->source)) {
+      $target = array("target" => $props->source);
+    }
+  }
+  else {
+    $target = array( "target" => $target_id );
+    $timing = array( "start_time" => 0, "end_time" => -1 );
+  }
+  $target["scope"] = "foo";
+  return array_merge_recursive($timing, $shape, $target);
+}
+
+function video_annotator_video_annotation_body_info($body_id, $data) {
+  $props = $data[$body_id];
+  if(isset($props->chars)) {
+    return array(
+      "body_type" => (isset($props->format) ? $props->format : "text/plain"),
+      "text_body" => $props->chars,
+    );
+  }
+}
+
+function video_annotator_video_annotation_json($data) {
+  $anno = array(
+    'id' => (isset($data['id']) ? $data['id'] : '<none>'),
+    'body' => video_annotator_video_annotation_body_json($data),
+    'target' => video_annotator_video_annotation_target_json($data),
+  );
+
+  $anno['annotatedBy'] = (isset($data['uid']) ? $data['uid'] : '<none>');
+
+  return $anno;
+}
+
+function video_annotator_video_annotation_body_json($data) {
+  return array(
+    "type" => ["cnt:ContentAsText", "dctypes:Text"],
+    "format" => $data["body_type"],
+    "chars" => $data["text_body"]
+  );
+}
+
+function video_annotator_video_annotation_target_json($data) {
+  $selectors = array_merge(
+                 module_invoke_all("video_annotation_timing_json", $data), 
+                 module_invoke_all("video_annotation_shape_json", $data)
+               );
+  if(count($selectors) > 1) {
+    $selectors = array(
+      'item' => $selectors,
+      'type' => 'oa:CompoundSelector'
+    );
+  }
+  $target = array(
+    'source' => $data["target"],
+    'type' => 'oa:SpecificResource',
+  );
+  if(count($selectors) > 0) {
+    $target['selector'] = $selectors;
+  }
+  return $target;
+}
+
+function video_annotator_video_annotation_timing_info($target_id, $data) {
+  $props = $data[$target_id];
+  if(isset($props->type) && in_array("oa:FragmentSelector", (array)$props->type)) {
+    $sel = $props->value;
+    if(substr($sel, 0, 6) == "t=npt:") {
+      $sel = substr($sel, 6);
+      $bits = explode(",", $sel);
+      if(count($bits) > 1) {
+        return array(
+          "start_time" => 0 + $bits[0],
+          "end_time" => 0 + $bits[1],
+        );
+      }
+    }
+  }
+}
+
+function video_annotator_video_annotation_timing_json($data) {
+  if($data["start_time"] != 0 || $data["end_time"] != -1) {
+    return array(array(
+      'type' => 'oa:FragmentSelector',
+      'conformsTo' => 'http://www.w3.org/TR/media-frags/',
+      'value' => 't=npt:' . $data['start_time'] . ',' . $data['end_time'],
+    ));
+  }
+}
+
+function video_annotator_video_annotation_shape_info($target_id, $data) {
+  $props = $data[$target_id];
+  #print_r($props);
+  $selector = array();
+  if(isset($props->type)) {
+    if(in_array("oa:FragmentSelector", (array)$props->type)) {
+      $sel = $props->value;
+      if(substr($sel, 0, 5) == "xywh=") {
+        $sel = substr($sel, 5);
+        $bits = explode(",", $sel);
+        if(count($bits) > 3) {
+          $x = 0 + $bits[0];
+          $y = 0 + $bits[1];
+          $w = 0 + $bits[2];
+          $h = 0 + $bits[3];
+          $selector["svg_selector"] = "<rect x='$x' y='$y' width='$w' height='$h'>";
+        }
+      }
+    }
+    elseif(in_array("oa:SVGSelector", (array)$props->type) && isset($prop->chars)) {
+      $selector["svg_selector"] = $prop->chars;
+    }
+  }
+  if(isset($props->width)) {
+    $selector["width"] = 0 + $props->width;
+  }
+  if(isset($props->height)) {
+    $selector["height"] = 0 + $props->height;
+  }
+  return $selector;
+}
+
+function video_annotator_video_annotation_shape_json($data) {
+  if($data["svg_selector"]) {
+    return array(array(
+      'type' => 'oa:SVGSelector',
+      'chars' => $data["svg_selector"],
+      'width' => $data['width'],
+      'height' => $data['height'],
+    ));
+  }
+}
+
+function video_annotator_media_configuration_form($form, &$form_state) {
+  # need to list content types for which video annotation should be enabled
+  # also need a way to specify back-end data storage mechanism
+  # also need to configure control mechanism - we should use a plugin system for adding annotation types, either
+  #   shapes or body content types
+  # video player drivers are handled at the JS level, but we should have boilerplate for adding them through a drupal module
+
+  if($form_state["submitted"]) {
+    return system_settings_form_submit($form, $form_state);
+  }
+  else {
+    return system_settings_form($form);
+  }
+}
+?>

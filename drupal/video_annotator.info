@@ -1,0 +1,9 @@
+name = Open Annotation Video Annotator
+description = Provides annotation capability for embedded videos with export/import serialization through Open Annotation.
+dependencies[] = mithgrid
+dependencies[] = ctools
+package = User interface
+core = 7.x
+scripts[] = js/videoanno.min.js
+
+configure = admin/config/media/video-annotation
