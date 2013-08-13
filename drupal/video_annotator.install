@@ -59,15 +59,14 @@ function video_annotator_schema() {
         ),
         'body_type' => array(
           'description' => t('The mime type of the annotation body'),
-          'type' => 'text',
+          'type' => 'varchar',
+          'length' => 64,
           'not null' => TRUE,
           'default' => 'text/plain',
         ),
         'text_body' => array(
           'description' => t('The text body of the annotation.'),
           'type' => 'text',
-          'not null' => TRUE,
-          'default' => '',
         ),
         'svg_selector' => array(
           'description' => t('The SVG description of the region the annotation is targeting.'),
@@ -94,7 +93,6 @@ function video_annotator_schema() {
         'target' => array(
           'description' => t('The URL of the embedded video which this annotation targets.'),
           'type' => 'text',
-          'not null' => TRUE,
         ),
         'scope' => array(
           'description' => t('The node which embeds the video when this annotation is applicable.'),
