@@ -257,8 +257,8 @@ function video_annotator_write_video_annotation($anno) {
   $vid = db_insert('video_annotations')
          -> fields($anno)
          -> execute();
-  $anno->id = $vid;
-  return $anno;
+  #$anno->id = $vid;
+  return $vid;
 }
 
 function video_annotator_delete_video_annotation($id) {
@@ -444,6 +444,7 @@ function _video_annotator_flatten_json($jsonld) {
   if(!function_exists('jsonld_expand') || !function_exists('jsonld_flatten')) {
     require_once('lib/jsonld.php');
   }
+  $jsonld = json_decode(json_encode($jsonld), FALSE);
   $data = jsonld_expand($jsonld, array(
     "keepFreeFloatingNodes" => TRUE
   ));
@@ -464,6 +465,7 @@ function _video_annotator_flatten_json($jsonld) {
 }
 
 function video_annotator_extract_annotations_from_jsonld($jsonld) {
+  global $user;
   $annos = array();
 
   $data = _video_annotator_flatten_json($jsonld);
@@ -483,6 +485,7 @@ function video_annotator_extract_annotations_from_jsonld($jsonld) {
         $target = module_invoke_all("video_annotation_target_info", $props->target, $data);
       }
       $anno = array_merge($anno, $body, $target);
+      $anno["uid"] = $user->uid;
       $annos[$id] = $anno;
     }
   }
@@ -516,7 +519,14 @@ function video_annotator_video_annotation_target_info($target_id, $data) {
     $target = array( "target" => $target_id );
     $timing = array( "start_time" => 0, "end_time" => -1 );
   }
-  $target["scope"] = "foo";
+  if(isset($props->scope)) {
+    $scope = $props->scope;
+    $bits = explode("node/", $scope);
+    if(sizeof($bits) == 2) {
+      $target["scope"] = intval($bits[1]);
+    }
+  }
+  #$target["scope"] = "foo";
   return array_merge_recursive($timing, $shape, $target);
 }
 
@@ -615,32 +625,31 @@ function video_annotator_video_annotation_timing_json($data) {
 
 function video_annotator_video_annotation_shape_info($target_id, $data) {
   $props = $data[$target_id];
-  #print_r($props);
   $selector = array();
   if(isset($props->type)) {
-    if(in_array("oa:FragmentSelector", (array)$props->type)) {
+    if(in_array("oa:FragmentSelector", (array)$props->type) && isset($props->conformsTo) && $props->conformsTo == "http://www.w3.org/TR/media-frags/") {
       $sel = $props->value;
       if(substr($sel, 0, 5) == "xywh=") {
         $sel = substr($sel, 5);
         $bits = explode(",", $sel);
         if(count($bits) > 3) {
-          $x = 0 + $bits[0];
-          $y = 0 + $bits[1];
-          $w = 0 + $bits[2];
-          $h = 0 + $bits[3];
+          $x = intval($bits[0]);
+          $y = intval($bits[1]);
+          $w = intval($bits[2]);
+          $h = intval($bits[3]);
           $selector["svg_selector"] = "<rect x='$x' y='$y' width='$w' height='$h'>";
         }
       }
     }
-    elseif(in_array("oa:SVGSelector", (array)$props->type) && isset($prop->chars)) {
-      $selector["svg_selector"] = $prop->chars;
+    elseif(in_array("oa:SVGSelector", (array)$props->type) && isset($props->chars)) {
+      $selector["svg_selector"] = $props->chars;
     }
   }
   if(isset($props->width)) {
-    $selector["width"] = 0 + $props->width;
+    $selector["width"] = intval($props->width);
   }
   if(isset($props->height)) {
-    $selector["height"] = 0 + $props->height;
+    $selector["height"] = intval($props->height);
   }
   return $selector;
 }

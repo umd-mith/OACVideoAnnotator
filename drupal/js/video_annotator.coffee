@@ -76,7 +76,85 @@ OAC.Client.StreamingVideo.namespace 'Drupal', (Drupal) ->
           app.importJSONLD annotationJSONLD
         else
           needAnnos.push app
-      
+
+      $.ajax
+        url: 'http://localhost/~jgsmith/drupal/?q=services/session/token'
+        type: 'GET'
+        success: (csr_token) -> 
+          console.log 'CSR Token: ', csr_token
+
+          $.ajax
+            url: uri_from_template(settings?.urls?.collection?.post, {
+                id: 0
+              })
+            dataType: 'json'
+            contentType: 'application/json'
+            type: 'POST'
+            headers:
+              'X-CSRF-Token': csr_token
+            success: (data) ->
+              console.log "Data returned:", data
+            error: (err) ->
+              console.log "Err:", err
+            data: JSON.stringify
+              "@context":
+                "oa":"http://www.w3.org/ns/oa#"
+                "rdf":"http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+                "cnt":"http://www.w3.org/2011/content#"
+                "dc":"http://purl.org/dc/elements/1.1/"
+                "dcterms":"http://purl.org/dc/terms/"
+                "exif":"http://www.w3.org/2003/12/exif/ns#"
+                "foaf":"http://xmlns.com/foaf/0.1/"
+                "height":"exif:height"
+                "width":"exif:width"
+                "id":"@id"
+                "type":"@type"
+                "graph":"@graph"
+                "value":"rdf:value"
+                "annotatedBy":{"@id":"oa:annotatedBy","@type":"@id"}
+                "serializedBy":{"@id":"oa:serializedBy","@type":"@id"}
+                "motivatedBy":{"@id":"oa:motivatedBy","@type":"@id"}
+                "equivalentTo":{"@id":"oa:equivalentTo","@type":"@id"}
+                "styledBy":{"@id":"oa:styledBy","@type":"@id"}
+                "cachedSource":{"@id":"oa:cachedSource","@type":"@id"}
+                "conformsTo":{"@id":"dcterms:conformsTo","@type":"@id"}
+                "default":{"@id":"oa:default","@type":"@id"}
+                "first":{"@id":"rdf:first","@type":"@id"}
+                "rest":{"@id":"rdf:rest","@container":"@list","@type":"@id"}
+                "body":{"@id":"oa:hasBody","@type":"@id"}
+                "target":{"@id":"oa:hasTarget","@type":"@id"}
+                "chars":"cnt:chars"
+                "format":"dc:format"
+                "source":{"@id":"oa:hasSource","@type":"@id"}
+                "selector":{"@id":"oa:hasSelector","@type":"@id"}
+                "scope":{"@id":"oa:hasScope","@type":"@id"}
+                "item":{"@id":"oa:item","@type":"@id"}
+              "@graph":[{
+                "type": "oa:Annotation"
+                "body":
+                  "type":[
+                    "cnt:ContentAsText"
+                    "dctypes:Text"
+                  ]
+                  "format":"text/plain"
+                  "chars":"This is a comment..."
+                "target":
+                  "source":"http://www.example.com/movies/4.m4v"
+                  "type":"oa:SpecificResource"
+                  "scope":"/~jgsmith/drupal/?q=node/1"
+                  "selector":
+                    "type":"oa:CompoundSelector"
+                    "item":[{
+                      "type":"oa:FragmentSelector"
+                      "conformsTo":"http://www.w3.org/TR/media-frags/"
+                      "value":"t=npt:1,2.5"
+                    }, {
+                      "type":"oa:SVGSelector"
+                      "chars":"<rect x=\"101\" y=\"202\" w=\"303\" h=\"404\" />"
+                      "width":606
+                      "height":505
+                    }]
+              }]
     
 )(jQuery)
   
