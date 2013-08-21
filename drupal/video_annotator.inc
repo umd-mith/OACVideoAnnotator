@@ -22,18 +22,20 @@ function _video_annotation_resource_create($json) {
   return (object)($saved_annos);
 }
 
-function _video_annotation_resource_update($id, $data) {
-  global $user;
-  $anno = video_annotator_get_annotation($id);
-  unset($data->created);
-  $data->id = $id;
-  $data->uid = $anno->uid;
-  $data->modified = time();
-  
-  video_annotator_write_annotation($data);
+function _video_annotation_resource_update($id, $json) {
+  $data = video_annotator_extract_annotations_from_jsonld($json);
+
+  $uri = services_resource_uri(array('video_annotation', $id)).".json";
+  $res = FALSE;
+  if(array_key_exists($uri, $data)) {
+    if(array_key_exists("uid", $data[$uri])) {
+      unset($data[$uri]["uid"]);
+    }
+    $res = video_annotator_update_video_annotation($id, $data[$uri]);
+  }
+
   return (object)array(
-    '@id' => $id,
-    'uri' => services_resource_uri(array('video_annotation', $id)).".json",
+    'success' => $res,
   );
 }
 
@@ -51,7 +53,7 @@ function _video_annotation_resource_retrieve($id) {
 }
 
 function _video_annotation_resource_delete($id) {
-  video_annotator_delete_annotation($id);
+  video_annotator_delete_video_annotation($id);
   return (object)array(
     'id' => $id,
   );

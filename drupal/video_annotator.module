@@ -83,7 +83,7 @@ function video_annotator_menu() {
 # TODO: figure out how to build the URL based on configuration info
 function video_annotator_api_urls() {
   # We have to make the root configurable for now :-/
-  $root = url(variable_get('video_annotator_rest_api_endpoint'));
+  $root = "http://localhost".url(variable_get('video_annotator_rest_api_endpoint'));
   return array(
     'collection' => array(
       'get' => $root . ".json&scope={scope_id}",
@@ -156,6 +156,11 @@ function video_annotator_services_resources() {
             'type' => 'int',
             'description' => 'The id of the video annotation to update',
             'source' => array('path' => '0'),
+            'optional' => FALSE,
+          ),
+          array(
+            'description' => 'The video annotation object',
+            'source' => 'data',
             'optional' => FALSE,
           ),
         ),
@@ -261,10 +266,32 @@ function video_annotator_write_video_annotation($anno) {
   return $vid;
 }
 
+function video_annotator_update_video_annotation($id, $anno) {
+  if(!_video_annotator_access('update', (object)array((object)array('id' => $id )))) {
+    return FALSE;
+  }
+  $num_updated = db_update('video_annotations')
+                  -> fields($anno)
+                  -> condition('id', $id)
+                  -> execute();
+  if($num_updated > 0) {
+    return TRUE;
+  }
+  else {
+    return FALSE;
+  }
+}
+
 function video_annotator_delete_video_annotation($id) {
+  $result = db_select('video_annotations')
+            -> fields('video_annotations', array('id'))
+            -> condition('id', $id)
+            -> addTag('video_annotation_access')
+            -> execute();
+  $ids = $result->fetchAllAssoc('id');
+
   db_delete('video_annotations')
-  -> condition('id', $id)
-  -> addTag('video_annotation_access')
+  -> condition('id', array_keys($ids))
   -> execute();
 }
 
@@ -469,13 +496,14 @@ function video_annotator_extract_annotations_from_jsonld($jsonld) {
   $annos = array();
 
   $data = _video_annotator_flatten_json($jsonld);
-
   # we want to pull out all of the useful information that we care about in annotations
   # we aren't going to store the annotations as-is
   foreach($data as $id => $props) {
     if(isset($props->type) && in_array("oa:Annotation", (array)$props->type)) {
       # we skip anything not an annotation -- if we need it, we'll get to it because it's referenced by an annotation.
       $anno = array();
+      $body = array();
+      $target = array();
       if(isset($props->body) && isset($data[$props->body])) {
         # pull out the body content -- we need this to be handled in a general way so that it can be extended through other plugins
         $body = module_invoke_all("video_annotation_body_info", $props->body, $data);
