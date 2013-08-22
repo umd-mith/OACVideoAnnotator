@@ -290,23 +290,24 @@ We want to tie into the data store and report any changes back to the server. Th
 * updated: the item id is in the model and ends in `.json`, or
 * created: the item id is in the model and does not end in `.json`.
 
+
     app.dataStore.canvas.events.onModelChange (model, list) ->
       return if freezeAjax
       for id in list
         if not model.contains id
-
+          
           _"RESTfully Delete Annotation"
-
+          
         else
           item = model.getItem id
           if item.id?[0] =~ /^\.json$/
-
+            
             _"RESTfully Update Annotation"
-
+            
           else
-
+            
             _"RESTfully Create Annotation"
-
+            
       null
 
 ### RESTfully Delete Annotation
@@ -459,18 +460,18 @@ We base our display of the annotation body on a fairly simple text display. Othe
 ## Drupal Glue
 
 We use Drupal's mechanisms to bootstrap the annotation client. This involves getting settings from the Drupal module and any context provided by Drupal.
+
+    _"Drupal Glue:resolve settings"
+    _"Drupal Glue:uri construction"
+    _"Drupal Glue:resolve csrl token"
+    _"Drupal Glue:fetch annotations"
+    _"Drupal Glue:instantiate application"
+
+[resolve settings](#)
     
     settingsDeffered.resolve settings.video_annotator
 
-We want to tie together the videoanno.js pieces and the drupal page view. We want to find all of the videos for which we have a driver and create a unified annotation management interface for them. That is, we want a single set of controls to manage annotations in all videos. We associate their events with the video we're closest to. They can float down the page as needed.
-          
-We want all of the controls to hide away except for some small icon that can be clicked to bring up the annotation HUD, which can float off to the side of the video.
-          
-When possible, the controls should float off to the side in the middle of the page, but if the page is scrolled all the way up or down, we may need to do something different.
-          
-Another option: have a control/selector pop up when the mouse hovers near a video on the page.
-
-We need to build out the controls palette based on the settings.controls and settings.permissions
+[uri construction](#)
 
     uri_from_template = (template, variables) ->
       if template?
@@ -478,13 +479,16 @@ We need to build out the controls palette based on the settings.controls and set
         out = out.replace('{scope_id}', settings.scope_id)
         out
 
+[resolve csrl token](#)
 
 We need the CSRL token for posting/putting/deleting back to the server. *N.B.:* This should be provided by the Drupal module as part of the settings.
 
     csrl = Q $.ajax
       url: '?q=services/session/token'
       type: 'GET'
-        
+
+[fetch annotations](#)
+
 We gather all annotations from the server in one call we need to pull in available annotations from the server based on the page we're on and the url of the player's video this page: window.document.location.href or window.document.location.pathname
 
     annotationJSONLD = Q $.ajax
@@ -492,7 +496,9 @@ We gather all annotations from the server in one call we need to pull in availab
           id: 0
         })
       dataType: 'json'
-          
+
+[instanticate application](#)
+
 We walk through the DOM and figure out which embedded videos we can work with. For each one, we instantiate the application that manages displaying and editing annotations. We give it all of the annotations we know about for this node and let it figure out which ones it cares about.
 
     OAC.Client.StreamingVideo.Player.onNewPlayer.addListener (playerobj) ->
