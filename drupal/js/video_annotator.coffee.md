@@ -12,7 +12,7 @@ The code is broken into two main sections:
 
     (($) ->
  
-      _"Namespace"
+      _"Definitions"
 
       Drupal.behaviors.video_annotator =
         attach: (context, settings) ->
@@ -21,19 +21,24 @@ The code is broken into two main sections:
 
     )(jQuery)
 
-## Namespace
+*N.B.:* In code, the pattern `_"Named Section"` indicates that the code in the named section should be included in that location. Some references are to small snippets of code within a section. For example, `_"Definitions:setup"` refers to the small section labeled `setup` under the "Definitions" heading.
+
+## Definitions
 
 Everything is defined as part of the `OAC.Client.StreamingVideo.Drupal` namespace. We assume that the Video Annotation toolkit has been loaded at this point, so we use the existing `OAC.Client.StreamingVideo` namespace as our root. 
 
     OAC.Client.StreamingVideo.namespace 'Drupal', (Drupal) ->
+      _"Definitions:setup"
       _"Controllers"
       _"Components"
       _"Application"
 
+[setup](#)
+
 We also assume that the `q` library is loaded. The toolkit does not depend on this library, but we do. The current Drupal MITHgrid module will load the `q` library since we plan on moving MITHgrid to using promises/futures instead of callbacks in the near future. We use promises to track information that we know we'll have eventually. In this case, we know that we'll be getting settings from Drupal, but we don't want to wrap all of the definitions in the function that Drupal's JavaScript will call to set everything up. At the same time, there's no reason for this information to leak outside of the namespace definition we're in.
 
-      settingsDeffered = Q.defer()
-      settings = settingsDeffered.promise
+    settingsDeffered = Q.defer()
+    settings = settingsDeffered.promise
 
 ## Controllers
 
@@ -122,21 +127,20 @@ When in editing mode, only save and cancel are shown and will fire. When not in 
       TextControls.initInstance = (args...) ->
         MITHgrid.Controller.initInstance 'OAC.Client.StreamingVideo.Drupal.TextControls', args..., (that) ->
           that.applyBindings = (binding) ->
-            _"TextControls:setup"
             _"TextControls:elements"
             _"TextControls:bindings"
             _"TextControls:triggers"
             _"TextControls:event handlers"
-
-We make sure we're not in edit mode or visible when we start up.
-
-            resetEditMode()
-            binding.eventHide()
+            _"TextControls:setup"
 
 [setup](#)
 
+We make sure we're not in edit mode or visible when we start up.
+
     shown = false
     inEditing = false
+    resetEditMode()
+    binding.eventHide()
 
 [elements](#)
 
@@ -162,8 +166,8 @@ We bind the click controller instance to each of the elements. This gives us a s
 
 We want to trigger various events based on the mode we're in and which control elements we expect the user to be able to see or access. For example, if not in the editing mode (`inEditing` is `false`), then only the "edit" and "delete" actions should be available.
 
-    setEditingMode = _"TextControls:setEditingMode"
-    resetEditingMode = _"TextControls:resetEditingMode"
+    setEditingMode = _"TextControls:set editing mode"
+    resetEditingMode = _"TextControls:reset editing mode"
 
     editBinding.events.onSelect.addListener (e) ->
       if shown and not inEditing
@@ -184,9 +188,9 @@ We want to trigger various events based on the mode we're in and which control e
       if shown and not inEditing
         @events.onDelete.fire()
 
-[setEditingMode](#)
+[set editing mode](#)
 
-We need to coordinate the showing and hiding of different elements based on our editing mode. These functions provide us with an easy way to manage the mode and the display of these elements. We'll use them below in translation of click events to semantically meaningful events that we expose to the application.
+We need to coordinate the showing and hiding of different elements based on our editing mode. These functions provide us with an easy way to manage the mode and the display of these elements. We use them in the translation of click events to semantically meaningful events that we expose to the application.
 
     ->
       inEditing = true
@@ -195,7 +199,7 @@ We need to coordinate the showing and hiding of different elements based on our 
       deleteEl.hide()
       cancelEl.show()
 
-[resetEditingMode](#)
+[reset editing mode](#)
 
     ->
       inEditing = false
@@ -208,16 +212,32 @@ We need to coordinate the showing and hiding of different elements based on our 
 
 We provide some event handlers that the application can call to show, hide, and position the controls. The text controller will fire events only when it is visible.
 
-    binding.eventShow = ->
+    binding.eventShow = _"TextControls:show event"
+    binding.eventHide = _"TextControls:hide event"
+    binding.eventMove = _"TextControls:move event"
+
+[show event](#)
+
+When we show the text controls, we want to reset the edit mode so that the user has to select the edit control before being able to edit the annotation body.
+
+    ->
       resetEditMode()
       binding.locate('').show()
       shown = true
 
-    binding.eventHide = ->
+[hide event](#)
+
+When we hide the text controls, we aren't concerned about setting the edit mode to a particular state since the act of hiding and the state of being hidden are enough to stop any events from this controller.
+
+    ->
       binding.locate('').hide()
       shown = false
 
-    binding.eventMove = (top, right) ->
+[move event](#)
+
+When we move the text controls, we are given the upper right coordinates of where the text controls should appear. This assumes that the text controls are positioned to the left of the annotation body display.
+
+    (top, right) ->
       if shown and inEditing
         resetEditMode()
         @events.onCancel.fire()
@@ -227,7 +247,6 @@ We provide some event handlers that the application can call to show, hide, and 
       binding.locate('').css
         top: "#{top}px"
         left: "#{right-width}px"
-
 
 ## Components
 
@@ -259,33 +278,36 @@ We define the application here.
           app.freezeUpdates = -> freezeAjax = true
           app.unfreezeUpdates = -> freezeAjax = false
 
-
           app.ready ->
             _"Data Synchronization"
             _"Annotation Display"
 
 ### Data Synchronization
 
-We want to tie into the data store and report any changes back to the server. This is done as soon as we know there is a change in the data. We don't require that someone take some action other than edit, create, or delete an annotation in the usual interface.
+We want to tie into the data store and report any changes back to the server. This is done as soon as we know there is a change in the data. We don't require that someone take some action other than edit, create, or delete an annotation in the usual interface. When we are allowing updates in the data store to get reflected back to the server, we need to go through each item in the list of updated items and figure out if the item is in one of three states:
+
+* deleted: the item id is no longer in the model,
+* updated: the item id is in the model and ends in `.json`, or
+* created: the item id is in the model and does not end in `.json`.
 
     app.dataStore.canvas.events.onModelChange (model, list) ->
       return if freezeAjax
       for id in list
         if not model.contains id
+
           _"RESTfully Delete Annotation"
+
         else
           item = model.getItem id
           if item.id?[0] =~ /^\.json$/
+
             _"RESTfully Update Annotation"
+
           else
+
             _"RESTfully Create Annotation"
+
       null
-
-When we are allowing updates in the data store to get reflected back to the server, we need to go through each item in the list of updated items and figure out if the item is in one of three states:
-
-* deleted: the item id is no longer in the model,
-* updated: the item id is in the model and ends in `.json`, or
-* created: the item id is in the model and does not end in `.json`.
 
 ### RESTfully Delete Annotation
 
