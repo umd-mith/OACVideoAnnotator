@@ -290,6 +290,7 @@ We want to tie into the data store and report any changes back to the server. Th
 * updated: the item id is in the model and ends in `.json`, or
 * created: the item id is in the model and does not end in `.json`.
 
+[]()
 
     app.dataStore.canvas.events.onModelChange (model, list) ->
       return if freezeAjax
@@ -497,7 +498,7 @@ We gather all annotations from the server in one call we need to pull in availab
         })
       dataType: 'json'
 
-[instanticate application](#)
+[instantiate application](#)
 
 We walk through the DOM and figure out which embedded videos we can work with. For each one, we instantiate the application that manages displaying and editing annotations. We give it all of the annotations we know about for this node and let it figure out which ones it cares about.
 
