@@ -27,8 +27,9 @@ The code is broken into two main sections:
 
 Everything is defined as part of the `OAC.Client.StreamingVideo.Drupal` namespace. We assume that the Video Annotation toolkit has been loaded at this point, so we use the existing `OAC.Client.StreamingVideo` namespace as our root. 
 
+    _"Definitions:setup"
+
     OAC.Client.StreamingVideo.namespace 'Drupal', (Drupal) ->
-      _"Definitions:setup"
       _"Controllers"
       _"Components"
       _"Application"
@@ -37,8 +38,8 @@ Everything is defined as part of the `OAC.Client.StreamingVideo.Drupal` namespac
 
 We also assume that the `q` library is loaded. The toolkit does not depend on this library, but we do. The current Drupal MITHgrid module will load the `q` library since we plan on moving MITHgrid to using promises/futures instead of callbacks in the near future. We use promises to track information that we know we'll have eventually. In this case, we know that we'll be getting settings from Drupal, but we don't want to wrap all of the definitions in the function that Drupal's JavaScript will call to set everything up. At the same time, there's no reason for this information to leak outside of the namespace definition we're in.
 
-    settingsDeffered = Q.defer()
-    settings = settingsDeffered.promise
+    settingsDeferred = Q.defer()
+    settings = settingsDeferred.promise
 
 ## Controllers
 
@@ -146,10 +147,10 @@ We make sure we're not in edit mode or visible when we start up.
 
 We cache all of the UI elements we'll be binding to. We also show/hide these elements depending on which mode this controller is in.
 
-    editEl = bindings.locate('edit')
-    saveEl = bindings.locate('save')
-    cancelEl = bindings.locate('cancel')
-    deleteEl = bindings.locate('delete')
+    editEl = binding.locate('edit')
+    saveEl = binding.locate('save')
+    cancelEl = binding.locate('cancel')
+    deleteEl = binding.locate('delete')
 
 [bindings](#)
 
@@ -159,8 +160,6 @@ We bind the click controller instance to each of the elements. This gives us a s
     saveBinding = clickController.bind saveEl
     cancelBinding = clickController.bind cancelEl
     deleteBinding = clickController.bind deleteEl
-
-
 
 [triggers](#)
 
@@ -172,21 +171,21 @@ We want to trigger various events based on the mode we're in and which control e
     editBinding.events.onSelect.addListener (e) ->
       if shown and not inEditing
         setEditMode()
-        @events.onEdit.fire()
+        binding.events.onEdit.fire()
 
     saveBinding.events.onSelect.addListener (e) ->
       if shown and inEditing
         resetEditMode()
-        @events.onSave.fire()
+        binding.events.onSave.fire()
 
     cancelBinding.events.onSelect.addListener (e) ->
       if shown and inEditing
         resetEditMode()
-        @events.onCancel.fire()
+        binding.events.onCancel.fire()
 
     deleteBinding.events.onSelect.addListener (e) ->
       if shown and not inEditing
-        @events.onDelete.fire()
+        binding.events.onDelete.fire()
 
 [set editing mode](#)
 
@@ -256,10 +255,40 @@ When we move the text controls, we are given the upper right coordinates of wher
 
 This component will build out the DOM based on information passed in from the Drupal attachment process (provided by the PHP side of this plugin). The AnnoController instance will bind to the same container as passed to this component after this component is finished adding the appropriate elements to the DOM.
 
-    Drupal.namespace 'AnnoControlComponent', (ACC) ->
-      ACC.initInstance = (args...) ->
-        MITHgrid.initInstance "OAC.Client.StreamingVideo.Drupal.AnnoControlComponent", args..., (app, container) ->
+    MITHgrid.defaults 'OAC.Client.StreamingVideo.Drupal.AnnoControlComponent',
+      events:
+        onModeChange: null
 
+    Drupal.namespace 'AnnoControlComponent', (ACC) ->
+      clickController = Drupal.Click.initInstance {}
+
+      ACC.initInstance = (args...) ->
+        MITHgrid.initInstance "OAC.Client.StreamingVideo.Drupal.AnnoControlComponent", args..., (that, container) ->
+          p = settings.then (s) ->
+            els =
+              constraint: $("<div></div>")
+              control: $("<div></div>")
+            $(container).append( els.control )
+            $(container).append( els.constraint )
+            controls = s.controls
+            names = ((nom for nom of controls).sort (a,b) -> controls[a].weight - controls[b].weight)
+            for name in names
+              config = controls[name]
+              if els[config.type]?
+                do (config) ->
+                  el = $("<i class='#{config.class}'></i>")
+                  els[config.type].append el
+
+                  binding = clickController.bind el
+                  binding.events.onSelect.addListener ->
+                    if $(el).hasClass 'active'
+                      $(el).removeClass 'active'
+                      that.events.onModeChange.fire null
+                    else
+                      $(els.constraint).find("i").removeClass 'active'
+                      $(el).addClass 'active'
+                      that.events.onModeChange.fire config.mode
+          p.done()
 
 ## Application
 
@@ -292,44 +321,47 @@ We want to tie into the data store and report any changes back to the server. Th
 
 []()
 
+    _"Data Synchronization:context"
+
+    itemToJSON = _"Data Synchronization:serialize"
+
     app.dataStore.canvas.events.onModelChange (model, list) ->
       return if freezeAjax
       for id in list
         if not model.contains id
           
-          _"RESTfully Delete Annotation"
+          req = _"Data Synchronization: delete"
           
         else
           item = model.getItem id
           if item.id?[0] =~ /^\.json$/
             
-            _"RESTfully Update Annotation"
+            req = _"Data Synchronization: update"
             
           else
             
-            _"RESTfully Create Annotation"
-            
+            req = _"Data Synchronization: create"
+
+        req.done()   
       null
 
-### RESTfully Delete Annotation
+[delete](#)
 
     csrl.then (token) ->
       $.ajax
-        url: uri_from_template(settings?.urls?.record?.delete, {
-            id: id
-          })
+        url: uri_from_template settings?.urls?.record?.delete,
+          id: id
         method: 'DELETE'
         type: 'json'
         headers:
           'X-CSRL-Token': token
 
-### RESTfully Update Annotation
+[update](#)
 
     csrl.then (token) ->
       $.ajax
-        url: uri_from_template(settings?.urls?.record?.put, {
+        url: uri_from_template settings?.urls?.record?.put,
           id: id
-          })
         method: 'PUT'
         headers:
           'X-CSRL-Token': token
@@ -339,13 +371,12 @@ We want to tie into the data store and report any changes back to the server. Th
           '@context': json_context
           '@graph': [ itemToJSON item ]
 
-### RESTfully Create Annotation
+[create](#)
 
     csrl.then (token) ->
       p = Q $.ajax
-        url: uri_from_template(settings?.urls?.collection?.post, {
+        url: uri_from_template settings?.urls?.collection?.post,
           id: id
-          })
         method: 'POST'
         headers:
           'X-CSRL-Token': token
@@ -354,6 +385,173 @@ We want to tie into the data store and report any changes back to the server. Th
         data: 
           '@context': json_context
           '@graph': [ itemToJSON item ]
+
+[context](#)
+
+We want to start with a fairly well-rounded context for Open Annotation but allow plugins to augment the context with additional properties.
+
+    buildContext = ->
+      context = 
+        _"Data Synchronization:core context"
+
+      # here, we'll look for hook handlers to modify the context
+
+      context
+
+    json_context = buildContext()
+
+[core context](#)
+
+This is the core context for our JSON-LD export from the annotation application to the Drupal server.
+
+    oa: 'http://www.w3.org/ns/oa#'
+    rdf: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#'
+    cnt: 'http://www.w3.org/2011/content#'
+    dc: 'http://purl.org/dc/elements/1.1/'
+    dcterms: 'http://purl.org/dc/terms/'
+    exif: 'http://www.w3.org/2003/12/exif/ns#'
+    foaf: 'http://xmlns.com/foaf/0.1/'
+    height: 'exif:height'
+    width: 'exif:width'
+    id: '@id'
+    type: '@type'
+    graph: '@graph'
+    value: 'rdf:value'
+    annotatedBy:
+      '@id': 'oa:annotatedBy'
+      '@type': '@id'
+    serializedBy:
+      '@id': 'oa:serializedBy'
+      '@type': '@id'
+    motivatedBy:
+      '@id': 'oa:motivatedBy'
+      '@type': '@id'
+    equivalentTo:
+      '@id': 'oa:equivalentTo'
+      '@type': '@id'
+    styledBy:
+      '@id': 'oa:styledBy'
+      '@type': '@id'
+    cachedSource:
+      '@id': 'oa:cachedSource'
+      '@type': '@id'
+    conformsTo:
+      '@id': 'dcterms:conformsTo'
+      '@type': '@id'
+    default:
+      '@id': 'oa:default'
+      '@type': '@id'
+    first:
+      '@id': 'rdf:first'
+      '@type': '@id'
+    rest:
+      '@id': 'rdf:rest'
+      '@container': '@list'
+      '@type': '@id'
+    body:
+      '@id': 'oa:hasBody'
+      '@type': '@id'
+    target:
+      '@id': 'oa:hasTarget'
+      '@type': '@id'
+    chars: 'cnt:chars'
+    format: 'dc:format'
+    source:
+      '@id': 'oa:hasSource'
+      '@type': '@id'
+    selector:
+      '@id': 'oa:hasSelector'
+      '@type': '@id'
+    scope:
+      '@id': 'oa:hasScope'
+      '@type': '@id'
+    item:
+      '@id': 'oa:item'
+      '@type': '@id'
+
+[serialize](#)
+
+We want to serialize individual annotations using a set JSON context to make it easier. This mirrors how we're managing JSON-LD serialization on the server side in the Drupal module. We could have used the export API of the annotation application, but we want to export a single annotation instead of all of the annotations.
+
+    (item) ->
+      anno =
+        id: item.id[0]
+        body: video_annotation_body_json item
+        target: video_annotation_target_json item
+
+      anno.target.hasScope = document.href
+
+      anno
+
+    video_annotation_body_json = _"Data Synchronization:serialize the body"
+
+    video_annotation_target_json = _"Data Synchronization:serialize the target"
+
+[serialize the body](#)
+
+    (item) ->
+
+      if "Text" in item.bodyType
+        
+        type: ["cnt:ContentAsText", "dctypes:Text"]
+        format: item.bodyType[0]
+        chars: item.bodyContent[0]
+
+      else
+
+        {}
+
+[serialize the target](#)
+
+    (item) ->
+      target =
+        source: item.target
+        type: 'oa:SpecificResource'
+
+      selectors = [video_annotation_timing_json(item), video_annotation_shape_json(item)]
+      selectors = (s for s in selectors when s?)
+
+      if selectors.length > 1
+        target.selector =
+          item: selectors
+          type: 'oa:CompoundSelector'
+      else if selectors.length > 0
+        target.selector = selectors[0]
+
+      target
+
+    video_annotation_timing_json = _"Data Synchronization:serialize target timing"
+
+    video_annotation_shape_json = _"Data Synchronization:serialize target shape"
+
+[serialize target shape](#)
+
+    (item) ->
+      shape = {}
+
+      if item.shapeType?
+        switch item.shapeType[0]
+          when 'Rectangle'
+            svg = "<rect x='#{item.x[0]}' y='#{item.y[0]}' width='#{item.w[0]}' height='#{item.h[0]}' />"
+          when 'Ellipse'
+            svg = "<ellipse x='#{item.x[0]}' y='#{item.y[0]}' width='#{item.w[0]}' height='#{item.h[0]}' />"
+        if svg?
+          shape.type = 'oa:SVGSelector'
+          shape.chars = svg
+          if item.w?
+            shape.width = item.w[0]
+          if item.h?
+            shape.height = item.h[0]
+
+          shape
+
+[serialize target timing](#)
+
+    (item) ->
+      if item.npt_start?[0]? and item.npt_end?[0]?
+        type: 'oa:FragmentSelector'
+        conformsTo: 'http://www.w3.org/TR/media-frags/'
+        value: "t=npt:#{item.npt_start[0]},#{item.npt_end[0]}"
 
 ### Annotation Display
 
@@ -466,18 +664,18 @@ We use Drupal's mechanisms to bootstrap the annotation client. This involves get
     _"Drupal Glue:uri construction"
     _"Drupal Glue:resolve csrl token"
     _"Drupal Glue:fetch annotations"
-    _"Drupal Glue:instantiate application"
+    OAC.Client.StreamingVideo.Player.onNewPlayer.addListener _"Drupal Glue:instantiate application"
 
 [resolve settings](#)
     
-    settingsDeffered.resolve settings.video_annotator
+    settingsDeferred.resolve settings.video_annotator
 
 [uri construction](#)
 
     uri_from_template = (template, variables) ->
       if template?
         out = template.replace('{id}', variables.id)
-        out = out.replace('{scope_id}', settings.scope_id)
+        out = out.replace('{scope_id}', settings.video_annotator.scope_id)
         out
 
 [resolve csrl token](#)
@@ -493,27 +691,29 @@ We need the CSRL token for posting/putting/deleting back to the server. *N.B.:* 
 We gather all annotations from the server in one call we need to pull in available annotations from the server based on the page we're on and the url of the player's video this page: window.document.location.href or window.document.location.pathname
 
     annotationJSONLD = Q $.ajax
-      url: uri_from_template(settings?.video_annotator?.urls?.collection?.get, {
+      url: uri_from_template settings?.video_annotator?.urls?.collection?.get,
           id: 0
-        })
       dataType: 'json'
 
 [instantiate application](#)
 
 We walk through the DOM and figure out which embedded videos we can work with. For each one, we instantiate the application that manages displaying and editing annotations. We give it all of the annotations we know about for this node and let it figure out which ones it cares about.
 
-    OAC.Client.StreamingVideo.Player.onNewPlayer.addListener (playerobj) ->
+    (playerobj) ->
+
       app = OAC.Client.StreamingVideo.Application.Drupal.initInstance
         player: playerobj
         csrl: csrl
         urls: settings.urls.record
 
-
       app.run()
+
       p = annotationJSONLD.then (annos) ->
         app.freezeUpdates()
         app.importJSONLD annos
+
       p = p.then app.unfreezeUpdates
+
       p.done()
 
 ## Educational Community License, Version 2.0

@@ -355,25 +355,25 @@ function video_annotator_video_annotation_control_info() {
     "weight" => 0,
     "type" => "constraint",
     "mode" => "Rectangle",
-    "icon" => "",
+    "class" => "icon-rectangle",
   );
   $controls["ellipse"] = array(
     "weight" => 1,
     "type" => "constraint",
     "mode" => "Ellipse",
-    "icon" => "",
+    "class" => "icon-ellipse",
   );
   $controls["select"] = array(
     "weight" => 0,
     "type" => "control",
     "mode" => "Select",
-    "icon" => "",
+    "class" => "icon-select",
   );
   $controls["play-toggle"] = array(
     "weight" => 1,
     "type" => "control",
     "mode" => "Watch",
-    "icon" => "",
+    "class" => "icon-play",
   );
   return $controls;
 }
