@@ -140,7 +140,7 @@ We make sure we're not in edit mode or visible when we start up.
 
     shown = false
     inEditing = false
-    resetEditMode()
+    resetEditingMode()
     binding.eventHide()
 
 [elements](#)
@@ -170,17 +170,17 @@ We want to trigger various events based on the mode we're in and which control e
 
     editBinding.events.onSelect.addListener (e) ->
       if shown and not inEditing
-        setEditMode()
+        setEditingMode()
         binding.events.onEdit.fire()
 
     saveBinding.events.onSelect.addListener (e) ->
       if shown and inEditing
-        resetEditMode()
+        resetEditingMode()
         binding.events.onSave.fire()
 
     cancelBinding.events.onSelect.addListener (e) ->
       if shown and inEditing
-        resetEditMode()
+        resetEditingMode()
         binding.events.onCancel.fire()
 
     deleteBinding.events.onSelect.addListener (e) ->
@@ -220,7 +220,7 @@ We provide some event handlers that the application can call to show, hide, and 
 When we show the text controls, we want to reset the edit mode so that the user has to select the edit control before being able to edit the annotation body.
 
     ->
-      resetEditMode()
+      resetEditingMode()
       binding.locate('').show()
       shown = true
 
@@ -238,7 +238,7 @@ When we move the text controls, we are given the upper right coordinates of wher
 
     (top, right) ->
       if shown and inEditing
-        resetEditMode()
+        resetEditingMode()
         @events.onCancel.fire()
 
       width = binding.locate('').width()
@@ -264,31 +264,29 @@ This component will build out the DOM based on information passed in from the Dr
 
       ACC.initInstance = (args...) ->
         MITHgrid.initInstance "OAC.Client.StreamingVideo.Drupal.AnnoControlComponent", args..., (that, container) ->
-          p = settings.then (s) ->
-            els =
-              constraint: $("<div></div>")
-              control: $("<div></div>")
-            $(container).append( els.control )
-            $(container).append( els.constraint )
-            controls = s.controls
-            names = ((nom for nom of controls).sort (a,b) -> controls[a].weight - controls[b].weight)
-            for name in names
-              config = controls[name]
-              if els[config.type]?
-                do (config) ->
-                  el = $("<i class='#{config.class}'></i>")
-                  els[config.type].append el
+          controls = that.options.controls
+          els =
+            constraint: $("<div></div>")
+            control: $("<div></div>")
+          $(container).append( els.control )
+          $(container).append( els.constraint )
+          names = ((nom for nom of controls).sort (a,b) -> controls[a].weight - controls[b].weight)
+          for name in names
+            config = controls[name]
+            if els[config.type]?
+              do (config) ->
+                el = $("<i class='#{config.class}'></i>")
+                els[config.type].append el
 
-                  binding = clickController.bind el
-                  binding.events.onSelect.addListener ->
-                    if $(el).hasClass 'active'
-                      $(el).removeClass 'active'
-                      that.events.onModeChange.fire null
-                    else
-                      $(els.constraint).find("i").removeClass 'active'
-                      $(el).addClass 'active'
-                      that.events.onModeChange.fire config.mode
-          p.done()
+                binding = clickController.bind el
+                binding.events.onSelect.addListener ->
+                  if $(el).hasClass 'active'
+                    $(el).removeClass 'active'
+                    that.events.onModeChange.fire null
+                  else
+                    $(els.constraint).find("i").removeClass 'active'
+                    $(el).addClass 'active'
+                    that.events.onModeChange.fire config.mode
 
 ## Application
 
@@ -325,7 +323,7 @@ We want to tie into the data store and report any changes back to the server. Th
 
     itemToJSON = _"Data Synchronization:serialize"
 
-    app.dataStore.canvas.events.onModelChange (model, list) ->
+    app.dataStore.canvas.events.onModelChange.addListener (model, list) ->
       return if freezeAjax
       for id in list
         if not model.contains id
@@ -581,7 +579,9 @@ We pass along the text control events to the rendering of the annotation body if
       annoControlDisplay = Drupal.AnnoControlComponent.initInstance $(container).find(".annotation-controls"),
         controls: settings.controls or {}
 
-      annoControls = annoController.bind $(container).find(".annotation-controls")
+      #annoControls = annoController.bind $(container).find(".annotation-controls")
+
+      annoControlDisplay.events.onModeChange.addListener app.setCurrentMode
 
 #### Body Display
 
@@ -701,10 +701,10 @@ We walk through the DOM and figure out which embedded videos we can work with. F
 
     (playerobj) ->
 
-      app = OAC.Client.StreamingVideo.Application.Drupal.initInstance
+      app = OAC.Client.StreamingVideo.Drupal.Application.initInstance
         player: playerobj
         csrl: csrl
-        urls: settings.urls.record
+        urls: settings.video_annotator.urls.record
 
       app.run()
 
