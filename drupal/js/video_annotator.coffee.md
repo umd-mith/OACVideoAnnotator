@@ -36,7 +36,7 @@ Everything is defined as part of the `OAC.Client.StreamingVideo.Drupal` namespac
 
 [setup](#)
 
-We also assume that the `q` library is loaded. The toolkit does not depend on this library, but we do. The current Drupal MITHgrid module will load the `q` library since we plan on moving MITHgrid to using promises/futures instead of callbacks in the near future. We use promises to track information that we know we'll have eventually. In this case, we know that we'll be getting settings from Drupal, but we don't want to wrap all of the definitions in the function that Drupal's JavaScript will call to set everything up. At the same time, there's no reason for this information to leak outside of the namespace definition we're in.
+We also assume that the `q` library is loaded. The toolkit does not depend on this library, but we do. The current Drupal MITHgrid module will load the `q` library since we plan on moving MITHgrid to using promises/futures instead of callbacks in the near future. We use promises to track information that we know we'll have eventually. In this case, we know that we'll be getting settings from Drupal, but we don't want to wrap all of the definitions in the function that Drupal's JavaScript will call to set everything up.
 
     settingsDeferred = Q.defer()
     settings = settingsDeferred.promise
@@ -275,7 +275,7 @@ This component will build out the DOM based on information passed in from the Dr
             config = controls[name]
             if els[config.type]?
               do (config) ->
-                el = $("<i class='#{config.class}'></i>")
+                el = $("<a href='#' class='#{config.class}'></a>")
                 els[config.type].append el
 
                 binding = clickController.bind el
@@ -284,13 +284,29 @@ This component will build out the DOM based on information passed in from the Dr
                     $(el).removeClass 'active'
                     that.events.onModeChange.fire null
                   else
-                    $(els.constraint).find("i").removeClass 'active'
+                    $(container).find("a").removeClass 'active'
                     $(el).addClass 'active'
                     that.events.onModeChange.fire config.mode
 
 ## Application
 
 We define the application here. 
+
+    MITHgrid.defaults 'OAC.Client.StreamingVideo.Drupal.Application',
+      viewSetup: """
+        <div class="video_annotator">
+         <div class="activation-control">Show Annotations</div>
+         <div class="annotation-controls"></div>
+         <div class="text-annotations"></div>
+         <div class="text-controls">
+            <span class="edit"><a href="#" title="edit annotation"></a></span>
+            <span class="save"><a href="#" title="save edit"></a></span>
+            <span class="cancel"><a href="#" title="cancel edit"></a></span>  
+            <span class="delete"><a href="#" title="delete annotation"></a></span>
+         </div>
+         <div class="canvas"></div>
+        </div>
+      """
 
     Drupal.namespace 'Application', (Application) ->
 
@@ -346,7 +362,7 @@ We want to tie into the data store and report any changes back to the server. Th
 [delete](#)
 
     csrl.then (token) ->
-      $.ajax
+      Q $.ajax
         url: uri_from_template settings?.urls?.record?.delete,
           id: id
         method: 'DELETE'
@@ -357,7 +373,7 @@ We want to tie into the data store and report any changes back to the server. Th
 [update](#)
 
     csrl.then (token) ->
-      $.ajax
+      Q $.ajax
         url: uri_from_template settings?.urls?.record?.put,
           id: id
         method: 'PUT'
@@ -372,7 +388,7 @@ We want to tie into the data store and report any changes back to the server. Th
 [create](#)
 
     csrl.then (token) ->
-      p = Q $.ajax
+      Q $.ajax
         url: uri_from_template settings?.urls?.collection?.post,
           id: id
         method: 'POST'
@@ -699,22 +715,39 @@ We gather all annotations from the server in one call we need to pull in availab
 
 We walk through the DOM and figure out which embedded videos we can work with. For each one, we instantiate the application that manages displaying and editing annotations. We give it all of the annotations we know about for this node and let it figure out which ones it cares about.
 
+We wrap the player DOM element so that we can better position and manage the annotation interface elements. We're displaying the textual annotations below the video player on the page. As long as the mouse is over the interface (either the video, text, or controls), the annotation interface open/close buttons will show up.
+
     (playerobj) ->
 
-      app = OAC.Client.StreamingVideo.Drupal.Application.initInstance
+      $(playerobj.container).wrap $("<div></div>")
+      el = $(playerobj.container).parent()
+      appEl = $("<div></div>")
+      el.append(appEl)
+
+      app = OAC.Client.StreamingVideo.Drupal.Application.initInstance appEl,
         player: playerobj
         csrl: csrl
         urls: settings.video_annotator.urls.record
 
       app.run()
+      app.ready ->
 
-      p = annotationJSONLD.then (annos) ->
+        hoverBinding = hoverController.bind el
+        hoverBinding.events.onFocus.addListener ->
+          el.find(".activation-control").show()
+        hoverBinding.events.onUnfocus.addListener ->
+          el.find(".activation-control").hide()
+
+        el.find(".activation-control").hide()
+
+      annotationJSONLD.then (annos) ->
         app.freezeUpdates()
         app.importJSONLD annos
+      .then(app.unfreezeUpdates)
+      .done()
 
-      p = p.then app.unfreezeUpdates
+    hoverController = OAC.Client.StreamingVideo.Drupal.Hover.initInstance {}
 
-      p.done()
 
 ## Educational Community License, Version 2.0
 
