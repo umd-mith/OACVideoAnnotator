@@ -11,11 +11,19 @@ drupal_add_js(array('video_annotator' => array(
     'create' => user_access('video annotation resource create'),
     'delete any' => user_access('video annotation resource delete any annotations'),
     'delete own' => user_access('video annotation resource delete own annotations'),
+    'view' => user_access('bypass video annotation access') || user_access('video annotation resource view any annotations') || user_access('video annotation resource view own annotations'),
+    'edit' => user_access('bypass video annotation access') || user_access('video annotation resource edit any annotations') || user_access('video annotation resource edit own annotations'),
+    'delete' => user_access('bypass video annotation access') || user_access('video annotation resource delete any annotations') || user_access('video annotation resource delete own annotations')
   ),
   'controls' => video_annotator_controls(),
   'urls' => video_annotator_api_urls(),
   'scope_id' => video_annotator_api_scope(),
 )), 'setting');
+
+drupal_add_css(drupal_get_path('module', 'video_annotator') . '/video_annotator.css', array(
+  'every_page' => TRUE,
+  'preprocess' => TRUE,
+));
 /**
   * @file
   * Provides annotation capability for embedded videos with export/import serialization through Open Annotation.
@@ -356,12 +364,14 @@ function video_annotator_video_annotation_control_info() {
     "type" => "constraint",
     "mode" => "Rectangle",
     "class" => "icon-rectangle",
+    "permission" => 'create',
   );
   $controls["ellipse"] = array(
     "weight" => 1,
     "type" => "constraint",
     "mode" => "Ellipse",
     "class" => "icon-ellipse",
+    "permission" => 'create',
   );
   $controls["select"] = array(
     "weight" => 0,
@@ -524,17 +534,13 @@ function video_annotator_video_annotation_target_info($target_id, $data) {
   $timing = array();
   $shape = array();
   $props = $data[$target_id];
-  #print_r($props);
   if(isset($props->type) && in_array("oa:SpecificResource", (array)$props->type)) {
     if(isset($props->selector) && isset($data[$props->selector])) {
       if(isset($data[$props->selector]->item)) {
         foreach($data[$props->selector]->item as $item) {
           if(isset($data[$item])) {
             $timing = array_merge_recursive($timing, module_invoke_all("video_annotation_timing_info", $item, $data));
-            #$timing = call_user_func_array("array_merge", $timing);
-
             $shape = array_merge_recursive($shape, module_invoke_all("video_annotation_shape_info", $item, $data));
-            #$shape = call_user_func_array("array_merge", $shape);
           }
         }
       }
@@ -554,7 +560,6 @@ function video_annotator_video_annotation_target_info($target_id, $data) {
       $target["scope"] = intval($bits[1]);
     }
   }
-  #$target["scope"] = "foo";
   return array_merge_recursive($timing, $shape, $target);
 }
 
@@ -573,6 +578,7 @@ function video_annotator_video_annotation_json($data) {
     '@id' => services_resource_uri(array('video_annotation', $data->id)).'.json',
     'body' => video_annotator_video_annotation_body_json($data),
     'target' => video_annotator_video_annotation_target_json($data),
+    '@type' => 'oa:Annotation',
   );
 
   $anno['target']['hasScope'] = url("node/".$data->scope, array());
@@ -669,7 +675,7 @@ function video_annotator_video_annotation_shape_info($target_id, $data) {
         }
       }
     }
-    elseif(in_array("oa:SVGSelector", (array)$props->type) && isset($props->chars)) {
+    elseif(in_array("oa:SvgSelector", (array)$props->type) && isset($props->chars)) {
       $selector["svg_selector"] = $props->chars;
     }
   }
@@ -685,7 +691,8 @@ function video_annotator_video_annotation_shape_info($target_id, $data) {
 function video_annotator_video_annotation_shape_json($data) {
   if($data->svg_selector) {
     return array(array(
-      'type' => 'oa:SVGSelector',
+      'type' => 'oa:SvgSelector',
+      'format' => "image/svg+xml",
       'chars' => $data->svg_selector,
       'width' => intval($data->width),
       'height' => intval($data->height),

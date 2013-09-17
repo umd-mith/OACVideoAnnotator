@@ -28,6 +28,8 @@ The code is broken into two main sections:
 Everything is defined as part of the `OAC.Client.StreamingVideo.Drupal` namespace. We assume that the Video Annotation toolkit has been loaded at this point, so we use the existing `OAC.Client.StreamingVideo` namespace as our root. 
 
     _"Definitions:setup"
+    _"Definitions:uri construction"
+    _"Definitions:csrl token"
 
     OAC.Client.StreamingVideo.namespace 'Drupal', (Drupal) ->
       _"Controllers"
@@ -40,6 +42,23 @@ We also assume that the `q` library is loaded. The toolkit does not depend on th
 
     settingsDeferred = Q.defer()
     settings = settingsDeferred.promise
+
+[uri construction](#)
+
+    uri_from_template = (template, variables) ->
+      if template?
+        out = template.replace('{id}', variables.id)
+        if Q.isFulfilled settingsDeferred
+          out = out.replace('{scope_id}', settings.inspect().value?.scope_id)
+        out
+
+[csrl token](#)
+
+We need the CSRL token for posting/putting/deleting back to the server. *N.B.:* This should be provided by the Drupal module as part of the settings.
+
+    csrl = Q $.ajax
+      url: '?q=services/session/token'
+      type: 'GET'
 
 ## Controllers
 
@@ -265,6 +284,7 @@ This component will build out the DOM based on information passed in from the Dr
       ACC.initInstance = (args...) ->
         MITHgrid.initInstance "OAC.Client.StreamingVideo.Drupal.AnnoControlComponent", args..., (that, container) ->
           controls = that.options.controls
+          perms = that.options.permissions
           els =
             constraint: $("<div></div>")
             control: $("<div></div>")
@@ -273,9 +293,9 @@ This component will build out the DOM based on information passed in from the Dr
           names = ((nom for nom of controls).sort (a,b) -> controls[a].weight - controls[b].weight)
           for name in names
             config = controls[name]
-            if els[config.type]?
+            if els[config.type]? and (not config.permission or perms[config.permission])
               do (config) ->
-                el = $("<a href='#' class='#{config.class}'></a>")
+                el = $("<a href='#' class='#{config.class}'>&nbsp;</a>")
                 els[config.type].append el
 
                 binding = clickController.bind el
@@ -295,16 +315,21 @@ We define the application here.
     MITHgrid.defaults 'OAC.Client.StreamingVideo.Drupal.Application',
       viewSetup: """
         <div class="video_annotator">
-         <div class="activation-control">Show Annotations</div>
-         <div class="annotation-controls"></div>
-         <div class="text-annotations"></div>
-         <div class="text-controls">
+          <div class="activation-control">
+            <div style="float: right;"><a href="#" class="open">O</a> <a href="#" class="close">C</a></div>
+            <span class="counter">0</span> comments
+          </div>
+          <div class="annotations">
+            <div class="annotation-controls"></div>
+            <div class="annotation-text"></div>
+          </div>
+          <div class="text-controls">
             <span class="edit"><a href="#" title="edit annotation"></a></span>
             <span class="save"><a href="#" title="save edit"></a></span>
             <span class="cancel"><a href="#" title="cancel edit"></a></span>  
             <span class="delete"><a href="#" title="delete annotation"></a></span>
-         </div>
-         <div class="canvas"></div>
+          </div>
+          <div class="canvas"></div>
         </div>
       """
 
@@ -317,6 +342,7 @@ We define the application here.
         OAC.Client.StreamingVideo.Application.initInstance "OAC.Client.StreamingVideo.Drupal.Application", args..., (app, container) ->
           appFn = -> app
           freezeAjax = false
+          csrl = app.options.csrl
 
           app.freezeUpdates = -> freezeAjax = true
           app.unfreezeUpdates = -> freezeAjax = false
@@ -343,12 +369,12 @@ We want to tie into the data store and report any changes back to the server. Th
       return if freezeAjax
       for id in list
         if not model.contains id
-          
-          req = _"Data Synchronization: delete"
+          if id[ -5 .. ] == ".json"
+            req = _"Data Synchronization: delete"
           
         else
           item = model.getItem id
-          if item.id?[0] =~ /^\.json$/
+          if id[ -5 .. ] == ".json"
             
             req = _"Data Synchronization: update"
             
@@ -356,49 +382,52 @@ We want to tie into the data store and report any changes back to the server. Th
             
             req = _"Data Synchronization: create"
 
-        req.done()   
+        req?.done()   
       null
 
 [delete](#)
 
     csrl.then (token) ->
       Q $.ajax
-        url: uri_from_template settings?.urls?.record?.delete,
-          id: id
-        method: 'DELETE'
-        type: 'json'
+        url: id
+        type: 'DELETE'
         headers:
-          'X-CSRL-Token': token
+          'X-CSRF-Token': token
 
 [update](#)
 
     csrl.then (token) ->
       Q $.ajax
-        url: uri_from_template settings?.urls?.record?.put,
-          id: id
-        method: 'PUT'
+        url: id
         headers:
-          'X-CSRL-Token': token
+          'X-CSRF-Token': token
         contentType: 'application/json'
-        type: 'json'
-        data: 
+        type: 'PUT'
+        data: JSON.stringify
           '@context': json_context
           '@graph': [ itemToJSON item ]
 
 [create](#)
 
-    csrl.then (token) ->
-      Q $.ajax
-        url: uri_from_template settings?.urls?.collection?.post,
-          id: id
-        method: 'POST'
-        headers:
-          'X-CSRL-Token': token
-        contentType: 'application/json'
-        type: 'json'
-        data: 
-          '@context': json_context
-          '@graph': [ itemToJSON item ]
+    do ->
+      q = csrl.then (token) ->
+        json = itemToJSON item
+        delete json.id
+        Q $.ajax
+          url: uri_from_template app.options.urls.collection.post,
+            id: id
+          headers:
+            'X-CSRF-Token': token
+          contentType: 'application/json'
+          type: 'POST'
+          data: JSON.stringify
+            '@context': json_context
+            '@graph': [ json ]
+      q.then (response) ->
+        #model.deleteItems item.id
+        #item.id = [ response.location ]
+        #model.loadItems [ item ]
+        response
 
 [context](#)
 
@@ -490,10 +519,11 @@ We want to serialize individual annotations using a set JSON context to make it 
     (item) ->
       anno =
         id: item.id[0]
+        type: 'oa:Annotation'
         body: video_annotation_body_json item
         target: video_annotation_target_json item
 
-      anno.target.hasScope = document.href
+      anno.target.scope = document.URL
 
       anno
 
@@ -519,7 +549,7 @@ We want to serialize individual annotations using a set JSON context to make it 
 
     (item) ->
       target =
-        source: item.target
+        source: item.targetURI?[0]
         type: 'oa:SpecificResource'
 
       selectors = [video_annotation_timing_json(item), video_annotation_shape_json(item)]
@@ -550,12 +580,12 @@ We want to serialize individual annotations using a set JSON context to make it 
           when 'Ellipse'
             svg = "<ellipse x='#{item.x[0]}' y='#{item.y[0]}' width='#{item.w[0]}' height='#{item.h[0]}' />"
         if svg?
-          shape.type = 'oa:SVGSelector'
+          shape.type = 'oa:SvgSelector'
           shape.chars = svg
-          if item.w?
-            shape.width = item.w[0]
-          if item.h?
-            shape.height = item.h[0]
+          if item.targetWidth?
+            shape.width = item.targetWidth[0]
+          if item.targetHeight?
+            shape.height = item.targetHeight[0]
 
           shape
 
@@ -594,6 +624,7 @@ We pass along the text control events to the rendering of the annotation body if
     settings.then (settings) ->
       annoControlDisplay = Drupal.AnnoControlComponent.initInstance $(container).find(".annotation-controls"),
         controls: settings.controls or {}
+        permissions: settings.permissions
 
       #annoControls = annoController.bind $(container).find(".annotation-controls")
 
@@ -601,47 +632,54 @@ We pass along the text control events to the rendering of the annotation body if
 
 #### Body Display
 
-    annotationDisplay = OAC.Client.StreamingVideo.Presentation.AnnotationList.initInstance $(container).find('.annotation-text'),
-      dataView: app.dataView.currentAnnotations
-      lensKey: ['.bodyType']
-      application: appFn
+    settings.then (settings) ->
+      annotationDisplay = OAC.Client.StreamingVideo.Presentation.AnnotationList.initInstance $(container).find('.annotation-text'),
+        dataView: app.dataView.currentAnnotations
+        lensKey: ['.bodyType']
+        application: appFn
 
-    annotationDisplay.addLens "Text", _"Annotation Body Text Lens"
+      annotationDisplay.addLens "Text", _"Annotation Body Text Lens"
 
 We highlight the annotation body based on which annotation is currently in focus. This is an application-wide setting (but may be different for each instance of the application, and thus for each video on the page). All changes to which annotation is in focus should be done by calling `app.setActiveAnnotation()` with the `id` of the annotation.
 
-    app.events.onActiveAnnotationChange.addListener annotationDisplay.eventFocusChange
+      app.events.onActiveAnnotationChange.addListener annotationDisplay.eventFocusChange
 
 #### Annotation Body Text Lens
 
 We base our display of the annotation body on a fairly simple text display. Other annotation body types can be defined and will work as long as a suitable lens is provided.
 
     (container, view, model, itemId) ->
-      rendering = annotations.initTextLens container, view, model, itemId
+      rendering = annotationDisplay.initTextLens container, view, model, itemId
       hoverBinding = hoverController.bind rendering.el
       inEditing = false
       textEl = $(rendering.el).find(".body-content")
       inputEl = $("<textarea></textarea>")
       rendering.el.append(inputEl)
       inputEl.hide()
-
+      item = model.getItem itemId
       hoverBinding.events.onFocus.addListener -> app.setActiveAnnotation itemId
-
       superFocus = rendering.eventFocus
       superUnfocus = rendering.eventUnfocus
 
+      canEditThis = settings.permissions.bypass or settings.permission.edit_any or (settings.permission.edit_own and (settings.user_id in item.owner))
+
+      canDeleteThis = settings.permissions.bypass or settings.permission.delete_any or (settings.permission.delete_own and (settings.user_id in item.owner))
+
       rendering.eventFocus = ->
         superFocus()
-        pos = $(rendering.el).position()
-        textControls.eventMove pos.top, pos.left
-        textControls.eventShow()
+        if canEditThis or canDeleteThis
+          pos = $(rendering.el).position()
+          textControls.eventMove pos.top, pos.left
+          textControls.eventShow()
+        else
+          textControls.eventHide()
 
       rendering.eventUnfocus = ->
         textControls.eventHide()
         superUnfocus()
 
       rendering.eventEdit = ->
-        if not inEditing
+        if not inEditing and canEditThis
           app.lockActiveAnnotation()
           inEditing = true
           text = textEl.text()
@@ -651,18 +689,18 @@ We base our display of the annotation body on a fairly simple text display. Othe
 
       superDelete = rendering.eventDelete
       rendering.eventDelete = ->
-        if not inEditing
+        if not inEditing and canDeleteThis
           superDelete()
 
       rendering.eventCancel = ->
-        if inEditing
+        if inEditing and canEditThis
           app.unlockActiveAnnotation()
           inEditing = false
           textEl.show()
           inputEl.hide()
 
       rendering.eventSave = ->
-        if inEditing
+        if inEditing and canEditThis
           app.unlockActiveAnnotation()
           inEditing = false
           textEl.show()
@@ -677,30 +715,12 @@ We base our display of the annotation body on a fairly simple text display. Othe
 We use Drupal's mechanisms to bootstrap the annotation client. This involves getting settings from the Drupal module and any context provided by Drupal.
 
     _"Drupal Glue:resolve settings"
-    _"Drupal Glue:uri construction"
-    _"Drupal Glue:resolve csrl token"
     _"Drupal Glue:fetch annotations"
     OAC.Client.StreamingVideo.Player.onNewPlayer.addListener _"Drupal Glue:instantiate application"
 
 [resolve settings](#)
     
     settingsDeferred.resolve settings.video_annotator
-
-[uri construction](#)
-
-    uri_from_template = (template, variables) ->
-      if template?
-        out = template.replace('{id}', variables.id)
-        out = out.replace('{scope_id}', settings.video_annotator.scope_id)
-        out
-
-[resolve csrl token](#)
-
-We need the CSRL token for posting/putting/deleting back to the server. *N.B.:* This should be provided by the Drupal module as part of the settings.
-
-    csrl = Q $.ajax
-      url: '?q=services/session/token'
-      type: 'GET'
 
 [fetch annotations](#)
 
@@ -727,26 +747,55 @@ We wrap the player DOM element so that we can better position and manage the ann
       app = OAC.Client.StreamingVideo.Drupal.Application.initInstance appEl,
         player: playerobj
         csrl: csrl
-        urls: settings.video_annotator.urls.record
+        urls: settings.video_annotator.urls
 
       app.run()
       app.ready ->
+        controlsShown = false
+
+        el.find(".video_annotator").width playerobj.getSize()[0]
+
+        playerobj.events.onResize.addListener (size) ->
+          el.find(".video_annotator").width size[0]
 
         hoverBinding = hoverController.bind el
         hoverBinding.events.onFocus.addListener ->
-          el.find(".activation-control").show()
+          if not controlsShown
+            el.find(".activation-control").show()
         hoverBinding.events.onUnfocus.addListener ->
-          el.find(".activation-control").hide()
+          if not controlsShown
+            el.find(".activation-control").hide()
 
+        openBinding  = clickController.bind el.find(".activation-control .open")
+        closeBinding = clickController.bind el.find(".activation-control .close")
+
+        openBinding.events.onSelect.addListener ->
+          controlsShown = true
+          el.find(".annotations").slideDown()
+
+        closeBinding.events.onSelect.addListener ->
+          controlsShown = false
+          el.find(".annotations").slideUp()
+
+        el.find(".annotation-controls").show()
         el.find(".activation-control").hide()
+        el.find(".annotations").hide()
+
+        counterEl = el.find(".counter")
+        app.dataStore.canvas.events.onModelChange.addListener (m, l) ->
+          $(counterEl).text m.size()
 
       annotationJSONLD.then (annos) ->
         app.freezeUpdates()
-        app.importJSONLD annos
+        d = Q.defer()
+        app.importJSONLD annos, ->
+          d.resolve null
+        d.promise
       .then(app.unfreezeUpdates)
       .done()
 
     hoverController = OAC.Client.StreamingVideo.Drupal.Hover.initInstance {}
+    clickController = OAC.Client.StreamingVideo.Drupal.Click.initInstance {}
 
 
 ## Educational Community License, Version 2.0

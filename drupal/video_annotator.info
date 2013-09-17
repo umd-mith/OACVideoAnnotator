@@ -5,6 +5,7 @@ dependencies[] = services
 
 package = User interface
 core = 7.x
+scripts[] = js/jsonld.js
 scripts[] = js/videoanno.min.js
 scripts[] = js/raphael.js
 scripts[] = js/video_annotator.js
