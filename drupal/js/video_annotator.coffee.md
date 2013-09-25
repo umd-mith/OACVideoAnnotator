@@ -147,6 +147,8 @@ When in editing mode, only save and cancel are shown and will fire. When not in 
       TextControls.initInstance = (args...) ->
         MITHgrid.Controller.initInstance 'OAC.Client.StreamingVideo.Drupal.TextControls', args..., (that) ->
           that.applyBindings = (binding) ->
+            shown = false
+            inEditing = false
             _"TextControls:elements"
             _"TextControls:bindings"
             _"TextControls:triggers"
@@ -157,8 +159,6 @@ When in editing mode, only save and cancel are shown and will fire. When not in 
 
 We make sure we're not in edit mode or visible when we start up.
 
-    shown = false
-    inEditing = false
     resetEditingMode()
     binding.eventHide()
 
@@ -323,7 +323,7 @@ We define the application here.
             <div class="annotation-controls"></div>
             <div class="annotation-text"></div>
           </div>
-          <div class="text-controls">
+          <div class="edit-controls">
             <span class="edit"><a href="#" title="edit annotation"></a></span>
             <span class="save"><a href="#" title="save edit"></a></span>
             <span class="cancel"><a href="#" title="cancel edit"></a></span>  
@@ -359,7 +359,7 @@ We want to tie into the data store and report any changes back to the server. Th
 * updated: the item id is in the model and ends in `.json`, or
 * created: the item id is in the model and does not end in `.json`.
 
-[]()
+For any annotation that is being modified or deleted, the id of the annotation is the URL of the annotation, and thus the URL to which we PUT or DELETE. Otherwise, we're creating an annotation and POST to the collection URL.
 
     _"Data Synchronization:context"
 
@@ -409,6 +409,8 @@ We want to tie into the data store and report any changes back to the server. Th
 
 [create](#)
 
+When we create a new annotation on the server, we want to replace the annotation in the browser so that the id of the annotation in the browser matches the URL of the annotation as stored on the server.
+
     do ->
       q = csrl.then (token) ->
         json = itemToJSON item
@@ -424,9 +426,11 @@ We want to tie into the data store and report any changes back to the server. Th
             '@context': json_context
             '@graph': [ json ]
       q.then (response) ->
-        #model.deleteItems item.id
-        #item.id = [ response.location ]
-        #model.loadItems [ item ]
+        if response?['@graph']?
+          model.removeItems [ item.id ]
+          item.id = response['@graph'][0]['@id']
+          item.type or= 'Annotation'
+          model.loadItems [ item ]
         response
 
 [context](#)
@@ -600,6 +604,8 @@ We want to serialize individual annotations using a set JSON context to make it 
 ### Annotation Display
 
 We assume that the annotations will be displayed in a way that allows selection of an annotation based on the textual content of that annotation, similar to in the demo. For now, we also assume that the DOMs of the text controls and the body display will be descendents of the application's container. This means that each copy of the application will have its own text controls and display of body content.
+
+    annotationDisplay = null
 
     _"Body Display"
     _"Text Controls"
