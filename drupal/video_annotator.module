@@ -3,27 +3,57 @@
 drupal_add_js(array('video_annotator' => array(
   # settings here to control how we draw controls, etc.
   'permissions' => array(
-    'bypass' => user_access('bypass video annotation access'),
-    'view any' => user_access('video annotation resource view any annotations'),
-    'view own' => user_access('video annotation resource view own annotations'),
-    'edit any' => user_access('video annotation resource edit any annotations'),
-    'edit own' => user_access('video annotation resource edit own annotations'),
-    'create' => user_access('video annotation resource create'),
-    'delete any' => user_access('video annotation resource delete any annotations'),
-    'delete own' => user_access('video annotation resource delete own annotations'),
-    'view' => user_access('bypass video annotation access') || user_access('video annotation resource view any annotations') || user_access('video annotation resource view own annotations'),
-    'edit' => user_access('bypass video annotation access') || user_access('video annotation resource edit any annotations') || user_access('video annotation resource edit own annotations'),
-    'delete' => user_access('bypass video annotation access') || user_access('video annotation resource delete any annotations') || user_access('video annotation resource delete own annotations')
+    'bypass' => 
+        user_access('bypass video annotation access'),
+    'view any' => 
+        user_access('video annotation resource view any annotations'),
+    'view own' => 
+        user_access('video annotation resource view own annotations'),
+    'edit any' => 
+        user_access('video annotation resource edit any annotations'),
+    'edit own' => 
+        user_access('video annotation resource edit own annotations'),
+    'create' => 
+        user_access('video annotation resource create'),
+    'delete any' => 
+        user_access('video annotation resource delete any annotations'),
+    'delete own' => 
+        user_access('video annotation resource delete own annotations'),
+    'view' => 
+        user_access('bypass video annotation access') 
+        || user_access('video annotation resource view any annotations') 
+        || user_access('video annotation resource view own annotations'),
+    'edit' => 
+        user_access('bypass video annotation access') 
+        || user_access('video annotation resource edit any annotations') 
+        || user_access('video annotation resource edit own annotations'),
+    'delete' => 
+        user_access('bypass video annotation access') 
+        || user_access('video annotation resource delete any annotations') 
+        || user_access('video annotation resource delete own annotations')
   ),
   'controls' => video_annotator_controls(),
   'urls' => video_annotator_api_urls(),
   'scope_id' => video_annotator_api_scope(),
 )), 'setting');
 
-drupal_add_css(drupal_get_path('module', 'video_annotator') . '/video_annotator.css', array(
-  'every_page' => TRUE,
-  'preprocess' => TRUE,
-));
+if(!variable_get('video_annotator_use_theme_for_styling', FALSE)) {
+  drupal_add_css(
+    drupal_get_path('module', 'video_annotator') . '/css/font-awesome.css', 
+    array(
+    'every_page' => TRUE,
+    'preprocess' => FALSE,
+    )
+  );
+  drupal_add_css(
+    drupal_get_path('module', 'video_annotator') . '/css/video_annotator.css', 
+    array(
+    'every_page' => TRUE,
+    'preprocess' => FALSE,
+    )
+  );
+}
+
 /**
   * @file
   * Provides annotation capability for embedded videos with export/import serialization through Open Annotation.
@@ -88,20 +118,13 @@ function video_annotator_menu() {
   return $items;
 }
 
-# TODO: figure out how to build the URL based on configuration info
 function video_annotator_api_urls() {
-  # We have to make the root configurable for now :-/
-  $root = "http://localhost".url(variable_get('video_annotator_rest_api_endpoint'));
+  $root = url(variable_get('video_annotator_rest_api_endpoint'));
   return array(
     'collection' => array(
       'get' => $root . ".json&scope={scope_id}",
       'post' => $root . ".json&scope={scope_id}",
-    ),
-    'record' => array(
-      'get' => $root . "/{id}.json",
-      'put' => $root . "/{id}.json",
-      'delete' => $root . "/{id}.json",
-    ),
+    )
   );
 }
 
@@ -222,6 +245,19 @@ function video_annotator_services_resources() {
   );
 }
 
+/*
+ * _video_annotator_access(
+ *   $op, // 'view', 'update', or 'delete'
+ *   $args // the argument passed in from the services module
+ * )
+ *
+ * For 'view' and 'delete', $args is the id of the annotation.
+ * For 'update', $args is an object with an id method/member.
+ *
+ * Returns TRUE if the user has access to the operation for the
+ * given annotation. FALSE otherwise.
+ *
+ */
 function _video_annotator_access($op, $args) {
   global $user;
 
@@ -250,9 +286,19 @@ function _video_annotator_access($op, $args) {
 
   $anno = video_annotator_get_video_annotation($id);
 
-  return $anno->uid == $user->uid && user_access("video annotation resource $op own annotations");
+  return $anno->uid == $user->uid 
+         && user_access("video annotation resource $op own annotations");
 }
 
+/*
+ * video_annotator_get_video_annotation(
+ *   $id // the id of the annotation
+ * )
+ *
+ * Returns the row of information from the database. This is not
+ * formatted as RDF or JSON-LD.
+ *
+ */
 function video_annotator_get_video_annotation($id) {
   $result = db_select('video_annotations')
             -> fields('video_annotations')
@@ -260,20 +306,29 @@ function video_annotator_get_video_annotation($id) {
             -> addTag('video_annotation_access')
             -> execute();
   return $result->fetchObject();
-  foreach($result as $row) {
-    return $row->fetchAssoc();
-  }
-  return FALSE;
 }
 
+/*
+ * video_annotator_write_video_annotation(
+ *   $anno // an object containing the fields to insert into the database
+ * )
+ *
+ * This creates a new annotation in the database.
+ *
+ */
 function video_annotator_write_video_annotation($anno) {
   $vid = db_insert('video_annotations')
          -> fields($anno)
          -> execute();
-  #$anno->id = $vid;
   return $vid;
 }
 
+/*
+ * video_annotator_update_video_annotation(
+ *   $id,  // the id of the annotation being updated
+ *   $anno // the fields to update in the database
+ * )
+ */
 function video_annotator_update_video_annotation($id, $anno) {
   if(!_video_annotator_access('update', (object)array((object)array('id' => $id )))) {
     return FALSE;
@@ -282,14 +337,15 @@ function video_annotator_update_video_annotation($id, $anno) {
                   -> fields($anno)
                   -> condition('id', $id)
                   -> execute();
-  if($num_updated > 0) {
-    return TRUE;
-  }
-  else {
-    return FALSE;
-  }
+  return $num_updated > 0;
 }
 
+/*
+ * video_annotator_delete_video_annotation(
+ *   $id // the id of the annotation to be removed
+ * )
+ *
+ */
 function video_annotator_delete_video_annotation($id) {
   $result = db_select('video_annotations')
             -> fields('video_annotations', array('id'))
@@ -327,10 +383,9 @@ function video_annotator_query_video_annotation_access_alter($query) {
         $query -> condition('uid', $account_uid);
       }
     }
-    else {
-      # no limit on what the user can see in the query
-    }
   }
+  # no limit on what the user can see in the query if the condition
+  # isn't added by this point
 }
 
 function video_annotator_filter_info() {
@@ -347,16 +402,37 @@ function video_annotator_ui_filter_callback($matches) {
 
 }
 
+/*
+ * video_annotator_ui_filter(
+ *   $text, // the text being filtered
+ *   $filter // configuration or other data
+ * )
+ *
+ * Finds annotation UI blocks in the text and replaces them with
+ * appropriate content.
+ */
 function video_annotator_ui_filter($text, $filter) {
 
 }
 
+/*
+ * video_annotator_controls()
+ *
+ * Invokes HOOK_video_annotation_control_info to collect
+ * the controls that should be displayed in the annotation UI.
+ */
 function video_annotator_controls() {
   $controls = module_invoke_all('video_annotation_control_info');
   # TODO: pre-process for javascript settings
   return $controls;
 }
 
+/*
+ * video_annotator_video_annotation_control_info()
+ *
+ * Provides the core default set of controls in the annotation UI. Called as
+ * part of the hook mechanism invoked by video_annotation_controls() above.
+ */
 function video_annotator_video_annotation_control_info() {
   $controls = array();
   $controls["rectangle"] = array(
@@ -364,6 +440,7 @@ function video_annotator_video_annotation_control_info() {
     "type" => "constraint",
     "mode" => "Rectangle",
     "class" => "icon-rectangle",
+    "iconClass" => "fa fa-square",
     "permission" => 'create',
   );
   $controls["ellipse"] = array(
@@ -371,6 +448,7 @@ function video_annotator_video_annotation_control_info() {
     "type" => "constraint",
     "mode" => "Ellipse",
     "class" => "icon-ellipse",
+    "iconClass" => "fa fa-circle",
     "permission" => 'create',
   );
   $controls["select"] = array(
@@ -378,12 +456,14 @@ function video_annotator_video_annotation_control_info() {
     "type" => "control",
     "mode" => "Select",
     "class" => "icon-select",
+    "iconClass" => "fa fa-hand-o-up",
   );
   $controls["play-toggle"] = array(
     "weight" => 1,
     "type" => "control",
     "mode" => "Watch",
     "class" => "icon-play",
+    "iconClass" => "fa fa-play",
   );
   return $controls;
 }
@@ -506,7 +586,8 @@ function video_annotator_extract_annotations_from_jsonld($jsonld) {
   $annos = array();
 
   $data = _video_annotator_flatten_json($jsonld);
-  # we want to pull out all of the useful information that we care about in annotations
+  # we want to pull out all of the useful information that we care about in
+  # annotations
   # we aren't going to store the annotations as-is
   foreach($data as $id => $props) {
     if(isset($props->type) && in_array("oa:Annotation", (array)$props->type)) {
@@ -516,11 +597,19 @@ function video_annotator_extract_annotations_from_jsonld($jsonld) {
       $target = array();
       if(isset($props->body) && isset($data[$props->body])) {
         # pull out the body content -- we need this to be handled in a general way so that it can be extended through other plugins
-        $body = module_invoke_all("video_annotation_body_info", $props->body, $data);
+        $body = module_invoke_all(
+          "video_annotation_body_info", 
+          $props->body, 
+          $data
+        );
         #$body = call_user_func_array("array_merge", $body);
       }
       if(isset($props->target) && isset($data[$props->target])) {
-        $target = module_invoke_all("video_annotation_target_info", $props->target, $data);
+        $target = module_invoke_all(
+          "video_annotation_target_info", 
+          $props->target, 
+          $data
+        );
       }
       $anno = array_merge($anno, $body, $target);
       $anno["uid"] = $user->uid;
@@ -534,25 +623,42 @@ function video_annotator_video_annotation_target_info($target_id, $data) {
   $timing = array();
   $shape = array();
   $props = $data[$target_id];
-  if(isset($props->type) && in_array("oa:SpecificResource", (array)$props->type)) {
-    if(isset($props->selector) && isset($data[$props->selector])) {
-      if(isset($data[$props->selector]->item)) {
-        foreach($data[$props->selector]->item as $item) {
-          if(isset($data[$item])) {
-            $timing = array_merge_recursive($timing, module_invoke_all("video_annotation_timing_info", $item, $data));
-            $shape = array_merge_recursive($shape, module_invoke_all("video_annotation_shape_info", $item, $data));
-          }
-        }
+  if(   isset($props->type) 
+     && in_array("oa:SpecificResource", (array)$props->type)
+     && isset($props->selector) 
+     && isset($data[$props->selector])
+     && isset($data[$props->selector]->item)
+  ) {
+    foreach($data[$props->selector]->item as $item) {
+      if(isset($data[$item])) {
+        $timing = array_merge_recursive(
+          $timing, 
+          module_invoke_all(
+            "video_annotation_timing_info", 
+            $item, 
+            $data
+          )
+        );
+        $shape = array_merge_recursive(
+          $shape, 
+          module_invoke_all(
+            "video_annotation_shape_info", 
+            $item, 
+            $data
+          )
+        );
       }
     }
-    if(isset($props->source)) {
-      $target = array("target" => $props->source);
-    }
+  }
+  
+  if(isset($props->source)) {
+    $target = array("target" => $props->source);
   }
   else {
     $target = array( "target" => $target_id );
     $timing = array( "start_time" => 0, "end_time" => -1 );
   }
+
   if(isset($props->scope)) {
     $scope = $props->scope;
     $bits = explode("node/", $scope);
@@ -647,6 +753,11 @@ function video_annotator_video_annotation_timing_info($target_id, $data) {
   }
 }
 
+/*
+ * video_annotator_video_annotation_timing_json(
+ *   $data // 
+ * )
+ */
 function video_annotator_video_annotation_timing_json($data) {
   if($data->start_time != 0 || $data->end_time != -1) {
     return array(array(
@@ -661,7 +772,10 @@ function video_annotator_video_annotation_shape_info($target_id, $data) {
   $props = $data[$target_id];
   $selector = array();
   if(isset($props->type)) {
-    if(in_array("oa:FragmentSelector", (array)$props->type) && isset($props->conformsTo) && $props->conformsTo == "http://www.w3.org/TR/media-frags/") {
+    if(in_array("oa:FragmentSelector", (array)$props->type) 
+       && isset($props->conformsTo) 
+       && $props->conformsTo == "http://www.w3.org/TR/media-frags/"
+      ) {
       $sel = $props->value;
       if(substr($sel, 0, 5) == "xywh=") {
         $sel = substr($sel, 5);
@@ -671,7 +785,8 @@ function video_annotator_video_annotation_shape_info($target_id, $data) {
           $y = intval($bits[1]);
           $w = intval($bits[2]);
           $h = intval($bits[3]);
-          $selector["svg_selector"] = "<rect x='$x' y='$y' width='$w' height='$h'>";
+          $selector["svg_selector"] = 
+                            "<rect x='$x' y='$y' width='$w' height='$h'>";
         }
       }
     }
@@ -703,9 +818,10 @@ function video_annotator_video_annotation_shape_json($data) {
 function video_annotator_media_configuration_form($form, &$form_state) {
   # need to list content types for which video annotation should be enabled
   # also need a way to specify back-end data storage mechanism
-  # also need to configure control mechanism - we should use a plugin system for adding annotation types, either
-  #   shapes or body content types
-  # video player drivers are handled at the JS level, but we should have boilerplate for adding them through a drupal module
+  # also need to configure control mechanism - we should use a plugin system
+  #   for adding annotation types, either shapes or body content types
+  # video player drivers are handled at the JS level, but we should have
+  #   boilerplate for adding them through a drupal module
 
   $form['video_annotator_rest_api_endpoint'] = array(
     '#type' => 'textfield',
@@ -715,6 +831,12 @@ function video_annotator_media_configuration_form($form, &$form_state) {
     '#maxlength' => 255,
     '#required' => TRUE,
     '#size' => 60,
+  );
+  $form['video_annotator_use_theme_for_styling'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Annotation UI styling provided by theme'),
+    '#description' => t('Select this option if you want to provide your own stylesheet for the annotation controls and display.'),
+    '#default_value' => variable_get('video_annotator_use_theme_for_styling', FALSE),
   );
 
   if($form_state["submitted"]) {

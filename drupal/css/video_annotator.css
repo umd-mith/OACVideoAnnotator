@@ -1,0 +1,156 @@
+@charset "UTF-8";
+/* CSS Document */
+
+/* @import url('./font-awesome.css'); */
+
+/*
+.video_annotator {
+  border: 1px dotted black;
+}
+*/
+
+.video_annotator .edit-controls {
+  border: 1px solid #333;
+  background-color: #f9f9f9;
+  position: absolute;
+  padding: 0;
+  margin: 0;
+  height: 16px;
+  width: 36px;
+}
+.video_annotator .edit-controls span {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+.video_annotator .edit-controls span a {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+.video_annotator .save a {
+  background: url(../images/tools_edit_buttons_save.png) no-repeat center center;
+}
+.video_annotator .delete a {
+  background: url(../images/tools_edit_buttons_delete.png) no-repeat center center;
+}
+.video_annotator .edit a {
+  background: url(../images/tools_edit_buttons_edit.png) no-repeat center center;
+}
+.video_annotator .cancel a {
+  background: url(../images/tools_edit_buttons_cancel.png) no-repeat center center;
+}
+
+/*
+.video_annotator .annotation-controls {
+  background-color: #ffccff;
+  height: 32px;
+}
+.video_annotator .annotation-controls div {
+  display: inline-block;
+  height: 32px;
+}
+.video_annotator .annotation-controls a {
+  text-decoration: none;
+}
+.video_annotator .annotation-controls .icon-select {
+  width: 32px;
+  height: 32px;
+  display: inline-block;
+  background: url(../images/tools_edit_buttons_save.png) no-repeat center center;
+}
+
+.video_annotator .annotation-controls .icon-play {
+  width: 32px;
+  height: 32px;
+  display: inline-block;
+  background: url(../images/tools_edit_buttons_save.png) no-repeat center center;
+}
+
+.video_annotator .annotation-controls .icon-rectangle {
+  width: 32px;
+  height: 32px;
+  display: inline-block;
+  background: url(../images/tools_edit_buttons_save.png) no-repeat center center;  
+}
+
+.video_annotator .annotation-controls .icon-ellipse {
+  width: 32px;
+  height: 32px;
+  display: inline-block;
+  background: url(../images/tools_edit_buttons_save.png) no-repeat center center; 
+}
+
+.video_annotator .annotations {
+  border: 1px solid black;
+  background: #cccccc;
+}
+
+.video_annotator .annotation-text {
+  height: 300px;
+  overflow-y:auto;
+}
+
+*/
+/* --- */
+
+.video_annotator { 
+  color: #222;
+}
+
+.video_annotator .fa {
+  color: #484848;
+  padding: 8px;
+  border: 1px solid #333;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+  text-decoration: none;
+}
+
+.annotation-controls > .active {
+  background: #ccc;
+}
+
+.annotation-controls {
+  margin-bottom: 0.5em;
+}
+
+.annotation-controls i {
+  min-width: 15px;
+  min-height: 15px;
+  text-align: center;
+}
+
+.annotation-controls span, .annotation-controls div { 
+  display: inline-block;
+  margin-right: 3px;
+}
+
+.annotation-controls span a, .annotation-controls div a {
+  display: inline-block;
+  background-color: #f9f9f9;
+}
+
+.annotation-controls span a.active, .annotation-controls div a.active {
+  background-color: #ccc;
+}
+
+.fa-square { 
+  color: #fff;
+  border: 1px dashed #222;
+}
+
+.fa-circle {
+  color: #fff;
+  border: 1px dashed #222;
+  -webkit-border-radius: 6px;
+  -moz-border-radius: 6px;
+  border-radius: 6px;
+}

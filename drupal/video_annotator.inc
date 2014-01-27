@@ -1,25 +1,34 @@
 <?php
-/* TODO: See if we can use JSON-LD at this point or if we need to elsewhere */
+
+/*
+ * This file defines the various functions needed by the REST service.
+ * These functions should not be called directly by anything else. Instead,
+ * use the functions defined in `video_annotator.module`.
+ */
+
 require_once('lib/jsonld.php');
 
 function _extract_annotation($jsonld) {
   $expanded = jsonld_expand($jsonld);
   
 }
+
 function _video_annotation_resource_create($json) {
   global $user;
 
   $data = video_annotator_extract_annotations_from_jsonld($json);
 
   $saved_annos = array();
+
   foreach($data as $anno) {
     $id = video_annotator_write_video_annotation($anno);
     $saved_annos[] = array(
-      '@id' => $id,
-      'uri' => services_resource_uri(array('video_annotion', $id)).".json",
+      '@id' => services_resource_uri(array('video_annotation', $id)).".json",
     );
   }
-  return (object)($saved_annos);
+  return (object)(array(
+    '@graph' => $saved_annos
+  ));
 }
 
 function _video_annotation_resource_update($id, $json) {
@@ -62,18 +71,15 @@ function _video_annotation_resource_delete($id) {
 function _video_annotation_resource_index($page, $parameters) {
   global $user;
 
-  $scope = array_key_exists("scope", $parameters) ? $parameters['scope'] : FALSE;
-  if($scope) {
-    if(substr($scope, 0, 5) == "node/") {
-      $scope = 0+substr($scope, 5);
-    }
-    else {
-      return array('error'=>'no scope');
-    }
+  $scope = 
+      array_key_exists("scope", $parameters) ? $parameters['scope'] : FALSE;
+  if($scope && strpos($scope, "node/") === 0) {
+    list($scope) = sscanf($scope, "node/%d");
   }
   else {
-    return array('error'=>'no scope');
+    return array('error' => 'no scope');
   }
+  
   $annos = array();
   try {
     $list = video_annotator_get_video_annotations_for_node($scope);

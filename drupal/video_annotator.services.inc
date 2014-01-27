@@ -2,7 +2,8 @@
 function video_annotator_default_services_endpoint() {
   $endpoints = array();
   $endpoint = new stdClass();
-  $endpoint->disabled = FALSE; /* Edit this to true to make a default endpoint disabled initially */
+  /* Edit this to true to make a default endpoint disabled initially */
+  $endpoint->disabled = FALSE; 
   $endpoint->api_version = 3;
   $endpoint->name = 'video_annotations';
   $endpoint->server = 'rest_server';
