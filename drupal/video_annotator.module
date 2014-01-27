@@ -1,7 +1,14 @@
 <?php
+/**
+  * @file
+  * Provides annotation capability for embedded videos with export/import serialization through Open Annotation.
+  */
 
+/*
+ * We provide permission information to the browser-side JavaScript so that
+ * the UI knows which elements to expose.
+ */
 drupal_add_js(array('video_annotator' => array(
-  # settings here to control how we draw controls, etc.
   'permissions' => array(
     'bypass' => 
         user_access('bypass video annotation access'),
@@ -37,6 +44,14 @@ drupal_add_js(array('video_annotator' => array(
   'scope_id' => video_annotator_api_scope(),
 )), 'setting');
 
+/*
+ * We allow the site administrator to disable the use of the default
+ * stylesheet. This is most useful when the site theme includes
+ * styling for the annotation UI.
+ *
+ * Note that disabling the default stylesheet will also disable
+ * loading of the font awesome resources.
+ */
 if(!variable_get('video_annotator_use_theme_for_styling', FALSE)) {
   drupal_add_css(
     drupal_get_path('module', 'video_annotator') . '/css/font-awesome.css', 
@@ -54,11 +69,13 @@ if(!variable_get('video_annotator_use_theme_for_styling', FALSE)) {
   );
 }
 
-/**
-  * @file
-  * Provides annotation capability for embedded videos with export/import serialization through Open Annotation.
-  */
-
+/*
+ * video_annotator_api_scope()
+ *
+ * Returns the current node in which the video is embedded. Used to
+ * define the scope property of the annotations sent to the page and/or
+ * created by the UI.
+ */
 function video_annotator_api_scope() {
   global $node;
   if(arg(0) == "node") {
@@ -67,6 +84,11 @@ function video_annotator_api_scope() {
   return 'node/0';
 }
 
+/*
+ * video_annotator_permissions()
+ *
+ * Returns a list of permissions available for assigning to roles.
+ */
 function video_annotator_permission() {
   return array(
     'video annotation resource create' => array(
@@ -104,6 +126,12 @@ function video_annotator_permission() {
   );
 }
 
+/*
+ * video_annotator_menu()
+ *
+ * Provides the link from the admin menu to the configuration page for
+ * this module.
+ */
 function video_annotator_menu() {
   $items = array();
 
@@ -118,6 +146,12 @@ function video_annotator_menu() {
   return $items;
 }
 
+/*
+ * video_annotator_api_urls()
+ *
+ * Returns an array of URLs used to retrieve the list of annotations for
+ * a page and to create a new annotation for a video on a particular page.
+ */
 function video_annotator_api_urls() {
   $root = url(variable_get('video_annotator_rest_api_endpoint'));
   return array(
@@ -128,6 +162,15 @@ function video_annotator_api_urls() {
   );
 }
 
+/*
+ * video_annotator_ctools_plugin_api(
+ *   $owner, // 'services'
+ *   $api    // 'services'
+ * )
+ *
+ * Returns the implementation information for the services api endpoint
+ * as managed by the ctools module.
+ */
 function video_annotator_ctools_plugin_api($owner, $api) {
   if($owner == "services" && $api == "services") {
     return array(
@@ -138,6 +181,11 @@ function video_annotator_ctools_plugin_api($owner, $api) {
   }
 }
 
+/*
+ * video_annotator_services_resources()
+ *
+ * 
+ */
 function video_annotator_services_resources() {
   return array(
     'video_annotation' => array(
@@ -370,7 +418,6 @@ function video_annotator_get_video_annotations_for_node($node_id) {
 }
 
 function video_annotator_query_video_annotation_access_alter($query) {
-  #$query->distinct();
   if(!$op = $query->getMetaData('op')) {
     $op = 'view';
   }
@@ -468,6 +515,13 @@ function video_annotator_video_annotation_control_info() {
   return $controls;
 }
 
+/*
+ * video_annotator_export_context()
+ *
+ * Returns the proper JSON-LD context for exporting annotations. This
+ * runs the basic context through all of the ALTER_video_annotation_context
+ * hook before returning the context.
+ */
 function video_annotator_export_context() {
  $context = array(
     'oa' => 'http://www.w3.org/ns/oa#',
@@ -557,6 +611,17 @@ function video_annotator_export_context() {
   return $context;
 }
 
+/*
+ * _video_annotator_flatten_json(
+ *   $jsonld, // JSON-LD to normalize
+ * )
+ *
+ * Returns a flattened form of the input JSON-LD to regularize the
+ * structure for further processing.
+ *
+ * If the jsonld PHP library is not loaded, then this will load that
+ * library.
+ */
 function _video_annotator_flatten_json($jsonld) {
   if(!function_exists('jsonld_expand') || !function_exists('jsonld_flatten')) {
     require_once('lib/jsonld.php');
@@ -581,6 +646,15 @@ function _video_annotator_flatten_json($jsonld) {
   return $return;
 }
 
+/*
+ * video_annotator_extract_annotations_from_jsonld(
+ *   $jsonld, // source JSON-LD
+ * )
+ *
+ * Returns an array of annotation information extracted from the
+ * source JSON-LD. Various hooks are called to extract the information,
+ * allowing other plugins to add support for additional annotation types.
+ */
 function video_annotator_extract_annotations_from_jsonld($jsonld) {
   global $user;
   $annos = array();
@@ -602,7 +676,6 @@ function video_annotator_extract_annotations_from_jsonld($jsonld) {
           $props->body, 
           $data
         );
-        #$body = call_user_func_array("array_merge", $body);
       }
       if(isset($props->target) && isset($data[$props->target])) {
         $target = module_invoke_all(
@@ -619,6 +692,15 @@ function video_annotator_extract_annotations_from_jsonld($jsonld) {
   return $annos;
 }
 
+/*
+ * video_annotator_video_annotation_target_info(
+ *   $target_id, // URI of the target being processed
+ *   $data // flattened JSON-LD source
+ * )
+ *
+ * Runs various hooks to extract timing, shape, and scope constraints about
+ * the specified target.
+ */
 function video_annotator_video_annotation_target_info($target_id, $data) {
   $timing = array();
   $shape = array();
@@ -669,6 +751,17 @@ function video_annotator_video_annotation_target_info($target_id, $data) {
   return array_merge_recursive($timing, $shape, $target);
 }
 
+/*
+ * video_annotator_video_annotation_body_info(
+ *   $body_id, // URI of the body being processed
+ *   $data // flattened JSON-LD source
+ * )
+ *
+ * Extracts the body type and text content for the specified body.
+ *
+ * The body type is the mime type of the content pointed to by the
+ * chars property. This defaults to text/plain.
+ */
 function video_annotator_video_annotation_body_info($body_id, $data) {
   $props = $data[$body_id];
   if(isset($props->chars)) {
@@ -679,6 +772,14 @@ function video_annotator_video_annotation_body_info($body_id, $data) {
   }
 }
 
+/*
+ * video_annotator_video_annotation_json(
+ *   $data // internal representation of annotation from database
+ * )
+ *
+ * Constructs a JSON-LD representation of the given annotation information
+ * from the database.
+ */
 function video_annotator_video_annotation_json($data) {
   $anno = array(
     '@id' => services_resource_uri(array('video_annotation', $data->id)).'.json',
@@ -707,6 +808,14 @@ function video_annotator_video_annotation_json($data) {
   return $anno;
 }
 
+/*
+ * video_annotator_video_annotation_body_json(
+ *   $data // internal representation of annotation from database
+ * )
+ *
+ * Constructs the body of an annotation representing that part of
+ * the annotation from the database.
+ */
 function video_annotator_video_annotation_body_json($data) {
   return array(
     "type" => ["cnt:ContentAsText", "dctypes:Text"],
@@ -715,6 +824,16 @@ function video_annotator_video_annotation_body_json($data) {
   );
 }
 
+/*
+ * video_annotator_video_annotation_target_json(
+ *   $data // internal representation of annotation from database
+ * )
+ *
+ * Constructs the target of an annotation representing that part of
+ * the annotation from the database. This calls the various
+ * hooks for timing and shape to allow the addition of new timing
+ * or shape constraints.
+ */
 function video_annotator_video_annotation_target_json($data) {
   $selectors = array_merge(
                  module_invoke_all("video_annotation_timing_json", $data), 
@@ -736,9 +855,19 @@ function video_annotator_video_annotation_target_json($data) {
   return $target;
 }
 
+/*
+ * video_annotator_video_annotation_timing_info(
+ *   $target_id, // URI of the target being processed
+ *   $data // flattened JSON-LD source
+ * )
+ *
+ * Returns the timing information contained in any fragment selector.
+ */
 function video_annotator_video_annotation_timing_info($target_id, $data) {
   $props = $data[$target_id];
-  if(isset($props->type) && in_array("oa:FragmentSelector", (array)$props->type)) {
+  if(  isset($props->type) 
+    && in_array("oa:FragmentSelector", (array)$props->type)
+  ) {
     $sel = $props->value;
     if(substr($sel, 0, 6) == "t=npt:") {
       $sel = substr($sel, 6);
@@ -755,8 +884,10 @@ function video_annotator_video_annotation_timing_info($target_id, $data) {
 
 /*
  * video_annotator_video_annotation_timing_json(
- *   $data // 
+ *   $data // internal representation of annotation from database
  * )
+ *
+ * 
  */
 function video_annotator_video_annotation_timing_json($data) {
   if($data->start_time != 0 || $data->end_time != -1) {
@@ -768,14 +899,20 @@ function video_annotator_video_annotation_timing_json($data) {
   }
 }
 
+/*
+ * video_annotator_video_annotation_shape_info(
+ *   $target_id, // URI of the target being processed
+ *   $data // flattened JSON-LD source
+ * )
+ */
 function video_annotator_video_annotation_shape_info($target_id, $data) {
   $props = $data[$target_id];
   $selector = array();
   if(isset($props->type)) {
-    if(in_array("oa:FragmentSelector", (array)$props->type) 
+    if(   in_array("oa:FragmentSelector", (array)$props->type) 
        && isset($props->conformsTo) 
        && $props->conformsTo == "http://www.w3.org/TR/media-frags/"
-      ) {
+    ) {
       $sel = $props->value;
       if(substr($sel, 0, 5) == "xywh=") {
         $sel = substr($sel, 5);
@@ -790,7 +927,10 @@ function video_annotator_video_annotation_shape_info($target_id, $data) {
         }
       }
     }
-    elseif(in_array("oa:SvgSelector", (array)$props->type) && isset($props->chars)) {
+    elseif(
+         in_array("oa:SvgSelector", (array)$props->type) 
+      && isset($props->chars)
+    ) {
       $selector["svg_selector"] = $props->chars;
     }
   }
@@ -803,6 +943,11 @@ function video_annotator_video_annotation_shape_info($target_id, $data) {
   return $selector;
 }
 
+/*
+ * video_annotator_video_annotation_shape_json(
+ *   $data // internal representation of annotation from database
+ * )
+ */
 function video_annotator_video_annotation_shape_json($data) {
   if($data->svg_selector) {
     return array(array(
@@ -815,6 +960,16 @@ function video_annotator_video_annotation_shape_json($data) {
   }
 }
 
+/*
+ * video_annotator_media_configuration_form(
+ *   $form, // form object to which fields are to be added
+ *   &$form_state, // data associated with form, such as submitted
+ *                 // information
+ * )
+ *
+ * Associated with the "admin/config/media/video-annotation" URL and
+ * referenced by video_annotator_menu() near the top of this file.
+ */
 function video_annotator_media_configuration_form($form, &$form_state) {
   # need to list content types for which video annotation should be enabled
   # also need a way to specify back-end data storage mechanism
