@@ -48,6 +48,8 @@ The path to endpoint should be "video_annotation".
 
 The authentication mechanism should be "Session authentication".
 
+![Service Endpoint Configuration Screen](images/docs/Service-Endpoint-Definition.png)
+
 ## PHP Hooks
 
 ### HOOK_video_annotation_control_info()
