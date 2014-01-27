@@ -81,16 +81,20 @@ OAC.Client.StreamingVideo.namespace "Player", (exports) ->
         bindPlayer: (player) ->
           if $(player).data('driver') != driverObject
             $(player).data('driver', driverObject)
-            exports.onNewPlayer.fire driverObject.bindPlayer player
+            binding = driverObject.bindPlayer player
+            binding.container = player
+            exports.onNewPlayer.fire binding
       bp = drivers[driverName].bindPlayer
       
       if pendingPlayers[driverName]?
         for player in pendingPlayers[driverName]
-          bp player
+          binding = bp player
+          binding.container = player
         delete pendingPlayers[driverName]
         
       for player in driverObject.getAvailablePlayers()
-        bp player
+        binding = bp player
+        binding.container = player
         
     for cb in driverCallbacks
       exports.register cb[0], cb[1]
@@ -100,7 +104,9 @@ OAC.Client.StreamingVideo.namespace "Player", (exports) ->
 
   exports.addPlayer = (driverName, player) ->
     if drivers[driverName]?
-      drivers[driverName].bindPlayer player
+      binding = drivers[driverName].bindPlayer player
+      binding.container = player
+      binding
     else
       pendingPlayers[driverName] ?= []
       pendingPlayers[driverName].push player
