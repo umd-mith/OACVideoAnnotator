@@ -6,7 +6,14 @@ collaboration to test the
 [OA data model](http://www.openannotation.org/spec/beta/) 
 for use in exchanging annotations of streaming video.
 
-See license.txt for licensing details
+See [license.txt](./license.txt) for licensing details
+
+## Drupal Module
+
+A module has been written for Drupal 7.x that incorporates the OAC Annotation Tool
+as a demonstration of how to incorporate the tool into an application. The source
+is in the [drupal](./drupal) subdirectory of this repository. See the README in that
+directory for more information on installing, configuring, and using the module.
 
 ## Setting up the OAC Annotation Tool
 
