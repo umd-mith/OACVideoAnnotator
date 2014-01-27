@@ -1,10 +1,11 @@
 name = Open Annotation Video Annotator
 description = Provides annotation capability for embedded videos with export/import serialization through Open Annotation.
-dependencies[] = mithgrid
 dependencies[] = services
 
 package = User interface
 core = 7.x
+scripts[] = js/q.min.js
+scripts[] = js/mithgrid.js
 scripts[] = js/jsonld.js
 scripts[] = js/videoanno.min.js
 scripts[] = js/raphael.js

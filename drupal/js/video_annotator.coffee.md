@@ -31,6 +31,13 @@ to small snippets of code within a section. For example,
 `_"Definitions:setup"` refers to the small section labeled `setup` under the
 "Definitions" heading.
 
+To build the JavaScript file from this file, run the following commands:
+
+```
+$ literate-programming video_annotator.coffee.md
+$ coffee -c video_annotator.coffee
+```
+
 ## Definitions
 
 Everything is defined as part of the `OAC.Client.StreamingVideo.Drupal`
@@ -502,18 +509,14 @@ to the DOM.
         MITHgrid.initInstance "OAC.Client.StreamingVideo.Drupal.AnnoControlComponent", args..., (that, container) ->
           controls = that.options.controls
           perms = that.options.permissions
-          console.log container
           els =
             constraint: $("<div></div>")
             control: $("<div></div>")
           $(container).append( els.control )
           $(container).append( els.constraint )
           names = ((nom for nom of controls).sort (a,b) -> controls[a].weight - controls[b].weight)
-          console.log "Control names:", names
           for name in names
             config = controls[name]
-            console.log name, "config", config, "perms", perms[config.permission]
-            console.log els[config.type]
             if els[config.type]? and (not(config.permission) or perms[config.permission])
               do (config) ->
                 if config.iconClass?
@@ -894,7 +897,6 @@ Otherwise, we ignore the event in the annotation body display.
 #### Annotation Controls
 
     settings.then (settings) ->
-      console.log (settings.controls or {})
       annoControlDisplay = Drupal.AnnoControlComponent.initInstance $(container).find(".annotation-controls"),
         controls: settings.controls or {}
         permissions: settings.permissions

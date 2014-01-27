@@ -17,11 +17,8 @@ properly.
 
 ### Require Modules
 
-* mithgrid
+* jquery_update
 * services
-
-The "mithgrid" modules has no additional configuration requirements. It
-simply provides a core JavaScript library on which this module depends.
 
 ### Configuring Services
 
