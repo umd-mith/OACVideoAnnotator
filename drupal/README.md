@@ -15,6 +15,8 @@ should work for this module. The following are additional installation
 requirements and settings that you may need to follow for this module to work
 properly.
 
+Note that this module is not published to the Drupal module list. You should be able to install it through the typical manual process that works for any other Drupal module.
+
 ### Require Modules
 
 * jquery_update
