@@ -61,6 +61,9 @@ OAC.Client.StreamingVideo.Player.register 'HTML5', (driver) ->
       #
       $(domObj).bind 'loadedmetadata', ->
         that.events.onResize.fire that.getSize()
+
+      $(domObj).bind 'loadeddata', ->
+        that.events.onResize.fire that.getSize()
     
       #
       # We fire the onPlayheadUpdate event when the player fires the timeupdate event, but only if
@@ -89,8 +92,8 @@ OAC.Client.StreamingVideo.Player.register 'HTML5', (driver) ->
       # 
       that.getCoordinates = -> 
         [
-          $(domObj).position().left
-          $(domObj).position().top
+          $(domObj).offset().left
+          $(domObj).offset().top
         ]
 
       #

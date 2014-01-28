@@ -1,0 +1,106 @@
+<?php
+
+/**
+ * @file
+ * Install, update, and uninstall functions for the video_annotator plugin
+ */
+
+/**
+ * Implements hook_uninstall().
+ *
+ * @ingroup video_annotator
+ */
+
+function video_annotator_uninstall() {
+  drupal_uninstall_schema('video_annotator');
+}
+
+function video_annotator_install() {
+  drupal_install_schema('video_annotator');
+}
+
+function video_annotator_schema() {
+  return array(
+    'video_annotations' => array(
+      'description' => 'Storage for video annotations.',
+      'indexes' => array(
+        'scope' => array('scope'),
+      ),
+      'unique_keys' => array(
+      ),
+      'primary key' => array('id'),
+      'fields' => array(
+        'id' => array(
+          'description' => 'The primary identifier for the annotation',
+          'type' => 'serial',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+        ),
+        'uid' => array(
+          'description' => t('The user who created the annotation.'),
+          'type' => 'int',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+          'default' => 0,
+        ),
+        'created' => array(
+          'description' => t('The timestamp for when the annotation was created.'),
+          'type' => 'int',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+          'default' => 0,
+        ),
+        'modified' => array(
+          'description' => t('The timetamp for when the annotation was modified.'),
+          'type' => 'int',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+          'default' => 0,
+        ),
+        'body_type' => array(
+          'description' => t('The mime type of the annotation body'),
+          'type' => 'varchar',
+          'length' => 64,
+          'not null' => TRUE,
+          'default' => 'text/plain',
+        ),
+        'text_body' => array(
+          'description' => t('The text body of the annotation.'),
+          'type' => 'text',
+        ),
+        'svg_selector' => array(
+          'description' => t('The SVG description of the region the annotation is targeting.'),
+          'type' => 'text',
+        ),
+        'height' => array(
+          'description' => t('The height of the play surface at the time the annotation was made.'),
+          'type' => 'int',
+          'unsigned' => TRUE,
+        ),
+        'width' => array(
+          'description' => t('The width of the play surface at the time the annotation was made.'),
+          'type' => 'int',
+          'unsigned' => TRUE,
+        ),
+        'start_time' => array(
+          'description' => t('The time in the video at which the annotation becomes applicable.'),
+          'type' => 'float',
+        ),
+        'end_time' => array(
+          'description' => t('The time in the video at which the annotation is no longer applicable.'),
+          'type' => 'float',
+        ),
+        'target' => array(
+          'description' => t('The URL of the embedded video which this annotation targets.'),
+          'type' => 'text',
+        ),
+        'scope' => array(
+          'description' => t('The node which embeds the video when this annotation is applicable.'),
+          'type' => 'int',
+          'not null' => TRUE,
+        ),
+      ),
+    ),
+  );
+}
+?>

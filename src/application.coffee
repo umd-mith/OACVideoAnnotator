@@ -232,6 +232,7 @@ OAC.Client.StreamingVideo.namespace "Application", (Application) ->
         CNT: "http://www.w3.org/2011/content#"
         DC: "http://purl.org/dc/elements/1.1/"
         DCTERMS: "http://purl.org/dc/terms/"
+        DCTYPES: "http://purl.org/dc/dcmitype/"
         EXIF: "http://www.w3.org/2003/12/exif/ns#"
     
       #
@@ -277,6 +278,9 @@ OAC.Client.StreamingVideo.namespace "Application", (Application) ->
       #
       # Finds annotations targeting the video given the target URI provided in the application configuration or
       # by the player driver binding.
+      #
+      # This method is deprecated and will be removed in a future release. Use
+      # the importJSONLD method instead.
       #
       # Parameters:
       #
@@ -360,7 +364,7 @@ OAC.Client.StreamingVideo.namespace "Application", (Application) ->
                             #
                             # We get timing information from the oa:FragSelector.
                             #
-                            if "#{NS.OA}FragSelector" in types
+                            if "#{NS.OA}FragmentSelector" in types
                               if data[hasSubSelector]["#{NS.RDF}value"]? and data[hasSubSelector]["#{NS.RDF}value"][0]?
                                 fragment = data[hasSubSelector]["#{NS.RDF}value"][0].value
                                 fragment = fragment.replace(/^t=npt:/, '')
@@ -377,6 +381,214 @@ OAC.Client.StreamingVideo.namespace "Application", (Application) ->
 
         app.dataStore.canvas.loadItems tempstore
 
+      #
+      # ### #importJSONLD
+      #
+      # Finds annotations targeting the video given the target URI provided in the application configuration or
+      # by the player driver binding.
+      #
+      # Parameters:
+      #
+      # * data - JSON-LD representation of OAC annotations
+      #
+      # Returns:
+      # Nothing.
+      #
+      # * * *
+      #
+      # For now, we require that @context be "http://www.w3.org/ns/oa-context-20130208.json"
+      # and exif map to the NS.EXIF namespace since we aren't using the JSON-LD api
+      # for expanding the JSON-LD based on contexts.
+      app.importJSONLD = (json, cb) ->
+        if not jsonld?
+          return
+        jsonld.expand json, {
+          keepFreeFloatingNodes: true
+        }, (err, data, ctx) ->
+          if err? or not data?
+            return cb(err, data)
+          jsonld.compact data, {
+            "oa" :     "http://www.w3.org/ns/oa#",
+            "cnt" :    "http://www.w3.org/2011/content#",
+            "dc" :     "http://purl.org/dc/elements/1.1/",
+            "dcterms": "http://purl.org/dc/terms/",
+            "dctypes": "http://purl.org/dc/dcmitype/",
+            "foaf" :   "http://xmlns.com/foaf/0.1/",
+            "rdf" :    "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+            "rdfs" :   "http://www.w3.org/2000/01/rdf-schema#",
+            "skos" :   "http://www.w3.org/2004/02/skos/core#",
+
+            "hasBody" :         {"@type":"@id", "@id" : "oa:hasBody"},
+            "hasTarget" :       {"@type":"@id", "@id" : "oa:hasTarget"},
+            "hasSource" :       {"@type":"@id", "@id" : "oa:hasSource"},
+            "hasSelector" :     {"@type":"@id", "@id" : "oa:hasSelector"},
+            "hasState" :        {"@type":"@id", "@id" : "oa:hasState"},
+            "hasScope" :        {"@type":"@id", "@id" : "oa:hasScope"},
+            "annotatedBy" :  {"@type":"@id", "@id" : "oa:annotatedBy"},
+            "serializedBy" : {"@type":"@id", "@id" : "oa:serializedBy"},
+            "motivatedBy" :  {"@type":"@id", "@id" : "oa:motivatedBy"},
+            "equivalentTo" : {"@type":"@id", "@id" : "oa:equivalentTo"},
+            "styledBy" :     {"@type":"@id", "@id" : "oa:styledBy"},
+            "cachedSource" : {"@type":"@id", "@id" : "oa:cachedSource"},
+            "conformsTo" :   {"@type":"@id", "@id" : "dcterms:conformsTo"},
+            "default" :      {"@type":"@id", "@id" : "oa:default"},
+            "item" :         {"@type":"@id", "@id" : "oa:item"},
+            "first":         {"@type":"@id", "@id" : "rdf:first"},
+            "rest":          {"@type":"@id", "@id" : "rdf:rest", "@container" : "@list"},
+
+            "chars" :        "cnt:chars",
+            "bytes" :        "cnt:bytes",
+            "format" :       "dc:format",
+            "annotatedAt" :  "oa:annotatedAt",
+            "serializedAt" : "oa:serializedAt",
+            "when" :         "oa:when",
+            "value" :        "rdf:value",
+            "start" :        "oa:start",
+            "end" :          "oa:end",
+            "exact" :        "oa:exact",
+            "prefix" :       "oa:prefix",
+            "suffix" :       "oa:suffix",
+            "label" :        "rdfs:label",
+            "name" :         "foaf:name",
+            "mbox" :         "foaf:mbox",
+            "styleClass" :        "oa:styleClass",
+            "exif":  NS.EXIF
+          }, (err, data) ->
+            is_in = (val, list) ->
+              if $.isArray list
+                val in list
+              else
+                val == list
+
+            graph = if data['@graph']? then data['@graph'] else data
+            graph = [ graph ] if not $.isArray graph
+            
+            tempstore = []
+            
+            for anno in graph
+              continue if not is_in "oa:Annotation", anno['@type']
+              continue if not is_in 'dctypes:Text', anno.hasBody?['@type']
+              continue if !anno.hasTarget? or not is_in 'oa:SpecificResource', anno.hasTarget['@type']
+              continue if not is_in options.url, anno.hasTarget.hasSource
+
+              item =
+                id: anno['@id']
+                type: 'Annotation'
+                bodyContent: anno.hasBody.chars
+                bodyType: 'Text'
+                targetURI: options.url      
+              
+              if anno.hasTarget.hasSelector?
+                if is_in "oa:CompoundSelector", anno.hasTarget.hasSelector['@type']
+                  selectors = anno.hasTarget.hasSelector.item
+                else
+                  selectors = anno.hasTarget.hasSelector
+                selectors = [ selectors ] if not $.isArray selectors
+
+                for selector in selectors
+                  type = selector['@type']
+                  if $.isArray type
+                    type = type[0]
+                  switch type
+                    when 'oa:FragmentSelector'
+                      if selector.conformsTo? and is_in "http://www.w3.org/TR/media-frags/", selector.conformsTo
+                        value = selector.value
+                        if $.isArray value
+                          value = value[0]
+                        if selector.value? and selector.value[0..5] == "t=npt:"
+                          bits = selector.value[6..].split(',')
+                          if bits.length == 2
+                            item.npt_start = parseNPT bits[0]
+                            item.npt_end   = parseNPT bits[1]
+                            
+                    when 'oa:SvgSelector'
+                      if selector.format == "image/svg+xml" and selector.chars?
+                        svg = selector.chars
+                        dom = $.parseXML svg
+                        #
+                        # Based on the root element, we interogate the shape info to see
+                        # which one wants to handle extracting the extents/etc. from the svg.
+                        #
+                        if dom?
+                          doc = dom.documentElement
+                          rootName = doc.nodeName
+                          for t, info of shapeTypes
+                            if info.extractFromSVG? and rootName in info.rootSVGElement
+                              shapeInfo = info.extractFromSVG doc
+                              if shapeInfo?
+                                $.extend item, shapeInfo
+                                item.shapeType = t
+                        if selector["exif:height"]?
+                          item.targetHeight = parseInt selector["exif:height"], 10
+                        if selector["exif:width"]?
+                          item.targetWidth = parseInt selector["exif:width"], 10
+              if item.npt_start? and item.npt_end?
+                tempstore.push item          
+            
+            app.dataStore.canvas.loadItems tempstore, cb
+        
+      app.exportJSONLD = () ->
+        jsonLD = {
+          '@context': ["http://www.w3.org/ns/oa-context-20130208.json",{ 
+            'exif': NS.EXIF 
+          }]
+          '@graph': [ ] 
+        }
+        findAnnos = app.dataStore.canvas.prepare ['!type']
+        
+        genBody = (obj) ->
+          {
+            '@type': 'dctypes:Text'
+            'format': 'text/plain'
+            'chars': obj.bodyContent[0]
+          }
+          
+        genTarget = (obj) ->
+          svgItem = {}
+          fragItem = {}
+
+          if obj.shapeType?
+            svglens = shapeTypes[obj.shapeType[0]]?.renderAsSVG
+
+          if svglens?
+            svgItem =
+              "@type": "oa:SvgSelector"
+              "format": "image/svg+xml"
+              "chars": svglens(app.dataStore.canvas, obj.id[0])
+            if obj.targetHeight?[0]?
+              svgItem["exif:height"] = obj.targetHeight?[0]
+            else
+              svgItem["exif:height"] = screenSize.height
+            if obj.targetWidth?[0]?
+              svgItem["exif:width"] = obj.targetWidth?[0]
+            else
+              svgItem["exif:width"] = screenSize.width
+          fragItem =
+            "@type": "oa:FragmentSelector"
+            "value": 't=npt:' + obj.npt_start[0] + ',' + obj.npt_end[0]
+            "conformsTo": "http://www.w3.org/TR/media-frags/"
+
+          {
+            "@type": "oa:SpecificResource"
+            "hasSource": obj.targetURI[0]
+            "hasSelector":
+              "@type": "oa:Composite"
+              "item": [ svgItem, fragItem ]
+          }
+          
+        genAnno = (obj) ->
+          {
+            "@type": "oa:Annotation"
+            "@id": obj.id?[0]
+            "hasBody": genBody(obj)
+            "hasTarget": genTarget(obj)
+          }
+
+        for id in findAnnos.evaluate('Annotation')
+          jsonLD["@graph"].push genAnno app.dataStore.canvas.getItem id
+
+        jsonLD
+        
       # ### exportData
       #
       # Produces a OAC-based RDF/JSON representation of the annotations in the MITHgrid data store.
@@ -424,11 +636,11 @@ OAC.Client.StreamingVideo.namespace "Application", (Application) ->
         #
         genBody = (obj, ids) ->
           # Generating body element
-          uri     ids.buid, NS.RDF, "type",   "#{NS.OA}Body"
+          uri     ids.buid, NS.RDF, "type",   "#{NS.DCTYPES}Text"
           literal ids.buid, NS.DC,  "format", "text/plain"
           literal ids.buid, NS.CNT, "characterEncoding", "utf-8"
           literal ids.buid, NS.CNT, "chars",  obj.bodyContent[0]
-
+          
         # #### genTarget (private)
         #
         # Generates a JSON object representing a target and adds it to tempstore
@@ -464,7 +676,7 @@ OAC.Client.StreamingVideo.namespace "Application", (Application) ->
           if svglens?
             # Targets have selectors, which then have svg and npt elements
             uri     ids.svgid, NS.RDF,  "type",              "#{NS.OA}SvgSelector"
-            literal ids.svgid, NS.DC,   "format",            "text/svg+xml"
+            literal ids.svgid, NS.DC,   "format",            "image/svg+xml"
             literal ids.svgid, NS.CNT,  "characterEncoding", "utf-8"
             literal ids.svgid, NS.CNT,  "chars",             svglens(app.dataStore.canvas, obj.id[0])
             if obj.targetHeight? and obj.targetHeight[0]?
@@ -478,7 +690,7 @@ OAC.Client.StreamingVideo.namespace "Application", (Application) ->
     
           # This is inserted regardless of the shape type - it's a function of this being a
           # streaming video annotation client
-          uri     ids.fgid, NS.RDF, "type",  "#{NS.OA}FragSelector"
+          uri     ids.fgid, NS.RDF, "type",  "#{NS.OA}FragmentSelector"
           literal ids.fgid, NS.RDF, "value", 't=npt:' + obj.npt_start[0] + ',' + obj.npt_end[0]
           uri     ids.fgid, NS.DCTERMS, "conformsTo", "http://www.w3.org/TR/media-frags/"
 
